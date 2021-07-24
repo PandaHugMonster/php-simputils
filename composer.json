@@ -1,6 +1,6 @@
 {
   "name": "spaf/simputils",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Simple minimal but useful set of utils (strings, datetimes, etc.) ",
   "minimum-stability": "stable",
   "license": "MIT",
@@ -17,6 +17,9 @@
   "autoload": {
     "psr-4": {
       "": "src/"
-    }
+    },
+    "files": [
+      "src/spaf/simputils/basic.php"
+    ]
   }
 }

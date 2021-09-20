@@ -15,10 +15,10 @@
   },
   "autoload": {
     "psr-4": {
-      "": "src/"
+      "spaf\\simputils\\": "src/"
     },
     "files": [
-      "src/spaf/simputils/basic.php"
+      "src/basic.php"
     ]
   }
 }

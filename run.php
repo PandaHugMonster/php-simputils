@@ -1,10 +1,17 @@
 <?php
 
 use spaf\simputils\logger\Logger;
+use spaf\simputils\logger\outputs\ContextOutput;
+use spaf\simputils\logger\outputs\CsvFileOutput;
+use spaf\simputils\logger\outputs\SyslogTransportOutput;
+use spaf\simputils\logger\outputs\TextFileOutput;
 use spaf\simputils\Settings;
 use spaf\simputils\SimpleObject;
 
 require_once 'vendor/autoload.php';
+
+
+use function spaf\simputils\basic\pd;
 
 //Settings::set_simple_object_type_case(Settings::SO_CAMEL_CASE);
 
@@ -17,6 +24,15 @@ require_once 'vendor/autoload.php';
 
 //Logger::get_default()->log_level = Logger::LEVEL_DEBUG;
 //Logger::get_default()->log_level = Logger::LEVEL_CRITICAL;
+
+$csv_output = new CsvFileOutput();
+
+Logger::$default = new Logger('default', [
+//	new SyslogTransportOutput(),
+//	new TextFileOutput(),
+	new ContextOutput(),
+	$csv_output
+]);
 Logger::$format = "[%(asctime)s] (%(levelname)s) %(filename)s:%(lineno)d: %(message)s";
 
 /**
@@ -40,7 +56,7 @@ class MyObj extends SimpleObject {
 $mo = new MyObj();
 $mo->hidden_field = 112;
 
-Logger::info('Test "%s" Test "%d"', 'My check', 22);
+Logger::log('Test "%s" Test "%d"', 'My check', 22);
 
 Logger::error($mo->hidden_field);
 Logger::debug('TEST');

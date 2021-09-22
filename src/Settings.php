@@ -77,7 +77,7 @@ class Settings {
 	}
 
 	public static function version(): string {
-		return '0.2.2';
+		return '0.2.3';
 	}
 
 	public static function license(): string {

@@ -1,7 +1,7 @@
 <?php
 
 
-namespace spaf\simputils\interfaces\helpers;
+namespace spaf\simputils\interfaces;
 
 
 interface LoggerInterface {

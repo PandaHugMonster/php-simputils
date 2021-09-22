@@ -1,7 +1,7 @@
 <?php
 
 
-namespace spaf\simputils\traits;
+namespace spaf\simputils\traits\logger;
 
 
 use spaf\simputils\logger\Logger;
@@ -46,8 +46,8 @@ trait LoggerTrait {
 		}
 	}
 
-	public static function log(?int $level, string $msg, mixed ...$values) {
-		static::_sub_log($level, $msg, ...$values);
+	public static function log(string $msg, mixed ...$values) {
+		static::_sub_log(static::$default_logging_level, $msg, ...$values);
 	}
 
 	public static function critical(string $msg, mixed ...$values) {

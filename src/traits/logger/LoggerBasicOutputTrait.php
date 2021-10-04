@@ -51,10 +51,10 @@ trait LoggerBasicOutputTrait {
 
 		$data = [
 			$logger::TEMPLATE_NAME => $logger->name,
-			$logger::TEMPLATE_FILE_NAME => !empty($caller)?$caller['file']:null,
-			$logger::TEMPLATE_LINE_NUMBER => !empty($caller)?$caller['line']:null,
+			$logger::TEMPLATE_FILE_NAME => !empty($caller['file'])?$caller['file']:null,
+			$logger::TEMPLATE_LINE_NUMBER => !empty($caller['line'])?$caller['line']:null,
 			$logger::TEMPLATE_CREATED_TIME => $now->getTimestamp(),
-			$logger::TEMPLATE_FUNCTION_NAME => !empty($caller)?$caller['function']:null,
+			$logger::TEMPLATE_FUNCTION_NAME => !empty($caller['function'])?$caller['function']:null,
 			$logger::TEMPLATE_HUMAN_TIME => $now->format($logger->dt_format),
 			$logger::TEMPLATE_LEVEL_NUMBER => $level,
 			$logger::TEMPLATE_LEVEL_NAME => $logger->log_level_name($level),

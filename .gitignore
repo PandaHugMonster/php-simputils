@@ -1,2 +1,5 @@
 .idea
 vendor
+.phpdoc
+phpdoc
+phpDocumentor.phar

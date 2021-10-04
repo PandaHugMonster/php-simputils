@@ -3,9 +3,9 @@
 
 namespace spaf\simputils\logger;
 
+use spaf\simputils\components\SimpleObject;
 use spaf\simputils\helpers\DateTimeHelper;
 use spaf\simputils\interfaces\LoggerInterface;
-use spaf\simputils\SimpleObject;
 use spaf\simputils\traits\logger\LoggerTrait;
 
 class Logger extends SimpleObject implements LoggerInterface {

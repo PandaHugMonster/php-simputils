@@ -1,8 +1,10 @@
 <?php
 
+/**
+ * Procedural shortcuts for functionality of `spaf\simputils\PHP`
+ */
 namespace spaf\simputils\basic;
-
-use spaf\simputils\Settings;
+use spaf\simputils\PHP;
 
 /**
  * Please Die function
@@ -13,24 +15,25 @@ use spaf\simputils\Settings;
  * Besides that, the functionality can be redefined. For example if you want
  * use your own implementation, you can just redefine it on a very early runtime stage
  * with the following code:
+ * ```php
  *      use spaf\simputils\Settings;
- *      Settings::redefine_pd([$your_obj, $method_name]);
+ *      Settings::redefine_pd($your_obj->$method_name(...));
+ *      // or using anonymous functions
+ *      Settings::redefine_pd(
+ *          function (...$args) {
+ *              echo "MY CALLBACK IS BEING USED\n";
+ *              print_r($args);
+ *              die;
+ *          }
+ *      );
+ * ```
  *
  * @param ...$args
  *
+ * @see PHP::pd()
  * @see \die()
- *
  * @see \print_r()
  */
-function pd(...$args) {
-	if (Settings::is_redefined(Settings::REDEFINED_PD)) {
-		$callback = Settings::get_redefined(Settings::REDEFINED_PD);
-		$callback(...$args);
-	} else {
-		foreach ($args as $arg) {
-			print_r($arg);
-			echo "\n";
-		}
-		die();
-	}
+function pd(...$args): never {
+	PHP::pd(...$args);
 }

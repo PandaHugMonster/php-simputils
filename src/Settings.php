@@ -20,7 +20,7 @@ class Settings {
 
 	private static array $_is_redefined_map = [];
 	private static ?Closure $_redefined_pd = null;
-	private static string $_redefined_simple_object_type_case = self::SO_SNAKE_CASE;
+	private static string $_redefined_simple_object_type_case = self::SO_CAMEL_CASE;
 
 	/**
 	 * Redefine Please Die functionality

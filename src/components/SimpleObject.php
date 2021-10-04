@@ -1,11 +1,12 @@
 <?php
 
 
-namespace spaf\simputils;
+namespace spaf\simputils\components;
 
 
 
 use spaf\simputils\interfaces\SimpleObjectInterface;
+use spaf\simputils\traits\MetaMagic;
 use spaf\simputils\traits\SimpleObjectTrait;
 
 /**
@@ -21,5 +22,5 @@ use spaf\simputils\traits\SimpleObjectTrait;
  */
 abstract class SimpleObject implements SimpleObjectInterface {
 	use SimpleObjectTrait;
-
+	use MetaMagic;
 }

@@ -4,8 +4,8 @@
 namespace spaf\simputils\traits\helpers;
 
 
-use DateTime;
 use DateTimeZone;
+use spaf\simputils\models\DateTime;
 
 /**
  * DateTime Helper Trait
@@ -25,7 +25,7 @@ trait DateTimeTrait {
 	 *
 	 * @param \DateTimeZone|null $tz
 	 *
-	 * @return \DateTime|null
+	 * @return DateTime|null
 	 * @throws \Exception
 	 */
 	public static function now(DateTimeZone|null $tz = null): ?DateTime {
@@ -55,7 +55,7 @@ trait DateTimeTrait {
 	 * @param bool $is_clone_allowed    If false and DateTime object supplied, the same object is returned,
 	 *                                  instead of the cloned one (instead of a new object). Default is true.
 	 *
-	 * @return \DateTime|null
+	 * @return DateTime|null
 	 * @throws \Exception
 	 */
 	public static function normalize(
@@ -80,7 +80,7 @@ trait DateTimeTrait {
 	/**
 	 * Stringify date with normalization
 	 *
-	 * @param \DateTime|string|int $dt
+	 * @param DateTime|string|int $dt
 	 * @param string|null $fmt
 	 * @param \DateTimeZone|null $tz
 	 * @param string|null $parsing_fmt

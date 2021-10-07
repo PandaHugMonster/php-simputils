@@ -34,6 +34,6 @@ use spaf\simputils\PHP;
  * @see \die()
  * @see \print_r()
  */
-function pd(...$args): never {
+function pd(...$args) {
 	PHP::pd(...$args);
 }

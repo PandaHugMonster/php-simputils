@@ -4,28 +4,33 @@
 namespace spaf\simputils\helpers;
 
 
-use spaf\simputils\Version;
 
+use spaf\simputils\models\Version;
+
+/**
+ *
+ */
 class SystemHelper {
 
 	public static function php_info(): array {
 		ob_start(); phpinfo(); $phpinfo = ob_get_clean();
 		//
 
+		$php_version = static::php_version();
 		$ini_config = ini_get_all(details: false);
 		$main_ini_file = php_ini_loaded_file();
 		$extra_ini_files = explode(',', preg_replace('/\n*/', '', php_ini_scanned_files()));
 		$stream_wrappers = stream_get_wrappers();
 		$stream_transports = stream_get_transports();
 		$stream_filters = stream_get_filters();
-		$zend_version = Version::wrap(zend_version(), 'Zend');
-		$xdebug_version = !empty($v = phpversion('xdebug'))?Version::wrap($v, 'xdebug'):null;
+		$zend_version = new Version(zend_version(), 'Zend');
+		$xdebug_version = !empty($v = phpversion('xdebug'))?new Version($v, 'xdebug'):null;
 		$env_vars = getenv();
 		$server_var = $_SERVER;
 		$loaded_extensions = get_loaded_extensions();
 		$loaded_extensions_versions = [];
 		foreach ($loaded_extensions as $ext) {
-			$loaded_extensions_versions[$ext] = Version::wrap(phpversion($ext), $ext);
+			$loaded_extensions_versions[$ext] = new Version(phpversion($ext), $ext);
 		}
 		/** @noinspection PhpComposerExtensionStubsInspection */
 		$opcache = extension_loaded('Zend OPcache')?opcache_get_status():null;
@@ -63,15 +68,15 @@ class SystemHelper {
 
 		$m = [];
 		preg_match('/PHP API => (?P<val>\d+)/i', $phpinfo, $m);
-		$php_api_version = !empty($m['val'])?Version::wrap($m['val'], 'PHP API'):null;
+		$php_api_version = !empty($m['val'])?new Version($m['val'], 'PHP API'):null;
 
 		$m = [];
 		preg_match('/PHP Extension => (?P<val>\d+)/i', $phpinfo, $m);
-		$php_extension_version = !empty($m['val'])?Version::wrap($m['val'], 'PHP Extension'):null;
+		$php_extension_version = !empty($m['val'])?new Version($m['val'], 'PHP Extension'):null;
 
 		$m = [];
 		preg_match('/Zend Extension => (?P<val>\d+)/i', $phpinfo, $m);
-		$zend_extension_version = !empty($m['val'])?Version::wrap($m['val'], 'Zend Extension'):null;
+		$zend_extension_version = !empty($m['val'])?new Version($m['val'], 'Zend Extension'):null;
 
 		$m = [];
 		preg_match('/Zend Extension Build => (?P<val>.*)/i', $phpinfo, $m);
@@ -82,6 +87,7 @@ class SystemHelper {
 		$php_extension_build = !empty($m['val'])?$m['val']:null;
 
 		$data = [
+			'php_version' => $php_version,
 			'ini_config' => $ini_config,
 			'main_ini_file' => $main_ini_file,
 			'extra_ini_files' => $extra_ini_files,
@@ -126,7 +132,7 @@ class SystemHelper {
 	}
 
 	public static function php_version(): Version|string {
-		return Version::wrap(phpversion());
+		return new Version(phpversion());
 	}
 
 	public static function os(): string {
@@ -134,19 +140,19 @@ class SystemHelper {
 	}
 
 	public static function system_name(): string {
-		return self::uname('n');
+		return static::uname('n');
 	}
 
 	public static function kernel_name(): string {
-		return self::uname('s');
+		return static::uname('s');
 	}
 
 	public static function kernel_release(): string {
-		return self::uname('r');
+		return static::uname('r');
 	}
 
 	public static function kernel_version(): string {
-		return self::uname('v');
+		return static::uname('v');
 	}
 
 	public static function uname($type = 'a'): string {

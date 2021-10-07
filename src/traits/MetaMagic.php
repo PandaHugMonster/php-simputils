@@ -99,7 +99,7 @@ trait MetaMagic {
 	}
 
 	/**
- 	 * Serialization meta-magic method
+	 * Serialization meta-magic method
 	 *
 	 * @return array
 	 */

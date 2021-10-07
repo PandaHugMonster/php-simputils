@@ -32,6 +32,6 @@ Here are listed and demonstrated examples of possible use-cases.
  3. [GitHelper examples](use-cases-helpers.md#GitHelper_examples) +
 
 ## Data
- 1. [Version object](use-cases-data.md#Version_object) ?+D
+ 1. [Version object](use-cases-data.md#Version_object) ?+DT
  2. [Version extended usage](use-cases-data.md#Version_extended_usage) +D
 

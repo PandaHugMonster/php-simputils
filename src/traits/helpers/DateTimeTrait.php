@@ -29,9 +29,9 @@ trait DateTimeTrait {
 	 * @throws \Exception
 	 */
 	public static function now(DateTimeZone|null $tz = null): ?DateTime {
-		$default_now_string = empty(self::$now_string)
+		$default_now_string = empty(static::$now_string)
 			?'now'
-			:self::$now_string;
+			:static::$now_string;
 		return static::normalize($default_now_string);
 	}
 

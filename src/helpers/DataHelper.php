@@ -76,7 +76,7 @@ class DataHelper {
 	 *
 	 * @return array Array with keys representing the abbreviations of units and the values representing powers
 	 */
-	protected static function unit_code_to_power_array(): array {
+	protected static function unitCodeToPowerArray(): array {
 		return [
 			static::DATA_UNIT_BYTE => 0,
 			static::DATA_UNIT_KILOBYTE => 1,
@@ -117,11 +117,11 @@ class DataHelper {
 	 * @return string Cleared and normalized unit abbreviation
 	 * @throws NonExistingDataUnit
 	 * @throws UnspecifiedDataUnit
-	 * @see DataHelper::unit_code_to_power_array()
+	 * @see DataHelper::unitCodeToPowerArray()
 	 *
 	 */
-	public static function clear_unit(string $unit): string {
-		$unit_codes = array_keys(static::unit_code_to_power_array());
+	public static function clearUnit(string $unit): string {
+		$unit_codes = array_keys(static::unitCodeToPowerArray());
 		$unit = preg_replace('/[^A-Z]/', '', strtoupper($unit));
 		if (empty($unit))
 			throw new UnspecifiedDataUnit();
@@ -167,10 +167,10 @@ class DataHelper {
 	 * @throws \spaf\simputils\exceptions\NonExistingDataUnit
 	 * @throws \spaf\simputils\exceptions\UnspecifiedDataUnit
 	 */
-	public static function unit_to(string $value, string $to_unit = self::DATA_UNIT_BYTE): float|int {
-		$unit_codes = static::unit_code_to_power_array();
-		$from_unit = static::clear_unit($value, $unit_codes);
-		$to_unit = static::clear_unit($to_unit, $unit_codes);
+	public static function unitTo(string $value, string $to_unit = self::DATA_UNIT_BYTE): float|int {
+		$unit_codes = static::unitCodeToPowerArray();
+		$from_unit = static::clearUnit($value, $unit_codes);
+		$to_unit = static::clearUnit($to_unit, $unit_codes);
 		$from_power = $unit_codes[$from_unit];
 		$to_power = $unit_codes[$to_unit];
 
@@ -184,7 +184,7 @@ class DataHelper {
 	}
 
 	/**
-	 * Alias for {@see unit_to()} but first argument integer will be considered as "bytes"
+	 * Alias for {@see unitTo()} but first argument integer will be considered as "bytes"
 	 *
 	 * ```php
 	 * $res = DataHelper::bytes_to(10240, 'MB');
@@ -203,10 +203,10 @@ class DataHelper {
 	 * @return float Resulting value of "$to_unit" level as a float number
 	 * @throws \spaf\simputils\exceptions\NonExistingDataUnit
 	 * @throws \spaf\simputils\exceptions\UnspecifiedDataUnit
-	 * @see \spaf\simputils\helpers\DataHelper::unit_to()
+	 * @see \spaf\simputils\helpers\DataHelper::unitTo()
 	 */
-	public static function bytes_to(int $bytes, string $to_unit): float {
-		return static::unit_to("{$bytes}b", $to_unit);
+	public static function bytesTo(int $bytes, string $to_unit): float {
+		return static::unitTo("{$bytes}b", $to_unit);
 	}
 
 	/**
@@ -236,8 +236,8 @@ class DataHelper {
 	 * @throws \spaf\simputils\exceptions\NonExistingDataUnit
 	 * @throws \spaf\simputils\exceptions\UnspecifiedDataUnit
 	 */
-	public static function to_bytes(string $value): int {
-		return intval(static::unit_to($value, static::DATA_UNIT_BYTE));
+	public static function toBytes(string $value): int {
+		return intval(static::unitTo($value, static::DATA_UNIT_BYTE));
 	}
 
 	/**
@@ -274,11 +274,11 @@ class DataHelper {
 	 * @throws \spaf\simputils\exceptions\NonExistingDataUnit
 	 * @throws \spaf\simputils\exceptions\UnspecifiedDataUnit
 	 */
-	public static function human_readable(int|string $value): ?string {
+	public static function humanReadable(int|string $value): ?string {
 		$res = null;
 		$value = is_numeric($value)?"{$value}b":$value;
-		foreach (static::unit_code_to_power_array() as $unit_code => $power) {
-			$_temp_value = static::unit_to($value, $unit_code);
+		foreach (static::unitCodeToPowerArray() as $unit_code => $power) {
+			$_temp_value = static::unitTo($value, $unit_code);
 			if ($_temp_value < 1024) {
 				$res = "{$_temp_value}{$unit_code}";
 				break;

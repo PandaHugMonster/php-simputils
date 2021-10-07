@@ -8,8 +8,15 @@ use spaf\simputils\components\BasicVersionParser;
 use spaf\simputils\exceptions\IncorrectVersionFormat;
 use spaf\simputils\models\Version;
 
+/**
+ *
+ */
 class DefaultVersionParser extends BasicVersionParser {
 
+	/**
+	 * @inheritdoc
+	 * @throws \spaf\simputils\exceptions\IncorrectVersionFormat
+	 */
 	public function parse(Version $version_object, ?string $string_version): array {
 
 		$matches = [];
@@ -35,7 +42,7 @@ class DefaultVersionParser extends BasicVersionParser {
 			$string_version = preg_replace('/[-_+.]+/', '.', $string_version);
 			$string_version = str_replace(' ', '', $string_version);
 
-			$regexp = '/(?P<ltype>'.$statuses_bunch.')?\.?(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)\.?(?P<rtype>'.$statuses_bunch.')?\.?(?P<revision>\d+)?/';
+			$regexp = '/(?P<ltype>'.$statuses_bunch.')?\.?(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)\.?(?P<rtype>'.$statuses_bunch.')?\.?(?P<revision>\d+)?/i';
 
 			$res = '';
 			for ($i = 0; $i < strlen($string_version); $i++) {
@@ -70,27 +77,54 @@ class DefaultVersionParser extends BasicVersionParser {
 		];
 	}
 
-	public function greaterThan(Version $obj1, Version $obj2): bool {
+	/**
+	 * @inheritdoc
+	 */
+	public function greaterThan(Version|string $obj1, Version|string $obj2): bool {
+		$obj1 = static::normalize($obj1);
+		$obj2 = static::normalize($obj2);
+
 		$priorities = static::$build_type_priorities;
-		if ($obj1->major > $obj2->major || $obj1->minor > $obj2->minor || $obj1->patch > $obj2->patch)
+
+		if ($obj1->major > $obj2->major) {
 			return true;
-		else if (!empty($obj1->build_type)) {
-			if (empty($obj2->build_type))
+		} else if ($obj1->major == $obj2->major) {
+			////
+			if ($obj1->minor > $obj2->minor) {
 				return true;
-			else if ($priorities[$obj1->build_type] > $priorities[$obj2->build_type]) {
-				return true;
-			} else {
-				$rev1 = $obj1->build_revision ?? 0;
-				$rev2 = $obj2->build_revision ?? 0;
-				if ($rev1 > $rev2)
+			} else if ($obj1->minor == $obj2->minor) {
+				////
+				if ($obj1->patch > $obj2->patch) {
 					return true;
+				} else if ($obj1->patch == $obj2->patch && !empty($obj1->build_type)) {
+					// --
+					if (empty($obj2->build_type))
+						return true;
+					else if ($priorities[$obj1->build_type] > $priorities[$obj2->build_type]) {
+						return true;
+					} else {
+						$rev1 = $obj1->build_revision ?? 0;
+						$rev2 = $obj2->build_revision ?? 0;
+						if ($rev1 > $rev2)
+							return true;
+					}
+					// --
+				}
+				////
 			}
+			////
 		}
 
 		return false;
 	}
 
-	public function equalsTo(Version $obj1, Version $obj2): bool {
+	/**
+	 * @inheritdoc
+	 */
+	public function equalsTo(Version|string $obj1, Version|string $obj2): bool {
+		$obj1 = static::normalize($obj1);
+		$obj2 = static::normalize($obj2);
+
 		$priorities = static::$build_type_priorities;
 		if ($obj1->major === $obj2->major && $obj1->minor === $obj2->minor && $obj1->patch === $obj2->patch) {
 			if (!empty($priorities[$obj1->build_type]) && empty($priorities[$obj2->build_type])) {

@@ -9,14 +9,71 @@ use spaf\simputils\models\Version;
 
 interface VersionParserInterface {
 
+	/**
+	 * The main parsing method
+	 *
+	 * @param \spaf\simputils\models\Version $version_object
+	 * @param string|null $string_version
+	 *
+	 * @return array
+	 */
 	public function parse(Version $version_object, ?string $string_version): array;
 
-	public function greaterThan(Version $obj1, Version $obj2): bool;
-	public function greaterThanEqual(Version $obj1, Version $obj2): bool;
-	public function equalsTo(Version $obj1, Version $obj2): bool;
-	public function lessThan(Version $obj1, Version $obj2): bool;
-	public function lessThanEqual(Version $obj1, Version $obj2): bool;
+	/**
+	 * Logic of ">"
+	 *
+	 * @param \spaf\simputils\models\Version|string $obj1
+	 * @param \spaf\simputils\models\Version|string $obj2
+	 *
+	 * @return bool
+	 */
+	public function greaterThan(Version|string $obj1, Version|string $obj2): bool;
 
-	public function toString(Version $obj): string;
+	/**
+	 * Logic of ">="
+	 * @param \spaf\simputils\models\Version|string $obj1
+	 * @param \spaf\simputils\models\Version|string $obj2
+	 *
+	 * @return bool
+	 */
+	public function greaterThanEqual(Version|string $obj1, Version|string $obj2): bool;
+
+	/**
+	 * Logic of "=="
+	 *
+	 * @param \spaf\simputils\models\Version|string $obj1
+	 * @param \spaf\simputils\models\Version|string $obj2
+	 *
+	 * @return bool
+	 */
+	public function equalsTo(Version|string $obj1, Version|string $obj2): bool;
+
+	/**
+	 * Logic of "<"
+	 *
+	 * @param \spaf\simputils\models\Version|string $obj1
+	 * @param \spaf\simputils\models\Version|string $obj2
+	 *
+	 * @return bool
+	 */
+	public function lessThan(Version|string $obj1, Version|string $obj2): bool;
+
+	/**
+	 * Logic of "<="
+	 * @param \spaf\simputils\models\Version|string $obj1
+	 * @param \spaf\simputils\models\Version|string $obj2
+	 *
+	 * @return bool
+	 */
+	public function lessThanEqual(Version|string $obj1, Version|string $obj2): bool;
+
+	/**
+	 * Turn version object to string
+	 *
+	 * @param \spaf\simputils\models\Version|string $obj
+	 *
+	 * @return string
+	 */
+	public function toString(Version|string $obj): string;
 
 }

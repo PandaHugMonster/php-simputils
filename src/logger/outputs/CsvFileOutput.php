@@ -5,6 +5,7 @@ namespace spaf\simputils\logger\outputs;
 
 
 use spaf\simputils\logger\Logger;
+use function file_exists;
 
 class CsvFileOutput extends TextFileOutput {
 
@@ -14,15 +15,15 @@ class CsvFileOutput extends TextFileOutput {
 	public bool $check_header_conformity = true;
 	public bool $headless = false;
 
-	protected static function preprocess_value($key, $value) {
+	protected static function preprocessValue($key, $value) {
 		return addslashes($value);
 	}
 
-	public function check_file_correctness($keys) {
-		$file_path = $this->compose_file_path();
+	public function checkFileCorrectness($keys) {
+		$file_path = $this->composeFilePath();
 		$ineligible = false;
 
-		$keys_names = $this->get_array_of_names();
+		$keys_names = $this->getArrayOfNames();
 		$header = '';
 		foreach ($keys as $key) {
 			$separator = !empty($header)?$this->separator:'';
@@ -30,35 +31,36 @@ class CsvFileOutput extends TextFileOutput {
 		}
 
 		if ($this->check_header_conformity) {
-			$res = $this->get_file_line_content($file_path, 0);
+			$res = $this->getFileLineContent($file_path, 0);
 			if (!empty($res) && preg_replace('/\s*/', '', $header) !== preg_replace('/\s*/', '', $res)) {
 				$ineligible = true;
 			}
 		}
 
-		if (!$this->file_eligible() || $ineligible) {
-			$this->rotate_files();
+		if (!$this->fileEligible() || $ineligible) {
+			$this->rotateFiles();
 		}
 
 		if (!file_exists($file_path)) {
 			if (!$this->headless) {
+				$this->prepareStorage($file_path);
 				file_put_contents($file_path, "$header\n");
 			}
 		}
 	}
 
-	public function log_from_data($data, $template) {
+	public function logFromData($data, $template) {
 		$template = '';
-		$keys = static::get_array_of_keys();
+		$keys = static::getArrayOfKeys();
 		sort($keys);
 
-		$this->check_file_correctness($keys);
+		$this->checkFileCorrectness($keys);
 
 		foreach ($keys as $key) {
 			$separator = !empty($template)?$this->separator:'';
 			$template .= $separator.$this->quotation_mark.$key.$this->quotation_mark;
 		}
 
-		$this->log(static::format_final_res($data, $template, $keys), $data[Logger::TEMPLATE_LEVEL_NUMBER]);
+		$this->log(static::formatFinalRes($data, $template, $keys), $data[Logger::TEMPLATE_LEVEL_NUMBER]);
 	}
 }

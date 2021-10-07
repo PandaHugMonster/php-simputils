@@ -6,6 +6,7 @@ namespace spaf\simputils\components;
 
 use spaf\simputils\interfaces\VersionParserInterface;
 use spaf\simputils\models\Version;
+use function is_null;
 
 abstract class BasicVersionParser implements VersionParserInterface {
 
@@ -18,7 +19,9 @@ abstract class BasicVersionParser implements VersionParserInterface {
 		'P' => 5,   'PL' => 5,
 	];
 
-	public function toString(Version $obj): string {
+	public function toString(Version|string $obj): string {
+		$obj = static::normalize($obj);
+
 		$res = $obj->major.'.'.$obj->minor.'.'.$obj->patch;
 
 		$check_1 = !empty($obj->build_type);
@@ -38,19 +41,37 @@ abstract class BasicVersionParser implements VersionParserInterface {
 
 	abstract public function parse(Version $version_object, ?string $string_version): array;
 
-	abstract public function greaterThan(Version $obj1, Version $obj2): bool;
-	abstract public function equalsTo(Version $obj1, Version $obj2): bool;
+	abstract public function greaterThan(Version|string $obj1, Version|string $obj2): bool;
+	abstract public function equalsTo(Version|string $obj1, Version|string $obj2): bool;
 
-	public function greaterThanEqual(Version $obj1, Version $obj2): bool {
+	public function greaterThanEqual(Version|string $obj1, Version|string $obj2): bool {
+		$obj1 = static::normalize($obj1);
+		$obj2 = static::normalize($obj2);
+
 		return $this->greaterThan($obj1, $obj2) || $this->equalsTo($obj1, $obj2);
 	}
 
-	public function lessThan(Version $obj1, Version $obj2): bool {
+	public function lessThan(Version|string $obj1, Version|string $obj2): bool {
+		$obj1 = static::normalize($obj1);
+		$obj2 = static::normalize($obj2);
+
 		return !$this->greaterThanEqual($obj1, $obj2);
 	}
 
-	public function lessThanEqual(Version $obj1, Version $obj2): bool {
+	public function lessThanEqual(Version|string $obj1, Version|string $obj2): bool {
+		$obj1 = static::normalize($obj1);
+		$obj2 = static::normalize($obj2);
+
 		return !$this->greaterThan($obj1, $obj2) &&
 			($this->lessThan($obj1, $obj2) || $this->equalsTo($obj1, $obj2));
+	}
+
+	public static function normalize(Version|string|null $item, ?string $app_name = null): ?Version {
+		if (is_null($item))
+			return null;
+		if ($item instanceof Version)
+			return $item;
+
+		return new Version($item, $app_name);
 	}
 }

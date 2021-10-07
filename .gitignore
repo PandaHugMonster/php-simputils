@@ -3,3 +3,6 @@ vendor
 .phpdoc
 phpdoc
 phpDocumentor.phar
+html-coverage
+.phpunit.cache
+.phpunit.result.cache

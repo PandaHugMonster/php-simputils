@@ -7,6 +7,9 @@ namespace spaf\simputils\logger\outputs;
 use spaf\simputils\interfaces\LoggerInterface;
 use spaf\simputils\logger\Logger;
 
+/**
+ * @codeCoverageIgnore
+ */
 class SyslogTransportOutput extends BasicOutput {
 
 	const LOG_EMERG = LOG_EMERG;
@@ -25,18 +28,18 @@ class SyslogTransportOutput extends BasicOutput {
 	}
 
 	public function log($msg, $priority = null) {
-		$priority = static::map_logger_level_to_syslog_level($priority);
+		$priority = static::mapLoggerLevelToSyslogLevel($priority);
 		if (is_null($priority))
 			$priority = static::LOG_INFO;
 		syslog($priority, $msg);
 	}
 
-	public function log_from_data($data, $template) {
+	public function logFromData($data, $template) {
 		$template = !empty($this->template)?$this->template:$template;
-		$this->log(static::format_final_res($data, $template), $data[Logger::TEMPLATE_LEVEL_NUMBER]);
+		$this->log(static::formatFinalRes($data, $template), $data[Logger::TEMPLATE_LEVEL_NUMBER]);
 	}
 
-	public static function map_logger_level_to_syslog_level($logger_level): int {
+	public static function mapLoggerLevelToSyslogLevel($logger_level): int {
 		return match ($logger_level) {
 			LoggerInterface::LEVEL_CRITICAL => static::LOG_CRIT,
 			LoggerInterface::LEVEL_ERROR => static::LOG_ERR,
@@ -46,7 +49,7 @@ class SyslogTransportOutput extends BasicOutput {
 		};
 	}
 
-	public static function map_syslog_level_to_logger_level($syslog_level): int {
+	public static function mapSyslogLevelToLoggerLevel($syslog_level): int {
 		return match ($syslog_level) {
 			static::LOG_EMERG, static::LOG_ALERT, static::LOG_CRIT => LoggerInterface::LEVEL_CRITICAL,
 			static::LOG_ERR => LoggerInterface::LEVEL_ERROR,

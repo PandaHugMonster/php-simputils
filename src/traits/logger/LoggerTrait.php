@@ -26,61 +26,61 @@ trait LoggerTrait {
 		$this->outputs = $outputs;
 	}
 
-	public static function process_template_str(string $msg, array $values): string {
+	public static function processTemplateStr(string $msg, array $values): string {
 		return sprintf($msg, ...$values);
 	}
 
-	protected static function _sub_log(?int $level, string $msg, mixed ...$values) {
+	protected static function _subLog(?int $level, string $msg, mixed ...$values) {
 		/** @var Logger $logger */
 		if (empty($logger))
-			$logger = static::get_default();
+			$logger = static::getDefault();
 
-		if (!empty($logger->outputs) && $level >= $logger->get_log_level()) {
+		if (!empty($logger->outputs) && $level >= $logger->getLogLevel()) {
 			foreach ($logger->outputs as $output) {
 				if ($output instanceof BasicOutput) {
-					$msg = static::process_template_str($msg, $values);
-					$data = $output->prepare_data($logger, $msg, $level, 3);
-					$output->log_from_data($data, static::$format);
+					$msg = static::processTemplateStr($msg, $values);
+					$data = $output->prepareData($logger, $msg, $level, 3);
+					$output->logFromData($data, static::$format);
 				}
 			}
 		}
 	}
 
 	public static function log(string $msg, mixed ...$values) {
-		static::_sub_log(static::$default_logging_level, $msg, ...$values);
+		static::_subLog(static::$default_logging_level, $msg, ...$values);
 	}
 
 	public static function critical(string $msg, mixed ...$values) {
-		static::_sub_log(static::LEVEL_CRITICAL, $msg, ...$values);
+		static::_subLog(static::LEVEL_CRITICAL, $msg, ...$values);
 	}
 
 	public static function error(string $msg, mixed ...$values) {
-		static::_sub_log(static::LEVEL_ERROR, $msg, ...$values);
+		static::_subLog(static::LEVEL_ERROR, $msg, ...$values);
 	}
 
 	public static function warning(string $msg, mixed ...$values) {
-		static::_sub_log(static::LEVEL_WARNING, $msg, ...$values);
+		static::_subLog(static::LEVEL_WARNING, $msg, ...$values);
 	}
 
 	public static function info(string $msg, mixed ...$values) {
-		static::_sub_log(static::LEVEL_INFO, $msg, ...$values);
+		static::_subLog(static::LEVEL_INFO, $msg, ...$values);
 	}
 
 	public static function debug(string $msg, mixed ...$values) {
-		static::_sub_log(static::LEVEL_DEBUG, $msg, ...$values);
+		static::_subLog(static::LEVEL_DEBUG, $msg, ...$values);
 	}
 
-	public static function get_default() {
+	public static function getDefault(): static {
 		if (empty(static::$default))
 			static::$default = new static();
 		return static::$default;
 	}
 
-	public function get_log_level(): int {
+	public function getLogLevel(): int {
 		return $this->log_level;
 	}
 
-	public function log_level_name(int $log_level): string {
+	public function logLevelName(int $log_level): string {
 		return match ($log_level) {
 			static::LEVEL_CRITICAL => 'CRITICAL',
 			static::LEVEL_ERROR => 'ERROR',
@@ -91,7 +91,7 @@ trait LoggerTrait {
 		};
 	}
 
-	public function set_log_level(int $value) {
+	public function setLogLevel(int $value) {
 		$this->log_level = $value;
 	}
 }

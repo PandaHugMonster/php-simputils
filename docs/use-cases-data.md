@@ -270,3 +270,19 @@ class MyVersionParser implements VersionParserInterface {
 }
 ```
 
+#### Comparing objects/versions
+
+Different variants of comparison:
+
+```php
+   use spaf\simputils\models\Version;
+   
+   $app_name = 'App Doe';
+   $v1 = new Version('1.2.3', $app_name);
+   $v2 = new Version('2.0.1', $app_name);
+   $v3 = new Version('01.02.03', $app_name);
+
+
+```
+
+#### Sorting

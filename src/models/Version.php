@@ -122,23 +122,23 @@ class Version extends SimpleObject {
 		return $this->parser->toString($this);
 	}
 
-	public function equals_to(Version|string $obj): bool {
+	public function equalsTo(Version|string $obj): bool {
 		return $this->parser->equalsTo($this, $obj);
 	}
 
-	public function greater_than(Version|string $obj): bool {
+	public function greaterThan(Version|string $obj): bool {
 		return $this->parser->greaterThan($this, $obj);
 	}
 
-	public function less_than(Version|string $obj): bool {
+	public function lessThan(Version|string $obj): bool {
 		return $this->parser->lessThan($this, $obj);
 	}
 
-	public function greater_than_equal(Version|string $obj): bool {
+	public function greaterThanEqual(Version|string $obj): bool {
 		return $this->parser->greaterThanEqual($this, $obj);
 	}
 
-	public function less_than_equal(Version|string $obj): bool {
+	public function lessThanEqual(Version|string $obj): bool {
 		return $this->parser->lessThanEqual($this, $obj);
 	}
 
@@ -151,7 +151,7 @@ class Version extends SimpleObject {
 	 * @see equal_to()
 	 */
 	public function e(Version|string $obj): bool {
-		return $this->equals_to($obj);
+		return $this->equalsTo($obj);
 	}
 
 	/**
@@ -160,10 +160,10 @@ class Version extends SimpleObject {
 	 * @param \spaf\simputils\models\Version|string $obj
 	 *
 	 * @return bool
-	 * @see greater_than()
+	 * @see greaterThan()
 	 */
 	public function gt(Version|string $obj): bool {
-		return $this->greater_than($obj);
+		return $this->greaterThan($obj);
 	}
 
 	/**
@@ -172,10 +172,10 @@ class Version extends SimpleObject {
 	 * @param \spaf\simputils\models\Version|string $obj
 	 *
 	 * @return bool
-	 * @see greater_than()
+	 * @see greaterThan()
 	 */
 	public function lt(Version|string $obj): bool {
-		return $this->less_than($obj);
+		return $this->lessThan($obj);
 	}
 
 	/**
@@ -184,10 +184,10 @@ class Version extends SimpleObject {
 	 * @param \spaf\simputils\models\Version|string $obj
 	 *
 	 * @return bool
-	 * @see greater_than_equal()
+	 * @see greaterThanEqual()
 	 */
 	public function gte(Version|string $obj): bool {
-		return $this->greater_than_equal($obj);
+		return $this->greaterThanEqual($obj);
 	}
 
 	/**
@@ -196,10 +196,10 @@ class Version extends SimpleObject {
 	 * @param \spaf\simputils\models\Version|string $obj
 	 *
 	 * @return bool
-	 * @see less_than_equal()
+	 * @see lessThanEqual()
 	 */
 	public function lte(Version|string $obj): bool {
-		return $this->less_than_equal($obj);
+		return $this->lessThanEqual($obj);
 	}
 
 	/**

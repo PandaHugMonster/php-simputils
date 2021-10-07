@@ -4,10 +4,12 @@
 namespace spaf\simputils\traits\logger;
 
 
+use spaf\simputils\PHP;
+
 trait LoggerBasicFileOutputTrait {
 
-	abstract public function get_storage(): string;
-	abstract public function get_file_name(int $number = 0): string;
+	abstract public function getStorage(): string;
+	abstract public function getFileName(int $number = 0): string;
 
 	public function __construct(?string $storage = null, ?string $prefix = null, ?string $ext = null) {
 		if (!empty($storage))
@@ -18,16 +20,16 @@ trait LoggerBasicFileOutputTrait {
 			$this->file_name_ext = $ext;
 	}
 
-	public function save_file(string $data_str) {
-		$path = $this->compose_file_path();
-		$this->prepare_storage($path);
+	public function saveFile(string $data_str) {
+		$path = $this->composeFilePath();
+		$this->prepareStorage($path);
 
 		file_put_contents($path, $data_str);
 	}
 
-	public function add_to_file(string $data_str) {
-		$path = $this->compose_file_path();
-		$this->prepare_storage($path);
+	public function addToFile(string $data_str) {
+		$path = $this->composeFilePath();
+		$this->prepareStorage($path);
 
 		$fd = fopen($path, 'a');
 		fwrite($fd, "{$data_str}\n");
@@ -36,14 +38,14 @@ trait LoggerBasicFileOutputTrait {
 			clearstatcache();
 	}
 
-	protected function compose_file_path(int $number = 0): string {
-		$storage = $this->get_storage();
-		$file_name = $this->get_file_name($number);
+	protected function composeFilePath(int $number = 0): string {
+		$storage = $this->getStorage();
+		$file_name = $this->getFileName($number);
 		$path = "{$storage}/{$file_name}";
 		return $path;
 	}
 
-	protected function prepare_storage($path) {
+	protected function prepareStorage($path) {
 		if ($this->is_structure_auto_created) {
 			$basedir = dirname($path);
 			if (!file_exists($basedir)) {
@@ -52,23 +54,23 @@ trait LoggerBasicFileOutputTrait {
 		}
 	}
 
-	protected function rotate_files() {
+	protected function rotateFiles() {
 		for ($i = $this->max_rotation_level; $i >= 0; $i--) {
-			$file_path = $this->compose_file_path($i);
+			$file_path = $this->composeFilePath($i);
 			if (file_exists($file_path)) {
 				if ($i === $this->max_rotation_level) {
-					unlink($file_path);
+					PHP::rmFile($file_path);
 				} else {
 					$prev_i = $i + 1;
-					$new_file_path = $this->compose_file_path($prev_i);
+					$new_file_path = $this->composeFilePath($prev_i);
 					rename($file_path, $new_file_path);
 				}
 			}
 		}
 	}
 
-	protected function file_eligible(int $number = 0): bool {
-		$file_path = $this->compose_file_path($number);
+	protected function fileEligible(int $number = 0): bool {
+		$file_path = $this->composeFilePath($number);
 		if (file_exists($file_path)) {
 			$size = filesize($file_path);
 			if ($size !== false && $size >= $this->max_file_size) {
@@ -79,7 +81,7 @@ trait LoggerBasicFileOutputTrait {
 		return true;
 	}
 
-	public static function get_file_line_content(string $file_path, int $from, ?int $to = null): null|string|array {
+	public static function getFileLineContent(string $file_path, int $from, ?int $to = null): null|string|array {
 		if (file_exists($file_path)) {
 			$fd = fopen($file_path, 'r');
 			if ($fd) {

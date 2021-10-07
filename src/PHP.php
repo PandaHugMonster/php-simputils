@@ -9,13 +9,23 @@ use Exception;
 use ReflectionClass;
 use spaf\simputils\traits\MetaMagic;
 use Throwable;
+use function file_exists;
+use function file_put_contents;
+use function glob;
 use function is_array;
+use function is_dir;
+use function is_null;
 use function is_resource;
 use function json_decode;
 use function json_encode;
 use function json_last_error;
+use function mkdir;
+use function rmdir;
 use function serialize;
+use function unlink;
 use function unserialize;
+use const GLOB_ERR;
+use const GLOB_MARK;
 use const JSON_ERROR_NONE;
 
 /**
@@ -43,21 +53,24 @@ class PHP {
 	 * @return false|string
 	 * @throws \Exception
 	 */
-	public static function serialize(mixed $data): false|string {
+	public static function serialize(mixed $data): ?string {
+		if (is_resource($data))
+			throw new Exception('Resources cannot be serialized through PHP default mechanisms');
+
 		if (static::$serialization_mechanism === static::SERIALIZATION_TYPE_JSON) {
 			if (static::classUsesTrait($data, MetaMagic::class)) {
 				$res = $data::_metaMagic($data, '___serialize');
+			} else {
+				$res = $data;
 			}
 
 			return json_encode($res);
 		}
 		if (static::$serialization_mechanism === static::SERIALIZATION_TYPE_PHP) {
-			if (is_resource($data))
-				throw new Exception('Resources cannot be serialized through PHP default mechanisms');
 			return \serialize($data);
 		}
 
-		return false;
+		return null;
 	}
 
 	/**
@@ -74,35 +87,45 @@ class PHP {
 			return null;
 
 		if (empty($class))
-			$class = static::determine_serialized_class($str);
+			$class = static::determineSerializedClass($str);
 
 		if (empty($class))
 			// TODO Fix this exception to a more appropriate one
 			throw new Exception('Cannot determine class for deserialization');
 
-		if (static::classUsesTrait($class, MetaMagic::class)) {
-			if (static::$serialization_mechanism === static::SERIALIZATION_TYPE_JSON) {
+		if (static::$serialization_mechanism === static::SERIALIZATION_TYPE_JSON) {
+			$data = json_decode($str, true);
+
+			if (static::classUsesTrait($class, MetaMagic::class)) {
 				$dummy = (new ReflectionClass($class))->newInstanceWithoutConstructor();
-				$data = json_decode($str, true);
 				/** @noinspection PhpUndefinedMethodInspection */
 				return $class::_metaMagic($dummy, '___deserialize', $data);
+			} else {
+				$dummy = new $class;
+				foreach ($data as $key => $val) {
+					$dummy->$key = $val;
+				}
+				return $dummy;
 			}
-		}
-		if (static::$serialization_mechanism === static::SERIALIZATION_TYPE_PHP) {
+		} else if (static::$serialization_mechanism === static::SERIALIZATION_TYPE_PHP) {
 			return \unserialize($str);
 		}
 
 		return null;
 	}
 
-	private static function determine_serialized_class(string $str): ?string {
+	private static function determineSerializedClass(string $str): ?string {
 		$data = json_decode($str, true);
 		// JSON parsing
 		if (json_last_error() === JSON_ERROR_NONE) {
 			if (is_array($data) && !empty($data[static::$serialized_class_key_name]))
 				return $data[static::$serialized_class_key_name];
 		} else {
-			$res = unserialize($str);
+			try {
+				$res = unserialize($str);
+			} catch (Exception $exception) {
+				$res = $exception;
+			}
 			if (!$res instanceof Throwable) {
 				return $res::class;
 			}
@@ -121,6 +144,11 @@ class PHP {
 				}
 			}
 		}
+		foreach (class_uses($class_ref) as $trait) {
+			if ($trait == $trait_ref)
+				return true;
+		}
+
 		return false;
 	}
 
@@ -130,6 +158,8 @@ class PHP {
 			return true;
 		return false;
 	}
+
+	public static bool $allow_dying = true;
 
 	/**
 	 * Please Die function
@@ -159,16 +189,110 @@ class PHP {
 	 *
 	 * @see \print_r()
 	 */
-	public static function pd(...$args): never {
-		if (Settings::is_redefined(Settings::REDEFINED_PD)) {
-			$callback = Settings::get_redefined(Settings::REDEFINED_PD);
-			$callback(...$args);
+	public static function pd(...$args) {
+		if (Settings::isRedefined(Settings::REDEFINED_PD)) {
+			$callback = Settings::getRedefined(Settings::REDEFINED_PD);
+			$res = (bool) $callback(...$args);
 		} else {
 			foreach ($args as $arg) {
 				print_r($arg);
 				echo "\n";
 			}
-			die();
+			$res = true;
 		}
+		if (static::$allow_dying && $res)
+			die(); // @codeCoverageIgnore
 	}
+
+	public static function boolStr(bool|null $var): ?string {
+		// TODO Improve
+		return $var?'true':'false';
+	}
+
+	/**
+	 * Delete file or directory
+	 *
+	 * @param string|null $file_path
+	 * @param bool $recursively
+	 *
+	 * @return bool|null
+	 * @throws \Exception
+	 */
+	public static function rmFile(?string $file_path, bool $recursively = false): ?bool {
+		if (empty($file_path)) {
+			return null;
+		}
+
+		if (!file_exists($file_path)) {
+			return true;
+		}
+
+		if (is_dir($file_path)) {
+			return static::rmDir($file_path, $recursively);
+		}
+
+		return unlink($file_path);
+	}
+
+	/**
+	 * Removes only directories
+	 *
+	 * Recommended to use {@see static::rmFile()} instead when applicable
+	 *
+	 * @param string|null $file_path
+	 * @param bool $recursively
+	 *
+	 * @todo Add root dir protection
+	 * @return bool|null
+	 * @throws \Exception
+	 */
+	public static function rmDir(?string $file_path, bool $recursively = false): ?bool {
+		if (!is_dir($file_path)) {
+			// TODO Fix exception
+			throw new Exception("{$file_path} is not a directory");
+		}
+		if ($recursively) {
+			$files = glob($file_path.'*', GLOB_MARK | GLOB_ERR);
+			$res = false;
+			foreach ($files as $file) {
+				// Attention: Recursion is here possible in case of directories
+				$res = $res || static::rmFile($file, $recursively);
+			}
+			return $res || static::rmDir($file_path, false);
+		}
+
+		return rmdir($file_path);
+	}
+
+	/**
+	 * Create directory
+	 *
+	 * @param string|null $file_path
+	 * @param bool $recursively
+	 *
+	 * @see \mkdir()
+	 * @return bool|null
+	 */
+	public static function mkDir(?string $file_path, bool $recursively = true): ?bool {
+		if (!file_exists($file_path))
+			return mkdir($file_path, recursive: $recursively);
+
+		return true;
+	}
+
+	/**
+	 * Create file
+	 *
+	 * @param string|null $file_path
+	 * @param mixed $content
+	 *
+	 * @see \file_put_contents()
+	 * @return bool|null
+	 */
+	public static function mkFile(?string $file_path, mixed $content = null): ?bool {
+		if (is_null($content))
+			$content = '';
+		return (bool) file_put_contents($file_path, $content);
+	}
+
 }

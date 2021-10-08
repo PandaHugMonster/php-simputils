@@ -9,23 +9,29 @@ use Exception;
 use ReflectionClass;
 use spaf\simputils\traits\MetaMagic;
 use Throwable;
+use function array_merge;
+use function dirname;
 use function file_exists;
+use function file_get_contents;
 use function file_put_contents;
-use function glob;
+use function in_array;
 use function is_array;
+use function is_callable;
 use function is_dir;
 use function is_null;
 use function is_resource;
+use function is_string;
 use function json_decode;
 use function json_encode;
 use function json_last_error;
 use function mkdir;
+use function realpath;
 use function rmdir;
+use function scandir;
 use function serialize;
+use function sort;
 use function unlink;
 use function unserialize;
-use const GLOB_ERR;
-use const GLOB_MARK;
 use const JSON_ERROR_NONE;
 
 /**
@@ -252,16 +258,81 @@ class PHP {
 			throw new Exception("{$file_path} is not a directory");
 		}
 		if ($recursively) {
-			$files = glob($file_path.'*', GLOB_MARK | GLOB_ERR);
 			$res = false;
+			$files = static::listFiles($file_path, true, 'rsort');
 			foreach ($files as $file) {
 				// Attention: Recursion is here possible in case of directories
-				$res = $res || static::rmFile($file, $recursively);
+				$res = static::rmFile($file, $recursively) || $res;
 			}
-			return $res || static::rmDir($file_path, false);
+
+			return static::rmFile($file_path) || $res;
 		}
 
 		return rmdir($file_path);
+	}
+
+	/**
+	 * List files in the folder recursively or not
+	 *
+	 * In case of file provided instead of folder path, will be returned an array containing just a name of the file
+	 * (if not excluded).
+	 *
+	 * ```php
+	 *      $dir = '/tmp';
+	 *      $res = PHP::listFiles($dir, true, true);
+	 *      print_r($res);
+	 *      // Would output recursively content of your /tmp folder sorted from the top
+	 *      // Equivalent of PHP::listFiles($dir, true, 'sort');
+	 *
+	 *      $dir = '/tmp';
+	 *      $res = PHP::listFiles($dir, true, false);
+	 *      print_r($res);
+	 *      // Would output recursively content of your /tmp folder unsorted (on the order of processing/looking up)
+	 *
+	 *      $dir = '/tmp';
+	 *      $res = PHP::listFiles($dir, true, 'rsort');
+	 *      print_r($res);
+	 *      // Would output recursively content of your /tmp folder in a reversed sort order
+	 *
+	 * ```
+	 *
+	 * @param ?string $file_path
+	 * @param bool $recursively
+	 * @param bool|string $sorting True/False or sorting callable like "sort" or "rsort"
+	 * @param bool $exclude_original_path
+	 *
+	 * @return ?array
+	 */
+	public static function listFiles(?string $file_path, bool $recursively = false, bool|string $sorting = true, bool $exclude_original_path = true): ?array {
+		$res = $exclude_original_path?[]:[$file_path];
+		if (file_exists($file_path)) {
+			if (!is_dir($file_path))
+				return $res;
+
+			// TODO bug here!
+			$scanned_dir = scandir($file_path);
+			if ($recursively) {
+				foreach ($scanned_dir as $file) {
+					if (in_array($file, ['.', '..'])) continue;
+
+					$full_sub_file_path = realpath($file_path.'/'.$file);
+					$sub_list = static::listFiles($full_sub_file_path, $recursively, exclude_original_path: false);
+					if (!empty($sub_list) && is_array($sub_list)) {
+						$res = array_merge($res, $sub_list);
+					}
+				}
+			}
+		}
+
+		if (!empty($sorting)) {
+			if (is_string($sorting) || is_callable($sorting)) {
+				$sorting($res);
+			} else {
+				sort($res);
+			}
+		}
+
+		return $res;
 	}
 
 	/**
@@ -289,10 +360,28 @@ class PHP {
 	 * @see \file_put_contents()
 	 * @return bool|null
 	 */
-	public static function mkFile(?string $file_path, mixed $content = null): ?bool {
+	public static function mkFile(?string $file_path, mixed $content = null, bool $recursively = true): ?bool {
+		if ($recursively) {
+			$base_dir = dirname($file_path);
+			// Make sure the parent dir for the file is created
+			static::mkDir($base_dir);
+		}
 		if (is_null($content))
 			$content = '';
 		return (bool) file_put_contents($file_path, $content);
+	}
+
+	/**
+	 * @param string|null $file_path
+	 *
+	 * @todo Implement parser callback parameter
+	 * @return string|false|null
+	 */
+	public static function getFileContent(?string $file_path = null): null|string|false {
+		if (empty($file_path) || !file_exists($file_path))
+			return false;
+
+		return file_get_contents($file_path);
 	}
 
 }

@@ -5,6 +5,7 @@ namespace spaf\simputils\logger\outputs;
 
 
 use spaf\simputils\logger\Logger;
+use spaf\simputils\PHP;
 use function file_exists;
 
 class CsvFileOutput extends TextFileOutput {
@@ -44,7 +45,7 @@ class CsvFileOutput extends TextFileOutput {
 		if (!file_exists($file_path)) {
 			if (!$this->headless) {
 				$this->prepareStorage($file_path);
-				file_put_contents($file_path, "$header\n");
+				PHP::mkFile($file_path, "$header\n");
 			}
 		}
 	}

@@ -4,7 +4,12 @@ use PHPUnit\Framework\TestCase;
 use spaf\simputils\models\Version;
 use spaf\simputils\PHP;
 use spaf\simputils\Settings;
+use spaf\simputils\traits\MetaMagic;
 use function spaf\simputils\basic\pd;
+
+class MyObjectExample {
+	use MetaMagic;
+}
 
 /**
  * @covers \spaf\simputils\PHP
@@ -166,6 +171,30 @@ class PHPClassTest extends TestCase {
 	public function testDeserializationException() {
 		$this->expectException(Exception::class);
 		PHP::deserialize('??');
+	}
+
+	public function testFilesRelatedFunctionality() {
+		$dir = '/tmp/simputils/tests/test-files-related-functionality';
+		$file = "{$dir}/my-very-file.txt";
+		PHP::mkDir($dir);
+		$this->assertDirectoryExists($dir);
+
+		$expected_content = 'Here is content';
+		PHP::mkFile($file, $expected_content);
+		$this->assertFileExists($file);
+
+		$received_content = PHP::getFileContent($file);
+		$this->assertEquals($expected_content, $received_content);
+
+		PHP::rmFile($dir, true);
+
+		$this->assertDirectoryDoesNotExist($dir);
+	}
+
+	public function testDirectTraitUsageCheck() {
+		$obj = new MyObjectExample();
+		$res = PHP::classUsesTrait($obj, MetaMagic::class);
+		$this->assertTrue($res, 'Is directly used meta-magic');
 	}
 
 }

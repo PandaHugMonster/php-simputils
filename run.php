@@ -120,7 +120,12 @@ class MyVersionParser extends DefaultVersionParser {
 $v1 = new Version('1.2.3-A2');
 $v2 = new Version('1.2.3');
 
-pd(PHP::boolStr($v1->e($v2)));
+//pd(PHP::boolStr($v1->e($v2)));
+
+$dir = '/tmp/simputils';
+
+PHP::rmFile('/tmp/simputils/tests', true);
+pd(PHP::listFiles($dir, true));
 
 // then in the entry point file:
 

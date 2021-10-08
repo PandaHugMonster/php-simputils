@@ -68,7 +68,7 @@ trait LoggerBasicOutputTrait {
 		return $value;
 	}
 
-	public static function formatFinalRes($data, string $template, ?array $template_names = null): string {
+	public static function formatFinalRes($data, string $template, ?array $template_names = null): mixed {
 		$res = $template;
 		$template_names = empty($template_names)?static::getArrayOfKeys():$template_names;
 

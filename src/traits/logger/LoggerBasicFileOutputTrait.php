@@ -24,7 +24,7 @@ trait LoggerBasicFileOutputTrait {
 		$path = $this->composeFilePath();
 		$this->prepareStorage($path);
 
-		file_put_contents($path, $data_str);
+		PHP::mkFile($path, $data_str);
 	}
 
 	public function addToFile(string $data_str) {
@@ -48,9 +48,7 @@ trait LoggerBasicFileOutputTrait {
 	protected function prepareStorage($path) {
 		if ($this->is_structure_auto_created) {
 			$basedir = dirname($path);
-			if (!file_exists($basedir)) {
-				mkdir($basedir, recursive: true);
-			}
+			PHP::mkDir($basedir, true);
 		}
 	}
 
@@ -93,6 +91,8 @@ trait LoggerBasicFileOutputTrait {
 							return $line;
 						} else {
 							$res[$i] = $line;
+							if ($i >= $to)
+								return $res;
 						}
 					}
 					$i++;

@@ -3,6 +3,8 @@
 use PHPUnit\Framework\TestCase;
 use spaf\simputils\logger\Logger;
 use spaf\simputils\logger\outputs\CsvFileOutput;
+use spaf\simputils\logger\outputs\JsonFileOutput;
+use spaf\simputils\logger\outputs\TextFileOutput;
 use spaf\simputils\PHP;
 
 /**
@@ -80,6 +82,7 @@ class LoggerTest extends TestCase {
 	 *
 	 * @runInSeparateProcess
 	 * @return void
+	 * @throws \Exception
 	 */
 	public function testFileOutput() {
 		$dir = '/tmp/simputils/tests/logs';
@@ -99,8 +102,66 @@ class LoggerTest extends TestCase {
 		Logger::error('Second line');
 		PHP::mkFile($expected_file, 'NOT_CORRECT');
 		Logger::error('Third line');
+		Logger::error('Fourth line');
+		Logger::error('Fifth line');
+		Logger::error('Sixth line');
+		Logger::info('Seventh line');
+		Logger::info('Eighth line');
+		Logger::info('Ninth line');
+		Logger::info('Tenth line');
 
 		$this->assertFileExists($expected_file);
+	}
+
+	/**
+	 * @covers \spaf\simputils\logger\outputs\TextFileOutput::getFileLineContent
+	 * @covers \spaf\simputils\traits\logger\LoggerBasicFileOutputTrait
+	 * @covers \spaf\simputils\logger\outputs\JsonFileOutput
+	 * @uses   \spaf\simputils\logger\outputs\BasicFileOutput
+	 * @uses   \spaf\simputils\logger\outputs\TextFileOutput
+	 *
+	 * @runInSeparateProcess
+	 *
+	 * @return void
+	 * @throws \Exception
+	 */
+	public function testFileContent() {
+		$file_path = '/tmp/simputils/tests/__just-a-file.txt';
+		PHP::mkFile($file_path, "Some multiline\nContent\nThat must\nbe\nconsidered.");
+		$lines = TextFileOutput::getFileLineContent($file_path, 2, 3);
+		$this->assertEquals(2, count($lines), 'Array must contain exact amount of lines');
+		$this->assertEquals("That must\n", $lines[2], 'First picked up line');
+		$this->assertEquals("be\n", $lines[3], 'Second picked up line');
+
+		$lines = TextFileOutput::getFileLineContent($file_path, 2, 10);
+		$this->assertEquals(3, count($lines), 'Array must contain exact amount of lines');
+		$this->assertEquals("That must\n", $lines[2], 'First picked up line again');
+		$this->assertEquals("be\n", $lines[3], 'Second picked up line again');
+		$this->assertEquals("considered.", $lines[4], 'Third picked up line');
+
+		$dir = '/tmp/simputils/tests/logs';
+		$prefix = 'tests-log-file-';
+		$expected_file = "{$dir}/{$prefix}0.json";
+		$output = new JsonFileOutput($dir, $prefix, 'json');
+		$output->max_file_size = 20;
+		Logger::$default = new Logger('testing-text', [
+			$output
+		]);
+
+		PHP::rmFile('/tmp/simputils/tests', true);
+
+		Logger::error('TEST ok?');
+		Logger::critical('Critical message!');
+		$output->max_file_size = 1024 * 1024 * 8;
+		Logger::critical('Not very Critical message!');
+
+		$this->assertFileExists($expected_file);
+		$json_data = json_decode(PHP::getFileContent($expected_file), true);
+
+		$this->assertCount(2, $json_data);
+
+		PHP::rmFile($expected_file);
+
 	}
 
 }

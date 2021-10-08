@@ -9,6 +9,8 @@ use spaf\simputils\PHP;
  * @covers \spaf\simputils\PHP::mkDir
  * @covers \spaf\simputils\PHP::rmFile
  * @covers \spaf\simputils\PHP::rmDir
+ * @covers \spaf\simputils\PHP::listFiles
+ * @covers \spaf\simputils\PHP::getFileContent
  */
 class FilesManagementTest extends TestCase {
 
@@ -29,7 +31,42 @@ class FilesManagementTest extends TestCase {
 
 		PHP::rmDir($dir, true);
 		$this->assertDirectoryDoesNotExist($dir, 'Directory was deleted');
+	}
 
+	public function testFilesTransparentActionsCases() {
+		$res = PHP::rmFile(null);
+		$this->assertNull($res, 'Transparent usage of rmFile() for null');
+
+		$location = '/tmp/simputils/tests';
+		$file = "{$location}/non-existing-file-(hopefully).txtXTX";
+		// Make sure file does not exist
+		PHP::rmFile($file);
+
+		$res = PHP::rmFile($file);
+		$this->assertTrue($res, 'Transparent usage of rmFile() for non-existing file');
+
+		$res = PHP::getFileContent(null);
+		$this->assertFalse($res, 'If no content, false should be returned');
+	}
+
+	public function testSorting() {
+		$location = '/tmp/simputils/tests';
+		$res = PHP::listFiles($location, true, true);
+		$this->assertIsArray($res, 'Result should be an array');
+	}
+
+	/**
+	 * @runInSeparateProcess
+	 * @return void
+	 */
+	public function testRmDirException() {
+		$location = '/tmp/simputils/tests';
+		$file = "{$location}/temp-file-to-test-rm-dir-exception.txt";
+		PHP::mkFile($file, recursively: true);
+
+		$this->expectException(Exception::class);
+
+		PHP::rmDir($file);
 	}
 
 }

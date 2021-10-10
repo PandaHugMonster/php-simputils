@@ -4,8 +4,10 @@
 namespace spaf\simputils\traits;
 
 
+use ReflectionClass;
 use spaf\simputils\exceptions\PropertyAccessError;
 use spaf\simputils\Settings;
+use function spl_object_id;
 
 /**
  * Trait SimpleObjectTrait
@@ -14,10 +16,10 @@ use spaf\simputils\Settings;
 trait SimpleObjectTrait {
 
 	/**
-	 * @param string $name
+	 * @param string $name Property name
 	 *
 	 * @return mixed
-	 * @throws \spaf\simputils\exceptions\PropertyAccessError
+	 * @throws \spaf\simputils\exceptions\PropertyAccessError Property access error
 	 */
 	public function __get(string $name): mixed {
 		$internal_name = self::preparePropertyName(self::GOS_GET, $name);
@@ -33,10 +35,10 @@ trait SimpleObjectTrait {
 	}
 
 	/**
-	 * @param string $name
-	 * @param mixed $value
+	 * @param string $name  Property name
+	 * @param mixed  $value Value to set
 	 *
-	 * @throws \spaf\simputils\exceptions\PropertyAccessError
+	 * @throws \spaf\simputils\exceptions\PropertyAccessError Property access error
 	 */
 	public function __set(string $name, mixed $value): void {
 		$internal_name = self::preparePropertyName(self::GOS_SET, $name);
@@ -52,8 +54,8 @@ trait SimpleObjectTrait {
 	}
 
 	/**
-	 * @param string $gos
-	 * @param string $property
+	 * @param string $gos      Get or Set prefix
+	 * @param string $property Property name
 	 *
 	 * @return string
 	 */
@@ -66,4 +68,29 @@ trait SimpleObjectTrait {
 		}
 	}
 
+	/**
+	 * @return int
+	 */
+	public function objId(): int {
+		return spl_object_id($this);
+	}
+
+	/**
+	 * @return string
+	 */
+	public static function classShort(): string {
+		return (new ReflectionClass(static::class))->getShortName();
+	}
+
+	/**
+	 *
+	 * @return string
+	 */
+	public function __toString(): string {
+		if (static::$to_string_format_json) {
+			return $this->toJson();
+		}
+
+		return 'Object <'.static::classShort().'#'.$this->objId().'>';
+	}
 }

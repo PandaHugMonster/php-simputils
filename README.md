@@ -1,6 +1,6 @@
 # php-simputils
 
-**Warning:** Minimum required version of PHP is **8.1** 
+**Warning:** Minimum required version of PHP is **8.0** (Was reconsidered from 8.1 back to 8.0) 
 
 Micro-framework extending PHP language with some useful perks, partly can even remind python 3 development capabilities.
 

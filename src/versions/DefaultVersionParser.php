@@ -62,7 +62,6 @@ class DefaultVersionParser extends BasicVersionParser {
 		}
 
 		if (empty($matches)) {
-//			pd($res);
 			throw new IncorrectVersionFormat("Could not parse version string \"{$string_version}\" by \"{$regexp}\"");
 		}
 

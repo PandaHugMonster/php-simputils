@@ -1,6 +1,7 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
+use spaf\simputils\models\PhpInfo;
 use spaf\simputils\models\Version;
 use spaf\simputils\PHP;
 use spaf\simputils\Settings;
@@ -195,6 +196,36 @@ class PHPClassTest extends TestCase {
 		$obj = new MyObjectExample();
 		$res = PHP::classUsesTrait($obj, MetaMagic::class);
 		$this->assertTrue($res, 'Is directly used meta-magic');
+	}
+
+	/**
+	 *
+	 * @covers \spaf\simputils\models\PhpInfo
+	 * @uses \spaf\simputils\helpers\SystemHelper
+	 * @uses \spaf\simputils\models\Version
+	 * @uses \spaf\simputils\traits\SimpleObjectTrait
+	 * @uses \spaf\simputils\versions\DefaultVersionParser
+	 *
+	 * @return void
+	 */
+	public function testPhpInfo() {
+		$php_info = PHP::info();
+		$this->assertInstanceOf(PhpInfo::class, $php_info, 'PHP info is the object');
+		$this->assertNotEmpty($php_info, 'PHP info is not empty');
+
+		// TODO refactor
+		$expected_keys = [
+			'php_version', 'ini_config', 'main_ini_file', 'extra_ini_files', 'stream_wrappers',
+			'stream_transports', 'stream_filters', 'zend_version', 'xdebug_version',
+			'env_vars', 'server_var', 'extensions', 'opcache',
+			'system_os', 'kernel_name', 'system_name', 'kernel_release', 'kernel_version',
+			'cpu_architecture', 'sapi_name', 'is_thread_safe', 'is_debug_build',
+			'zend_signal_handling', 'zend_memory_manager', 'zend_multibyte_support',
+			'virtual_directory_support', 'php_api_version', 'php_extension_version',
+			'zend_extension_version', 'zend_extension_build', 'php_extension_build',
+		];
+		foreach ($expected_keys as $key)
+			$this->assertArrayHasKey($key, $php_info, 'Does have '.$key);
 	}
 
 }

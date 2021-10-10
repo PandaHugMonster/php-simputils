@@ -41,10 +41,11 @@ trait LoggerBasicOutputTrait {
 		$backtrace_level = $backtrace_level < 0?0:$backtrace_level;
 
 		$caller = array_shift($bt);
-		if ($backtrace_level > 0)
+		if ($backtrace_level > 0) {
 			for ($i = 0; $i < $backtrace_level; $i++) {
 				$caller = array_shift($bt);
 			}
+		}
 
 		/** @noinspection PhpUnhandledExceptionInspection */
 		$now = DateTimeHelper::normalize('now');

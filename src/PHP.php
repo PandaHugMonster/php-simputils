@@ -7,6 +7,9 @@ namespace spaf\simputils;
 
 use Exception;
 use ReflectionClass;
+use spaf\simputils\components\InternalMemoryCache;
+use spaf\simputils\models\PhpInfo;
+use spaf\simputils\models\Version;
 use spaf\simputils\traits\MetaMagic;
 use Throwable;
 use function array_merge;
@@ -34,11 +37,12 @@ use function unlink;
 use function unserialize;
 use const JSON_ERROR_NONE;
 
+
 /**
  * Special static PHP helper
  *
- * Contains fix of the PHP platform "issues" and "missing features", like really disappointing serialize() feature that does not
- * provide ability to use "json" as output.
+ * Contains fix of the PHP platform "issues" and "missing features", like really disappointing
+ * serialize() feature that does not provide ability to use "json" as output.
  *
  * @package spaf\simputils
  */
@@ -47,6 +51,13 @@ class PHP {
 	const SERIALIZATION_TYPE_JSON = 0;
 	const SERIALIZATION_TYPE_PHP = 1;
 
+	public static array $array_yes = [
+		'enabled', 'yes', 't', 'true', 'y', '\+', '1'
+	];
+	public static array $array_no = [
+		'disabled', 'no', 'f', 'false', 'n', '-', '0'
+	];
+
 	// TODO Maybe #class? Checkout compatibility with JavaScript and other techs and standards
 	public static string $serialized_class_key_name = '_class';
 	public static string|int $serialization_mechanism = self::SERIALIZATION_TYPE_JSON;
@@ -54,10 +65,11 @@ class PHP {
 	/**
 	 * Serialize any data
 	 *
-	 * @param mixed $data
+	 * @param mixed $data Data to serialize
 	 *
-	 * @return false|string
-	 * @throws \Exception
+	 * @return ?string
+	 *
+	 * @throws \Exception Runtime resources can't be serialized
 	 */
 	public static function serialize(mixed $data): ?string {
 		if (is_resource($data))
@@ -82,13 +94,13 @@ class PHP {
 	/**
 	 * Deserialize data serialized by {@see serialize()} method
 	 *
-	 * @param string|null $str
-	 * @param null $class
+	 * @param ?string $str   String to deserialize
+	 * @param ?string $class Class hint
 	 *
 	 * @return mixed
-	 * @throws \ReflectionException
+	 * @throws \ReflectionException Reflection related exceptions
 	 */
-	public static function deserialize(string|null $str, $class = null): mixed {
+	public static function deserialize(string|null $str, ?string $class = null): mixed {
 		if (empty($str))
 			return null;
 
@@ -120,6 +132,11 @@ class PHP {
 		return null;
 	}
 
+	/**
+	 * @param string $str Serialized string
+	 *
+	 * @return string|null
+	 */
 	private static function determineSerializedClass(string $str): ?string {
 		$data = json_decode($str, true);
 		// JSON parsing
@@ -140,7 +157,15 @@ class PHP {
 		return null;
 	}
 
-	public static function classUsesTrait(object|string $class_ref, $trait_ref): bool {
+	/**
+	 * Check if object/class using a trait
+	 *
+	 * @param object|string $class_ref Object or class to check
+	 * @param string        $trait_ref Trait string reference
+	 *
+	 * @return bool
+	 */
+	public static function classUsesTrait(object|string $class_ref, string $trait_ref): bool {
 		foreach (class_parents($class_ref) as $cp) {
 			$traits = class_uses($cp);
 			if (!empty($traits)) {
@@ -158,6 +183,13 @@ class PHP {
 		return false;
 	}
 
+	/**
+	 * Check if a string is JSON parsable
+	 *
+	 * @param string $json_or_not String to check
+	 *
+	 * @return bool
+	 */
 	public static function isJsonString(string $json_or_not): bool {
 		json_decode($json_or_not, true);
 		if (json_last_error() === JSON_ERROR_NONE)
@@ -189,11 +221,12 @@ class PHP {
 	 *      );
 	 * ```
 	 *
-	 * @param ...$args
+	 * @param mixed ...$args Multiple params to print out before die
 	 *
 	 * @see \die()
 	 *
 	 * @see \print_r()
+	 * @return void
 	 */
 	public static function pd(...$args) {
 		if (Settings::isRedefined(Settings::REDEFINED_PD)) {
@@ -210,6 +243,16 @@ class PHP {
 			die(); // @codeCoverageIgnore
 	}
 
+	/**
+	 * Turn bool true or false into string "true" or "false"
+	 *
+	 * Opposite functionality of {@see \spaf\simputils\PHP::asBool()}.
+	 *
+	 * @param bool|null $var Value to convert
+	 *
+	 * @see \spaf\simputils\PHP::asBool()
+	 * @return string|null
+	 */
 	public static function boolStr(bool|null $var): ?string {
 		// TODO Improve
 		return $var?'true':'false';
@@ -218,13 +261,25 @@ class PHP {
 	/**
 	 * Delete file or directory
 	 *
-	 * @param string|null $file_path
-	 * @param bool $recursively
+	 * This function should be used in the most cases for both deletion of regular files or
+	 * directories. But, for some cases, if you want you can supply `$strict` param as true,
+	 * in this case the function will delete only regular files, and raise exception if directory
+	 * path is supplied.
+	 *
+	 * @param string|null $file_path   File path
+	 * @param bool        $recursively Recursively delete files (only in case of directories)
+	 * @param bool        $strict      If true supplied - then exception is raised in case of
+	 *                                 directory path supplied instead of a regular file path.
 	 *
 	 * @return bool|null
-	 * @throws \Exception
+	 * @throws \Exception Exception if `$strict` param is true and the file path provided is
+	 *                    a directory.
 	 */
-	public static function rmFile(?string $file_path, bool $recursively = false): ?bool {
+	public static function rmFile(
+		?string $file_path,
+		bool $recursively = false,
+		bool $strict = false
+	): ?bool {
 		if (empty($file_path)) {
 			return null;
 		}
@@ -234,7 +289,12 @@ class PHP {
 		}
 
 		if (is_dir($file_path)) {
-			return static::rmDir($file_path, $recursively);
+			if ($strict) {
+				// TODO Fix exception
+				throw new Exception("{$file_path} is a directory, and a strict mode is on");
+			} else {
+				return static::rmDir($file_path, $recursively);
+			}
 		}
 
 		return unlink($file_path);
@@ -245,37 +305,37 @@ class PHP {
 	 *
 	 * Recommended to use {@see static::rmFile()} instead when applicable
 	 *
-	 * @param string|null $file_path
-	 * @param bool $recursively
+	 * @param string|null $directory_path Directory path
+	 * @param bool        $recursively    Recursively deletes directories (required if not empty)
 	 *
-	 * @todo Add root dir protection
 	 * @return bool|null
-	 * @throws \Exception
+	 * @throws \Exception Exception if regular file path is supplied, and not a directory path
+	 * @todo Add root dir protection
 	 */
-	public static function rmDir(?string $file_path, bool $recursively = false): ?bool {
-		if (!is_dir($file_path)) {
+	public static function rmDir(?string $directory_path, bool $recursively = false): ?bool {
+		if (!is_dir($directory_path)) {
 			// TODO Fix exception
-			throw new Exception("{$file_path} is not a directory");
+			throw new Exception("{$directory_path} is not a directory");
 		}
 		if ($recursively) {
 			$res = false;
-			$files = static::listFiles($file_path, true, 'rsort');
+			$files = static::listFiles($directory_path, true, 'rsort');
 			foreach ($files as $file) {
 				// Attention: Recursion is here possible in case of directories
 				$res = static::rmFile($file, $recursively) || $res;
 			}
 
-			return static::rmFile($file_path) || $res;
+			return static::rmFile($directory_path) || $res;
 		}
 
-		return rmdir($file_path);
+		return rmdir($directory_path);
 	}
 
 	/**
 	 * List files in the folder recursively or not
 	 *
-	 * In case of file provided instead of folder path, will be returned an array containing just a name of the file
-	 * (if not excluded).
+	 * In case of file provided instead of folder path, will be returned an array containing
+	 * just a name of the file (if not excluded).
 	 *
 	 * ```php
 	 *      $dir = '/tmp';
@@ -287,7 +347,8 @@ class PHP {
 	 *      $dir = '/tmp';
 	 *      $res = PHP::listFiles($dir, true, false);
 	 *      print_r($res);
-	 *      // Would output recursively content of your /tmp folder unsorted (on the order of processing/looking up)
+	 *      // Would output recursively content of your /tmp folder unsorted (on the order
+	 *      // of processing/looking up)
 	 *
 	 *      $dir = '/tmp';
 	 *      $res = PHP::listFiles($dir, true, 'rsort');
@@ -296,14 +357,21 @@ class PHP {
 	 *
 	 * ```
 	 *
-	 * @param ?string $file_path
-	 * @param bool $recursively
-	 * @param bool|string $sorting True/False or sorting callable like "sort" or "rsort"
-	 * @param bool $exclude_original_path
+	 * @param ?string     $file_path             File path
+	 * @param bool        $recursively           Recursively create directories
+	 * @param bool|string $sorting               True/False or sorting callable
+	 *                                           like "sort" or "rsort"
+	 * @param bool        $exclude_original_path Exclude original file path from the array.
+	 *                                           Default is true, and in the most cases it's fine.
 	 *
 	 * @return ?array
 	 */
-	public static function listFiles(?string $file_path, bool $recursively = false, bool|string $sorting = true, bool $exclude_original_path = true): ?array {
+	public static function listFiles(
+		?string $file_path,
+		bool $recursively = false,
+		bool|string $sorting = true,
+		bool $exclude_original_path = true
+	): ?array {
 		$res = $exclude_original_path?[]:[$file_path];
 		if (file_exists($file_path)) {
 			if (!is_dir($file_path))
@@ -316,7 +384,11 @@ class PHP {
 					if (in_array($file, ['.', '..'])) continue;
 
 					$full_sub_file_path = realpath($file_path.'/'.$file);
-					$sub_list = static::listFiles($full_sub_file_path, $recursively, exclude_original_path: false);
+					$sub_list = static::listFiles(
+						$full_sub_file_path,
+						$recursively,
+						exclude_original_path: false
+					);
 					if (!empty($sub_list) && is_array($sub_list)) {
 						$res = array_merge($res, $sub_list);
 					}
@@ -338,15 +410,15 @@ class PHP {
 	/**
 	 * Create directory
 	 *
-	 * @param string|null $file_path
-	 * @param bool $recursively
+	 * @param string|null $directory_path Directory path
+	 * @param bool        $recursively    Should be directories recursively created
 	 *
-	 * @see \mkdir()
 	 * @return bool|null
+	 *@see \mkdir()
 	 */
-	public static function mkDir(?string $file_path, bool $recursively = true): ?bool {
-		if (!file_exists($file_path))
-			return mkdir($file_path, recursive: $recursively);
+	public static function mkDir(?string $directory_path, bool $recursively = true): ?bool {
+		if (!file_exists($directory_path))
+			return mkdir($directory_path, recursive: $recursively);
 
 		return true;
 	}
@@ -354,13 +426,18 @@ class PHP {
 	/**
 	 * Create file
 	 *
-	 * @param string|null $file_path
-	 * @param mixed $content
+	 * @param string|null $file_path   File path
+	 * @param mixed       $content     Content to put to file
+	 * @param bool        $recursively Create folders recursively
 	 *
-	 * @see \file_put_contents()
 	 * @return bool|null
+	 * @see \file_put_contents()
 	 */
-	public static function mkFile(?string $file_path, mixed $content = null, bool $recursively = true): ?bool {
+	public static function mkFile(
+		?string $file_path,
+		mixed $content = null,
+		bool $recursively = true
+	): ?bool {
 		if ($recursively) {
 			$base_dir = dirname($file_path);
 			// Make sure the parent dir for the file is created
@@ -372,7 +449,7 @@ class PHP {
 	}
 
 	/**
-	 * @param string|null $file_path
+	 * @param string|null $file_path File path
 	 *
 	 * @todo Implement parser callback parameter
 	 * @return string|false|null
@@ -384,4 +461,56 @@ class PHP {
 		return file_get_contents($file_path);
 	}
 
+	/**
+	 * Tries to recognize string or other types of value as bool TRUE or FALSE
+	 *
+	 * Decision is made based on {@see static::$array_yes}, what will not match, will be
+	 * considered as FALSE, otherwise TRUE.
+	 *
+	 * Values can be modified, so you can control what should be considered as TRUE or FALSE
+	 *
+	 * If `$strict` supplied - then null will be returned if value does not match any of those 2
+	 * arrays (yes and no).
+	 *
+	 * @param mixed $val    Converts string (or any) value into a bool value
+	 *                      (recognition is based on $array_yes)
+	 * @param bool  $strict If true - then null is returned if the value does not match both arrays
+	 *
+	 * @return ?bool
+	 */
+	public static function asBool(mixed $val, bool $strict = false): ?bool {
+		$sub_res = false;
+		if (!isset($val))
+			return false;
+		if (in_array($val, static::$array_yes))
+			$sub_res = true;
+		if ($strict) {
+			if ($sub_res)
+				return true;
+			if (in_array($val, static::$array_no))
+				return false;
+
+			return null;
+		}
+		return $sub_res;
+	}
+
+	/**
+	 * @return \spaf\simputils\models\Version|string
+	 */
+	public static function phpVersion(): Version|string {
+		return new Version(phpversion());
+	}
+
+	/**
+	 * @param bool $use_fresh Generate a new object even if it exists in the cache
+	 *
+	 * @return \spaf\simputils\models\PhpInfo|array|string
+	 */
+	public static function info(bool $use_fresh = false): PhpInfo|array|string {
+		if ($use_fresh || empty(InternalMemoryCache::$default_phpinfo_object)) {
+			InternalMemoryCache::$default_phpinfo_object = new PhpInfo();
+		}
+		return InternalMemoryCache::$default_phpinfo_object;
+	}
 }

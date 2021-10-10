@@ -23,4 +23,12 @@ use spaf\simputils\traits\SimpleObjectTrait;
 abstract class SimpleObject implements SimpleObjectInterface {
 	use SimpleObjectTrait;
 	use MetaMagic;
+
+	/**
+	 * @var bool If set to true, then string format will be as "json", otherwise (default)
+	 *           will be using object short class name and object id. This variable is relevant
+	 *           only if __toString() is not redefined, or if redefined with usage of this static
+	 *           variable.
+	 */
+	public static bool $to_string_format_json = false;
 }

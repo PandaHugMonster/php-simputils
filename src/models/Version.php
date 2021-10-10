@@ -12,7 +12,8 @@ use spaf\simputils\versions\DefaultVersionParser;
  *
  * Comfortable way to operate with version information.
  *
- * It parses version (which parser to use is flexible as well), and stores it. Allows comparing versions, sort them, etc.
+ * It parses version (which parser to use is flexible as well), and stores it.
+ * Allows comparing versions, sort them, etc.
  *
  * Example:
  * ```php
@@ -61,7 +62,8 @@ use spaf\simputils\versions\DefaultVersionParser;
  *
  * ```
  *
- * @see https://www.php.net/manual/ru/function.version-compare.php The basic logic was inspired by this method
+ * @see https://www.php.net/manual/en/function.version-compare.php
+ *      The basic logic was inspired by this method
  * @see https://semver.org/ The key functionality is directed to Semantic Versioning
  * @package spaf\simputils
  */
@@ -85,12 +87,20 @@ class Version extends SimpleObject {
 	protected ?string $original_value = null;
 	protected null|string|bool $original_strict = null;
 
+	/**
+	 * @return mixed|\spaf\simputils\interfaces\VersionParserInterface|null
+	 */
 	public function getParser() {
 		if (empty($this->_parser))
 			$this->_parser = new static::$default_parser_class();
 		return $this->_parser;
 	}
 
+	/**
+	 * @param $val
+	 *
+	 * @return void
+	 */
 	public function setParser($val) {
 		$this->_parser = $val;
 	}
@@ -102,7 +112,11 @@ class Version extends SimpleObject {
 	 * @param string|null $software_name
 	 * @param \spaf\simputils\interfaces\VersionParserInterface|null $parser
 	 */
-	public function __construct(?string $version = null, ?string $software_name = null, ?VersionParserInterface $parser = null) {
+	public function __construct(
+		?string $version = null,
+		?string $software_name = null,
+		?VersionParserInterface $parser = null
+	) {
 		$this->original_value = $version;
 		$this->software_name = $software_name;
 		if (!empty($parser))
@@ -118,26 +132,54 @@ class Version extends SimpleObject {
 		$this->build_revision = $data['build_revision'] ?? null;
 	}
 
+	/**
+	 * @return string
+	 */
 	public function __toString(): string {
 		return $this->parser->toString($this);
 	}
 
+	/**
+	 * @param \spaf\simputils\models\Version|string $obj
+	 *
+	 * @return bool
+	 */
 	public function equalsTo(Version|string $obj): bool {
 		return $this->parser->equalsTo($this, $obj);
 	}
 
+	/**
+	 * @param \spaf\simputils\models\Version|string $obj
+	 *
+	 * @return bool
+	 */
 	public function greaterThan(Version|string $obj): bool {
 		return $this->parser->greaterThan($this, $obj);
 	}
 
+	/**
+	 * @param \spaf\simputils\models\Version|string $obj
+	 *
+	 * @return bool
+	 */
 	public function lessThan(Version|string $obj): bool {
 		return $this->parser->lessThan($this, $obj);
 	}
 
+	/**
+	 * @param \spaf\simputils\models\Version|string $obj
+	 *
+	 * @return bool
+	 */
 	public function greaterThanEqual(Version|string $obj): bool {
 		return $this->parser->greaterThanEqual($this, $obj);
 	}
 
+	/**
+	 * @param \spaf\simputils\models\Version|string $obj
+	 *
+	 * @return bool
+	 */
 	public function lessThanEqual(Version|string $obj): bool {
 		return $this->parser->lessThanEqual($this, $obj);
 	}
@@ -218,5 +260,4 @@ class Version extends SimpleObject {
 
 		return $res;
 	}
-
 }

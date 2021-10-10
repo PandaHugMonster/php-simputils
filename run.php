@@ -122,10 +122,13 @@ $v2 = new Version('1.2.3');
 
 //pd(PHP::boolStr($v1->e($v2)));
 
-$dir = '/tmp/simputils';
+//$dir = '/tmp/simputils';
 
-PHP::rmFile('/tmp/simputils/tests', true);
-pd(PHP::listFiles($dir, true));
+$phpi1 = PHP::info();
+pd("$phpi1");
+//pd(InternalMemoryCache::$original_phpinfo_string);
+//PHP::rmFile('/tmp/simputils/tests', true);
+//pd(PHP::listFiles($dir, true));
 
 // then in the entry point file:
 

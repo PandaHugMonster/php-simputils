@@ -1,9 +1,10 @@
 ## In-place quick debugging or PleaseDie
 
-**Important:** `pd()` is a shortcut for `PHP::pd()`. In the most cases is recommended to use a shortcut.
+**Important:** `pd()` is a shortcut for `PHP::pd()`. In the most cases is recommended to use 
+a shortcut.
 
-This is simple dev/debugging method like "alert()" of JavaScript browser implementation. It prints out the data/vars
-and then stops the execution.
+This is simple dev/debugging method like "alert()" of JavaScript browser implementation. It 
+prints out the data/vars and then stops the execution.
 
 The simple usage would be:
 
@@ -49,10 +50,13 @@ Big and fat fox of a pink colour jumped over the internet
 ```
 
 ### Extension and Redefinability
-Please Die functionality could be extended or even redefined. By another framework, or by another library, or by yourself.
+Please Die functionality could be extended or even redefined. By another framework, or by 
+another library, or by yourself.
 
-A good example is a small "proxy-lib" [spaf/yii2-simputils](https://github.com/PandaHugMonster/yii2-simputils) that
-redefines the pd() underlying functionality with a better outputting mechanism like "VarDumper".
+A good example is a small "proxy-lib" 
+[spaf/yii2-simputils](https://github.com/PandaHugMonster/yii2-simputils) that redefines the pd() 
+underlying functionality with a better outputting mechanism like "VarDumper".
 
-Even though through this "proxy-lib" you redefine functionality, you don't need to change an import and a call of "pd()"
-anywhere in your code, because the call stays the same, but the different functionality is being used.
+Even though through this "proxy-lib" you redefine functionality, you don't need to change an import 
+and a call of "pd()" anywhere in your code, because the call stays the same, but the different 
+functionality is being used.

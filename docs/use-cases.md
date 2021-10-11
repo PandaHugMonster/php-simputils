@@ -23,8 +23,9 @@ Here are listed and demonstrated examples of possible use-cases.
  5. [JSONs and CSVs and INIs and dot-ENVs](use-cases-configs.md#JSONs_and_CSVs_and_INIs_and_dot_ENVs)
 
 ## System and environment information
- 1. [Easy PHP Info](use-cases-sys.md#Easy_PHP_Info) +
- 2. [System information](use-cases-sys.md#System_information) +
+ 1. [PHP static class](use-cases-php-static-class.md#PHP static class) +
+ 2. [PHP Info](use-cases-php-info.md#PHP Info) +
+ 3. [System information](use-cases-sys.md#System_information) +
 
 ## Helpers
  1. [DateTimeHelper examples](use-cases-helpers.md#DateTimeHelper_examples) +

@@ -5,7 +5,7 @@ namespace spaf\simputils\generic\constants;
 /**
  * PHP info constants
  *
- *
+ * @see \spaf\simputils\models\PhpInfo
  */
 abstract class PHPInfoConst {
 

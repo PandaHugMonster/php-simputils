@@ -33,6 +33,7 @@ use function rmdir;
 use function scandir;
 use function serialize;
 use function sort;
+use function strtolower;
 use function unlink;
 use function unserialize;
 use const JSON_ERROR_NONE;
@@ -52,15 +53,17 @@ class PHP {
 	const SERIALIZATION_TYPE_PHP = 1;
 
 	public static array $array_yes = [
-		'enabled', 'yes', 't', 'true', 'y', '\+', '1'
+		'enabled', 'yes', 't', 'true', 'y', '+', '1', 'enable',
 	];
 	public static array $array_no = [
-		'disabled', 'no', 'f', 'false', 'n', '-', '0'
+		'disabled', 'no', 'f', 'false', 'n', '-', '0', 'disable',
 	];
 
 	// TODO Maybe #class? Checkout compatibility with JavaScript and other techs and standards
 	public static string $serialized_class_key_name = '_class';
 	public static string|int $serialization_mechanism = self::SERIALIZATION_TYPE_JSON;
+
+	public static bool $allow_dying = true;
 
 	/**
 	 * Serialize any data
@@ -73,7 +76,9 @@ class PHP {
 	 */
 	public static function serialize(mixed $data): ?string {
 		if (is_resource($data))
-			throw new Exception('Resources cannot be serialized through PHP default mechanisms');
+			throw new Exception(
+				'Resources cannot be serialized through PHP default mechanisms'
+			);
 
 		if (static::$serialization_mechanism === static::SERIALIZATION_TYPE_JSON) {
 			if (static::classUsesTrait($data, MetaMagic::class)) {
@@ -197,8 +202,6 @@ class PHP {
 		return false;
 	}
 
-	public static bool $allow_dying = true;
-
 	/**
 	 * Please Die function
 	 *
@@ -221,7 +224,9 @@ class PHP {
 	 *      );
 	 * ```
 	 *
-	 * @param mixed ...$args Multiple params to print out before die
+	 * @todo implement simple log integration
+	 *
+	 * @param mixed ...$args Anything you want to print out before dying
 	 *
 	 * @see \die()
 	 *
@@ -480,6 +485,8 @@ class PHP {
 	 */
 	public static function asBool(mixed $val, bool $strict = false): ?bool {
 		$sub_res = false;
+		if (is_string($val))
+			$val = strtolower($val);
 		if (!isset($val))
 			return false;
 		if (in_array($val, static::$array_yes))
@@ -498,7 +505,7 @@ class PHP {
 	/**
 	 * @return \spaf\simputils\models\Version|string
 	 */
-	public static function phpVersion(): Version|string {
+	public static function version(): Version|string {
 		return new Version(phpversion());
 	}
 
@@ -512,5 +519,16 @@ class PHP {
 			InternalMemoryCache::$default_phpinfo_object = new PhpInfo();
 		}
 		return InternalMemoryCache::$default_phpinfo_object;
+	}
+
+	/**
+	 * Identifies variable type
+	 *
+	 * @param mixed $var Variable to identify
+	 *
+	 * @return string
+	 */
+	public static function type(mixed $var): string {
+		return is_object($var)?get_class($var):gettype($var);
 	}
 }

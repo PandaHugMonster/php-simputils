@@ -69,4 +69,18 @@ class FilesManagementTest extends TestCase {
 		PHP::rmDir($file);
 	}
 
+	/**
+	 * @runInSeparateProcess
+	 * @return void
+	 */
+	public function testRmFileDirException() {
+		$location = '/tmp/simputils/tests';
+		$dir = "{$location}/dir-strict-cannot-let-to-delete";
+		PHP::mkDir($dir, recursively: true);
+
+		$this->expectException(Exception::class);
+
+		// Exception here because strict file deletion does not allow dir deletion
+		PHP::rmFile($dir, strict: true);
+	}
 }

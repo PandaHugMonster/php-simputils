@@ -1,4 +1,5 @@
 <?php
+/** @noinspection PhpHierarchyChecksInspection */
 
 
 namespace spaf\simputils\logger;
@@ -11,7 +12,7 @@ use spaf\simputils\traits\logger\LoggerTrait;
 class Logger extends SimpleObject implements LoggerInterface {
 	use LoggerTrait;
 
-	public string $name = 'default';
+	public ?string $name = null;
 
 	protected array $outputs = [];
 	public ?int $log_level = LoggerInterface::LEVEL_INFO;
@@ -19,6 +20,7 @@ class Logger extends SimpleObject implements LoggerInterface {
 
 	public static mixed $default = null;
 	public static int $default_logging_level = LoggerInterface::LEVEL_INFO;
-	public static string $format = "[%(asctime)s] (%(levelname)s) %(filename)s:%(lineno)d | %(funcname)s():\t %(message)s";
+	public static string $format
+		= "[%(asctime)s] (%(levelname)s) %(filename)s:%(lineno)d | %(funcname)s():\t %(message)s";
 
 }

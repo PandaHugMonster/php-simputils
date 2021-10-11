@@ -7,6 +7,7 @@ namespace spaf\simputils\traits\logger;
 use spaf\simputils\logger\Logger;
 use spaf\simputils\logger\outputs\BasicOutput;
 use spaf\simputils\logger\outputs\ContextOutput;
+use spaf\simputils\Settings;
 
 trait LoggerTrait {
 
@@ -15,8 +16,14 @@ trait LoggerTrait {
 	}
 
 	public function init(?string $name = null, array $outputs = []) {
-		if (!empty($name))
+		if (!empty($name)) {
 			$this->name = $name;
+		} else {
+			$default_name = 'default';
+			$this->name = !empty(Settings::$app_name)
+				?($default_name.'-'.Settings::$app_name)
+				:$default_name;
+		}
 
 		if (empty($outputs)) {
 			$outputs = [

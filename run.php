@@ -6,7 +6,6 @@ use spaf\simputils\logger\outputs\CsvFileOutput;
 use spaf\simputils\models\Version;
 use spaf\simputils\PHP;
 use spaf\simputils\versions\DefaultVersionParser;
-use function spaf\simputils\basic\pd;
 
 require_once 'vendor/autoload.php';
 
@@ -125,7 +124,14 @@ $v2 = new Version('1.2.3');
 //$dir = '/tmp/simputils';
 
 $phpi1 = PHP::info();
-pd("$phpi1");
+
+//pd($phpi1->kernel_name);
+//pd($phpi1->php_extension_build);
+//pd($phpi1->extra_ini_files);
+foreach ($phpi1->toArray() as $key => $val) {
+	Logger::info('Key: %s ; Type: %s ;', $key, PHP::type($val));
+}
+//pd("My PHP info item of  is {$phpi1->}");
 //pd(InternalMemoryCache::$original_phpinfo_string);
 //PHP::rmFile('/tmp/simputils/tests', true);
 //pd(PHP::listFiles($dir, true));

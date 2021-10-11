@@ -4,20 +4,57 @@ namespace spaf\simputils\models;
 
 use ArrayAccess;
 use Exception;
+use Iterator;
 use spaf\simputils\components\InternalMemoryCache;
 use spaf\simputils\components\SimpleObject;
 use spaf\simputils\generic\constants\PHPInfoConst as constants;
 use spaf\simputils\helpers\SystemHelper;
 use spaf\simputils\PHP;
 use spaf\simputils\traits\ArrayAccessReadOnlyTrait;
+use function array_keys;
+use function in_array;
 use function is_string;
 use function json_decode;
 use function json_encode;
 
 /**
  * PHP Info class instance
+ * @todo Finish documentation and phpcs and test coverage
+ * @todo Refactor testing
+ * 
+ * @property-read Version $php_version
+ * @property-read array $ini_config
+ * @property-read string $main_ini_file
+ * @property-read array $extra_ini_files
+ * @property-read array $stream_wrappers
+ * @property-read array $stream_transports
+ * @property-read array $stream_filters
+ * @property-read Version $zend_version
+ * @property-read Version $xdebug_version
+ * @property-read array $env_vars
+ * @property-read array $server_var
+ * @property-read array $extensions
+ * @property-read boolean $opcache
+ * @property-read string $system_os
+ * @property-read string $kernel_name
+ * @property-read string $system_name
+ * @property-read string $kernel_release
+ * @property-read string $kernel_version
+ * @property-read string $cpu_architecture
+ * @property-read string $sapi_name
+ * @property-read boolean $is_thread_safe
+ * @property-read boolean $is_debug_build
+ * @property-read boolean $zend_signal_handling
+ * @property-read boolean $zend_memory_manager
+ * @property-read boolean $virtual_directory_support
+ * @property-read string $zend_extension_build
+ * @property-read string $php_extension_build
+ * @property-read boolean $zend_multibyte_support
+ * @property-read Version $php_api_version
+ * @property-read Version $php_extension_version
+ * @property-read Version $zend_extension_version
  */
-class PhpInfo extends SimpleObject implements ArrayAccess {
+class PhpInfo extends SimpleObject implements ArrayAccess, Iterator {
 	use ArrayAccessReadOnlyTrait;
 
 	/**
@@ -25,21 +62,18 @@ class PhpInfo extends SimpleObject implements ArrayAccess {
 	 */
 	public static bool $to_string_format_json = true;
 
-	// TODO Getters
-	// TODO Finalize and clear functionality
-	// TODO Finish documentation and phpcs and test coverage
-	// TODO Refactor testing
-	// TODO Implement representation as a string
-
 	protected ?array $storage = null;
+	private ?array $available_storage_keys = null;
+	private int $iter_index = 0;
 
 	private static array $replace_php_info_reg_exp_array = [];
 
 	/**
-	 *
+	 * @todo Maybe improve a bit
 	 */
 	public function __construct() {
 		$this->storage = static::compose();
+		$this->available_storage_keys = array_keys($this->storage);
 	}
 
 	/**
@@ -96,7 +130,7 @@ class PhpInfo extends SimpleObject implements ArrayAccess {
 
 		$data = [];
 
-		$data[constants::KEY_PHP_VERSION] = PHP::phpVersion();
+		$data[constants::KEY_PHP_VERSION] = PHP::version();
 		$data[constants::KEY_INI_CONFIG] = ini_get_all(details: false);
 		$data[constants::KEY_MAIN_INI_FILE] = php_ini_loaded_file();
 		$data[constants::KEY_EXTRA_INI_FILES] = explode(
@@ -266,7 +300,16 @@ class PhpInfo extends SimpleObject implements ArrayAccess {
 	 * @return string
 	 */
 	public static function getYesNoArrayAsRegExpChoices(): string {
-		return implode('|', array_merge(PHP::$array_yes, PHP::$array_no));
+		$yeses = PHP::$array_yes;
+		$noes = PHP::$array_no;
+		$both = array_merge($yeses, $noes);
+		$to_escape = ['+', '-'];
+		foreach ($both as $key => $item) {
+			if (in_array($item, $to_escape)) {
+				$both[$key] = '\\'.$item;
+			}
+		}
+		return implode('|', $both);
 	}
 
 	/**
@@ -299,5 +342,54 @@ class PhpInfo extends SimpleObject implements ArrayAccess {
 		if ($with_class)
 			$res[PHP::$serialized_class_key_name] = static::class;
 		return $res;
+	}
+
+	/**
+	 * @param string $name Property name
+	 *
+	 * @return mixed
+	 * @throws \spaf\simputils\exceptions\PropertyAccessError Property Access error
+	 */
+	public function __get(string $name): mixed {
+		if (in_array($name, $this->available_storage_keys)) {
+			return $this->storage[$name];
+		}
+
+		return parent::__get($name);
+	}
+
+	/**
+	 * @return mixed
+	 */
+	public function current(): mixed {
+		return $this->storage[$this->key()];
+	}
+
+	/**
+	 * @return void
+	 */
+	public function next(): void {
+		$this->iter_index++;
+	}
+
+	/**
+	 * @return mixed
+	 */
+	public function key(): mixed {
+		return $this->available_storage_keys[$this->iter_index];
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function valid(): bool {
+		return isset($this->available_storage_keys[$this->iter_index]);
+	}
+
+	/**
+	 * @return void
+	 */
+	public function rewind(): void {
+		$this->iter_index = 0;
 	}
 }

@@ -63,10 +63,13 @@ trait MetaMagic {
 	}
 
 	/**
-	 * Represents object as array
+	 * Represents object as an array
+	 *
+	 * TODO Currently only recursively
 	 *
 	 * @param bool $with_class Result will contain full class name
 	 *
+	 * @todo implement recursive and non recursive approach
 	 * @return array
 	 */
 	public function toArray(bool $with_class = false): array {

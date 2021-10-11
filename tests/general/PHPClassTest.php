@@ -15,7 +15,12 @@ class MyObjectExample {
 /**
  * @covers \spaf\simputils\PHP
  * @covers \spaf\simputils\basic\pd
+ * @covers \spaf\simputils\models\PhpInfo
  * @uses \spaf\simputils\Settings
+ * @uses \spaf\simputils\components\BasicVersionParser
+ * @uses \spaf\simputils\models\Version
+ * @uses \spaf\simputils\traits\SimpleObjectTrait
+ * @uses \spaf\simputils\traits\MetaMagic
  */
 class PHPClassTest extends TestCase {
 
@@ -209,23 +214,89 @@ class PHPClassTest extends TestCase {
 	 * @return void
 	 */
 	public function testPhpInfo() {
-		$php_info = PHP::info();
+		$php_info = PHP::info(true);
 		$this->assertInstanceOf(PhpInfo::class, $php_info, 'PHP info is the object');
 		$this->assertNotEmpty($php_info, 'PHP info is not empty');
 
-		// TODO refactor
-		$expected_keys = [
-			'php_version', 'ini_config', 'main_ini_file', 'extra_ini_files', 'stream_wrappers',
-			'stream_transports', 'stream_filters', 'zend_version', 'xdebug_version',
-			'env_vars', 'server_var', 'extensions', 'opcache',
-			'system_os', 'kernel_name', 'system_name', 'kernel_release', 'kernel_version',
-			'cpu_architecture', 'sapi_name', 'is_thread_safe', 'is_debug_build',
-			'zend_signal_handling', 'zend_memory_manager', 'zend_multibyte_support',
-			'virtual_directory_support', 'php_api_version', 'php_extension_version',
-			'zend_extension_version', 'zend_extension_build', 'php_extension_build',
-		];
+		$expected_keys = array_keys($php_info->toArray());
 		foreach ($expected_keys as $key)
 			$this->assertArrayHasKey($key, $php_info, 'Does have '.$key);
 	}
 
+	/**
+	 * @return array[]
+	 */
+	public function dataProviderToBool(): array {
+		return [
+			['true', true], ['1', true], ['T', true], ['trUe', true], ['t', true], ['y', true],
+			['yes', true], ['yEs', true], ['enabled', true], [1, true], ['+', true],
+
+			['false', false], ['0', false], [0, false], [null, false], ['F', false],
+			['FalsE', false], ['f', false], ['n', false], ['no', false], ['No', false],
+			['disabled', false], ['-', false],
+
+			['coocoo', null], ['dodo', null], ['bee', null], ['gogo', null],
+		];
+	}
+
+	/**
+	 * @param mixed $mixed_val    Mixed value from dp
+	 * @param bool  $expected_val Expected value from dp
+	 *
+	 * @dataProvider dataProviderToBool
+	 * @return void
+	 */
+	public function testAsBool(mixed $mixed_val, ?bool $expected_val) {
+		$sub_res = PHP::asBool($mixed_val);
+
+		// Due to dataProviderToBool works for both strict and non strict, adjusting null
+		$expected_val = $expected_val === null?false:$expected_val;
+
+		$this->assertEquals(
+			$expected_val,
+			$sub_res,
+			"Checking to bool non strict conversion of {$mixed_val} to {$expected_val}"
+		);
+	}
+
+	/**
+	 * @param mixed $mixed_val    Mixed value from dp
+	 * @param bool  $expected_val Expected value from dp
+	 *
+	 * @dataProvider dataProviderToBool
+	 * @return void
+	 */
+	public function testAsBoolStrict(mixed $mixed_val, ?bool $expected_val) {
+		$sub_res = PHP::asBool($mixed_val, true);
+		$this->assertEquals(
+			$expected_val,
+			$sub_res,
+			"Checking to bool STRICT conversion of {$mixed_val} to {$expected_val}"
+		);
+	}
+
+	public function dataProviderType(): array {
+		return [
+			['this is string', 'string'],
+			['anotherstringishere', 'string'],
+			[12, 'integer'],
+			[22.22, 'double'],
+			[new Version('0.0.0', 'no app'), Version::class],
+			[PHP::info(), PhpInfo::class],
+			[true, 'boolean'],
+			[false, 'boolean'],
+		];
+	}
+
+	/**
+	 * @param $in
+	 * @param $expected
+	 *
+	 * @dataProvider dataProviderType
+	 * @return void
+	 */
+	public function testType($in, $expected) {
+		$res = PHP::type($in);
+		$this->assertEquals($expected, $res, "Is {$in} of type {$expected}");
+	}
 }

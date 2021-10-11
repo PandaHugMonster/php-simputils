@@ -28,7 +28,7 @@ use spaf\simputils\PHP;
  *      );
  * ```
  *
- * @param ...$args
+ * @param mixed ...$args Anything you want to print out before dying
  *
  * @see PHP::pd()
  * @see \die()

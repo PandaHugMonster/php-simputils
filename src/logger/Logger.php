@@ -4,7 +4,7 @@
 
 namespace spaf\simputils\logger;
 
-use spaf\simputils\components\SimpleObject;
+use spaf\simputils\generic\SimpleObject;
 use spaf\simputils\helpers\DateTimeHelper;
 use spaf\simputils\interfaces\LoggerInterface;
 use spaf\simputils\traits\logger\LoggerTrait;

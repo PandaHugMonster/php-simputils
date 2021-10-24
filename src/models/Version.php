@@ -3,7 +3,8 @@
 namespace spaf\simputils\models;
 
 
-use spaf\simputils\components\SimpleObject;
+use spaf\simputils\attributes\Property;
+use spaf\simputils\generic\SimpleObject;
 use spaf\simputils\interfaces\VersionParserInterface;
 use spaf\simputils\versions\DefaultVersionParser;
 
@@ -17,79 +18,172 @@ use spaf\simputils\versions\DefaultVersionParser;
  *
  * Example:
  * ```php
- *  $version = new Version('13.34.56', 'My app');
- *  echo "$version\n";
- *  // Outputs like (as a str): 12.34.56
- *  print_r($version);
- *  // Outputs like (as a str):
- *  //      spaf\simputils\Version Object
- *  //      (
- *  //          [software_name] => My app
- *  //          [parsed_version] => 12.34.56
- *  //      )
+ *      $version = new Version('13.34.56', 'My app');
+ *      echo "{$version} / type: {$version->obj_type}\n";
+ *      // Outputs like (as a str): 13.34.56 / type: spaf\simputils\models\Version
+ *      print_r($version);
+ *      // Outputs like (as a str):
+ *      //      spaf\simputils\models\Version Object
+ *      //      (
+ *      //          [software_name] => My app
+ *      //          [parsed_version] => 13.34.56
+ *      //      )
  *
- *  $version = Version::new('My APP RC13.34.56', 'My app');
- *  echo "$version\n";
- *  // Outputs like (as a str): 13.34.56-RC
+ *      $version = new Version('My APP RC13.34.56', 'My app');
+ *      echo "$version\n";
+ *      // Outputs like (as a str): 13.34.56-RC
  *
- *  $version = Version::new('My APP 13.34.56RC', 'My app');
- *  echo "$version\n";
- *  // Outputs like (as a str): 13.34.56-RC
+ *      $version = new Version('My APP 13.34.56RC', 'My app');
+ *      echo "$version\n";
+ *      // Outputs like (as a str): 13.34.56-RC
  *
- *  $version = Version::new(' 13.34.56RC55 ', 'My app');
- *  echo "$version\n";
- *  // Outputs like (as a str): 13.34.56-RC55
+ *      $version = new Version(' 13.34.56RC55 ', 'My app');
+ *      echo "$version\n";
+ *      // Outputs like (as a str): 13.34.56-RC55
  *
- *  $version = Version::new('13.34.56F99', 'My app');
- *  echo "$version\n";
- *  // Outputs like (as a str): 13.34.56
+ *      $version = new Version('13.34.56F99', 'My app');
+ *      echo "$version\n";
+ *      // Outputs like (as a str): 13.34.56
  *
- *  $version = Version::new('13.34.56F99', 'My app');
- *  echo "$version\n";
- *  // Outputs like (as a str): 13.34.56
+ *      $version = new Version('13.34.56F99', 'My app');
+ *      echo "$version\n";
+ *      // Outputs like (as a str): 13.34.56
  *
- *  $version = Version::new('20020611', 'My app');
- *  echo "$version\n";
- *  // Outputs like (as a str): 20020611.0.0
+ *      $version = new Version('20020611', 'My app');
+ *      echo "$version\n";
+ *      // Outputs like (as a str): 20020611.0.0
  *
- *  $version = Version::new('15', 'My app');
- *  echo "$version\n";
- *  // Outputs like (as a str): 20020611.0.0
+ *      $version = new Version('15', 'My app');
+ *      echo "$version\n";
+ *      // Outputs like (as a str): 15.0.0
  *
- *  $version = Version::new('SOMERUBBISHHERE--15.12.0');
- *  echo "$version\n";
- *  // Outputs like (as a str): 15.12.0
+ *      $version = new Version('SOMERUBBISHHERE--15.12.0');
+ *      echo "$version\n";
+ *      // Outputs like (as a str): 15.12.0
  *
  * ```
+ *
+ * @todo Replace with interface
+ * @property \spaf\simputils\generic\BasicVersionParser $parser
  *
  * @see https://www.php.net/manual/en/function.version-compare.php
  *      The basic logic was inspired by this method
  * @see https://semver.org/ The key functionality is directed to Semantic Versioning
- * @package spaf\simputils
+ * @package spaf\simputils\models
  */
 class Version extends SimpleObject {
 
+	/**
+	 * Default version parser is used for newly created `Version` objects
+	 *
+	 * @var string
+	 */
+	public static string $default_parser_class = DefaultVersionParser::class;
+
+	/**
+	 * If true - then debug print out will include original version string
+	 *
+	 * @var bool
+	 */
+	public static bool $debug_include_orig = false;
+
+	/**
+	 * Software name property (In the most cases users can skip it, though it's strongly recommended
+	 * to use everytime)
+	 * @var string|null
+	 */
 	public ?string $software_name = null;
 
-	public static string $default_parser_class = DefaultVersionParser::class;
-	public static bool $debug_include_orig = false;
+	/**
+	 * Contains the assigned parser during object creation By default class from
+	 * {@see static::$default_parser_class} is used, but it can be redefined in per case basis
+	 * (even during creation of `Version` object)
+	 *
+	 * @var VersionParserInterface|null
+	 */
 	protected ?VersionParserInterface $_parser = null;
+
+	/**
+	 * Contains the major part of the version
+	 *
+	 * @var int|mixed|null
+	 */
 	public ?int $major = null;
+
+	/**
+	 * Contains the minor part of the version
+	 *
+	 * @var int|mixed|null
+	 */
 	public ?int $minor = null;
+
+	/**
+	 * Contains the patch part of the version
+	 *
+	 * @var int|mixed|null
+	 */
 	public ?int $patch = null;
 
+	/**
+	 * Contains build type if specified/parsed correctly.
+	 *
+	 * The build types recognisable by the parsers.
+	 * The default parser recognises the following types (letter case ignored):
+	 *
+	 *  1.  "DEV"
+	 *  2.  "A" or "ALPHA"
+	 *  3.  "B" or "BETA"
+	 *  4.  "RC"
+	 *  5.  "#"
+	 *  6.  "P" or "PL"
+	 *
+	 * The priority is on the same order, more info you can find here
+	 * {@see \spaf\simputils\generic\BasicVersionParser}
+	 *
+	 * @var string|mixed|null
+	 */
 	public ?string $build_type = null;
+	/**
+	 * Build revision, is considered only when build type is specified Example:
+	 * "RC2", "A3", etc.
+	 *
+	 * @var mixed|null
+	 */
 	public mixed $build_revision = null;
 
+	/**
+	 * @todo Undone
+	 * @var string|mixed|null
+	 */
 	public ?string $prefix = null;
+	/**
+	 * @todo Undone
+	 * @var string|mixed|null
+	 */
 	public ?string $postfix = null;
+	/**
+	 * @todo Undone
+	 * @var string|null
+	 */
 	public ?string $non_standard = null;
+	/**
+	 * Original string that was parsed
+	 *
+	 * @var string|null
+	 */
 	protected ?string $original_value = null;
+	/**
+	 * @todo clarify
+	 * @var string|bool|null
+	 */
 	protected null|string|bool $original_strict = null;
 
 	/**
+	 * Getter for $parser
+	 *
 	 * @return mixed|\spaf\simputils\interfaces\VersionParserInterface|null
 	 */
+	#[Property('parser')]
 	public function getParser() {
 		if (empty($this->_parser))
 			$this->_parser = new static::$default_parser_class();
@@ -97,10 +191,13 @@ class Version extends SimpleObject {
 	}
 
 	/**
-	 * @param $val
+	 * Setter for $parser
+	 *
+	 * @param mixed $val Value to assign to $parser property
 	 *
 	 * @return void
 	 */
+	#[Property('parser')]
 	public function setParser($val) {
 		$this->_parser = $val;
 	}
@@ -108,9 +205,10 @@ class Version extends SimpleObject {
 	/**
 	 * Version constructor.
 	 *
-	 * @param string|null $version
-	 * @param string|null $software_name
-	 * @param \spaf\simputils\interfaces\VersionParserInterface|null $parser
+	 * @param string|null                 $version       Version string to parse
+	 * @param string|null                 $software_name Software name
+	 * @param VersionParserInterface|null $parser        Custom parser for the new object (must be
+	 *                                                   parser-object and not a class-string)
 	 */
 	public function __construct(
 		?string $version = null,
@@ -140,7 +238,7 @@ class Version extends SimpleObject {
 	}
 
 	/**
-	 * @param \spaf\simputils\models\Version|string $obj
+	 * @param Version|string $obj Right side object of the comparison
 	 *
 	 * @return bool
 	 */
@@ -149,7 +247,7 @@ class Version extends SimpleObject {
 	}
 
 	/**
-	 * @param \spaf\simputils\models\Version|string $obj
+	 * @param Version|string $obj Right side object of the comparison
 	 *
 	 * @return bool
 	 */
@@ -158,7 +256,7 @@ class Version extends SimpleObject {
 	}
 
 	/**
-	 * @param \spaf\simputils\models\Version|string $obj
+	 * @param Version|string $obj Right side object of the comparison
 	 *
 	 * @return bool
 	 */
@@ -167,7 +265,7 @@ class Version extends SimpleObject {
 	}
 
 	/**
-	 * @param \spaf\simputils\models\Version|string $obj
+	 * @param Version|string $obj Right side object of the comparison
 	 *
 	 * @return bool
 	 */
@@ -176,7 +274,7 @@ class Version extends SimpleObject {
 	}
 
 	/**
-	 * @param \spaf\simputils\models\Version|string $obj
+	 * @param Version|string $obj Right side object of the comparison
 	 *
 	 * @return bool
 	 */
@@ -187,7 +285,7 @@ class Version extends SimpleObject {
 	/**
 	 * "equal_to" shortcut
 	 *
-	 * @param \spaf\simputils\models\Version|string $obj
+	 * @param Version|string $obj Right side object of the comparison
 	 *
 	 * @return bool
 	 * @see equal_to()
@@ -199,7 +297,7 @@ class Version extends SimpleObject {
 	/**
 	 * "greater_than" shortcut
 	 *
-	 * @param \spaf\simputils\models\Version|string $obj
+	 * @param Version|string $obj Right side object of the comparison
 	 *
 	 * @return bool
 	 * @see greaterThan()
@@ -211,7 +309,7 @@ class Version extends SimpleObject {
 	/**
 	 * "greater_than" shortcut
 	 *
-	 * @param \spaf\simputils\models\Version|string $obj
+	 * @param Version|string $obj Right side object of the comparison
 	 *
 	 * @return bool
 	 * @see greaterThan()
@@ -223,7 +321,7 @@ class Version extends SimpleObject {
 	/**
 	 * "greater_than_equal" shortcut
 	 *
-	 * @param \spaf\simputils\models\Version|string $obj
+	 * @param Version|string $obj Right side object of the comparison
 	 *
 	 * @return bool
 	 * @see greaterThanEqual()
@@ -235,7 +333,7 @@ class Version extends SimpleObject {
 	/**
 	 * "less_than_equal" shortcut
 	 *
-	 * @param \spaf\simputils\models\Version|string $obj
+	 * @param Version|string $obj Right side object of the comparison
 	 *
 	 * @return bool
 	 * @see lessThanEqual()

@@ -4,8 +4,8 @@
 namespace spaf\simputils\versions;
 
 
-use spaf\simputils\components\BasicVersionParser;
 use spaf\simputils\exceptions\IncorrectVersionFormat;
+use spaf\simputils\generic\BasicVersionParser;
 use spaf\simputils\models\Version;
 
 /**

@@ -5,6 +5,7 @@ namespace spaf\simputils;
 
 
 use Closure;
+use spaf\simputils\attributes\Deprecated;
 use spaf\simputils\models\Version;
 use ValueError;
 
@@ -129,8 +130,9 @@ class Settings {
 	/**
 	 * Framework/lib version
 	 *
-	 * @return \spaf\simputils\models\Version|string
+	 * @return Version|string
 	 */
+	#[Deprecated]
 	public static function version(): Version|string {
 		return new Version('0.2.3', 'SimpUtils');
 	}

@@ -1,7 +1,7 @@
 <?php
 
 
-namespace spaf\simputils\components;
+namespace spaf\simputils\generic;
 
 
 use spaf\simputils\interfaces\VersionParserInterface;

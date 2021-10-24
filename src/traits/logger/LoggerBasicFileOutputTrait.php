@@ -4,11 +4,16 @@
 namespace spaf\simputils\traits\logger;
 
 
+use spaf\simputils\attributes\Property;
 use spaf\simputils\PHP;
 
 trait LoggerBasicFileOutputTrait {
 
+	#[Property('storage')]
 	abstract public function getStorage(): string;
+
+	// FIX  Something terrible!!! Renamed method
+	#[Property('file_name')]
 	abstract public function getFileName(int $number = 0): string;
 
 	public function __construct(?string $storage = null, ?string $prefix = null, ?string $ext = null) {

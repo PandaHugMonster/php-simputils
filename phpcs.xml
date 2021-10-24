@@ -1,7 +1,9 @@
 <?xml version="1.0"?>
 <ruleset name="spaf">
 	<description>SPAF general</description>
-	<rule ref="PSR1"/>
+	<rule ref="PSR1">
+		<exclude name="PSR1.Files.SideEffects.FoundWithSymbols" />
+	</rule>
 	<rule ref="Generic.Arrays.ArrayIndent">
 		<properties>
 			<property name="indent" value="4" />
@@ -56,6 +58,8 @@
 		<properties>
 			<property name="indent" value="4" />
 		</properties>
+		<exclude name="PEAR.ControlStructures.MultiLineCondition.SpacingAfterOpenBrace" />
+		<exclude name="PEAR.ControlStructures.MultiLineCondition.StartWithBoolean" />
 	</rule>
 	<rule ref="PEAR.Formatting.MultiLineAssignment">
 		<properties>
@@ -101,6 +105,7 @@
 			<property name="indent" value="4"/>
 			<property name="tabIndent" value="true"/>
 		</properties>
+		<exclude name="Generic.WhiteSpace.ScopeIndent.IncorrectExact" />
 	</rule>
 	<rule ref="Squiz.WhiteSpace.FunctionSpacing">
 		<properties>
@@ -108,5 +113,7 @@
 			<property name="spacingBeforeFirst" value="1" />
 			<property name="spacingAfterLast" value="0" />
 		</properties>
+		<exclude name="Squiz.WhiteSpace.FunctionSpacing.Before" />
+		<exclude name="Squiz.Commenting.FunctionComment.Missing" />
 	</rule>
 </ruleset>

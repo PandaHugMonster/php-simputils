@@ -4,6 +4,7 @@
  * Procedural shortcuts for functionality of `spaf\simputils\PHP`
  */
 namespace spaf\simputils\basic;
+use spaf\simputils\models\Box;
 use spaf\simputils\PHP;
 
 /**
@@ -36,4 +37,13 @@ use spaf\simputils\PHP;
  */
 function pd(...$args) {
 	PHP::pd(...$args);
+}
+
+/**
+ * @param $array
+ *
+ * @return \spaf\simputils\models\Box|array
+ */
+function box($array): Box|array {
+	return PHP::box($array);
 }

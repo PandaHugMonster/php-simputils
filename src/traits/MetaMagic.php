@@ -2,8 +2,9 @@
 
 namespace spaf\simputils\traits;
 
-use ReflectionClass;
+use spaf\simputils\models\Box;
 use spaf\simputils\PHP;
+use function is_null;
 use function json_decode;
 use function json_encode;
 use const JSON_PRETTY_PRINT;
@@ -30,16 +31,20 @@ trait MetaMagic {
 	/**
 	 * Converts object to JSON string
 	 *
-	 * @param bool $with_class Default to false, whether the additional "_class" value
-	 *                         should be added
-	 * @param bool $pretty     Multi-line pretty json
+	 * @param bool  $with_class Default to false, whether the additional "_class" value
+	 *                          should be added
+	 * @param ?bool $pretty     Multi-line pretty json
 	 *
 	 * @return string
 	 */
-	public function toJson(bool $with_class = false, bool $pretty = true): string {
+	public function toJson(bool $with_class = false, ?bool $pretty = null): string {
 		$data = $this->toArray($with_class);
 		$flags = 0;
-		if ($pretty) {
+		if (is_null($pretty)) {
+			if (isset(static::$is_json_pretty) && static::$is_json_pretty === true) {
+				$flags |= JSON_PRETTY_PRINT;
+			}
+		} else if ($pretty) {
 			$flags |= JSON_PRETTY_PRINT;
 		}
 		return json_encode($data, $flags);
@@ -67,15 +72,46 @@ trait MetaMagic {
 	 *
 	 * TODO Currently only recursively
 	 *
-	 * @param bool $with_class Result will contain full class name
 	 *
+	 * Some good examples of the Box and simple array difference:
+	 * ```php
+	 *
+	 *      // Normal behaviour (Box is enabled by default)
+	 *      $a = PHP::version();
+	 *
+	 *      $b = $a->toArray();
+	 *
+	 *      echo "\$a is {$a->obj_type}\nand\n\$b is {$b->obj_type}";
+	 *      // The output would be something like:
+	 *      //      $a is spaf\simputils\models\Version
+	 *      //      and
+	 *      //      $b is spaf\simputils\models\Box
+	 *
+	 *      // Disabling usage of Box instead of normal array
+	 *      PHP::$use_box_instead_of_array = false;
+	 *
+	 *      // Adjusted behaviour (Box is DISABLED now)
+	 *      $b = $a->toArray();
+	 *
+	 *      echo "\$a is {$a->obj_type}\nand\n\$b is ".PHP::type($b);
+	 *      // The output would be something like:
+	 *      //      $a is spaf\simputils\models\Version
+	 *      //      and
+	 *      //      $b is array
+	 *
+	 * ```
+	 *
+	 * @param bool $with_class Result will contain full class name
 	 * @todo implement recursive and non recursive approach
-	 * @return array
+	 * @return Box|array
 	 */
-	public function toArray(bool $with_class = false): array {
+	public function toArray(bool $with_class = false): Box|array {
 		$res = json_decode(json_encode($this), true);
 		if ($with_class)
 			$res[PHP::$serialized_class_key_name] = static::class;
+		if (PHP::$use_box_instead_of_array) {
+			$res = new Box($res);
+		}
 		return $res;
 	}
 
@@ -93,9 +129,21 @@ trait MetaMagic {
 			$class = $data[PHP::$serialized_class_key_name];
 			unset($data[PHP::$serialized_class_key_name]);
 		}
-		$reflection_class = new ReflectionClass($class);
-		$obj = $reflection_class->newInstanceWithoutConstructor();
+
+		$obj = $class::createDummy();
 		return static::_metaMagic($obj, '___setup', $data);
+	}
+
+	/**
+	 * Creates the dummy object of the class (instance creation without constructor)
+	 *
+	 * @return static
+	 *
+	 * @throws \ReflectionException Reflection Exception
+	 */
+	public static function createDummy(): static {
+		/** @noinspection PhpIncompatibleReturnTypeInspection */
+		return PHP::createDummy(static::class);
 	}
 
 	/**
@@ -189,6 +237,7 @@ trait MetaMagic {
 			'___serialize' => $context->___serialize(),
 			'___deserialize' => $context->___deserialize(...$spell),
 			'___setup' => $context->___setup(...$spell),
+			'___propertied' => $context->___propertied(...$spell),
 		};
 		return $res;
 	}

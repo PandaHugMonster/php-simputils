@@ -1,7 +1,7 @@
 <?php
 
 
-namespace spaf\simputils\components;
+namespace spaf\simputils\generic;
 
 
 
@@ -31,4 +31,5 @@ abstract class SimpleObject implements SimpleObjectInterface {
 	 *           variable.
 	 */
 	public static bool $to_string_format_json = false;
+	public static bool $is_json_pretty = false;
 }

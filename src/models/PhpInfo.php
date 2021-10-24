@@ -2,20 +2,15 @@
 
 namespace spaf\simputils\models;
 
-use ArrayAccess;
 use Exception;
-use Iterator;
 use spaf\simputils\components\InternalMemoryCache;
-use spaf\simputils\components\SimpleObject;
-use spaf\simputils\generic\constants\PHPInfoConst as constants;
+use spaf\simputils\generic\constants\ConstPHPInfo as constants;
 use spaf\simputils\helpers\SystemHelper;
 use spaf\simputils\PHP;
-use spaf\simputils\traits\ArrayAccessReadOnlyTrait;
+use spaf\simputils\traits\ArrayReadOnlyAccessTrait;
 use function array_keys;
 use function in_array;
 use function is_string;
-use function json_decode;
-use function json_encode;
 
 /**
  * PHP Info class instance
@@ -53,16 +48,16 @@ use function json_encode;
  * @property-read Version $php_api_version
  * @property-read Version $php_extension_version
  * @property-read Version $zend_extension_version
+ *
  */
-class PhpInfo extends SimpleObject implements ArrayAccess, Iterator {
-	use ArrayAccessReadOnlyTrait;
+class PhpInfo extends Box {
+	use ArrayReadOnlyAccessTrait;
 
 	/**
 	 * @inheritdoc
 	 */
 	public static bool $to_string_format_json = true;
 
-	protected ?array $storage = null;
 	private ?array $available_storage_keys = null;
 	private int $iter_index = 0;
 
@@ -72,8 +67,8 @@ class PhpInfo extends SimpleObject implements ArrayAccess, Iterator {
 	 * @todo Maybe improve a bit
 	 */
 	public function __construct() {
-		$this->storage = static::compose();
-		$this->available_storage_keys = array_keys($this->storage);
+		parent::__construct(static::compose());
+		$this->available_storage_keys = array_keys((array) $this);
 	}
 
 	/**
@@ -313,83 +308,16 @@ class PhpInfo extends SimpleObject implements ArrayAccess, Iterator {
 	}
 
 	/**
-	 * Offset exists
-	 *
-	 * @param mixed $offset Offset
-	 *
-	 * @return bool
-	 */
-	public function offsetExists(mixed $offset): bool {
-		return isset($this->storage[$offset]);
-	}
-
-	/**
-	 * Getting a value by offset
-	 *
-	 * @param mixed $offset Offset
-	 *
-	 * @return mixed
-	 */
-	public function offsetGet(mixed $offset): mixed {
-		return $this->storage[$offset];
-	}
-
-	/**
-	 * @inheritdoc
-	 */
-	public function toArray(bool $with_class = false): array {
-		$res = json_decode(json_encode($this->storage), true);
-		if ($with_class)
-			$res[PHP::$serialized_class_key_name] = static::class;
-		return $res;
-	}
-
-	/**
 	 * @param string $name Property name
 	 *
 	 * @return mixed
 	 * @throws \spaf\simputils\exceptions\PropertyAccessError Property Access error
 	 */
-	public function __get(string $name): mixed {
+	public function __get($name): mixed {
 		if (in_array($name, $this->available_storage_keys)) {
-			return $this->storage[$name];
+			return $this[$name];
 		}
 
 		return parent::__get($name);
-	}
-
-	/**
-	 * @return mixed
-	 */
-	public function current(): mixed {
-		return $this->storage[$this->key()];
-	}
-
-	/**
-	 * @return void
-	 */
-	public function next(): void {
-		$this->iter_index++;
-	}
-
-	/**
-	 * @return mixed
-	 */
-	public function key(): mixed {
-		return $this->available_storage_keys[$this->iter_index];
-	}
-
-	/**
-	 * @return bool
-	 */
-	public function valid(): bool {
-		return isset($this->available_storage_keys[$this->iter_index]);
-	}
-
-	/**
-	 * @return void
-	 */
-	public function rewind(): void {
-		$this->iter_index = 0;
 	}
 }

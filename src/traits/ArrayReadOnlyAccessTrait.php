@@ -31,7 +31,7 @@ use Exception;
  *
  * @see \ArrayAccess
  */
-trait ArrayAccessReadOnlyTrait {
+trait ArrayReadOnlyAccessTrait {
 
 	/**
 	 * Default ArrayAccess setting method

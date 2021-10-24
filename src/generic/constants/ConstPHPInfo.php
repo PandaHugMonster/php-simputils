@@ -7,7 +7,7 @@ namespace spaf\simputils\generic\constants;
  *
  * @see \spaf\simputils\models\PhpInfo
  */
-abstract class PHPInfoConst {
+interface ConstPHPInfo {
 
 	const KEY_IS_THREAD_SAFE = 'is_thread_safe';
 	const KEY_IS_DEBUG_BUILD = 'is_debug_build';

@@ -5,14 +5,19 @@
 namespace spaf\simputils;
 
 
+use ArrayAccess;
 use Exception;
+use Iterator;
 use ReflectionClass;
 use spaf\simputils\components\InternalMemoryCache;
+use spaf\simputils\models\Box;
 use spaf\simputils\models\PhpInfo;
 use spaf\simputils\models\Version;
 use spaf\simputils\traits\MetaMagic;
 use Throwable;
 use function array_merge;
+use function class_exists;
+use function class_parents;
 use function dirname;
 use function file_exists;
 use function file_get_contents;
@@ -22,6 +27,7 @@ use function is_array;
 use function is_callable;
 use function is_dir;
 use function is_null;
+use function is_object;
 use function is_resource;
 use function is_string;
 use function json_decode;
@@ -45,6 +51,15 @@ use const JSON_ERROR_NONE;
  * Contains fix of the PHP platform "issues" and "missing features", like really disappointing
  * serialize() feature that does not provide ability to use "json" as output.
  *
+ * Regarding {@see \spaf\simputils\PHP::$use_box_instead_of_array}.
+ * This functionality set into "true" by default. You can disable it if you are experiencing issues
+ * with execution speed. Most likely, usage of Box instead of array for non-gigantic "arrays"
+ * should not compromise your performance. THOUGH keep in mind, Box is not as efficient as arrays.
+ * Especially if you will be implementing your own Box class and overriding some of it's methods.
+ * @todo Checkout and make sure all works efficiently enough etc.
+ *
+ *
+ * @see Box
  * @package spaf\simputils
  */
 class PHP {
@@ -63,25 +78,42 @@ class PHP {
 	public static string $serialized_class_key_name = '_class';
 	public static string|int $serialization_mechanism = self::SERIALIZATION_TYPE_JSON;
 
+	/**
+	 * @var bool Using Box object instead of array for the most of stuff related to "Objects"
+	 *           read a bit more in the description of this class {@see \spaf\simputils\PHP}
+	 *
+	 * @see \spaf\simputils\traits\MetaMagic::toArray()
+	 */
+	public static bool $use_box_instead_of_array = true;
+
 	public static bool $allow_dying = true;
 
 	/**
 	 * Serialize any data
 	 *
-	 * @param mixed $data Data to serialize
+	 * @param mixed $data          Data to serialize
+	 * @param ?int  $enforced_type Enforced serialization type (per function call
+	 *                                overrides the default serialization type)
 	 *
 	 * @return ?string
 	 *
+	 * TODO Unrelated: Implement recursive toJson control to objects (So object can decide,
+	 *      whether it wants to be a string, an array or a number).
+	 *
 	 * @throws \Exception Runtime resources can't be serialized
 	 */
-	public static function serialize(mixed $data): ?string {
+	public static function serialize(mixed $data, ?int $enforced_type = null): ?string {
 		if (is_resource($data))
 			throw new Exception(
 				'Resources cannot be serialized through PHP default mechanisms'
 			);
 
-		if (static::$serialization_mechanism === static::SERIALIZATION_TYPE_JSON) {
-			if (static::classUsesTrait($data, MetaMagic::class)) {
+		if (is_null($enforced_type)) {
+			$enforced_type = static::$serialization_mechanism;
+		}
+
+		if ($enforced_type === static::SERIALIZATION_TYPE_JSON) {
+			if (static::isClass($data) && static::classUsesTrait($data, MetaMagic::class)) {
 				$res = $data::_metaMagic($data, '___serialize');
 			} else {
 				$res = $data;
@@ -89,7 +121,7 @@ class PHP {
 
 			return json_encode($res);
 		}
-		if (static::$serialization_mechanism === static::SERIALIZATION_TYPE_PHP) {
+		if ($enforced_type === static::SERIALIZATION_TYPE_PHP) {
 			return \serialize($data);
 		}
 
@@ -99,13 +131,19 @@ class PHP {
 	/**
 	 * Deserialize data serialized by {@see serialize()} method
 	 *
-	 * @param ?string $str   String to deserialize
-	 * @param ?string $class Class hint
+	 * @param ?string $str           String to deserialize
+	 * @param ?string $class         Class hint
+	 * @param ?int    $enforced_type Enforced serialization type (per function call
+	 *                               overrides the default serialization type)
 	 *
 	 * @return mixed
 	 * @throws \ReflectionException Reflection related exceptions
 	 */
-	public static function deserialize(string|null $str, ?string $class = null): mixed {
+	public static function deserialize(
+		string|null $str,
+		?string $class = null,
+		?int $enforced_type = null
+	): mixed {
 		if (empty($str))
 			return null;
 
@@ -116,21 +154,24 @@ class PHP {
 			// TODO Fix this exception to a more appropriate one
 			throw new Exception('Cannot determine class for deserialization');
 
-		if (static::$serialization_mechanism === static::SERIALIZATION_TYPE_JSON) {
+		if (is_null($enforced_type)) {
+			$enforced_type = static::$serialization_mechanism;
+		}
+
+		if ($enforced_type === static::SERIALIZATION_TYPE_JSON) {
 			$data = json_decode($str, true);
 
+			$dummy = PHP::createDummy($class);
 			if (static::classUsesTrait($class, MetaMagic::class)) {
-				$dummy = (new ReflectionClass($class))->newInstanceWithoutConstructor();
 				/** @noinspection PhpUndefinedMethodInspection */
 				return $class::_metaMagic($dummy, '___deserialize', $data);
 			} else {
-				$dummy = new $class;
 				foreach ($data as $key => $val) {
 					$dummy->$key = $val;
 				}
 				return $dummy;
 			}
-		} else if (static::$serialization_mechanism === static::SERIALIZATION_TYPE_PHP) {
+		} else if ($enforced_type === static::SERIALIZATION_TYPE_PHP) {
 			return \unserialize($str);
 		}
 
@@ -140,6 +181,7 @@ class PHP {
 	/**
 	 * @param string $str Serialized string
 	 *
+	 * @todo Maybe automatically determine the serialization type?
 	 * @return string|null
 	 */
 	private static function determineSerializedClass(string $str): ?string {
@@ -530,5 +572,197 @@ class PHP {
 	 */
 	public static function type(mixed $var): string {
 		return is_object($var)?get_class($var):gettype($var);
+	}
+
+	/**
+	 * Check if provided value is a class string
+	 *
+	 * @param mixed $class_or_not Value that is being checked
+	 *
+	 * @return bool
+	 */
+	public static function isClass(mixed $class_or_not): bool {
+		if (is_string($class_or_not)) {
+			if (class_exists($class_or_not, false))
+				return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Checks if class of first variable is found in second (as one of parents or itself)
+	 *
+	 * In case if non-strict (default behaviour) check - instead of string class refs object could
+	 * be used (then their classes will be compared)
+	 *
+	 * Second argument as array allows to check against multiple classes/objects.
+	 * But keep in mind each class's parents will be checked, and if found there - you will get
+	 * true as a result.
+	 *
+	 * @param string|object       $item             Class or object to check
+	 * @param string|object|array $of_item          Class or object against of which to check
+	 * @param bool                $disallow_objects If true, then objects will cause "FALSE"
+	 *
+	 * @return bool
+	 */
+	public static function isClassIn(
+		string|object $item,
+		string|object|array $of_item,
+		bool $disallow_objects = false
+	): bool {
+		if (is_object($item)) {
+			if ($disallow_objects) {
+				return false;
+			}
+			$item = $item::class;
+		}
+		if (is_object($of_item)) {
+			if ($disallow_objects) {
+				return false;
+			}
+
+			$of_item = $of_item::class;
+		}
+
+		if (static::isClass($item) && static::isClass($of_item)) {
+			if ($item === $of_item) {
+				return true;
+			}
+
+			$parents = class_parents($of_item, false);
+			foreach ($parents as $parent) {
+				if ($item === $parent) {
+					return true;
+				}
+			}
+		}
+
+
+		return false;
+	}
+
+	/**
+	 * Check if first class contains the second one (as itself or one of his parents)
+	 *
+	 * Basically {@see static::isClassIn()} shortcut, but with inversed first 2 arguments.
+	 * With a tiny limitation - arrays should not be used in here as any of arguments
+	 *
+	 * ```php
+	 *
+	 *  use spaf\simputils\PHP;
+	 *
+	 *  class A {}
+	 *  class B extends A {}
+	 *  class C {}
+	 *
+	 *  $b_contains_a = PHP::classContains(B::class, A::class);
+	 *  // Returns true, because B class is extended from A
+	 *
+	 *  $a_contains_c = PHP::classContains(A::class, C::class);
+	 *  // Returns false, Because A class is not C class and not having C class as one of it's
+	 *  // parents
+	 *
+	 *  $a_contains_b = PHP::classContains(A::class, B::class);
+	 *  // Returns false, Because A class is independent from B class (B extended from A,
+	 *  // not vice-versa)
+	 *
+	 *  $c_contains_c = PHP::classContains(C::class, C::class);
+	 *  // Returns true, Because C class is C class
+	 *
+	 * ```
+	 *
+	 * @param string|object $of_item          Class or object
+	 * @param string|object $item             Class or object being part of the first argument
+	 * @param bool          $disallow_objects Limit objects usage, in case of true value
+	 *                                        That would lead to false if objects instead of
+	 *                                        classes provided
+	 *
+	 * @todo Add traits and interfaces checks
+	 * @todo Array "as-any" of classes/traits/interfaces
+	 *
+	 * @return bool
+	 */
+	public static function classContains(
+		string|object $of_item,
+		string|object $item,
+		bool $disallow_objects = false
+	): bool {
+		return static::isClassIn($item, $of_item, $disallow_objects);
+	}
+
+	/**
+	 * Creates dummy object (without calling __construct)
+	 *
+	 * This way of creating objects should be avoided in the most of the cases. It's needed
+	 * only if you are working with serialization-alike functionality.
+	 *
+	 * @param string|object $class Class or Object (class of the provided object then will be taken)
+	 *
+	 * @return object
+	 * @throws \ReflectionException Reflection exception
+	 */
+	public static function createDummy(string|object $class): object {
+		if (is_object($class)) {
+			$class = $class::class;
+		}
+		return (new ReflectionClass($class))->newInstanceWithoutConstructor();
+	}
+
+	/**
+	 *
+	 * @todo EXPERIMENTAL
+	 *
+	 * @return bool
+	 */
+	public static function in($item_a, $item_b, $a, $b): bool {
+
+	}
+
+	/**
+	 * Determines whether value is array-alike (can be treated as array)
+	 *
+	 * Basically it checks presence of {@see Iterator} + {@see ArrayAccess} interfaces (must have
+	 * both), or if the variable type is "array".
+	 *
+	 * **Important:** Strings are not considered as array-alike, so this method will return FALSE
+	 * if a string provided.
+	 *
+	 * @param mixed $var Any value
+	 *
+	 * @todo Subject to partial improvement after {@see static::classContains()} fixing
+	 * @return bool
+	 * @throws \ReflectionException Temporary
+	 */
+	public static function isArrayCompatible(mixed $var): bool {
+		if (is_array($var)) {
+			return true;
+		}
+
+		if (is_object($var)) {
+			$var = $var::class;
+		}
+
+		if (static::isClass($var)) {
+			// TODO This should be implemented through static::classContains
+			$reflection = new ReflectionClass($var);
+			if (
+				$reflection->implementsInterface(Iterator::class)
+				&& $reflection->implementsInterface(ArrayAccess::class)
+			) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * @param ?array $array Array, elements of which should be used as elements of the newly created
+	 *                      box.
+	 *
+	 * @return Box|array
+	 */
+	public static function box(?array $array = null): Box|array {
+		return new Box($array);
 	}
 }

@@ -8,4 +8,5 @@ namespace spaf\simputils\special;
  */
 class PropertiesCacheIndex {
 	public static $index = [];
+	public static $property_settings = [];
 }

@@ -4,6 +4,7 @@ namespace spaf\simputils\components;
 
 
 use Exception;
+use spaf\simputils\attributes\Property;
 use spaf\simputils\generic\BasicSystemFingerprint;
 use spaf\simputils\models\Version;
 use spaf\simputils\PHP;
@@ -20,7 +21,7 @@ class DefaultSystemFingerprint extends BasicSystemFingerprint {
 	 * @inheritdoc
 	 * @return string[]
 	 */
-	public function getParts(): array {
+	#[Property('parts')] public function getParts(): array {
 		return [
 			'version', 'strictness',
 		];
@@ -30,14 +31,14 @@ class DefaultSystemFingerprint extends BasicSystemFingerprint {
 	 * @inheritdoc
 	 * @return string
 	 */
-	public function getName(): string {
+	#[Property('name')] public function getName(): string {
 		return static::NAME;
 	}
 
 	/**
 	 * @return mixed
 	 */
-	public function getData(): mixed {
+	#[Property('data')] public function getData(): mixed {
 		return [
 			'TEST', 'QUQU'
 		];
@@ -47,6 +48,7 @@ class DefaultSystemFingerprint extends BasicSystemFingerprint {
 	 * @param string $field Field/Property name
 	 * @param mixed  $val   Value
 	 *
+	 * @codeCoverageIgnore
 	 * @return mixed
 	 * @throws \Exception Exception value is wrong
 	 */

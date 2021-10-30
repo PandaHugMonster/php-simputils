@@ -1,4 +1,13 @@
-## Property
+## Common info
+1. It's a commonly good practice to consider all the `Property` and `PropertyBatch` as having own
+   initialization layer, and to do not use calls to `Property` and `PropertyBatch` fields inside
+   of the `Property` and `PropertyBatch` marked methods. Though, there is no limitation
+   to use properties anywhere **except `PropertyBatch` marked methods**.
+2. Consider always using `protected` modifier for property methods. In some cases due to nature 
+   of modifiers in PHP, inheritance and the current architecture, using `private` can cause errors.
+
+
+### Property
 
 To use properties, there are generally 2 ways:
 
@@ -231,5 +240,12 @@ the performance compromises of Properties.
         }
     }
 ```
+
+## PropertyBatch
+**Important:** It's not allowed to call properties defined through `Property` and `PropertyBatch`
+inside of methods marked with `PropertyBatch`. If you need that functionality - use the 
+direct method call of the marked property. It's unresolvable problem of "chicken and egg" 
+(at least in current implementation!). The `Property` has not such problem due to simpler 
+name resolution, than `PropertyBatch`.
 
 

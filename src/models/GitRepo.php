@@ -3,8 +3,8 @@
 namespace spaf\simputils\models;
 
 
-use spaf\simputils\components\SimpleObject;
 use spaf\simputils\exceptions\GitDirectoryNotFound;
+use spaf\simputils\generic\SimpleObject;
 use spaf\simputils\helpers\DateTimeHelper;
 
 /**
@@ -98,5 +98,4 @@ class GitRepo extends SimpleObject {
 	public function getCommitBody($ref = 'HEAD'): string {
 		return $this->show('%b', $ref);
 	}
-
 }

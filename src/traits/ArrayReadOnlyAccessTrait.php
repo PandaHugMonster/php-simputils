@@ -30,8 +30,36 @@ use Exception;
  * ```
  *
  * @see \ArrayAccess
+ * @codeCoverageIgnore
  */
 trait ArrayReadOnlyAccessTrait {
+
+	/**
+	 * @var bool
+	 */
+	private bool $____read_only = true;
+
+	/**
+	 * Sets the read-only flag
+	 *
+	 * TODO Has to be refactored/or reorganized at some point
+	 * @param bool $val Enable or Disable, default is to enable
+	 *
+	 * @return void
+	 */
+	protected function ____setReadOnly(bool $val = true) {
+		$this->____read_only = $val;
+	}
+
+	/**
+	 * Checks read-only flag
+	 *
+	 * TODO Has to be refactored/or reorganized at some point
+	 * @return bool
+	 */
+	protected function ____isReadOnly(): bool {
+		return $this->____read_only;
+	}
 
 	/**
 	 * Default ArrayAccess setting method
@@ -43,7 +71,11 @@ trait ArrayReadOnlyAccessTrait {
 	 * @throws \Exception It's not allowed to change the value of read-only object
 	 */
 	final public function offsetSet(mixed $offset, mixed $value): void {
-		$this->cannotUseIt();
+		if ($this->____isReadOnly()) {
+			$this->cannotUseIt();
+		} else {
+			parent::offsetSet($offset, $value);
+		}
 	}
 
 	/**
@@ -53,7 +85,11 @@ trait ArrayReadOnlyAccessTrait {
 	 * @throws \Exception Modification of the object through the array interface is not allowed
 	 */
 	public function offsetUnset(mixed $offset): void {
-		$this->cannotUseIt();
+		if ($this->____isReadOnly()) {
+			$this->cannotUseIt();
+		} else {
+			parent::offsetUnset($offset);
+		}
 	}
 
 	/**

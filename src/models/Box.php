@@ -5,7 +5,6 @@ namespace spaf\simputils\models;
 use ArrayObject;
 use Exception;
 use spaf\simputils\attributes\Property;
-use spaf\simputils\interfaces\SimpleObjectInterface;
 use spaf\simputils\PHP;
 use spaf\simputils\traits\MetaMagic;
 use spaf\simputils\traits\SimpleObjectTrait;
@@ -14,6 +13,7 @@ use function array_values;
 use function count;
 use function is_array;
 use function is_null;
+use function is_object;
 
 /**
  * The Array-alike Box
@@ -120,7 +120,7 @@ use function is_null;
  * @property-read Box|array $keys
  * @property-read Box|array $values
  */
-class Box extends ArrayObject implements SimpleObjectInterface {
+class Box extends ArrayObject {
 	use SimpleObjectTrait;
 	use MetaMagic;
 
@@ -175,7 +175,9 @@ class Box extends ArrayObject implements SimpleObjectInterface {
 		if (is_array($from)) {
 			foreach ($from as $key) {
 				if (isset($this[$key])) {
-					$res[$key] = clone $this[$key];
+					$res[$key] = is_object($this[$key])
+						?clone $this[$key]
+						:$this[$key];
 				}
 			}
 		} else {
@@ -188,7 +190,7 @@ class Box extends ArrayObject implements SimpleObjectInterface {
 				$to = $size + $to; // considered "- $to"
 			}
 			if ($from < 0) {
-				$from = $size + $from; // considered "- $to"
+				$from = $size + $from; // considered "- $from"
 			}
 			if ($from > $to) {
 				throw new Exception('$from value cannot be bigger than $to value');
@@ -196,7 +198,9 @@ class Box extends ArrayObject implements SimpleObjectInterface {
 
 			foreach ($this->keys as $key) {
 				if ($i >= $from && $i < $to) {
-					$res[$key] = clone $this[$key];
+					$res[$key] = is_object($this[$key])
+						?clone $this[$key]
+						:$this[$key];
 				}
 				$i++;
 			}
@@ -213,6 +217,7 @@ class Box extends ArrayObject implements SimpleObjectInterface {
 	 * @todo Maybe Box?
 	 * @param bool $with_class Pack with class, default is "false"
 	 *
+	 * @codeCoverageIgnore
 	 * @return array
 	 */
 	public function toArray(bool $with_class = false): array {
@@ -225,6 +230,7 @@ class Box extends ArrayObject implements SimpleObjectInterface {
 	/**
 	 * @param array $data Data array
 	 *
+	 * @codeCoverageIgnore
 	 * @return $this
 	 */
 	public function ___setup(array $data): static {
@@ -237,6 +243,7 @@ class Box extends ArrayObject implements SimpleObjectInterface {
 	/**
 	 * To debug as a normal array
 	 *
+	 * @codeCoverageIgnore
 	 * @return array|null
 	 */
 	public function __debugInfo(): ?array {

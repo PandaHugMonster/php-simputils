@@ -5,13 +5,17 @@ namespace spaf\simputils\traits;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionProperty;
+use ReflectionUnionType;
 use spaf\simputils\attributes\Property;
 use spaf\simputils\attributes\PropertyBatch;
 use spaf\simputils\exceptions\PropertyAccessError;
 use spaf\simputils\exceptions\PropertyDoesNotExist;
 use spaf\simputils\special\PropertiesCacheIndex;
+use function implode;
 use function in_array;
+use function is_null;
 use function is_numeric;
+use function method_exists;
 use function strtolower;
 use function ucfirst;
 
@@ -77,7 +81,8 @@ trait PropertiesTrait {
 		}
 	}
 
-	public function __isset($name): bool {
+	public function __isset($name) {
+		// FIX  Implementation is questionable. Urgently refactor!
 		if (
 			$method_name = PropertiesCacheIndex
 			::$index[static::class.'#'.$name.'#'.Property::TYPE_GET]
@@ -92,17 +97,14 @@ trait PropertiesTrait {
 	}
 
 	private function ____propertyBatchMethodGet($value, $type, $name): mixed {
-
 		$settings = PropertiesCacheIndex::$property_settings[static::class.'#'.$name];
-		if (!empty($value_store_ref = $settings['storage'])) {
-			if ($value_store_ref === PropertyBatch::STORAGE_SELF) {
-				$value_store = &$this;
-			} else {
-				$value_store = &$this->$value_store_ref;
-			}
-			return $value_store[$name] ?? null;
+		$value_store_ref = $settings['storage'];
+		if ($value_store_ref === PropertyBatch::STORAGE_SELF) {
+			$value_store = &$this;
+		} else {
+			$value_store = &$this->$value_store_ref;
 		}
-		return null;
+		return $value_store[$name] ?? null;
 	}
 
 	private function ____propertyBatchMethodSet($value, $type, $name): void {
@@ -151,7 +153,7 @@ trait PropertiesTrait {
 			// NOTE PropertyBatch part
 			if (!empty($attr = $item->getAttributes(PropertyBatch::class)[0] ?? null)) {
 				$args = $attr->getArguments();
-				$expected_names = $args[2] ?? $args['names'] ?? null;
+				$expected_names = $args[3] ?? null;
 
 				if (empty($expected_names)) {
 					$item->setAccessible(true);
@@ -180,7 +182,31 @@ trait PropertiesTrait {
 					$method_name = '____propertyBatchMethod';
 
 					$access_type = $args[0] ?? $args['type'] ?? PropertyBatch::TYPE_BOTH;
-					$value_store_ref = $args[3] ?? $args['storage'] ?? '____property_batch_storage';
+					$value_store_ref = $args[2] ?? $args['storage'] ?? '____property_batch_storage';
+					if ($value_store_ref === PropertyBatch::STORAGE_SELF) {
+						$value_store = &$this;
+					} else {
+						$value_store = &$this->$value_store_ref;
+					}
+					if (!empty($default_values)) {
+						if (
+							$value_store_ref === PropertyBatch::STORAGE_SELF
+							&& method_exists($this, '____setReadOnly')
+						) {
+							// FIX Fix those at some point
+							$this->____setReadOnly(false);
+						}
+						foreach ($default_values as $k => $v) {
+							$value_store[$k] = $v;
+						}
+						if (
+							$value_store_ref === PropertyBatch::STORAGE_SELF
+							&& method_exists($this, '____setReadOnly')
+						) {
+							// FIX Fix those at some point
+							$this->____setReadOnly(true);
+						}
+					}
 
 					if ($access_type === PropertyBatch::TYPE_BOTH) {
 						foreach ($expected_names as $exp_name) {
@@ -210,25 +236,26 @@ trait PropertiesTrait {
 							PropertiesCacheIndex::$property_settings[$key]['storage']
 								= $value_store_ref;
 
-							if (!isset($index[$key_type = $key.'#'.$access_type])) {
-								$index[$key_type] = $method_name.ucfirst($access_type);
-							} else {
-								$index[$key.'#'.$access_type] = $method_name.ucfirst($access_type);
-							}
+							$key_type = $key.'#'.$access_type;
+							$index[$key_type] = $method_name.ucfirst($access_type);
 						}
 
 						if ($access_type === PropertyBatch::TYPE_GET) {
 							if ($check_and_do_not_call) {
 								return true;
 							}
-							return $this->$method_name(null, $call_type, $name);
+							return $this->{$method_name.ucfirst($access_type)}(
+								null, $call_type, $name
+							);
 
 						} else if ($access_type === PropertyBatch::TYPE_SET) {
-							return $this->$method_name($value, $call_type, $name);
+							return $this->{$method_name.ucfirst($access_type)}(
+								$value, $call_type, $name
+							);
 
 						}
 
-					} elseif (empty($sub)) {
+					} else if (empty($sub)) {
 						$sub = $access_type === Property::TYPE_GET?'read-only':'write-only';
 					}
 
@@ -251,10 +278,24 @@ trait PropertiesTrait {
 							if (!empty($method_type)) {
 								$method_type = strtolower($method_type);
 							} else {
-								$return_type = $item?->getReturnType()?->getName() ?? 'mixed';
+								$ref_ret_type = $item?->getReturnType() ?? null;
+								if ($ref_ret_type instanceof ReflectionUnionType) {
+									$r = [];
+									foreach ($ref_ret_type->getTypes() as $ref_ret_type_item) {
+										$r[] = $ref_ret_type_item;
+									}
+									$return_type = implode('|', $r);
+								} else {
+									$return_type = $ref_ret_type?->getName() ?? null;
+								}
 
-								$is_setter = (bool) $item->getNumberOfParameters();
-								$is_getter = $return_type !== 'void' && $return_type !== 'never';
+								$is_setter = (bool) $item->getNumberOfParameters()
+									|| $return_type === 'void'
+									|| $return_type === 'never';
+								$is_getter = !$is_setter || ($is_setter
+										&& !is_null($return_type)
+										&& $return_type !== 'void'
+										&& $return_type !== 'never');
 
 								if ($is_setter && $is_getter) {
 									// BOTH
@@ -306,7 +347,8 @@ trait PropertiesTrait {
 										$value, $call_type, $name
 									);
 								}
-							} elseif (empty($sub)) {
+							}
+							if (empty($sub)) {
 								$sub = $method_type === Property::TYPE_GET?'read-only':'write-only';
 							}
 

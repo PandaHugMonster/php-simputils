@@ -73,9 +73,8 @@ class SystemHelper {
 		return PHP_SAPI;
 	}
 
-	public static function systemFingerprint(
-		Version|string $version = null
-	): BasicSystemFingerprint|string {
+	public static function systemFingerprint(Version|string $version = null)
+	: BasicSystemFingerprint|string {
 		$version = $version ?? Settings::version();
 		return new DefaultSystemFingerprint(version: $version);
 	}

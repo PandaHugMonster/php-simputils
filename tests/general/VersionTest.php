@@ -1,8 +1,8 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
-use spaf\simputils\components\BasicVersionParser;
 use spaf\simputils\exceptions\IncorrectVersionFormat;
+use spaf\simputils\generic\BasicVersionParser;
 use spaf\simputils\models\Version;
 use spaf\simputils\PHP;
 use spaf\simputils\versions\DefaultVersionParser;
@@ -20,7 +20,6 @@ class CustomParserSample extends DefaultVersionParser {
 			'build_revision' => 100502,
 		];
 	}
-
 }
 
 /**
@@ -28,14 +27,13 @@ class CustomParserSample extends DefaultVersionParser {
  *
  * @covers \spaf\simputils\models\Version
  * @covers \spaf\simputils\versions\DefaultVersionParser
- * @covers \spaf\simputils\components\BasicVersionParser
  * @covers \spaf\simputils\exceptions\IncorrectVersionFormat
+ * @covers \spaf\simputils\generic\BasicVersionParser
  * @uses \spaf\simputils\PHP
  * @uses \spaf\simputils\Settings
- * @uses \spaf\simputils\traits\SimpleObjectTrait
  * @uses \spaf\simputils\traits\MetaMagic
  * @uses \spaf\simputils\interfaces\VersionParserInterface
- * @uses \spaf\simputils\interfaces\SimpleObjectInterface
+ * @uses \spaf\simputils\traits\PropertiesTrait
  */
 class VersionTest extends TestCase {
 
@@ -250,5 +248,4 @@ class VersionTest extends TestCase {
 		$res = BasicVersionParser::normalize('1.2.3');
 		$this->assertInstanceOf(Version::class, $res, 'String normalization creates object on the fly');
 	}
-
 }

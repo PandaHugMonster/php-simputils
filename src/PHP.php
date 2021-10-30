@@ -12,6 +12,7 @@ use Iterator;
 use ReflectionClass;
 use spaf\simputils\components\InternalMemoryCache;
 use spaf\simputils\models\Box;
+use spaf\simputils\models\CliArgs;
 use spaf\simputils\models\PhpInfo;
 use spaf\simputils\models\Version;
 use spaf\simputils\traits\MetaMagic;
@@ -767,5 +768,17 @@ class PHP {
 	 */
 	public static function box(?array $array = null): Box|array {
 		return new Box($array);
+	}
+
+	public static function pr($data) {
+		echo "{$data}\n";
+	}
+
+	public static function cliArgs(bool $use_fresh = false): CliArgs {
+		if ($use_fresh || empty(InternalMemoryCache::$default_cli_args_object)) {
+			global $argv;
+			InternalMemoryCache::$default_cli_args_object = new CliArgs($argv, true);
+		}
+		return InternalMemoryCache::$default_cli_args_object;
 	}
 }

@@ -1,0 +1,15 @@
+#!/bin/env php
+<?php
+
+require_once '../vendor/autoload.php';
+
+use spaf\simputils\PHP;
+use function spaf\simputils\basic\pd;
+use function spaf\simputils\basic\pr;
+
+$args = PHP::cliArgs();
+
+pr("Hello World {$args->executable}");
+pr("{$args->args}");
+
+pd('## END ##');

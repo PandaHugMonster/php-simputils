@@ -47,3 +47,12 @@ function pd(...$args) {
 function box($array): Box|array {
 	return PHP::box($array);
 }
+
+/**
+ * Just an echo with "\n"
+ *
+ * @param $data
+ */
+function pr($data) {
+	PHP::pr($data);
+}

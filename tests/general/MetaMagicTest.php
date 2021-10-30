@@ -17,13 +17,16 @@ class MyObject {
 }
 
 /**
- * @covers spaf\simputils\traits\MetaMagic
+ * @covers \spaf\simputils\traits\MetaMagic
  * @uses \spaf\simputils\PHP
  */
 class MetaMagicTest extends TestCase {
 
 	public function testJson() {
-		$obj = MyObject::fromJson('{"field_1": "test 1", "'.PHP::$serialized_class_key_name.'": "'.MyObject::class.'"}');
+		$json_string = '{"field_1": "test 1", "'
+			.PHP::$serialized_class_key_name
+			.'": "'.MyObject::class.'"}';
+		$obj = MyObject::fromJson($json_string);
 		$this->assertInstanceOf(MyObject::class, $obj, 'Is correct class used');
 		$this->assertEquals('test 1', $obj->field_1, 'Is correct value in a field');
 
@@ -37,6 +40,9 @@ class MetaMagicTest extends TestCase {
 		$this->assertIsArray($json, 'Is a json a proper array');
 		$this->assertEquals($obj->field_2, $json['field_2'], 'Is a proper value');
 		$this->assertArrayNotHasKey(PHP::$serialized_class_key_name, $json, 'Missing class key in a json array');
+
+		$res = $obj->toJson(true, true);
+		$this->assertIsString($res, 'Is a pretty string');
 
 		$res = $obj->toJson(true);
 		$this->assertIsString($res, 'Is a string');
@@ -74,5 +80,4 @@ class MetaMagicTest extends TestCase {
 
 		PHP::$serialization_mechanism = PHP::SERIALIZATION_TYPE_JSON;
 	}
-
 }

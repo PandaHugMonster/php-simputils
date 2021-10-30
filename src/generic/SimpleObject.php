@@ -5,7 +5,6 @@ namespace spaf\simputils\generic;
 
 
 
-use spaf\simputils\interfaces\SimpleObjectInterface;
 use spaf\simputils\traits\MetaMagic;
 use spaf\simputils\traits\SimpleObjectTrait;
 
@@ -20,7 +19,7 @@ use spaf\simputils\traits\SimpleObjectTrait;
  *
  * @package spaf\simputils
  */
-abstract class SimpleObject implements SimpleObjectInterface {
+abstract class SimpleObject {
 	use SimpleObjectTrait;
 	use MetaMagic;
 

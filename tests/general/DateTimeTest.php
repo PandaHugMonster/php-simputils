@@ -1,6 +1,5 @@
 <?php
 
-
 use PHPUnit\Framework\TestCase;
 use spaf\simputils\helpers\DateTimeHelper;
 use spaf\simputils\models\DateTime;
@@ -57,5 +56,4 @@ class DateTimeTest extends TestCase {
 		$this->assertInstanceOf(DateTime::class, $now, 'Is a date-time object');
 		$this->assertEquals(DateTimeHelper::stringify($now), strval($now), 'Is a string-compatible');
 	}
-
 }

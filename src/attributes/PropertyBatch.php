@@ -7,6 +7,7 @@ use spaf\simputils\generic\BasicAttribute;
 
 /**
  * @package spaf\simputils\attributes
+ * @codeCoverageIgnore
  */
 #[Attribute(Attribute::TARGET_PROPERTY | Attribute::TARGET_METHOD)]
 class PropertyBatch extends BasicAttribute {
@@ -28,7 +29,7 @@ class PropertyBatch extends BasicAttribute {
 	public function __construct(
 		public ?string $type = null,
 		public ?string $modifier = null,
-		public ?array $names = null,
 		public ?string $storage = null,
+		public ?array $names = null,
 	) {}
 }

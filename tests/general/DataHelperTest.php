@@ -1,6 +1,5 @@
 <?php
 
-namespace general;
 
 use PHPUnit\Framework\TestCase;
 use spaf\simputils\exceptions\NonExistingDataUnit;
@@ -119,5 +118,4 @@ class DataHelperTest extends TestCase {
 		$this->expectException($exception_class);
 		DataHelper::clearUnit($val);
 	}
-
 }

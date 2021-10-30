@@ -24,6 +24,7 @@ use spaf\simputils\generic\BasicAttribute;
  *              for getter and for setter.
  *
  * @package spaf\simputils\attributes
+ * @codeCoverageIgnore
  */
 #[Attribute(Attribute::TARGET_METHOD)]
 class Property extends BasicAttribute {

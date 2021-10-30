@@ -3,6 +3,7 @@
 namespace spaf\simputils\generic;
 
 use Exception;
+use spaf\simputils\attributes\Property;
 use spaf\simputils\generic\constants\ConstSystemFingerprint as constants;
 use spaf\simputils\logger\Logger;
 use spaf\simputils\PHP;
@@ -43,6 +44,7 @@ abstract class BasicSystemFingerprint extends SimpleObject {
 	 *
 	 * @return array
 	 */
+	#[Property('parts')]
 	abstract public function getParts(): array;
 
 	/**
@@ -50,11 +52,13 @@ abstract class BasicSystemFingerprint extends SimpleObject {
 	 *
 	 * @return string
 	 */
+	#[Property('name')]
 	abstract public function getName(): string;
 
 	/**
 	 * @return mixed
 	 */
+	#[Property('data')]
 	abstract public function getData(): mixed;
 
 	/**
@@ -126,7 +130,10 @@ abstract class BasicSystemFingerprint extends SimpleObject {
 			if (is_null($index_type)) {
 				$index_type = $t;
 			} else if ($index_type !== $t) {
-				throw new Exception('Index/keys must be of the same type');
+				// FIX  Should be implemented differently (to use both int and str keys)
+				throw new Exception( // @codeCoverageIgnore
+					'Index/keys must be of the same type' // @codeCoverageIgnore
+				);
 			}
 		}
 
@@ -174,7 +181,9 @@ abstract class BasicSystemFingerprint extends SimpleObject {
 		if (!empty($this->parts)) {
 			foreach ($this->parts as $part) {
 				if (!isset($this->$part)) {
-					throw new Exception("\"{$part}\" property is not specified");
+					throw new Exception( // @codeCoverageIgnore
+						"\"{$part}\" property is not specified" // @codeCoverageIgnore
+					);
 				}
 				$res .= '/'.$this->$part;
 			}
@@ -192,8 +201,8 @@ abstract class BasicSystemFingerprint extends SimpleObject {
 		$ser_str = null;
 		try {
 			$ser_str = PHP::serialize($data, PHP::SERIALIZATION_TYPE_JSON);
-		} catch (Exception $e) {
-			Logger::error($e->getMessage());
+		} catch (Exception $e) { // @codeCoverageIgnore
+			Logger::error($e->getMessage()); // @codeCoverageIgnore
 		}
 		return hash($algo, $ser_str);
 	}
@@ -201,12 +210,13 @@ abstract class BasicSystemFingerprint extends SimpleObject {
 	/**
 	 * @param string $string String to parse
 	 *
+	 * FIX  Refactor the params acquiring
 	 * @return void|array
 	 * @throws \ReflectionException Reflection error
 	 */
 	protected static function parse(string $string): ?array {
 		if (is_null($string)) {
-			return null;
+			return null; // @codeCoverageIgnore
 		}
 
 		// Cleaning duplicated slashes
@@ -215,11 +225,13 @@ abstract class BasicSystemFingerprint extends SimpleObject {
 		$parts = explode('/', $string);
 
 		if (!empty($parts) && empty($parts[0])) {
-			array_shift($parts);
+			array_shift($parts); // @codeCoverageIgnore
 		}
 
 		if (empty($parts) || empty($parts[0]) || empty($parts[1])) {
-			throw new Exception('Parsing has failed, too few data-parts are found');
+			throw new Exception( // @codeCoverageIgnore
+				'Parsing has failed, too few data-parts are found' // @codeCoverageIgnore
+			);
 		}
 
 		$instance = static::createDummy();
@@ -227,7 +239,7 @@ abstract class BasicSystemFingerprint extends SimpleObject {
 
 		$name = $parts[0];
 		if ($name !== $instance->getName()) {
-			throw new Exception('Instance name does not match');
+			throw new Exception('Instance name does not match'); // @codeCoverageIgnore
 		}
 
 		[$instance->first_hash, $instance->second_hash] = explode(',', $parts[1]);

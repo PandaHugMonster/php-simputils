@@ -164,8 +164,8 @@ trait MetaMagic {
 	 *
 	 * @return array
 	 */
-	protected function ___serialize(): array {
-		return $this->toArray(PHP::$serialization_mechanism == PHP::SERIALIZATION_TYPE_JSON);
+	protected function ___serialize(): Box|array {
+		return $this->toArray(PHP::$serialization_mechanism === PHP::SERIALIZATION_TYPE_JSON);
 	}
 
 	/**
@@ -175,7 +175,7 @@ trait MetaMagic {
 	 *
 	 * @return $this
 	 */
-	protected function ___deserialize(array $data): static {
+	protected function ___deserialize(Box|array $data): static {
 		if (isset($data[PHP::$serialized_class_key_name]))
 			unset($data[PHP::$serialized_class_key_name]);
 		return static::_metaMagic($this, '___setup', $data);
@@ -237,7 +237,6 @@ trait MetaMagic {
 			'___serialize' => $context->___serialize(),
 			'___deserialize' => $context->___deserialize(...$spell),
 			'___setup' => $context->___setup(...$spell),
-			'___propertied' => $context->___propertied(...$spell),
 		};
 		return $res;
 	}
@@ -253,7 +252,7 @@ trait MetaMagic {
 	 * @return array
 	 */
 	public function __serialize(): array {
-		return static::_metaMagic($this, '___serialize');
+		return (array) static::_metaMagic($this, '___serialize');
 	}
 
 	/**

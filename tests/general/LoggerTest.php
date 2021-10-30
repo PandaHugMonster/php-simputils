@@ -6,6 +6,7 @@ use spaf\simputils\logger\outputs\CsvFileOutput;
 use spaf\simputils\logger\outputs\JsonFileOutput;
 use spaf\simputils\logger\outputs\TextFileOutput;
 use spaf\simputils\PHP;
+use spaf\simputils\Settings;
 
 /**
  * @covers \spaf\simputils\logger\Logger
@@ -16,11 +17,11 @@ use spaf\simputils\PHP;
  * @uses \spaf\simputils\interfaces\LoggerInterface
  * @uses \spaf\simputils\traits\helpers\DateTimeTrait
  * @uses \spaf\simputils\Settings
- * @uses spaf\simputils\traits\SimpleObjectTrait
  * @uses \spaf\simputils\helpers\DateTimeHelper
  * @uses \spaf\simputils\interfaces\helpers\DateTimeHelperInterface
  * @uses \spaf\simputils\models\DateTime
  * @uses \spaf\simputils\PHP
+ * @uses \spaf\simputils\traits\PropertiesTrait
  *
  */
 class LoggerTest extends TestCase {
@@ -72,6 +73,15 @@ class LoggerTest extends TestCase {
 		Logger::log('TEST');
 		$buffer = ob_get_clean();
 		$this->assertMatchesRegularExpression('/.*TEST/i', $buffer, 'Checking the output');
+	}
+
+	public function testLoggerObjectDefaultName() {
+		$logger = new Logger();
+		$this->assertEquals('default', $logger->name);
+
+		Settings::$app_name = 'TestAppName';
+		$logger = new Logger();
+		$this->assertEquals('default-TestAppName', $logger->name);
 	}
 
 	/**
@@ -163,5 +173,4 @@ class LoggerTest extends TestCase {
 		PHP::rmFile($expected_file);
 
 	}
-
 }

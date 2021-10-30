@@ -1,12 +1,8 @@
 <?php
 
-namespace general;
-
 use PHPUnit\Framework\TestCase;
 use spaf\simputils\models\Version;
 use spaf\simputils\Settings;
-use ValueError;
-use function print_r;
 use function spaf\simputils\basic\pd;
 
 /**
@@ -15,10 +11,10 @@ use function spaf\simputils\basic\pd;
  * @uses \spaf\simputils\traits\SimpleObjectTrait
  * @uses \spaf\simputils\versions\DefaultVersionParser
  * @uses \spaf\simputils\traits\MetaMagic
- * @uses \spaf\simputils\interfaces\SimpleObjectInterface
  * @uses \spaf\simputils\PHP
  * @uses \spaf\simputils\basic\pd()
- * @uses \spaf\simputils\components\BasicVersionParser
+ * @uses \spaf\simputils\traits\PropertiesTrait
+ * @uses \spaf\simputils\generic\BasicVersionParser
  */
 class SettingsTest extends TestCase {
 
@@ -62,5 +58,4 @@ class SettingsTest extends TestCase {
 		$this->expectException(ValueError::class);
 		Settings::setSimpleObjectTypeCase('FAKE-sTyLe');
 	}
-
 }

@@ -4,6 +4,7 @@
 namespace spaf\simputils\traits\logger;
 
 
+use spaf\simputils\attributes\Property;
 use spaf\simputils\logger\Logger;
 use spaf\simputils\logger\outputs\BasicOutput;
 use spaf\simputils\logger\outputs\ContextOutput;
@@ -83,8 +84,14 @@ trait LoggerTrait {
 		return static::$default;
 	}
 
+	#[Property('logLevel')]
 	public function getLogLevel(): int {
 		return $this->log_level;
+	}
+
+	#[Property('logLevel')]
+	public function setLogLevel(int $value) {
+		$this->log_level = $value;
 	}
 
 	public function logLevelName(int $log_level): string {
@@ -96,9 +103,5 @@ trait LoggerTrait {
 			static::LEVEL_DEBUG => 'DEBUG',
 			static::LEVEL_NOT_SET => 'NOT SET',
 		};
-	}
-
-	public function setLogLevel(int $value) {
-		$this->log_level = $value;
 	}
 }

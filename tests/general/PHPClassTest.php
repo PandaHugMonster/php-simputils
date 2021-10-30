@@ -1,11 +1,14 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
+use spaf\simputils\generic\SimpleObject;
+use spaf\simputils\models\Box;
 use spaf\simputils\models\PhpInfo;
 use spaf\simputils\models\Version;
 use spaf\simputils\PHP;
 use spaf\simputils\Settings;
 use spaf\simputils\traits\MetaMagic;
+use function spaf\simputils\basic\box;
 use function spaf\simputils\basic\pd;
 
 class MyObjectExample {
@@ -15,12 +18,15 @@ class MyObjectExample {
 /**
  * @covers \spaf\simputils\PHP
  * @covers \spaf\simputils\basic\pd
+ * @covers \spaf\simputils\basic\box
  * @covers \spaf\simputils\models\PhpInfo
  * @uses \spaf\simputils\Settings
- * @uses \spaf\simputils\components\BasicVersionParser
  * @uses \spaf\simputils\models\Version
  * @uses \spaf\simputils\traits\SimpleObjectTrait
  * @uses \spaf\simputils\traits\MetaMagic
+ * @uses \spaf\simputils\generic\BasicVersionParser
+ * @uses \spaf\simputils\traits\PropertiesTrait
+ * @uses \spaf\simputils\models\Box
  */
 class PHPClassTest extends TestCase {
 
@@ -298,5 +304,62 @@ class PHPClassTest extends TestCase {
 	public function testType($in, $expected) {
 		$res = PHP::type($in);
 		$this->assertEquals($expected, $res, "Is {$in} of type {$expected}");
+	}
+
+	public function testBox() {
+		$box = box(['My array', 'data' => 'in my array']);
+		$this->assertEquals(Box::class, PHP::type($box));
+	}
+
+	/**
+	 * @covers \spaf\simputils\traits\ArrayReadOnlyAccessTrait
+	 * @runInSeparateProcess
+	 * @return void
+	 */
+	public function testArrayReadOnlyStuff() {
+		$phpi = PHP::info();
+		$this->assertInstanceOf(Box::class, $phpi->keys);
+
+		$this->expectException(Exception::class);
+
+		// This is done like that to avoid silly PHPStorm exceptions
+		$name = 'kernel_name';
+		$phpi->$name = 'test';
+	}
+
+	/**
+	 * @uses \spaf\simputils\versions\DefaultVersionParser
+	 * @return void
+	 */
+	public function testClassRelatedUtils() {
+		$this->assertFalse(PHP::isClass('IaMnOtAcLaSs'));
+		$this->assertTrue(PHP::isClass(PhpInfo::class));
+
+		$this->assertFalse(PHP::isClassIn(PhpInfo::class, Version::class));
+		$this->assertTrue(PHP::isClassIn(SimpleObject::class, Version::class));
+
+		$obj1 = new Version('1.1.1');
+		$cls1 = Version::class;
+
+		$obj2 = new Version('1.1.2');
+
+		$this->assertTrue(PHP::isClassIn($obj1, $cls1));
+
+		$this->assertFalse(PHP::isClassIn($obj1, $cls1, true));
+		$this->assertFalse(PHP::isClassIn($obj1, $cls1, true));
+
+		$this->assertTrue(PHP::isClassIn($obj1, $obj2));
+		$this->assertFalse(PHP::isClassIn($obj1, $obj2, true));
+		$this->assertFalse(PHP::isClassIn($cls1, $obj1, true));
+
+		$this->assertTrue(PHP::classContains($obj1, $obj2));
+
+		$this->assertIsObject(PHP::createDummy(Version::class));
+		$this->assertIsObject(PHP::createDummy($obj1));
+
+		$this->assertTrue(PHP::isArrayCompatible([]));
+		$this->assertTrue(PHP::isArrayCompatible(box([])));
+		$this->assertFalse(PHP::isArrayCompatible($obj1));
+
 	}
 }

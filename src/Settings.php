@@ -153,6 +153,7 @@ class Settings {
 	 * this method in every application on the very early stage. Some functionality strongly
 	 * relying on this preparations (for example DotEnv, etc.).
 	 *
+	 * @codeCoverageIgnore
 	 * @param string|null $app_name  Application name
 	 * @param string|null $code_root Code root dir
 	 * @param bool        $enforce   Enforce re-preparing the framework

@@ -3,20 +3,23 @@
 namespace spaf\simputils\models;
 
 use Exception;
+use spaf\simputils\attributes\PropertyBatch;
 use spaf\simputils\components\InternalMemoryCache;
 use spaf\simputils\generic\constants\ConstPHPInfo as constants;
 use spaf\simputils\helpers\SystemHelper;
 use spaf\simputils\PHP;
 use spaf\simputils\traits\ArrayReadOnlyAccessTrait;
-use function array_keys;
 use function in_array;
 use function is_string;
 
 /**
  * PHP Info class instance
- * @todo Finish documentation and phpcs and test coverage
- * @todo Refactor testing
- * 
+ *
+ * Represents the basic data from phpinfo() and similar/related places. Can be used as array/box,
+ * or as an object. The data is read-only. In the most cases it's suggested to do not create it
+ * manually as a new object, but rather using {@see PHP::info()} method, because it caches
+ * the object, and you receive the same object with every call.
+ *
  * @property-read Version $php_version
  * @property-read array $ini_config
  * @property-read string $main_ini_file
@@ -53,22 +56,31 @@ use function is_string;
 class PhpInfo extends Box {
 	use ArrayReadOnlyAccessTrait;
 
-	/**
-	 * @inheritdoc
-	 */
 	public static bool $to_string_format_json = true;
-
-	private ?array $available_storage_keys = null;
-	private int $iter_index = 0;
-
 	private static array $replace_php_info_reg_exp_array = [];
 
+	protected int $iter_index = 0;
+
 	/**
-	 * @todo Maybe improve a bit
+	 * Defining the properties and it's defaults
+	 *
+	 * @return array|\spaf\simputils\models\Box
+	 * @see PropertyBatch
+	 */
+	#[PropertyBatch(storage: PropertyBatch::STORAGE_SELF)]
+	private function defineFields(): array|Box {
+		// IMP  Never use Property and PropertyBatch inside of PropertyBatch method.
+		//      Only direct method calls!
+		return $this->getKeys();
+	}
+
+	/**
+	 * Constructor
+	 *
+	 * Has the initial values acquiring.
 	 */
 	public function __construct() {
 		parent::__construct(static::compose());
-		$this->available_storage_keys = array_keys((array) $this);
 	}
 
 	/**
@@ -118,6 +130,8 @@ class PhpInfo extends Box {
 	}
 
 	/**
+	 * Acquiring values of PHP info and similar
+	 *
 	 * @return array
 	 */
 	protected static function compose(): array {
@@ -151,7 +165,7 @@ class PhpInfo extends Box {
 		/** @noinspection PhpComposerExtensionStubsInspection */
 		$data[constants::KEY_OPCACHE] = extension_loaded('Zend OPcache')
 			?opcache_get_status()
-			:null;
+			:null; //@codeCoverageIgnore
 		$data[constants::KEY_SYSTEM_OS] = SystemHelper::os();
 		$data[constants::KEY_KERNEL_NAME] = SystemHelper::kernelName();
 		$data[constants::KEY_SYSTEM_NAME] = SystemHelper::systemName();
@@ -198,6 +212,9 @@ class PhpInfo extends Box {
 	}
 
 	/**
+	 * Reg-exp keys for values available only inside of {@see \phpinfo()} string
+	 *
+	 * @codeCoverageIgnore
 	 * @return array
 	 */
 	public static function listOfRegExpKeys(): array {
@@ -212,9 +229,12 @@ class PhpInfo extends Box {
 	}
 
 	/**
+	 * Fulfilling reg exp replaces
+	 *
 	 * @param string  $key Key
 	 * @param ?string $val Value
 	 *
+	 * @codeCoverageIgnore
 	 * @todo relocate to Lib engine Settings
 	 * @return void
 	 * @throws \Exception If a key is not a valid name
@@ -228,6 +248,8 @@ class PhpInfo extends Box {
 	}
 
 	/**
+	 * Array of reg exp replaces
+	 *
 	 * @return array
 	 */
 	public static function getPhpInfoRegExpArray(): array {
@@ -236,62 +258,64 @@ class PhpInfo extends Box {
 		return [
 			$k = constants::KEY_IS_THREAD_SAFE
 				=> !empty($ref[$k])
-					?$ref[$k]
+					?$ref[$k] //@codeCoverageIgnore
 					:('/Thread Safety => (?P<val>'.$yes_no_set.')/i'),
 
 			$k = constants::KEY_IS_DEBUG_BUILD
 				=> !empty($ref[$k])
-					?$ref[$k]
+					?$ref[$k] //@codeCoverageIgnore
 					:('/Debug Build => (?P<val>'.$yes_no_set.')/i'),
 
 			$k = constants::KEY_ZEND_SIGNAL_HANDLING
 				=> !empty($ref[$k])
-					?$ref[$k]
+					?$ref[$k] //@codeCoverageIgnore
 					:('/Zend Signal Handling => (?P<val>'.$yes_no_set.')/i'),
 
 			$k = constants::KEY_ZEND_MEMORY_MANAGER
 				=> !empty($ref[$k])
-					?$ref[$k]
+					?$ref[$k] //@codeCoverageIgnore
 					:('/Zend Memory Manager => (?P<val>'.$yes_no_set.')/i'),
 
 			$k = constants::KEY_ZEND_MULTIBYTE_SUPPORT
 				=> !empty($ref[$k])
-					?$ref[$k]
+					?$ref[$k] //@codeCoverageIgnore
 					:('/Zend Multibyte Support => (?P<val>provided by mbstring)/i'),
 
 			$k = constants::KEY_VIRTUAL_DIRECTORY_SUPPORT
 				=> !empty($ref[$k])
-					?$ref[$k]
+					?$ref[$k] //@codeCoverageIgnore
 					:('/Virtual Directory Support => (?P<val>'.$yes_no_set.')/i'),
 
 			$k = constants::KEY_PHP_API_VERSION
 				=> !empty($ref[$k])
-					?$ref[$k]
+					?$ref[$k] //@codeCoverageIgnore
 					:('/PHP API => (?P<val>\d+)/i'),
 
 			$k = constants::KEY_PHP_EXTENSION_VERSION
 				=> !empty($ref[$k])
-					?$ref[$k]
+					?$ref[$k] //@codeCoverageIgnore
 					:('/PHP Extension => (?P<val>\d+)/i'),
 
 			$k = constants::KEY_ZEND_EXTENSION_VERSION
 				=> !empty($ref[$k])
-					?$ref[$k]
+					?$ref[$k] //@codeCoverageIgnore
 					:('/Zend Extension => (?P<val>\d+)/i'),
 
 			$k = constants::KEY_ZEND_EXTENSION_BUILD
 				=> !empty($ref[$k])
-					?$ref[$k]
+					?$ref[$k] //@codeCoverageIgnore
 					:('/Zend Extension Build => (?P<val>.*)/i'),
 
 			$k = constants::KEY_PHP_EXTENSION_BUILD
 				=> !empty($ref[$k])
-					?$ref[$k]
+					?$ref[$k] //@codeCoverageIgnore
 					:('/PHP Extension Build => (?P<val>.*)/i'),
 		];
 	}
 
 	/**
+	 * Yes and No regexp variants
+	 *
 	 * @return string
 	 */
 	public static function getYesNoArrayAsRegExpChoices(): string {
@@ -305,19 +329,5 @@ class PhpInfo extends Box {
 			}
 		}
 		return implode('|', $both);
-	}
-
-	/**
-	 * @param string $name Property name
-	 *
-	 * @return mixed
-	 * @throws \spaf\simputils\exceptions\PropertyAccessError Property Access error
-	 */
-	public function __get($name): mixed {
-		if (in_array($name, $this->available_storage_keys)) {
-			return $this[$name];
-		}
-
-		return parent::__get($name);
 	}
 }

@@ -6,6 +6,7 @@ namespace spaf\simputils;
 
 
 use ArrayAccess;
+use ArrayObject;
 use Exception;
 use Iterator;
 use ReflectionClass;
@@ -113,7 +114,10 @@ class PHP {
 		}
 
 		if ($enforced_type === static::SERIALIZATION_TYPE_JSON) {
-			if (static::isClass($data) && static::classUsesTrait($data, MetaMagic::class)) {
+			if (
+				(is_object($data) || static::isClass($data))
+				&& static::classUsesTrait($data, MetaMagic::class)
+			) {
 				$res = $data::_metaMagic($data, '___serialize');
 			} else {
 				$res = $data;
@@ -188,8 +192,9 @@ class PHP {
 		$data = json_decode($str, true);
 		// JSON parsing
 		if (json_last_error() === JSON_ERROR_NONE) {
-			if (is_array($data) && !empty($data[static::$serialized_class_key_name]))
+			if (is_array($data) && !empty($data[static::$serialized_class_key_name])) {
 				return $data[static::$serialized_class_key_name];
+			}
 		} else {
 			try {
 				$res = unserialize($str);
@@ -711,12 +716,13 @@ class PHP {
 	/**
 	 *
 	 * @todo EXPERIMENTAL
+	 * @todo Rename
 	 *
 	 * @return bool
 	 */
-	public static function in($item_a, $item_b, $a, $b): bool {
-
-	}
+//	public static function in($item_a, $item_b, $a, $b): bool {
+//
+//	}
 
 	/**
 	 * Determines whether value is array-alike (can be treated as array)
@@ -745,10 +751,7 @@ class PHP {
 		if (static::isClass($var)) {
 			// TODO This should be implemented through static::classContains
 			$reflection = new ReflectionClass($var);
-			if (
-				$reflection->implementsInterface(Iterator::class)
-				&& $reflection->implementsInterface(ArrayAccess::class)
-			) {
+			if ($reflection->isSubclassOf(ArrayObject::class)) {
 				return true;
 			}
 		}

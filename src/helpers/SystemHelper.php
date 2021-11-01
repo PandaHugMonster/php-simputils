@@ -5,7 +5,7 @@ namespace spaf\simputils\helpers;
 
 
 
-use spaf\simputils\components\DefaultSystemFingerprint;
+use spaf\simputils\components\SystemFingerprint;
 use spaf\simputils\generic\BasicSystemFingerprint;
 use spaf\simputils\models\Version;
 use spaf\simputils\Settings;
@@ -76,6 +76,6 @@ class SystemHelper {
 	public static function systemFingerprint(Version|string $version = null)
 	: BasicSystemFingerprint|string {
 		$version = $version ?? Settings::version();
-		return new DefaultSystemFingerprint(version: $version);
+		return new SystemFingerprint($version);
 	}
 }

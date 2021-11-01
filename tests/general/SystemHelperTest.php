@@ -2,7 +2,7 @@
 
 
 use PHPUnit\Framework\TestCase;
-use spaf\simputils\components\DefaultSystemFingerprint;
+use spaf\simputils\components\SystemFingerprint;
 use spaf\simputils\generic\BasicSystemFingerprint;
 use spaf\simputils\helpers\SystemHelper;
 
@@ -45,7 +45,7 @@ class SystemHelperTest extends TestCase {
 	}
 
 	/**
-	 * @covers \spaf\simputils\components\DefaultSystemFingerprint
+	 * @covers \spaf\simputils\components\SystemFingerprint
 	 * @covers \spaf\simputils\generic\BasicSystemFingerprint
 	 * @uses \spaf\simputils\helpers\SystemHelper
 	 * @uses \spaf\simputils\PHP
@@ -55,14 +55,16 @@ class SystemHelperTest extends TestCase {
 	 * @uses \spaf\simputils\traits\MetaMagic
 	 * @uses \spaf\simputils\traits\PropertiesTrait
 	 * @uses \spaf\simputils\versions\DefaultVersionParser
+	 * @uses \spaf\simputils\models\Box
+	 * @uses \spaf\simputils\traits\dsf\DsfVersionsMethodsTrait
 	 */
 	public function testDefaultFingerPrint() {
 		$d = SystemHelper::systemFingerprint();
 
-		$fp = new DefaultSystemFingerprint(parse: strval($d));
-		$this->assertInstanceOf(DefaultSystemFingerprint::class, $fp);
+		$fp = new SystemFingerprint();
+		$this->assertInstanceOf(SystemFingerprint::class, $fp);
 
-		$fp = new DefaultSystemFingerprint(strval($d));
-		$this->assertInstanceOf(DefaultSystemFingerprint::class, $fp);
+		$fp = SystemFingerprint::parse(strval($d));
+		$this->assertInstanceOf(SystemFingerprint::class, $fp);
 	}
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace spaf\simputils\attributes;
+namespace spaf\simputils\attributes\markers;
 
 use Attribute;
 use spaf\simputils\generic\BasicAttribute;

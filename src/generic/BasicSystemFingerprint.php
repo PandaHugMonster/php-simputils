@@ -6,18 +6,11 @@ use Exception;
 use spaf\simputils\attributes\Property;
 use spaf\simputils\generic\constants\ConstSystemFingerprint as constants;
 use spaf\simputils\logger\Logger;
+use spaf\simputils\models\Box;
 use spaf\simputils\PHP;
-use function array_shift;
-use function array_slice;
-use function count;
-use function current;
 use function explode;
-use function is_integer;
 use function is_null;
-use function is_string;
-use function key;
 use function preg_replace;
-use function reset;
 
 /**
  *
@@ -84,31 +77,24 @@ abstract class BasicSystemFingerprint extends SimpleObject {
 	 * @throws \ReflectionException Reflection Exception
 	 */
 	public function __construct(mixed ...$params) {
-
-		$parsable = null;
-
-		if (count($this->parts) !== count($params))
-
-		reset($params);
-		if (isset($params['parse'])) {
-			$parsable = $params['parse'];
-		}
-		if (empty($parsable) && is_integer(key($params))) {
-			$first = current($params);
-			if (is_string($first)) {
-				$parsable = $first;
-			}
-		}
-
-		if (!empty($parsable)) {
-			$parsed_params = static::parse($parsable);
-			$this->assignParams($parsed_params);
-		} else {
-			$this->assignParams($params);
-			$this->fulfillFromData();
-		}
-
+		$this->assignParams($params);
+		$this->fulfillFromData();
 		$this->init();
+	}
+
+	public static function parse(string $fingerprint_string): static {
+		$params = static::parseString($fingerprint_string);
+		if (empty($params) || $params['name'] !== static::NAME) {
+			throw new Exception('Params are empty or name is not correct');
+		}
+		$instance = static::createDummy();
+		unset($params['name']);
+		[
+			'first_hash' => $instance->first_hash,
+			'second_hash' => $instance->second_hash
+		] = $params;
+
+		return $instance;
 	}
 
 	/**
@@ -117,12 +103,12 @@ abstract class BasicSystemFingerprint extends SimpleObject {
 	 * If the array is integer indexed - then order of `$this->parts` is used, otherwise
 	 * the values assigned directly by keys/names of properties.
 	 *
-	 * @param array $params Params to assign to fields
+	 * @param Box|array $params Params to assign to fields
 	 *
 	 * @return void
 	 * @throws \Exception Exception if indices' types are not homogenous
 	 */
-	protected function assignParams(array $params) {
+	protected function assignParams(Box|array $params) {
 		$index_type = null;
 		// TODO Move to PHP as "areKeysHomogenous" and "areKeysHeterogenous"
 		foreach ($params as $k => $v) {
@@ -173,10 +159,16 @@ abstract class BasicSystemFingerprint extends SimpleObject {
 	}
 
 	/**
+	 * @param bool $only_base
+	 *
 	 * @return string
+	 * @throws \Exception
 	 */
-	protected function generateString(): string {
+	protected function generateString(bool $only_base = false): string {
 		$res = $this->name.'/'.$this->first_hash.','.$this->second_hash;
+		if ($only_base) {
+			return $res;
+		}
 
 		if (!empty($this->parts)) {
 			foreach ($this->parts as $part) {
@@ -210,42 +202,40 @@ abstract class BasicSystemFingerprint extends SimpleObject {
 	/**
 	 * @param string $string String to parse
 	 *
-	 * FIX  Refactor the params acquiring
 	 * @return void|array
 	 * @throws \ReflectionException Reflection error
 	 */
-	protected static function parse(string $string): ?array {
+	protected static function parseString(string $string): ?array {
+
 		if (is_null($string)) {
 			return null; // @codeCoverageIgnore
 		}
 
 		// Cleaning duplicated slashes
-		$string = preg_replace('#/+#', '/', $string);
+		$string = ltrim(
+			rtrim(
+				preg_replace('#/+#', '/', $string),
+				'/'
+			),
+			'/'
+		);
 
-		$parts = explode('/', $string);
+		$parts = new Box(explode('/', $string));
 
-		if (!empty($parts) && empty($parts[0])) {
-			array_shift($parts); // @codeCoverageIgnore
-		}
+		$base_parts = $parts->shift(2)->stash;
 
-		if (empty($parts) || empty($parts[0]) || empty($parts[1])) {
+		if (empty($base_parts) || $base_parts->size < 2) {
 			throw new Exception( // @codeCoverageIgnore
 				'Parsing has failed, too few data-parts are found' // @codeCoverageIgnore
 			);
 		}
 
-		$instance = static::createDummy();
-		$instance->is_no_data = true;
-
-		$name = $parts[0];
-		if ($name !== $instance->getName()) {
-			throw new Exception('Instance name does not match'); // @codeCoverageIgnore
-		}
-
-		[$instance->first_hash, $instance->second_hash] = explode(',', $parts[1]);
-
-		// Excluding the common params, and leaving only custom params
-		return array_slice($parts, 2);
+		$res = [
+			'name' => $base_parts[0],
+		];
+		[$res['first_hash'], $res['second_hash']] = explode(',', $base_parts[1]);
+//		pd($res);
+		return $res;
 	}
 
 	/**

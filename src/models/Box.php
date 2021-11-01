@@ -4,6 +4,7 @@ namespace spaf\simputils\models;
 
 use ArrayObject;
 use Exception;
+use spaf\simputils\attributes\markers\Affecting;
 use spaf\simputils\attributes\Property;
 use spaf\simputils\PHP;
 use spaf\simputils\traits\MetaMagic;
@@ -115,7 +116,12 @@ use function is_object;
  * identical by functionality. `box()` is just a shortcut for {@see PHP::box()}, and `PHP::box()`
  * is a shortcut for `new Box()`.
  *
+ * TODO Implement more of array-related functionality from default PHP pool
+ *
  * @package spaf\simputils\generic
+ *
+ * @property-read mixed $stash Stash suppose to contain additional data that was prepared during
+ *                             some of functionality like {@see Box::shift()}
  * @property-read int $size
  * @property-read Box|array $keys
  * @property-read Box|array $values
@@ -127,11 +133,21 @@ class Box extends ArrayObject {
 	public static bool $to_string_format_json = true;
 	public static bool $is_json_pretty = false;
 
+	protected mixed $_stash = null;
+
+	/**
+	 * @return mixed
+	 */
+	#[Property('stash')]
+	protected function getStashContent(): mixed {
+		return $this->_stash;
+	}
+
 	/**
 	 * @return int
 	 */
 	#[Property('size')]
-	public function getSize() {
+	protected function getSize() {
 		return count($this);
 	}
 
@@ -139,7 +155,7 @@ class Box extends ArrayObject {
 	 * @return static|Box|array
 	 */
 	#[Property('keys')]
-	public function getKeys(): static|Box|array {
+	protected function getKeys(): static|Box|array {
 		return new Box(array_keys((array) $this));
 	}
 
@@ -147,7 +163,7 @@ class Box extends ArrayObject {
 	 * @return static|Box|array
 	 */
 	#[Property('values')]
-	public function getValues(): static|Box|array {
+	protected function getValues(): static|Box|array {
 		return new Box(array_values((array) $this));
 	}
 
@@ -210,11 +226,68 @@ class Box extends ArrayObject {
 	}
 
 	/**
+	 * Shift array items (analogue of php function `\array_shift()`)
+	 *
+	 * **This method affects this object!**
+	 *
+	 * It returns the same object-box with removed specified amount of elements from the specified
+	 * side (by default 1 item from the left/start side)
+	 *
+	 * All the removed elements are put into `stash` read-only field. All previous values will be
+	 * wiped out. It's not incremental.
+	 *
+	 * **Important:** Even though the `\array_shift()` was referenced as an example of similar
+	 * functionality. Code inside might not use it from purpose of efficiency, despite the fact
+	 * of the same functionality!
+	 *
+	 * @see \array_shift()
+	 *
+	 * @param int  $amount     Amount of elements to shift
+	 * @param bool $from_start If set to true, then the shift will be done on the left side (start
+	 *                         side), otherwise it's don on the right side (end side). Default true.
+	 *
+	 * @return static
+	 */
+	#[Affecting]
+	public function shift(int $amount = 1, bool $from_start = true): static {
+		$temp_stash = new Box();
+		$box = $from_start
+			?$this
+			:$this->reversed();
+		$i = 0;
+		foreach ($box as $k => $v) {
+			if ($i++ >= $amount) {
+				break;
+			}
+
+			$temp_stash[$k] = $v;
+		}
+
+		foreach ($temp_stash as $key => $val) {
+			unset($this[$key]);
+		}
+
+		// NOTE Important to store the resulting removed elements in the stash, if they would be
+		//      needed for the user.
+		$this->_stash = $temp_stash;
+
+		return $this;
+	}
+
+	/**
+	 * Returns a new Box with reversed position of data
+	 *
+	 * @return Box|array
+	 */
+	public function reversed(): Box|array {
+		return new Box(array_reverse((array) $this));
+	}
+
+	/**
 	 * To a normal PHP array
 	 *
 	 * @inheritdoc
 	 *
-	 * @todo Maybe Box?
 	 * @param bool $with_class Pack with class, default is "false"
 	 *
 	 * @codeCoverageIgnore

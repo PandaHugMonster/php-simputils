@@ -263,4 +263,4 @@ name resolution, than `PropertyBatch`.
 
 ## Future functionality
 
- * Planned to implement `Property` attribute for
+ * Planned to implement `Property` attribute for `fields`. For thin access control.

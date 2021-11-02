@@ -1,3 +1,15 @@
+## Intro
+In the framework some definitions might be defined differently that commonly used:
+ * `field` term is used for defined in class variables (commonly known as properties). 
+   But, excluding those that defined through `Property` or `PropertyBatch` or with help 
+   of `__get()` and `__set()` (so non-runtime defined "variables").
+ * `property` term is used for all the `fields` and defined through `Property` or 
+   `PropertyBatch` or with help of `__get()` and `__set()` (so runtime and non-runtime 
+   defined "variables").
+ * `dynamic property` - is usually in refer to `properties` that having method in behind
+   (Keep in mind that it has nothing to do with PHP "static" functionality in classes,
+   and is not being opposite to it. It's just completely unrelated name)
+
 ## Common info
 1. It's a commonly good practice to consider all the `Property` and `PropertyBatch` as having own
    initialization layer, and to do not use calls to `Property` and `PropertyBatch` fields inside
@@ -46,7 +58,7 @@ Example of Property:
 A few conditions to bear in mind while using properties:
  1. **1 single method** or **2 separate methods** can be used to implement property
  2. `Property` attribute can be applied only on methods (class functions)
-    `PropertyBatch` attribute can be applied only on a class non-static fields
+    `PropertyBatch` attribute can be applied on a class non-static fields and methods.
  3. In case of redefinition of class's magical methods `__get`, `__set` and `__isset`
     the Property trait's "parent" methods must be invoked.
     * This is why it's advised against of direct trait usage, but to use a layer class
@@ -104,9 +116,9 @@ the performance compromises of Properties.
 ### Some suggested good practices
 
  1. It's better to have consistent definition style at least across the same project.
- 2. It's slightly more efficient to use separate methods for getter and setter. And it's
-    a good practice to have consistent implementation format (separate or a single 
-    multi-method) across the same project. Though it's not forbidden to mix those!
+ 2. It's a good practice to specify "name" parameter always for `Property` 
+    and `PropertyBatch`.
+ 3. __-more to come-__
 
 ### Code examples
 
@@ -249,3 +261,6 @@ direct method call of the marked property. It's unresolvable problem of "chicken
 name resolution, than `PropertyBatch`.
 
 
+## Future functionality
+
+ * Planned to implement `Property` attribute for

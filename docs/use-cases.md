@@ -1,6 +1,9 @@
 # List of Use-Cases
 Here are listed and demonstrated examples of possible use-cases.
 
+## Properties
+ 1. [Properties attributes](attributes/Property.md) +
+
 ## Debugging
  1. [In-place quick debugging or PleaseDie](use-cases-debugging.md#In_place_quick_debugging_or_PleaseDie) +D
 

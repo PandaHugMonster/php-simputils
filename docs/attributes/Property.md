@@ -38,18 +38,31 @@ To use properties, there are generally 2 ways:
     but it seems not really efficient way of usage.
  2. Apply Property attribute on your method
 
-----
+[comment]: <> (TODO Fully refine the document)
 
 Example of Property:
 
 ```php
     use spaf\simputils\attributes\Property;
     
-    class Z1 {
+    /**
+     * @property-read mixed $getMyMethodName
+     * @property-read mixed $prop_two
+     */
+    class MyClass {
     
+        protected $_prop_two = null;
+    
+        // In this case the property name would be "getMyMethodName" and it would be read-only
         #[Property]
         public function getMyMethodName() {
             return 'Value of property';
+        }
+        
+        // One more read-only property but with specified name as "prop_two"
+        #[Property('prop_two')]
+        public function getPropTwo() {
+            return $this->_prop_two;
         }
         
     }

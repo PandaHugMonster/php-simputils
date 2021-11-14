@@ -12,7 +12,7 @@
   "type": "library",
   "require": {
     "php": ">=8.0",
-    "yiisoft/yii2": "^2.0"
+    "ext-fileinfo": "*"
   },
   "autoload": {
     "psr-4": {

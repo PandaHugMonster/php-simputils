@@ -162,7 +162,7 @@ trait MetaMagic {
 	/**
 	 * Serialization meta-magic method
 	 *
-	 * @return array
+	 * @return Box|array
 	 */
 	protected function ___serialize(): Box|array {
 		return $this->toArray(PHP::$serialization_mechanism === PHP::SERIALIZATION_TYPE_JSON);
@@ -171,7 +171,7 @@ trait MetaMagic {
 	/**
 	 * De-serialization meta-magic method
 	 *
-	 * @param array $data Data received during deserialization
+	 * @param Box|array $data Data received during deserialization
 	 *
 	 * @return $this
 	 */

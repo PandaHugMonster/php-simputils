@@ -16,6 +16,8 @@ use spaf\simputils\models\DateTime;
  */
 trait DateTimeTrait {
 
+	public static ?string $now_string = null;
+
 	/**
 	 * Returns current datetime object
 	 *
@@ -29,10 +31,7 @@ trait DateTimeTrait {
 	 * @throws \Exception
 	 */
 	public static function now(DateTimeZone|null $tz = null): ?DateTime {
-		$default_now_string = empty(static::$now_string)
-			?'now'
-			:static::$now_string;
-		return static::normalize($default_now_string);
+		return static::normalize(static::$now_string ?? 'now');
 	}
 
 	/**
@@ -99,5 +98,4 @@ trait DateTimeTrait {
 		$dt = static::normalize($dt, $tz, $parsing_fmt);
 		return $dt->format(!empty($fmt)?$fmt:static::FMT_STRINGIFY_DEFAULT);
 	}
-
 }

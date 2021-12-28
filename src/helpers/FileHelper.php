@@ -12,27 +12,32 @@ class FileHelper {
 			return $file->mime_type;
 		}
 
+		$ext = pathinfo($file, PATHINFO_EXTENSION);
+
 		if (!file_exists($file)) {
-			return null;
+			return static::mimeTypeRealMapper('application/x-empty', $ext);
 		}
 
 		$finfo = new finfo(FILEINFO_MIME_TYPE);
 		$orig_mime = $finfo->file($file);
 
-		$ext = pathinfo($file, PATHINFO_EXTENSION);
-
 		return static::mimeTypeRealMapper($orig_mime, $ext);
 	}
 
 	/**
-	 * @param $orig_mime
-	 * @param $ext
+	 * @param string $orig_mime Original mime type
+	 * @param string $ext       File extension
 	 *
-	 * FIX  Just a prototype yet
-	 * @return mixed
+	 * TODO Must be extended further + implement dynamic replacement of the functionality
+	 *      so the per-project settings could be used
+	 *
+	 * @return string
 	 */
-	protected static function mimeTypeRealMapper($orig_mime, $ext) {
+	protected static function mimeTypeRealMapper(string $orig_mime, string $ext): string {
 		if (in_array($orig_mime, ['text/plain', 'application/x-empty'])) {
+			if (in_array($ext, ['json'])) {
+				return 'application/json';
+			}
 			if (in_array($ext, ['js'])) {
 				return 'application/javascript';
 			}

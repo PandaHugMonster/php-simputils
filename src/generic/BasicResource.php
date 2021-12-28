@@ -4,6 +4,7 @@ namespace spaf\simputils\generic;
 
 use spaf\simputils\attributes\Property;
 use spaf\simputils\helpers\DataHelper;
+use spaf\simputils\PHP;
 
 /**
  * Basic resource abstract model
@@ -25,6 +26,8 @@ use spaf\simputils\helpers\DataHelper;
  *
  */
 abstract class BasicResource extends SimpleObject {
+
+	public mixed $processor_settings = null;
 
 	protected ?string $_urn = null;
 	protected bool $_is_local = true;
@@ -76,11 +79,7 @@ abstract class BasicResource extends SimpleObject {
 			return null;
 		}
 
-		return preg_replace(
-			'#/+#',
-			'/',
-			$this->_path.'/'.$this->_name.'.'.$this->_ext
-		);
+		return PHP::glueFullFilePath($this->_path, $this->_name, $this->_ext);
 	}
 
 	#[Property('path')]

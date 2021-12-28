@@ -4,7 +4,9 @@
  * Procedural shortcuts for functionality of `spaf\simputils\PHP`
  */
 namespace spaf\simputils\basic;
+use DateTimeZone;
 use spaf\simputils\models\Box;
+use spaf\simputils\models\DateTime;
 use spaf\simputils\PHP;
 
 /**
@@ -40,10 +42,40 @@ function pd(...$args) {
 }
 
 /**
- * @param $array
+ * @param ?array $array Array that should be wrapped into a box
  *
  * @return \spaf\simputils\models\Box|array
  */
-function box($array): Box|array {
+function box(?array $array = null): Box|array {
 	return PHP::box($array);
 }
+
+/**
+ * Short and quick getting "now" `DateTime` object
+ *
+ * @param \DateTimeZone|null $tz TimeZone
+ *
+ * @return \spaf\simputils\models\DateTime|null
+ *
+ * @throws \Exception Parsing error
+ */
+function now(?DateTimeZone $tz = null): ?DateTime {
+	return PHP::now($tz);
+}
+
+/**
+ * Short and quick getting `DateTime` object of specified date and time
+ *
+ * @param DateTime|string|int $dt  Any date-time representation (DateTime object, string, int)
+ * @param \DateTimeZone|null  $tz  TimeZone
+ * @param string|null         $fmt FROM Format, usually not needed, just if you are using
+ *                                 a special date-time format to parse
+ *
+ * @return DateTime|null
+ *
+ * @throws \Exception Parsing error
+ */
+function ts(DateTime|string|int $dt, ?DateTimeZone $tz = null, string $fmt = null): ?DateTime {
+	return PHP::ts($dt, $tz, $fmt);
+}
+

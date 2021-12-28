@@ -13,5 +13,4 @@ class DateTime extends \DateTime {
 	public function __toString(): string {
 		return DateTimeHelper::stringify($this);
 	}
-
 }

@@ -7,11 +7,15 @@ namespace spaf\simputils;
 
 use ArrayAccess;
 use ArrayObject;
+use DateTimeZone;
 use Exception;
 use Iterator;
 use ReflectionClass;
 use spaf\simputils\components\InternalMemoryCache;
+use spaf\simputils\helpers\DateTimeHelper;
 use spaf\simputils\models\Box;
+use spaf\simputils\models\DateTime;
+use spaf\simputils\models\files\File;
 use spaf\simputils\models\PhpInfo;
 use spaf\simputils\models\Version;
 use spaf\simputils\traits\MetaMagic;
@@ -154,9 +158,9 @@ class PHP {
 		if (empty($class))
 			$class = static::determineSerializedClass($str);
 
-		if (empty($class))
-			// TODO Fix this exception to a more appropriate one
-			throw new Exception('Cannot determine class for deserialization');
+//		if (empty($class))
+//			// TODO Fix this exception to a more appropriate one
+//			throw new Exception('Cannot determine class for deserialization');
 
 		if (is_null($enforced_type)) {
 			$enforced_type = static::$serialization_mechanism;
@@ -164,7 +168,9 @@ class PHP {
 
 		if ($enforced_type === static::SERIALIZATION_TYPE_JSON) {
 			$data = json_decode($str, true);
-
+			if (empty($class)) {
+				return $data;
+			}
 			$dummy = PHP::createDummy($class);
 			if (static::classUsesTrait($class, MetaMagic::class)) {
 				/** @noinspection PhpUndefinedMethodInspection */
@@ -250,52 +256,6 @@ class PHP {
 	}
 
 	/**
-	 * Please Die function
-	 *
-	 * Print out all the supplied params, and then die/exit the runtime.
-	 * Basically, could be considered as a shortcut of sequence of "print_r + die"
-	 *
-	 * Besides that, the functionality can be redefined. For example if you want
-	 * use your own implementation, you can just redefine it on a very early runtime stage
-	 * with the following code:
-	 * ```php
-	 *      use spaf\simputils\Settings;
-	 *      Settings::redefine_pd($your_obj->$method_name(...));
-	 *      // or using anonymous functions
-	 *      Settings::redefine_pd(
-	 *          function (...$args) {
-	 *              echo "MY CALLBACK IS BEING USED\n";
-	 *              print_r($args);
-	 *              die;
-	 *          }
-	 *      );
-	 * ```
-	 *
-	 * @todo implement simple log integration
-	 *
-	 * @param mixed ...$args Anything you want to print out before dying
-	 *
-	 * @see \die()
-	 *
-	 * @see \print_r()
-	 * @return void
-	 */
-	public static function pd(...$args) {
-		if (Settings::isRedefined(Settings::REDEFINED_PD)) {
-			$callback = Settings::getRedefined(Settings::REDEFINED_PD);
-			$res = (bool) $callback(...$args);
-		} else {
-			foreach ($args as $arg) {
-				print_r($arg);
-				echo "\n";
-			}
-			$res = true;
-		}
-		if (static::$allow_dying && $res)
-			die(); // @codeCoverageIgnore
-	}
-
-	/**
 	 * Turn bool true or false into string "true" or "false"
 	 *
 	 * Opposite functionality of {@see \spaf\simputils\PHP::asBool()}.
@@ -310,6 +270,8 @@ class PHP {
 		return $var?'true':'false';
 	}
 
+	//// Start Files related
+
 	/**
 	 * Delete file or directory
 	 *
@@ -318,38 +280,42 @@ class PHP {
 	 * in this case the function will delete only regular files, and raise exception if directory
 	 * path is supplied.
 	 *
-	 * @param string|null $file_path   File path
-	 * @param bool        $recursively Recursively delete files (only in case of directories)
-	 * @param bool        $strict      If true supplied - then exception is raised in case of
-	 *                                 directory path supplied instead of a regular file path.
+	 * @param null|string|File $file        File path
+	 * @param bool             $recursively Recursively delete files (only in case of directories)
+	 * @param bool             $strict      If true supplied - then exception is raised in case of
+	 *                                      directory path supplied instead of a regular file path.
 	 *
 	 * @return bool|null
 	 * @throws \Exception Exception if `$strict` param is true and the file path provided is
 	 *                    a directory.
 	 */
 	public static function rmFile(
-		?string $file_path,
+		null|string|File $file,
 		bool $recursively = false,
 		bool $strict = false
 	): ?bool {
-		if (empty($file_path)) {
+		if (empty($file)) {
 			return null;
 		}
 
-		if (!file_exists($file_path)) {
+		if ($file instanceof File) {
+			$file = $file->name_full;
+		}
+
+		if (!file_exists($file)) {
 			return true;
 		}
 
-		if (is_dir($file_path)) {
+		if (is_dir($file)) {
 			if ($strict) {
 				// TODO Fix exception
-				throw new Exception("{$file_path} is a directory, and a strict mode is on");
+				throw new Exception("{$file} is a directory, and a strict mode is on");
 			} else {
-				return static::rmDir($file_path, $recursively);
+				return static::rmDir($file, $recursively);
 			}
 		}
 
-		return unlink($file_path);
+		return unlink($file);
 	}
 
 	/**
@@ -503,7 +469,8 @@ class PHP {
 	/**
 	 * @param string|null $file_path File path
 	 *
-	 * @todo Implement parser callback parameter
+	 * FIX  Replace with File infrastructure
+	 *
 	 * @return string|false|null
 	 */
 	public static function getFileContent(?string $file_path = null): null|string|false {
@@ -512,6 +479,46 @@ class PHP {
 
 		return file_get_contents($file_path);
 	}
+
+	/**
+	 * Splits full file path on 3 components:
+	 *  * Directory
+	 *  * File name without extension and directory
+	 *  * Extension
+	 *
+	 * @param string $path Full file path
+	 *
+	 * @return array Array with a first item "directory",
+	 *               then second "filename" and third "extension".
+	 * @see \pathinfo()
+	 */
+	public static function splitFullFilePath(string $path): array {
+		$tmp_parts = pathinfo($path);
+		return [
+			$tmp_parts['dirname'] ?? '',
+			$tmp_parts['filename'] ?? '',
+			$tmp_parts['extension'] ?? ''
+		];
+	}
+
+	/**
+	 * Opposite of `splitFullFilePath()`
+	 *
+	 * @param string $dir  Directory
+	 * @param string $name File name without extension and directory
+	 * @param string $ext  Extension
+	 *
+	 * @see splitFullFilePath()
+	 * @return string
+	 */
+	public static function glueFullFilePath(string $dir, string $name, string $ext): string {
+		if (!empty($ext)) {
+			$ext = ".{$ext}";
+		}
+		return "{$dir}/{$name}{$ext}";
+	}
+
+	//// End Files related
 
 	/**
 	 * Tries to recognize string or other types of value as bool TRUE or FALSE
@@ -550,7 +557,7 @@ class PHP {
 	}
 
 	/**
-	 * @return \spaf\simputils\models\Version|string
+	 * @return Version|string
 	 */
 	public static function version(): Version|string {
 		return new Version(phpversion());
@@ -714,17 +721,6 @@ class PHP {
 	}
 
 	/**
-	 *
-	 * @todo EXPERIMENTAL
-	 * @todo Rename
-	 *
-	 * @return bool
-	 */
-//	public static function in($item_a, $item_b, $a, $b): bool {
-//
-//	}
-
-	/**
 	 * Determines whether value is array-alike (can be treated as array)
 	 *
 	 * Basically it checks presence of {@see Iterator} + {@see ArrayAccess} interfaces (must have
@@ -759,13 +755,96 @@ class PHP {
 		return false;
 	}
 
+	//// Methods with shortcutting into "basic.php" file
+
+	/**
+	 * Please Die function
+	 *
+	 * Print out all the supplied params, and then die/exit the runtime.
+	 * Basically, could be considered as a shortcut of sequence of "print_r + die"
+	 *
+	 * Besides that, the functionality can be redefined. For example if you want
+	 * use your own implementation, you can just redefine it on a very early runtime stage
+	 * with the following code:
+	 * ```php
+	 *      use spaf\simputils\Settings;
+	 *      Settings::redefine_pd($your_obj->$method_name(...));
+	 *      // or using anonymous functions
+	 *      Settings::redefine_pd(
+	 *          function (...$args) {
+	 *              echo "MY CALLBACK IS BEING USED\n";
+	 *              print_r($args);
+	 *              die;
+	 *          }
+	 *      );
+	 * ```
+	 *
+	 * @todo implement simple log integration
+	 *
+	 * @param mixed ...$args Anything you want to print out before dying
+	 *
+	 * @see \die()
+	 *
+	 * @see \print_r()
+	 * @return void
+	 */
+	public static function pd(...$args) {
+		if (Settings::isRedefined(Settings::REDEFINED_PD)) {
+			$callback = Settings::getRedefined(Settings::REDEFINED_PD);
+			$res = (bool) $callback(...$args);
+		} else {
+			foreach ($args as $arg) {
+				print_r($arg);
+				echo "\n";
+			}
+			$res = true;
+		}
+		if (static::$allow_dying && $res)
+			die(); // @codeCoverageIgnore
+	}
+
 	/**
 	 * @param ?array $array Array, elements of which should be used as elements of the newly created
 	 *                      box.
+	 *
+	 * TODO Implement transparent Box supplying instead of array?
 	 *
 	 * @return Box|array
 	 */
 	public static function box(?array $array = null): Box|array {
 		return new Box($array);
+	}
+
+	/**
+	 * Just a shortcut for `DateTimeHelper::now`
+	 *
+	 * @param \DateTimeZone|null $tz TimeZone
+	 *
+	 * @return DateTime|null
+	 *
+	 * @throws \Exception Parsing error
+	 */
+	public static function now(?DateTimeZone $tz = null): ?DateTime {
+		return DateTimeHelper::now($tz);
+	}
+
+	/**
+	 * Just a simplified shortcut for `DateTimeHelper::normalize`
+	 *
+	 * @param DateTime|string|int $dt  Any date-time representation (DateTime object, string, int)
+	 * @param \DateTimeZone|null  $tz  TimeZone
+	 * @param string|null         $fmt FROM Format, usually not needed, just if you are using
+	 *                                 a special date-time format to parse
+	 *
+	 * @return DateTime|null
+	 *
+	 * @throws \Exception Parsing error
+	 */
+	public static function ts(
+		DateTime|string|int $dt,
+		?DateTimeZone $tz = null,
+		string $fmt = null
+	): ?DateTime {
+		return DateTimeHelper::normalize($dt, $tz, $fmt);
 	}
 }

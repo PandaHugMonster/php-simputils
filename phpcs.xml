@@ -43,6 +43,8 @@
 		<properties>
 			<property name="spacing" value="0" />
 		</properties>
+		<exclude name="Generic.WhiteSpace.ArbitraryParenthesesSpacing.SpaceAfterOpen" />
+		<exclude name="Generic.WhiteSpace.ArbitraryParenthesesSpacing.SpaceBeforeClose" />
 	</rule>
 	<rule ref="Generic.WhiteSpace.ScopeIndent">
 		<properties>

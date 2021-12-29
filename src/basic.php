@@ -1,9 +1,11 @@
 <?php
 
 /**
- * Procedural shortcuts for functionality of `spaf\simputils\PHP`
+ * Procedural shortcuts for functionality of different core classes
+ * like `spaf\simputils\PHP`, `spaf\simputils\Str`, etc.
  */
 namespace spaf\simputils\basic;
+
 use DateTimeZone;
 use spaf\simputils\models\Box;
 use spaf\simputils\models\DateTime;
@@ -78,4 +80,3 @@ function now(?DateTimeZone $tz = null): ?DateTime {
 function ts(DateTime|string|int $dt, ?DateTimeZone $tz = null, string $fmt = null): ?DateTime {
 	return PHP::ts($dt, $tz, $fmt);
 }
-

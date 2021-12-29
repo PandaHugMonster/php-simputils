@@ -61,7 +61,9 @@ use const JSON_ERROR_NONE;
  * with execution speed. Most likely, usage of Box instead of array for non-gigantic "arrays"
  * should not compromise your performance. THOUGH keep in mind, Box is not as efficient as arrays.
  * Especially if you will be implementing your own Box class and overriding some of it's methods.
- * @todo Checkout and make sure all works efficiently enough etc.
+ *
+ * TODO Checkout and make sure all works efficiently enough etc.
+ * FIX  Reformat the file. Extract `Str`, `File` and other stuff to corresponding classes.
  *
  *
  * @see Box

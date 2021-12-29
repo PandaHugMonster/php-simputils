@@ -8,6 +8,8 @@ use spaf\simputils\exceptions\NotImplementedYet;
 use spaf\simputils\generic\BasicResource;
 use spaf\simputils\generic\BasicResourceApp;
 use spaf\simputils\helpers\FileHelper;
+use spaf\simputils\models\files\apps\CsvProcessor;
+use spaf\simputils\models\files\apps\DotenvProcessor;
 use spaf\simputils\models\files\apps\JsonProcessor;
 use spaf\simputils\models\files\apps\TextProcessor;
 use spaf\simputils\PHP;
@@ -40,8 +42,19 @@ use ValueError;
 class File extends BasicResource {
 
 	public static array $processors = [
+		// Generic text processor
 		'text/plain' => TextProcessor::class,
+
+		// JSON processors
 		'application/json' => JsonProcessor::class,
+
+		// CSV processors
+		'text/csv' => CsvProcessor::class,
+		'application/csv' => CsvProcessor::class,
+
+		// DotEnv processor
+		'text/dotenv' => DotenvProcessor::class,
+		'application/dotenv' => DotenvProcessor::class,
 	];
 
 	/**

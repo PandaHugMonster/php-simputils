@@ -31,6 +31,13 @@ class TextProcessor extends BasicResourceApp {
 		return $content;
 	}
 
+	/**
+	 *
+	 * @param mixed          $stream Stream/Pointer/FileDescriptor/Path etc.
+	 * @param mixed          $data   Data to store
+	 * @param ?BasicResource $file   File instance
+	 *
+	 */
 	public static function setContent(mixed $stream, $data, ?BasicResource $file = null): void {
 		if (is_string($stream)) {
 			$fd = fopen($stream, 'w');

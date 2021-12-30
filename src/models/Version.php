@@ -63,8 +63,9 @@ use spaf\simputils\versions\DefaultVersionParser;
  *
  * ```
  *
- * @todo Replace with interface
- * @todo In future versions implement "format" method like for dates
+ * TODO Replace with interface
+ * TODO In future versions implement "format" method like for dates
+ * FIX  Implement option to display with software name (but compatibly with parsing)
  * @property \spaf\simputils\generic\BasicVersionParser $parser
  *
  * @see https://www.php.net/manual/en/function.version-compare.php

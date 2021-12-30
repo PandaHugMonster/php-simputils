@@ -1,11 +1,16 @@
 <?php
+
 namespace spaf\simputils\models\files\apps\settings;
 
 use Exception;
 use spaf\simputils\generic\SimpleObject;
 
 /**
+ *
+ *
  * FIX  Add strict mode at some point
+ * FIX  Add wrapping up/splitting of comment-extensions in case if it's too long
+ *
  */
 class DotEnvSettings extends SimpleObject {
 
@@ -29,7 +34,7 @@ class DotEnvSettings extends SimpleObject {
 	public bool $collapse_excessive_underscores = true;
 
 	/**
-	 * @var ?string $always_wrap_values Always wrapping values into quote symbol specified.
+	 * @var ?string $always_quote_values Always wrapping values into quote symbol specified.
 	 *                                  It would be ignored if the value having first and last
 	 *                                  symbol of double-quote or single-quote (both must be
 	 *                                  matching).
@@ -39,7 +44,29 @@ class DotEnvSettings extends SimpleObject {
 	 *                                  ignored always, and auto-wrapping would not happen in any
 	 *                                  case.
 	 */
-	public ?string $always_wrap_values = '"';
+	public ?string $always_quote_values = '"';
+
+	/**
+	 * @var bool $auto_type_hinting Prefixing the line of param and it's value with
+	 *                              a comment-extension of `ExtTypeHint`, which will suggest
+	 *                              data-type of the value.
+	 *                              **Important:** The value must not be prematurely casted to
+	 *                              string, otherwise you always as a type will receive "string".
+	 *                              If this option is true - always supply original value if
+	 *                              possible, otherwise it would be treated as string!
+	 */
+	public bool $auto_type_hinting = false;
+
+	/**
+	 * @var bool $show_comments By default disabled, if enabled - then comments will be part
+	 *                          of the resulting array-content. It's more like introspection or
+	 *                          debugging option.
+	 *                          **Important:** Only separate line comments are available, any
+	 *                          "one-liner" comments after the value - will be ignored completely
+	 *                          and you would not see them in the array! Usually "one-liner"
+	 *                          comments are not recommended.
+	 */
+	public bool $show_comments = false;
 
 	/**
 	 * Parameter name normalizer
@@ -106,7 +133,7 @@ class DotEnvSettings extends SimpleObject {
 	}
 
 	public function normalizeValue($value) {
-		$q = $this->always_wrap_values;
+		$q = $this->always_quote_values;
 		if (!is_string($value)) {
 			$value = "{$value}";
 		}

@@ -69,6 +69,8 @@
 		</properties>
 	</rule>
 	<rule ref="PEAR.Functions.FunctionCallSignature">
+		<exclude name="PEAR.Functions.FunctionCallSignature.ContentAfterOpenBracket" />
+		<exclude name="PEAR.Functions.FunctionCallSignature.CloseBracketLine" />
 		<properties>
 			<property name="requiredSpacesAfterOpen" value="0" />
 			<property name="requiredSpacesBeforeClose" value="0" />
@@ -117,5 +119,8 @@
 		</properties>
 		<exclude name="Squiz.WhiteSpace.FunctionSpacing.Before" />
 		<exclude name="Squiz.Commenting.FunctionComment.Missing" />
+	</rule>
+	<rule ref="Squiz.Classes.ValidClassName.MissingBrace">
+		<exclude name="Squiz.Classes.ValidClassName.MissingBrace" />
 	</rule>
 </ruleset>

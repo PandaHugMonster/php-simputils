@@ -2,6 +2,8 @@
 
 namespace spaf\simputils\generic;
 
+use spaf\simputils\attributes\Property;
+
 /**
  * Basic DotEnv Comment Extension class
  *
@@ -14,12 +16,17 @@ namespace spaf\simputils\generic;
  *          if used, so please do not use spaces in comment-extension name)
  *       4. The last thing for common format is space (at least 1)
  *       5. Anything that goes after - is defined by the extensions!
+ *
+ * @property-read ?string $value Only for "PREFIX_ROW", in case if the comment-extension was used
+ *                               as a wrapper for the value.
  */
 abstract class BasicDotEnvCommentExt extends SimpleObject {
 
 	// IMP  Do not redefine them! It will be marked as final at php 8.1 version
 	const PREFIX_GLOBAL = '#:';
 	const PREFIX_ROW = '#:#';
+
+	protected mixed $_value;
 
 	/**
 	 * Returns unique name of this comment-extension
@@ -66,7 +73,37 @@ abstract class BasicDotEnvCommentExt extends SimpleObject {
 			$params_str = " {$params_str}";
 		}
 
-		return "{$this->getPrefix()} {$name}{$params_str}";
+		return "{$this->getPrefix()}\t{$name}{$params_str}";
+	}
+
+	/**
+	 * Gets wrapped value
+	 *
+	 * Applicable only for "PREFIX_ROW"
+	 *
+	 * The value should be defined by the target class
+	 *
+	 * @return mixed|null
+	 */
+	#[Property('value')]
+	public function getValue(): ?string {
+		return $this->getPrefix() === static::PREFIX_ROW
+			?$this->_value
+			:null;
+	}
+
+	/**
+	 * Wrap the value directly in place
+	 *
+	 * @param mixed $value     Value to wrap
+	 * @param mixed ...$params Params for the constructor
+	 *
+	 * @return self
+	 */
+	public static function wrap(mixed $value, mixed ...$params): static {
+		$obj = new static(...$params);
+		$obj->_value = $value;
+		return $obj;
 	}
 
 	public function __toString(): string {

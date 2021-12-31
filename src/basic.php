@@ -9,6 +9,7 @@ namespace spaf\simputils\basic;
 use DateTimeZone;
 use spaf\simputils\models\Box;
 use spaf\simputils\models\DateTime;
+use spaf\simputils\models\files\File;
 use spaf\simputils\PHP;
 
 /**
@@ -79,4 +80,8 @@ function now(?DateTimeZone $tz = null): ?DateTime {
  */
 function ts(DateTime|string|int $dt, ?DateTimeZone $tz = null, string $fmt = null): ?DateTime {
 	return PHP::ts($dt, $tz, $fmt);
+}
+
+function fl(null|string|File $file = null, $app = null): ?File {
+	return PHP::file($file, $app);
 }

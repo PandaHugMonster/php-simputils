@@ -5,12 +5,15 @@ namespace spaf\simputils;
 
 
 use Closure;
-use spaf\simputils\attributes\Deprecated;
+use spaf\simputils\attributes\markers\Deprecated;
 use spaf\simputils\models\Version;
 use ValueError;
 
 /**
  * Simputils Settings class
+ *
+ * FIX  Important - this class most likely is obsolete at this point. All of it's functionality will
+ *      get migrated/redistributed over more fitting places.
  *
  * @package spaf\simputils
  */

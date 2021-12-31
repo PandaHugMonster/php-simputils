@@ -2,8 +2,10 @@
 
 namespace spaf\simputils\traits;
 
+use ReflectionAttribute;
 use ReflectionClass;
 use ReflectionMethod;
+use ReflectionObject;
 use ReflectionProperty;
 use ReflectionUnionType;
 use spaf\simputils\attributes\Property;
@@ -46,7 +48,9 @@ use function ucfirst;
  * it will be so negligible, that almost always it would be much more efficient to fix/optimize
  * the "complexities" of your own solution/code first.
  *
- * FIX  To drastically optimize
+ * TODO Implement normal PropertyReflection class!
+ *
+ * FIX  !!! Absolute MESS! Fully refactor and improve, but do not damage functionality
  */
 trait PropertiesTrait {
 
@@ -153,35 +157,12 @@ trait PropertiesTrait {
 			// NOTE PropertyBatch part
 			if (!empty($attr = $item->getAttributes(PropertyBatch::class)[0] ?? null)) {
 				$args = $attr->getArguments();
-				$expected_names = $args[3] ?? null;
+				$expected_names = $this->_propertyBatchExpectedNames($item, $attr);
 
-				if (empty($expected_names)) {
-					$item->setAccessible(true);
-					$_group = [];
-					$expected_names = [];
-					$default_values = [];
-					if ($item instanceof ReflectionMethod) {
-						$_group = (array) $item->invoke($this);
-					} else if ($item instanceof ReflectionProperty) {
-						$_group = (array) $item->getValue($this);
-					}
-					$item->setAccessible(false);
-					if (!empty($_group)) {
-						foreach ($_group as $k => $v) {
-							if (is_numeric($k)) {
-								$expected_names[] = $v;
-							} else {
-								$default_values[$k] = $v;
-								$expected_names[] = $k;
-							}
-
-						}
-					}
-				}
 				if (in_array($name, $expected_names)) {
 					$method_name = '____propertyBatchMethod';
 
-					$access_type = $args[0] ?? $args['type'] ?? PropertyBatch::TYPE_BOTH;
+					$access_type = $this->_propertyBatchAccessType($item, $attr);
 					$value_store_ref = $args[2] ?? $args['storage'] ?? '____property_batch_storage';
 					if ($value_store_ref === PropertyBatch::STORAGE_SELF) {
 						$value_store = &$this;
@@ -269,45 +250,9 @@ trait PropertiesTrait {
 				if (!empty($attr = $item->getAttributes(Property::class)[0] ?? null)) {
 					if (!empty($attr)) {
 						/** @var \ReflectionAttribute $attr */
-						$args = $attr->getArguments();
 
-						$expected_name = $args[0] ?? $args['name'] ?? $item->name;
-						if ($name === $expected_name) {
-							$method_type = $args[1] ?? $args['type'] ?? null;
-
-							if (!empty($method_type)) {
-								$method_type = strtolower($method_type);
-							} else {
-								$ref_ret_type = $item?->getReturnType() ?? null;
-								if ($ref_ret_type instanceof ReflectionUnionType) {
-									$r = [];
-									foreach ($ref_ret_type->getTypes() as $ref_ret_type_item) {
-										$r[] = $ref_ret_type_item;
-									}
-									$return_type = implode('|', $r);
-								} else {
-									$return_type = $ref_ret_type?->getName() ?? null;
-								}
-
-								$is_setter = (bool) $item->getNumberOfParameters()
-									|| $return_type === 'void'
-									|| $return_type === 'never';
-								$is_getter = !$is_setter || ($is_setter
-										&& !is_null($return_type)
-										&& $return_type !== 'void'
-										&& $return_type !== 'never');
-
-								if ($is_setter && $is_getter) {
-									// BOTH
-									$method_type = Property::TYPE_BOTH;
-								} else if ($is_getter) {
-									// GET
-									$method_type = Property::TYPE_GET;
-								} else if ($is_setter) {
-									// SET
-									$method_type = Property::TYPE_SET;
-								}
-							}
+						if ($name === $this->_propertyExpectedName($item, $attr)) {
+							$method_type = $this->_propertyMethodAccessType($item, $attr);
 
 							if ($method_type === Property::TYPE_BOTH) {
 								if (!isset($index[$key_type = $ref_name.'#'.Property::TYPE_GET])) {
@@ -371,5 +316,150 @@ trait PropertiesTrait {
 		}
 
 		throw new PropertyDoesNotExist('No such property '.$name);
+	}
+
+	private function _propertyBatchExpectedNames($ref, \ReflectionAttribute $attr): ?array {
+		$args = $attr->getArguments();
+
+		$expected_names = $args[3] ?? null;
+
+		if (empty($expected_names)) {
+			$ref->setAccessible(true);
+			$_group = [];
+			$expected_names = [];
+			$default_values = [];
+			if ($ref instanceof ReflectionMethod) {
+				$_group = (array) $ref->invoke($this);
+			} else if ($ref instanceof ReflectionProperty) {
+				$_group = (array) $ref->getValue($this);
+			}
+			$ref->setAccessible(false);
+			if (!empty($_group)) {
+				foreach ($_group as $k => $v) {
+					if (is_numeric($k)) {
+						$expected_names[] = $v;
+					} else {
+						$default_values[$k] = $v;
+						$expected_names[] = $k;
+					}
+
+				}
+			}
+		}
+
+		return $expected_names;
+	}
+
+	private function _propertyExpectedName($ref, \ReflectionAttribute $attr) {
+		$args = $attr->getArguments();
+		return $args[0] ?? $args['name'] ?? $ref->name;
+	}
+
+	private function _propertyBatchAccessType($ref, \ReflectionAttribute $attr) {
+		$args = $attr->getArguments();
+		return $args[0] ?? $args['type'] ?? PropertyBatch::TYPE_BOTH;
+	}
+
+	private function _propertyMethodAccessType($ref, \ReflectionAttribute $attr) {
+		$args = $attr->getArguments();
+
+		$method_type = $args[1] ?? $args['type'] ?? null;
+
+		if (!empty($method_type)) {
+			$method_type = strtolower($method_type);
+		} else {
+			$ref_ret_type = $ref?->getReturnType() ?? null;
+			if ($ref_ret_type instanceof ReflectionUnionType) {
+				$r = [];
+				foreach ($ref_ret_type->getTypes() as $ref_ret_type_item) {
+					$r[] = $ref_ret_type_item;
+				}
+				$return_type = implode('|', $r);
+			} else {
+				$return_type = $ref_ret_type?->getName() ?? null;
+			}
+
+			$is_setter = (bool) $ref->getNumberOfParameters()
+				|| $return_type === 'void'
+				|| $return_type === 'never';
+			$is_getter = !$is_setter || ($is_setter
+					&& !is_null($return_type)
+					&& $return_type !== 'void'
+					&& $return_type !== 'never');
+
+			if ($is_setter && $is_getter) {
+				// BOTH
+				$method_type = Property::TYPE_BOTH;
+			} else if ($is_getter) {
+				// GET
+				$method_type = Property::TYPE_GET;
+			} else if ($is_setter) {
+				// SET
+				$method_type = Property::TYPE_SET;
+			}
+		}
+
+		return $method_type;
+	}
+
+	public function __debugInfo(): ?array {
+		$ref = new ReflectionObject($this);
+		$res = [];
+		foreach ($ref->getProperties() as $property) {
+			$name = $property->name;
+
+			$property->setAccessible(true);
+			$value = $property->getValue($this);
+			$property->setAccessible(false);
+
+			$name = "\${$name}";
+			if ($property->isStatic()) {
+				$name = "static::{$name}";
+			}
+
+			$res[$name] = $value;
+		}
+		$ref_class = new ReflectionClass($this);
+		$items = $ref_class->getMethods();
+		foreach ($items as $item) {
+			$attr = $item->getAttributes(Property::class)[0] ?? null;
+			if (!empty($attr)) {
+				$expected_name = $this->_propertyExpectedName($item, $attr);
+				$method_type = $this->_propertyMethodAccessType($item, $attr);
+
+				if ($this->_debugOutputDisabled($item, $attr)) {
+					$value = '<..skipped..>';
+				} else {
+					// Do not optimize additionally. This code must not be called if debugOutput
+					// is disabled!
+					$value = $this->{$expected_name};
+				}
+				if ($method_type === Property::TYPE_GET || $method_type === Property::TYPE_BOTH) {
+					$res["\${$expected_name}"] = $value;
+				}
+			}
+		}
+		$items = array_merge($ref_class->getProperties(), $ref_class->getMethods());
+		foreach ($items as $item) {
+			$attr = $item->getAttributes(PropertyBatch::class)[0] ?? null;
+			if (!empty($attr)) {
+				$expected_names = $this->_propertyBatchExpectedNames($item, $attr);
+				$access_type = $this->_propertyBatchAccessType($item, $attr);
+
+				if ($access_type === Property::TYPE_GET || $access_type === Property::TYPE_BOTH) {
+					foreach ($expected_names as $expected_name) {
+						$res["\${$expected_name}"] = $this->{$expected_name};
+					}
+				}
+			}
+		}
+		return $res;
+	}
+
+	private function _debugOutputDisabled($ref, ReflectionAttribute $attr): bool {
+		$args = $attr->getArguments();
+		return
+			(isset($args['debug_output']) && $args['debug_output'] === false) ||
+			(isset($args[2]) && $args[2] === false);
 	}
 }

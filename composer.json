@@ -12,7 +12,8 @@
   "type": "library",
   "require": {
     "php": ">=8.0",
-    "ext-fileinfo": "*"
+    "ext-fileinfo": "*",
+    "ramsey/uuid": "*"
   },
   "autoload": {
     "psr-4": {

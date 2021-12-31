@@ -244,7 +244,7 @@ class File extends BasicResource {
 		$this->_app = $var;
 	}
 
-	#[Property('content')]
+	#[Property('content', debug_output: false)]
 	protected function getContent(): mixed {
 		return $this->app->getContent($this->name_full, $this);
 	}
@@ -267,7 +267,7 @@ class File extends BasicResource {
 		return $this->_backup_file;
 	}
 
-	#[Property('backup_content')]
+	#[Property('backup_content', debug_output: false)]
 	protected function getBackupContent(): ?string {
 		if (file_exists($this->_backup_file)) {
 			return (new static($this->_backup_file))->content;

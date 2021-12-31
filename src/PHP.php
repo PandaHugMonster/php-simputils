@@ -12,12 +12,15 @@ use Exception;
 use Iterator;
 use ReflectionClass;
 use spaf\simputils\components\InternalMemoryCache;
+use spaf\simputils\generic\BasicInitConfig;
 use spaf\simputils\helpers\DateTimeHelper;
 use spaf\simputils\models\Box;
 use spaf\simputils\models\DateTime;
 use spaf\simputils\models\files\File;
+use spaf\simputils\models\InitConfig;
 use spaf\simputils\models\PhpInfo;
 use spaf\simputils\models\Version;
+use spaf\simputils\special\CodeBlocksCacheIndex;
 use spaf\simputils\traits\MetaMagic;
 use Throwable;
 use function array_merge;
@@ -94,6 +97,68 @@ class PHP {
 	public static bool $use_box_instead_of_array = true;
 
 	public static bool $allow_dying = true;
+
+	/**
+	 * Initializer of the framework
+	 *
+	 * Should be called just once by any code-group (Main app, independent libraries)
+	 *
+	 * If init can not be called multiple times for the same `$name` (even for the main "app").
+	 * If this is done, it will raise an Exception.
+	 *
+	 * It's suggested to provide your configs through the `InitConfig` object (please feel free to
+	 * extend it by your class for any purpose).
+	 *
+	 * IMP  For security reasons and efficiency-wise strongly recommended to call `PHP::init()`
+	 *      as early as possible in your main app. It should be the very first thing to be called
+	 *      right after the "composer autoloader".
+	 *
+	 * IMP  Modules/Libraries/Extensions and any external code that calls `PHP::init()` without
+	 *      `$name` or with value of "app" - must be considered as unsafe!
+	 *
+	 * IMP  `$name` argument must be always supplied (through `$config` or through `$name`).
+	 *      For the security reasons name must be unique and during runtime persist as final.
+	 *      So multiple libraries can not use the same name.
+	 *
+	 * NOTE `$name` parameter can be omit, in this case code will be consider as the "app code",
+	 *      and not "module/library/extension code". Modules/Libraries/Extensions MUST NEVER call
+	 *      `PHP::init()` without $name parameter, and not use reserved word "app".
+	 *      If you are developing the "leaf" code (main app, and not a library) - then
+	 *      you should not specify `$name` or you can set it to "app" which is being default.
+	 *
+	 */
+	public static function init(
+		?BasicInitConfig $config = null,
+		?string $name = null,
+		?string $code_root = null,
+		?string $working_dir = null
+	) {
+		if (empty($config)) {
+			$config = new InitConfig();
+		}
+		$config->name = $name ?? $config->name;
+		$code_root = $code_root ?? $config->code_root;
+		$working_dir = $working_dir ?? $config->working_dir;
+
+
+		$config->code_root = $code_root ?? debug_backtrace()[0]['file'];
+		$config->working_dir = $working_dir ?? $config->code_root;
+
+		// FIX  Implement code below into config through Properties
+		if (!is_dir($config->code_root)) {
+			$config->code_root = dirname($config->code_root);
+		}
+		if (!is_dir($config->working_dir)) {
+			$config->working_dir = dirname($config->working_dir);
+		}
+		////
+
+		CodeBlocksCacheIndex::registerInitBlock($config);
+	}
+
+	public static function getInitConfig(?string $name = null): ?BasicInitConfig {
+		return CodeBlocksCacheIndex::getInitBlock($name);
+	}
 
 	/**
 	 * Serialize any data
@@ -801,8 +866,9 @@ class PHP {
 			}
 			$res = true;
 		}
-		if (static::$allow_dying && $res)
+		if (static::$allow_dying && $res) {
 			die(); // @codeCoverageIgnore
+		}
 	}
 
 	/**
@@ -848,5 +914,9 @@ class PHP {
 		string $fmt = null
 	): ?DateTime {
 		return DateTimeHelper::normalize($dt, $tz, $fmt);
+	}
+
+	public static function file(null|string|File $file = null, $app = null): ?File {
+		return new File($file, $app);
 	}
 }

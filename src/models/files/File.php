@@ -246,7 +246,7 @@ class File extends BasicResource {
 
 	#[Property('content', debug_output: false)]
 	protected function getContent(): mixed {
-		return $this->app->getContent($this->name_full, $this);
+		return $this->app::getContent($this->name_full, $this);
 	}
 
 	#[Property('content')]
@@ -254,7 +254,7 @@ class File extends BasicResource {
 		if ($this->is_backup_preserved) {
 			$this->preserveFile();
 		}
-		$this->app->setContent($this->name_full, $data, $this);
+		$this->app::setContent($this->name_full, $data, $this);
 	}
 
 	#[Property('exists')]

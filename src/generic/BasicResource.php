@@ -75,7 +75,7 @@ abstract class BasicResource extends SimpleObject {
 
 	#[Property('name_full')]
 	protected function getNameFull(): ?string {
-		if (empty($this->_path) || empty($this->_name)) {
+		if (empty($this->_path) && empty($this->_name) && empty($this->_ext)) {
 			return null;
 		}
 

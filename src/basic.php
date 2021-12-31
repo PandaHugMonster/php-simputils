@@ -1,5 +1,5 @@
 <?php
-
+// TODO @noinspection Generic.NamingConventions.CamelCapsFunctionName.NotCamelCaps
 /**
  * Procedural shortcuts for functionality of different core classes
  * like `spaf\simputils\PHP`, `spaf\simputils\Str`, etc.
@@ -84,4 +84,33 @@ function ts(DateTime|string|int $dt, ?DateTimeZone $tz = null, string $fmt = nul
 
 function fl(null|string|File $file = null, $app = null): ?File {
 	return PHP::file($file, $app);
+}
+
+/**
+ * Getting Environment Variable value
+ *
+ * @param ?string $name   Variable name
+ * @param bool    $strict Is strict mode (`$name` must be exactly as variable specified, otherwise
+ *                        exception will be raised)
+ *
+ * @return mixed returns value of the environment variable or if no `name` is provided returns all
+ *               the env variables.
+ * @see PHP::allEnvs()
+ */
+function env(?string $name = null, bool $strict = true): mixed {
+	if (empty($name)) {
+		return PHP::allEnvs();
+	}
+	return PHP::env($name, $strict);
+}
+
+/**
+ * @param string $name
+ * @param mixed $value
+ * @param bool $strict
+ *
+ * @see PHP::envSet()
+ */
+function env_set(string $name, mixed $value, bool $strict = true) {
+	PHP::envSet($name, $value, $strict);
 }

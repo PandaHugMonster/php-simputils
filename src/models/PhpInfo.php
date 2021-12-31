@@ -64,6 +64,7 @@ class PhpInfo extends Box {
 	/**
 	 * Defining the properties and it's defaults
 	 *
+	 * TODO Do we need this method?
 	 * @return array|\spaf\simputils\models\Box
 	 * @see PropertyBatch
 	 */
@@ -152,7 +153,9 @@ class PhpInfo extends Box {
 		$data[constants::KEY_XDEBUG_VERSION] = !empty($v = phpversion('xdebug'))
 			?new Version($v, 'xdebug')
 			:null; //@codeCoverageIgnore
-		$data[constants::KEY_ENV_VARS] = getenv();
+		// IMP  Due to weird and volatile $_ENV, for PhpInfo `getenv()` is used,
+		//      what is thread-unsafe.
+		$data[constants::KEY_ENV_VARS] = PHP::allEnvs();
 		$data[constants::KEY_SERVER_VAR] = $_SERVER;
 
 		$loaded_extensions = get_loaded_extensions();
@@ -329,5 +332,22 @@ class PhpInfo extends Box {
 			}
 		}
 		return implode('|', $both);
+	}
+
+	/**
+	 * Updating in real time `PhpInfo` env var value
+	 *
+	 * Strongly recommended to avoid using it directly.
+	 * Use `PHP::envSet()` or `\spaf\simputils\basic\env_set()` instead!
+	 *
+	 * @param string $key Name of the var
+	 * @param mixed  $val Value to set to the var
+	 *
+	 * @see \spaf\simputils\basic\env_set()
+	 * @see PHP::envSet()
+	 *
+	 */
+	public function updateEnvVar(string $key, mixed $val): void {
+		$this['env_vars'][$key] = $val;
 	}
 }

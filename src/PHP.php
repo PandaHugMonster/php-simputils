@@ -11,6 +11,7 @@ use DateTimeZone;
 use Exception;
 use Iterator;
 use ReflectionClass;
+use spaf\simputils\attributes\markers\Shortcut;
 use spaf\simputils\components\InternalMemoryCache;
 use spaf\simputils\generic\BasicInitConfig;
 use spaf\simputils\helpers\DateTimeHelper;
@@ -99,6 +100,13 @@ class PHP {
 	public static bool $allow_dying = true;
 
 	/**
+	 * @var bool $refresh_php_info_env_vars If set, the PHP info object's env variables are
+	 *                                      refreshed when updated through `PHP::envSet()` or
+	 *                                      `env_set()`
+	 */
+	public static bool $refresh_php_info_env_vars = true;
+
+	/**
 	 * Initializer of the framework
 	 *
 	 * Should be called just once by any code-group (Main app, independent libraries)
@@ -128,13 +136,16 @@ class PHP {
 	 *
 	 */
 	public static function init(
-		?BasicInitConfig $config = null,
+		null|BasicInitConfig|Box|array $config = null,
 		?string $name = null,
 		?string $code_root = null,
 		?string $working_dir = null
-	) {
+	): BasicInitConfig {
 		if (empty($config)) {
 			$config = new InitConfig();
+		}
+		if (is_array($config) || $config instanceof Box) {
+			$config = new InitConfig(...$config);
 		}
 		$config->name = $name ?? $config->name;
 		$code_root = $code_root ?? $config->code_root;
@@ -153,7 +164,12 @@ class PHP {
 		}
 		////
 
-		CodeBlocksCacheIndex::registerInitBlock($config);
+		if (CodeBlocksCacheIndex::registerInitBlock($config)) {
+			$config->init();
+		} else {
+			// TODO Exception here?
+		}
+		return $config;
 	}
 
 	public static function getInitConfig(?string $name = null): ?BasicInitConfig {
@@ -918,5 +934,69 @@ class PHP {
 
 	public static function file(null|string|File $file = null, $app = null): ?File {
 		return new File($file, $app);
+	}
+
+	/**
+	 * Just a "shortcut" to $_ENV
+	 *
+	 * You would think why it's done like this, but situation in PHP is so weird in matter of
+	 * Env Vars - so it's kind of a single point of usage when you feel comfortable with it.
+	 * You really don't need to use this method if you feel weird about it. Using `$_ENV` is fully
+	 * normal way, and even somehow comfortable for "in line {$_ENV['smthg']} usage" :).
+	 *
+	 * @return array|Box
+	 */
+	#[Shortcut('\$_ENV')]
+	public static function allEnvs(): array|Box {
+		return InternalMemoryCache::$initial_get_env_state;
+	}
+
+	/**
+	 * Get Environmental Variable
+	 *
+	 * Due to thread-unsafe nature of `putenv()` and `getenv()`, those are completely unused,
+	 * on a level of the framework. It's strongly recommended to use `PHP::env()` or
+	 * `\spaf\simputils\basic\env()` and `PHP::envSet()` or `\spaf\simputils\basic\env_set()`.
+	 *
+	 *
+	 * @param string $name Env variable name
+	 *
+	 * @return mixed Returns value, or null if does not exist
+	 */
+	public static function env(string $name): mixed {
+		return $_ENV[$name] ?? null;
+	}
+
+	/**
+	 * Setting Environmental Variable for this runtime
+	 *
+	 * IMP  This does not change the real Environmental Variables, it does not propagate to other
+	 *      threads or processes. It just adds value to `$_ENV` array.
+	 *
+	 * IMP  The PhpInfo env_vars updated only on the main object received through `PHP::info()`
+	 *
+	 * IMP  `getenv()` will never return values assigned by this method, it's recommended against
+	 *      of using `getenv()` because it's thread-unsafe nature (and `putenv()` as well).
+	 *
+	 * @param string $name     Environmental variable name
+	 * @param mixed  $value    Value to set
+	 * @param bool   $override If the value is not empty and this parameter is false (default) -
+	 *                         then the value will not be overwritten. In case if the variable is
+	 *                         empty - then this parameter ignored. If it is set to true - then
+	 *                         in any case it would be overwritten.
+	 *                         **Important:** In the most cases it's almost always a bad idea to
+	 *                         overwrite/override the set value, because it could override
+	 *                         intentionally set Env Variable from the container/script/os like
+	 *                         "special keys" or even "secrets".
+	 * @see static::info()
+	 */
+	public static function envSet(string $name, mixed $value, bool $override = false): void {
+		if (empty($_ENV[$name]) || $override) {
+			$_ENV[$name] = $value;
+			if (static::$refresh_php_info_env_vars) {
+				$info = static::info();
+				$info->updateEnvVar($name, $value);
+			}
+		}
 	}
 }

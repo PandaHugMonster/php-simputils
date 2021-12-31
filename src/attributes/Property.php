@@ -37,8 +37,17 @@ class Property extends BasicAttribute {
 	const MODIFIER_PROTECTED = 'protected';
 	const MODIFIER_PRIVATE = 'private';
 
+	/**
+	 * @param string|null $name         Property name
+	 * @param string|null $type         Enforced property type (get, set, both)
+	 * @param bool        $debug_output By default true, if set, then `__debugInfo()` will include
+	 *                                  property to the output. If false - value will be replaced
+	 *                                  with a "cap". The mostly useful for cases when getter will
+	 *                                  cause heavy calculation, network traffic, or files reading.
+	 */
 	public function __construct(
 		public ?string $name = null,
 		public ?string $type = null,
+		public bool $debug_output = true,
 	) {}
 }

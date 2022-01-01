@@ -49,12 +49,11 @@ class SystemHelperTest extends TestCase {
 	 * @covers \spaf\simputils\generic\BasicSystemFingerprint
 	 * @uses \spaf\simputils\helpers\SystemHelper
 	 * @uses \spaf\simputils\PHP
-	 * @uses \spaf\simputils\Settings
 	 * @uses \spaf\simputils\generic\BasicVersionParser
 	 * @uses \spaf\simputils\models\Version
 	 * @uses \spaf\simputils\traits\MetaMagic
 	 * @uses \spaf\simputils\traits\PropertiesTrait
-	 * @uses \spaf\simputils\versions\DefaultVersionParser
+	 * @uses \spaf\simputils\components\versions\parsers\DefaultVersionParser
 	 * @uses \spaf\simputils\models\Box
 	 * @uses \spaf\simputils\traits\dsf\DsfVersionsMethodsTrait
 	 */

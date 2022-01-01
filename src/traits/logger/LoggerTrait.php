@@ -8,7 +8,9 @@ use spaf\simputils\attributes\Property;
 use spaf\simputils\logger\Logger;
 use spaf\simputils\logger\outputs\BasicOutput;
 use spaf\simputils\logger\outputs\ContextOutput;
-use spaf\simputils\Settings;
+use spaf\simputils\models\InitConfig;
+use spaf\simputils\PHP;
+use spaf\simputils\special\CodeBlocksCacheIndex;
 
 trait LoggerTrait {
 
@@ -20,9 +22,10 @@ trait LoggerTrait {
 		if (!empty($name)) {
 			$this->name = $name;
 		} else {
+			$init_config = PHP::getInitConfig();
 			$default_name = 'default';
-			$this->name = !empty(Settings::$app_name)
-				?($default_name.'-'.Settings::$app_name)
+			$this->name = !empty($init_config->name)
+				?($default_name.'-'.$init_config->name)
 				:$default_name;
 		}
 
@@ -79,8 +82,12 @@ trait LoggerTrait {
 	}
 
 	public static function getDefault(): static {
+		$class = CodeBlocksCacheIndex::getRedefinition(
+			InitConfig::REDEF_LOGGER,
+			static::class
+		);
 		if (empty(static::$default))
-			static::$default = new static();
+			static::$default = new $class();
 		return static::$default;
 	}
 

@@ -6,7 +6,6 @@ namespace spaf\simputils\logger\outputs;
 
 use spaf\simputils\logger\Logger;
 use spaf\simputils\PHP;
-use function json_decode;
 use function json_encode;
 
 class JsonFileOutput extends TextFileOutput {
@@ -35,13 +34,11 @@ class JsonFileOutput extends TextFileOutput {
 
 	public function log($msg, $priority = null) {
 		$path = $this->composeFilePath();
-		$content = PHP::getFileContent($path);
-		$json_content = [];
-		if (!empty($content)) {
-			$json_content = json_decode($content, true);
-		}
-		$json_content[] = $msg;
+		$content = PHP::file($path)->content ?? [];
+		$content[] = $msg;
 
-		$this->saveFile(json_encode($json_content));
+		// TODO Most likely outdated code, must be refactored with
+		//      a newly created `File` infrastructure.
+		$this->saveFile(json_encode($content));
 	}
 }

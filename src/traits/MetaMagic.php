@@ -3,7 +3,9 @@
 namespace spaf\simputils\traits;
 
 use spaf\simputils\models\Box;
+use spaf\simputils\models\InitConfig;
 use spaf\simputils\PHP;
+use spaf\simputils\special\CodeBlocksCacheIndex;
 use function is_null;
 use function json_decode;
 use function json_encode;
@@ -110,7 +112,11 @@ trait MetaMagic {
 		if ($with_class)
 			$res[PHP::$serialized_class_key_name] = static::class;
 		if (PHP::$use_box_instead_of_array) {
-			$res = new Box($res);
+			$box_class = CodeBlocksCacheIndex::getRedefinition(
+				InitConfig::REDEF_BOX,
+				Box::class
+			);
+			$res = new $box_class($res);
 		}
 		return $res;
 	}

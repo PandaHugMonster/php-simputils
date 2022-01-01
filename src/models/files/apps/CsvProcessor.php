@@ -7,7 +7,9 @@ use Exception;
 use spaf\simputils\generic\BasicResource;
 use spaf\simputils\models\Box;
 use spaf\simputils\models\files\apps\settings\CsvSettings;
+use spaf\simputils\models\InitConfig;
 use spaf\simputils\PHP;
+use spaf\simputils\special\CodeBlocksCacheIndex;
 
 /**
  * CSV data processor
@@ -158,9 +160,13 @@ class CsvProcessor extends TextProcessor {
 		$is_box_used = $data instanceof Box && PHP::$use_box_instead_of_array;
 		$is_assoc_used = false;
 		$is_index_used = false;
+		$box_class = CodeBlocksCacheIndex::getRedefinition(
+			InitConfig::REDEF_BOX,
+			Box::class
+		);
 
 		$res = $is_box_used
-			?new Box()
+			?new $box_class()
 			:[];
 		// NOTE CSV array - basically means matrix
 		foreach ($data as $row) {

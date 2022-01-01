@@ -1,11 +1,11 @@
 <?php
 
-namespace spaf\simputils\components;
+namespace spaf\simputils\special;
 
 use spaf\simputils\models\Box;
 use spaf\simputils\models\PhpInfo;
 
-class InternalMemoryCache {
+class CommonMemoryCacheIndex {
 
 	/**
 	 * The very initial "getenv()" state.

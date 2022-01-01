@@ -5,10 +5,11 @@ namespace spaf\simputils\models;
 use Exception;
 use spaf\simputils\attributes\PropertyBatch;
 use spaf\simputils\Boolean;
-use spaf\simputils\components\InternalMemoryCache;
 use spaf\simputils\generic\constants\ConstPHPInfo as constants;
 use spaf\simputils\helpers\SystemHelper;
 use spaf\simputils\PHP;
+use spaf\simputils\special\CodeBlocksCacheIndex;
+use spaf\simputils\special\CommonMemoryCacheIndex;
 use spaf\simputils\traits\ArrayReadOnlyAccessTrait;
 use function in_array;
 use function is_string;
@@ -22,6 +23,8 @@ use function is_string;
  * the object, and you receive the same object with every call.
  *
  * @property-read Version $php_version
+ * @property-read Version $simp_utils_version
+ * @property-read string $simp_utils_license
  * @property-read array $ini_config
  * @property-read string $main_ini_file
  * @property-read array $extra_ini_files
@@ -96,11 +99,11 @@ class PhpInfo extends Box {
 	 * @see \phpinfo()
 	 */
 	public static function getOriginalPhpInfo(bool $use_fresh = false): string {
-		if ($use_fresh || empty(InternalMemoryCache::$original_phpinfo_string)) {
-			ob_start(); phpinfo(); InternalMemoryCache::$original_phpinfo_string = ob_get_clean();
+		if ($use_fresh || empty(CommonMemoryCacheIndex::$original_phpinfo_string)) {
+			ob_start(); phpinfo(); CommonMemoryCacheIndex::$original_phpinfo_string = ob_get_clean();
 		}
 
-		return InternalMemoryCache::$original_phpinfo_string;
+		return CommonMemoryCacheIndex::$original_phpinfo_string;
 	}
 
 	/**
@@ -138,10 +141,16 @@ class PhpInfo extends Box {
 	 */
 	protected static function compose(): array {
 		$reg_exps = static::getPhpInfoRegExpArray();
+		$version_class = CodeBlocksCacheIndex::getRedefinition(
+			InitConfig::REDEF_VERSION,
+			Version::class
+		);
 
 		$data = [];
 
 		$data[constants::KEY_PHP_VERSION] = PHP::version();
+		$data[constants::KEY_SIMP_UTILS_VERSION] = PHP::simpUtilsVersion();
+		$data[constants::KEY_SIMP_UTILS_LICENSE] = PHP::simpUtilsLicense();
 		$data[constants::KEY_INI_CONFIG] = ini_get_all(details: false);
 		$data[constants::KEY_MAIN_INI_FILE] = php_ini_loaded_file();
 		$data[constants::KEY_EXTRA_INI_FILES] = explode(
@@ -150,9 +159,9 @@ class PhpInfo extends Box {
 		$data[constants::KEY_STREAM_WRAPPERS] = stream_get_wrappers();
 		$data[constants::KEY_STREAM_TRANSPORTS] = stream_get_transports();
 		$data[constants::KEY_STREAM_FILTERS] = stream_get_filters();
-		$data[constants::KEY_ZEND_VERSION] = new Version(zend_version(), 'Zend');
+		$data[constants::KEY_ZEND_VERSION] = new $version_class(zend_version(), 'Zend');
 		$data[constants::KEY_XDEBUG_VERSION] = !empty($v = phpversion('xdebug'))
-			?new Version($v, 'xdebug')
+			?new $version_class($v, 'xdebug')
 			:null; //@codeCoverageIgnore
 		// IMP  Due to weird and volatile $_ENV, for PhpInfo `getenv()` is used,
 		//      what is thread-unsafe.
@@ -163,7 +172,7 @@ class PhpInfo extends Box {
 		$data[constants::KEY_EXTENSIONS] = [];
 
 		foreach ($loaded_extensions as $ext) {
-			$data[constants::KEY_EXTENSIONS][$ext] = new Version(phpversion($ext), $ext);
+			$data[constants::KEY_EXTENSIONS][$ext] = new $version_class(phpversion($ext), $ext);
 		}
 
 		/** @noinspection PhpComposerExtensionStubsInspection */
@@ -193,17 +202,17 @@ class PhpInfo extends Box {
 
 			constants::KEY_PHP_API_VERSION
 				=> fn($v) => !empty($v)
-					?new Version($v, 'PHP API')
+					?new $version_class($v, 'PHP API')
 					:null, // @codeCoverageIgnore
 
 			constants::KEY_PHP_EXTENSION_VERSION
 				=> fn($v) => !empty($v)
-					?new Version($v, 'PHP Extension')
+					?new $version_class($v, 'PHP Extension')
 					:null, // @codeCoverageIgnore
 
 			constants::KEY_ZEND_EXTENSION_VERSION
 				=> fn($v) => !empty($v)
-					?new Version($v, 'Zend Extension')
+					?new $version_class($v, 'Zend Extension')
 					:null, // @codeCoverageIgnore
 		];
 
@@ -344,8 +353,7 @@ class PhpInfo extends Box {
 	 * @param string $key Name of the var
 	 * @param mixed  $val Value to set to the var
 	 *
-	 * @see \spaf\simputils\basic\env_set()
-	 * @see PHP::envSet()
+	 * @see \spaf\simputils\PHP::envSet()
 	 *
 	 */
 	public function updateEnvVar(string $key, mixed $val): void {

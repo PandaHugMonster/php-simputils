@@ -1,7 +1,7 @@
 <?php
 
 
-namespace spaf\simputils\versions;
+namespace spaf\simputils\components\versions\parsers;
 
 
 use spaf\simputils\exceptions\IncorrectVersionFormat;

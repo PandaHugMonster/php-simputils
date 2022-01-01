@@ -70,4 +70,29 @@ class Str {
 
 		return "$value";
 	}
+
+	/**
+	 * Quick uuid solution
+	 *
+	 * @see Uuid
+	 *
+	 * @return string
+	 */
+	public static function uuid(): string {
+		throw new NotImplementedYet();
+	}
+
+	/**
+	 * Check if a string is JSON parsable
+	 *
+	 * @param string $json_or_not String to check
+	 *
+	 * @return bool
+	 */
+	public static function isJson(string $json_or_not): bool {
+		json_decode($json_or_not, true);
+		if (json_last_error() === JSON_ERROR_NONE)
+			return true;
+		return false;
+	}
 }

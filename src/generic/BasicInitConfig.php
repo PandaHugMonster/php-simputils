@@ -2,18 +2,28 @@
 
 namespace spaf\simputils\generic;
 
-use spaf\simputils\components\InternalMemoryCache;
 use spaf\simputils\models\Box;
+use spaf\simputils\models\InitConfig;
+use spaf\simputils\special\CodeBlocksCacheIndex;
+use spaf\simputils\special\CommonMemoryCacheIndex;
 
 /**
  *
  */
 abstract class BasicInitConfig extends SimpleObject {
 
+	const REDEF_PD = 'pd';
+	const REDEF_BOX = 'Box';
+	const REDEF_DATE_TIME = 'DateTime';
+	const REDEF_FILE = 'File';
+	const REDEF_PHP_INFO = 'PhpInfo';
+	const REDEF_VERSION = 'Version';
+	const REDEF_LOGGER = 'Logger';
+
 	public ?string $name = null;
 	public ?string $code_root = null;
 	public ?string $working_dir = null;
-	public array $disable_init_for = [];
+	public array|Box $disable_init_for = [];
 
 	protected array $successful_init_blocks = [];
 
@@ -22,6 +32,11 @@ abstract class BasicInitConfig extends SimpleObject {
 	 *                                  interface `\spaf\simputils\interfaces\InitBlockInterface`)
 	 */
 	public null|array|Box $init_blocks = [];
+
+	/**
+	 * @var array|Box|null $redefinitions Key => Closure/Class string
+	 */
+	public null|array|Box $redefinitions = [];
 
 	public function __construct(mixed ...$params) {
 		foreach ($params as $key => $val) {
@@ -45,7 +60,7 @@ abstract class BasicInitConfig extends SimpleObject {
 	public function init() {
 		// The only place getenv is used. It might be safe enough, though not sure yet.
 		if (empty($this->name) || $this->name === 'app') {
-			$_ENV = InternalMemoryCache::$initial_get_env_state = !empty($_ENV)
+			$_ENV = CommonMemoryCacheIndex::$initial_get_env_state = !empty($_ENV)
 				?$_ENV
 				:(getenv() ?? []);
 		}
@@ -66,9 +81,13 @@ abstract class BasicInitConfig extends SimpleObject {
 	}
 
 	public function __toString(): string {
+		$box_class = CodeBlocksCacheIndex::getRedefinition(
+			InitConfig::REDEF_BOX,
+			Box::class
+		);
 		$init_blocks = $this->init_blocks;
-		if (!$init_blocks instanceof Box) {
-			$init_blocks = new Box($init_blocks);
+		if (!$init_blocks instanceof $box_class) {
+			$init_blocks = new $box_class($init_blocks);
 		}
 		return  "{$this->class_short}[name={$this->name}, code_root={$this->code_root}, " .
 				"working_dir={$this->working_dir}, init_blocks={$init_blocks}]";

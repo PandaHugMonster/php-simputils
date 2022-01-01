@@ -4,9 +4,9 @@ namespace spaf\simputils\models;
 
 
 use spaf\simputils\attributes\Property;
+use spaf\simputils\components\versions\parsers\DefaultVersionParser;
 use spaf\simputils\generic\SimpleObject;
 use spaf\simputils\interfaces\VersionParserInterface;
-use spaf\simputils\versions\DefaultVersionParser;
 
 /**
  * Version object class

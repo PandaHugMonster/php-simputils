@@ -3,8 +3,8 @@
 namespace spaf\simputils\generic;
 
 use spaf\simputils\attributes\Property;
+use spaf\simputils\FS;
 use spaf\simputils\helpers\DataHelper;
-use spaf\simputils\PHP;
 
 /**
  * Basic resource abstract model
@@ -22,7 +22,7 @@ use spaf\simputils\PHP;
  * @property-read string $urn
  * @property-read string $uri
  *
- * @property-read ?string $md5;
+ * @property-read ?string $md5
  *
  */
 abstract class BasicResource extends SimpleObject {
@@ -54,7 +54,7 @@ abstract class BasicResource extends SimpleObject {
 	}
 
 	#[Property('size')]
-	protected function getSize(): int {
+	protected function getSize(): ?int {
 		return $this->_size;
 	}
 
@@ -78,8 +78,7 @@ abstract class BasicResource extends SimpleObject {
 		if (empty($this->_path) && empty($this->_name) && empty($this->_ext)) {
 			return null;
 		}
-
-		return PHP::glueFullFilePath($this->_path, $this->_name, $this->_ext);
+		return FS::glueFullFilePath($this->_path, $this->_name, $this->_ext);
 	}
 
 	#[Property('path')]

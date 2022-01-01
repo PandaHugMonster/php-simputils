@@ -5,15 +5,15 @@ namespace spaf\simputils\models;
 use Exception;
 use spaf\simputils\attributes\Property;
 use spaf\simputils\exceptions\NotImplementedYet;
+use spaf\simputils\FS;
 use spaf\simputils\generic\BasicResource;
 use spaf\simputils\generic\BasicResourceApp;
-use spaf\simputils\helpers\FileHelper;
 use spaf\simputils\models\files\apps\CsvProcessor;
 use spaf\simputils\models\files\apps\DotenvProcessor;
 use spaf\simputils\models\files\apps\JsonProcessor;
 use spaf\simputils\models\files\apps\TextProcessor;
-use spaf\simputils\PHP;
 use ValueError;
+use function file_exists;
 
 /**
  * File representation object
@@ -90,9 +90,9 @@ class File extends BasicResource {
 
 		// TODO Use string for file. Implement here
 
-		[$this->_path, $this->_name, $this->_ext] = PHP::splitFullFilePath($file);
+		[$this->_path, $this->_name, $this->_ext] = FS::splitFullFilePath($file);
 
-		$this->_mime_type = FileHelper::getFileMimeType($file);
+		$this->_mime_type = FS::getFileMimeType($file);
 		if (empty($app)) {
 			$app = static::$processors[$this->_mime_type] ?? TextProcessor::class;
 		}
@@ -112,7 +112,7 @@ class File extends BasicResource {
 			if ($this->is_backup_preserved) {
 				$this->preserveFile();
 			}
-			return PHP::rmFile($this);
+			return FS::rmFile($this);
 		}
 
 		return false;
@@ -145,7 +145,7 @@ class File extends BasicResource {
 			);
 		}
 
-		return PHP::glueFullFilePath(
+		return FS::glueFullFilePath(
 			$dir ?? $this->path,
 			$name ?? $this->name,
 			$ext ?? $this->extension
@@ -224,14 +224,16 @@ class File extends BasicResource {
 			}
 		}
 
-		[$dir, $name, $ext] = PHP::splitFullFilePath($this->_backup_file);
+		[$dir, $name, $ext] = FS::splitFullFilePath($this->_backup_file);
 
 		$this->copy($dir, $name, $ext,true);
 	}
 
 	#[Property('size')]
-	protected function getSize(): int {
-		return filesize($this->name_full);
+	protected function getSize(): ?int {
+		return file_exists($this->name_full)
+			?filesize($this->name_full)
+			:null;
 	}
 
 	#[Property('app')]

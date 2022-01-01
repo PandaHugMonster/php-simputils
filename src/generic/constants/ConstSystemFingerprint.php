@@ -5,7 +5,7 @@ namespace spaf\simputils\generic\constants;
 /**
  * System Fingerprint constants
  *
- * @see \spaf\simputils\components\SystemFingerprint
+ * @see \spaf\simputils\models\SystemFingerprint
  */
 interface ConstSystemFingerprint {
 

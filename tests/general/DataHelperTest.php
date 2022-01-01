@@ -2,12 +2,12 @@
 
 
 use PHPUnit\Framework\TestCase;
+use spaf\simputils\Data;
 use spaf\simputils\exceptions\NonExistingDataUnit;
 use spaf\simputils\exceptions\UnspecifiedDataUnit;
-use spaf\simputils\helpers\DataHelper;
 
 /**
- * @covers \spaf\simputils\helpers\DataHelper
+ * @covers \spaf\simputils\Data
  */
 class DataHelperTest extends TestCase {
 
@@ -55,7 +55,7 @@ class DataHelperTest extends TestCase {
 	 * @throws \spaf\simputils\exceptions\UnspecifiedDataUnit
 	 */
 	public function testConversionUnitTo($in, $expected, $unit) {
-		$res = DataHelper::unitTo($in, $unit);
+		$res = Data::unitTo($in, $unit);
 		$this->assertEquals($expected, $res);
 	}
 
@@ -70,7 +70,7 @@ class DataHelperTest extends TestCase {
 	 * @throws \spaf\simputils\exceptions\UnspecifiedDataUnit
 	 */
 	public function testConversionBytesTo($in, $expected, $unit) {
-		$res = DataHelper::bytesTo($in, $unit);
+		$res = Data::bytesTo($in, $unit);
 		$this->assertEquals($expected, $res);
 	}
 
@@ -84,7 +84,7 @@ class DataHelperTest extends TestCase {
 	 * @throws \spaf\simputils\exceptions\UnspecifiedDataUnit
 	 */
 	public function testConversionToBytes($in, $expected) {
-		$res = DataHelper::toBytes($in);
+		$res = Data::toBytes($in);
 		$this->assertEquals($expected, $res);
 	}
 
@@ -95,7 +95,7 @@ class DataHelperTest extends TestCase {
 	 * @throws \spaf\simputils\exceptions\UnspecifiedDataUnit
 	 */
 	public function testConversionHumanReadable($in, $expected) {
-		$res = DataHelper::humanReadable($in);
+		$res = Data::humanReadable($in);
 		$this->assertEquals($expected, $res);
 	}
 
@@ -116,6 +116,6 @@ class DataHelperTest extends TestCase {
 	 */
 	public function testExceptions($val, $exception_class) {
 		$this->expectException($exception_class);
-		DataHelper::clearUnit($val);
+		Data::clearUnit($val);
 	}
 }

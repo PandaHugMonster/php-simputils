@@ -6,10 +6,10 @@ use Exception;
 use spaf\simputils\attributes\PropertyBatch;
 use spaf\simputils\Boolean;
 use spaf\simputils\generic\constants\ConstPHPInfo as constants;
-use spaf\simputils\helpers\SystemHelper;
 use spaf\simputils\PHP;
 use spaf\simputils\special\CodeBlocksCacheIndex;
 use spaf\simputils\special\CommonMemoryCacheIndex;
+use spaf\simputils\System;
 use spaf\simputils\traits\ArrayReadOnlyAccessTrait;
 use function in_array;
 use function is_string;
@@ -179,13 +179,13 @@ class PhpInfo extends Box {
 		$data[constants::KEY_OPCACHE] = extension_loaded('Zend OPcache')
 			?opcache_get_status()
 			:null; //@codeCoverageIgnore
-		$data[constants::KEY_SYSTEM_OS] = SystemHelper::os();
-		$data[constants::KEY_KERNEL_NAME] = SystemHelper::kernelName();
-		$data[constants::KEY_SYSTEM_NAME] = SystemHelper::systemName();
-		$data[constants::KEY_KERNEL_RELEASE] = SystemHelper::kernelRelease();
-		$data[constants::KEY_KERNEL_VERSION] = SystemHelper::kernelVersion();
-		$data[constants::KEY_CPU_ARCHITECTURE] = SystemHelper::cpuArchitecture();
-		$data[constants::KEY_SAPI_NAME] = SystemHelper::serverApi();
+		$data[constants::KEY_SYSTEM_OS] = System::os();
+		$data[constants::KEY_KERNEL_NAME] = System::kernelName();
+		$data[constants::KEY_SYSTEM_NAME] = System::systemName();
+		$data[constants::KEY_KERNEL_RELEASE] = System::kernelRelease();
+		$data[constants::KEY_KERNEL_VERSION] = System::kernelVersion();
+		$data[constants::KEY_CPU_ARCHITECTURE] = System::cpuArchitecture();
+		$data[constants::KEY_SAPI_NAME] = System::serverApi();
 
 		$keys_list_fn_callbacks = [
 			constants::KEY_IS_THREAD_SAFE => 'bool',

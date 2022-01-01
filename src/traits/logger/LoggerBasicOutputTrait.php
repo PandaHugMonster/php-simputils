@@ -4,7 +4,7 @@
 namespace spaf\simputils\traits\logger;
 
 
-use spaf\simputils\helpers\DateTimeHelper;
+use spaf\simputils\DT;
 use spaf\simputils\logger\Logger;
 
 trait LoggerBasicOutputTrait {
@@ -48,7 +48,7 @@ trait LoggerBasicOutputTrait {
 		}
 
 		/** @noinspection PhpUnhandledExceptionInspection */
-		$now = DateTimeHelper::normalize('now');
+		$now = DT::normalize('now');
 
 		$data = [
 			$logger::TEMPLATE_NAME => $logger->name,

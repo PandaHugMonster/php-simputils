@@ -1,12 +1,12 @@
 <?php
 
 
-namespace spaf\simputils\helpers;
+namespace spaf\simputils;
 
 
 use spaf\simputils\interfaces\helpers\DateTimeHelperInterface;
 use spaf\simputils\traits\helpers\DateTimeTrait;
 
-class DateTimeHelper implements DateTimeHelperInterface {
+class DT implements DateTimeHelperInterface {
 	use DateTimeTrait;
 }

@@ -30,8 +30,6 @@ use spaf\simputils\attributes\markers\Shortcut;
  */
 class Math {
 
-	//// Basic Math Functions
-
 	/**
 	 * Absolute value
 	 *

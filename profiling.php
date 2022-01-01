@@ -1,6 +1,6 @@
 <?php
 
-use spaf\simputils\helpers\DataHelper;
+use spaf\simputils\Data;
 use spaf\simputils\logger\Logger;
 use spaf\simputils\logger\outputs\ContextOutput;
 use spaf\simputils\logger\outputs\CsvFileOutput;
@@ -40,7 +40,7 @@ function profile($name, &$a, $size, ...$params) {
 	return [
 		'size' => $size,
 		'time' => round($dt_res, 3),
-		'memory' => DataHelper::humanReadable($mem_res),
+		'memory' => Data::humanReadable($mem_res),
 	];
 }
 

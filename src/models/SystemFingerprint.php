@@ -1,6 +1,6 @@
 <?php
 
-namespace spaf\simputils\components;
+namespace spaf\simputils\models;
 
 
 use spaf\simputils\generic\BasicSystemFingerprint;

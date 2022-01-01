@@ -2,9 +2,9 @@
 
 
 use PHPUnit\Framework\TestCase;
-use spaf\simputils\components\SystemFingerprint;
 use spaf\simputils\generic\BasicSystemFingerprint;
-use spaf\simputils\helpers\SystemHelper;
+use spaf\simputils\models\SystemFingerprint;
+use spaf\simputils\System;
 
 /**
  *
@@ -18,36 +18,36 @@ class SystemHelperTest extends TestCase {
 	 * @return void
 	 */
 	public function testBasics() {
-		$this->assertIsString($val = SystemHelper::os());
+		$this->assertIsString($val = System::os());
 		$this->assertNotEmpty($val);
 
-		$this->assertIsString($val = SystemHelper::systemName());
+		$this->assertIsString($val = System::systemName());
 		$this->assertNotEmpty($val);
 
-		$this->assertIsString($val = SystemHelper::kernelName());
+		$this->assertIsString($val = System::kernelName());
 		$this->assertNotEmpty($val);
 
-		$this->assertIsString($val = SystemHelper::kernelRelease());
+		$this->assertIsString($val = System::kernelRelease());
 		$this->assertNotEmpty($val);
 
-		$this->assertIsString($val = SystemHelper::kernelVersion());
+		$this->assertIsString($val = System::kernelVersion());
 		$this->assertNotEmpty($val);
 
-		$this->assertIsString($val = SystemHelper::cpuArchitecture());
+		$this->assertIsString($val = System::cpuArchitecture());
 		$this->assertNotEmpty($val);
 
-		$this->assertIsString($val = SystemHelper::serverApi());
+		$this->assertIsString($val = System::serverApi());
 		$this->assertNotEmpty($val);
 
-		$this->assertIsObject($val = SystemHelper::systemFingerprint());
+		$this->assertIsObject($val = System::systemFingerprint());
 		$this->assertInstanceOf(BasicSystemFingerprint::class, $val);
 		$this->assertIsString(strval($val));
 	}
 
 	/**
-	 * @covers \spaf\simputils\components\SystemFingerprint
+	 * @covers \spaf\simputils\models\SystemFingerprint
 	 * @covers \spaf\simputils\generic\BasicSystemFingerprint
-	 * @uses \spaf\simputils\helpers\SystemHelper
+	 * @uses \spaf\simputils\System
 	 * @uses \spaf\simputils\PHP
 	 * @uses \spaf\simputils\generic\BasicVersionParser
 	 * @uses \spaf\simputils\models\Version
@@ -58,7 +58,7 @@ class SystemHelperTest extends TestCase {
 	 * @uses \spaf\simputils\traits\dsf\DsfVersionsMethodsTrait
 	 */
 	public function testDefaultFingerPrint() {
-		$d = SystemHelper::systemFingerprint();
+		$d = System::systemFingerprint();
 
 		$fp = new SystemFingerprint();
 		$this->assertInstanceOf(SystemFingerprint::class, $fp);

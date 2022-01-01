@@ -4,8 +4,8 @@ namespace spaf\simputils\traits;
 
 use Exception;
 use spaf\simputils\attributes\Property;
-use spaf\simputils\components\SystemFingerprint;
 use spaf\simputils\models\InitConfig;
+use spaf\simputils\models\SystemFingerprint;
 use spaf\simputils\models\Version;
 use spaf\simputils\PHP;
 use spaf\simputils\special\CodeBlocksCacheIndex;
@@ -96,7 +96,7 @@ trait DefaultSystemFingerprintTrait {
 				throw new Exception('Version parameter/property must be specified');
 			} else if (is_string($val)) {
 				return new $version_class($val);
-			} else if (!PHP::classContains($val, $version_class::class)) {
+			} else if (!PHP::classContains($val, $version_class)) {
 				throw new Exception('Version object is not a correct one');
 			}
 		}

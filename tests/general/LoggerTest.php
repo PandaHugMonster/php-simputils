@@ -15,7 +15,7 @@ use spaf\simputils\logger\outputs\TextFileOutput;
  *
  * @uses \spaf\simputils\interfaces\LoggerInterface
  * @uses \spaf\simputils\traits\helpers\DateTimeTrait
- * @uses \spaf\simputils\helpers\DateTimeHelper
+ * @uses \spaf\simputils\DT
  * @uses \spaf\simputils\interfaces\helpers\DateTimeHelperInterface
  * @uses \spaf\simputils\models\DateTime
  * @uses \spaf\simputils\PHP

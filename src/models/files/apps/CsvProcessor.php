@@ -60,11 +60,15 @@ class CsvProcessor extends TextProcessor {
 		} else if (is_resource($stream)) {
 			$fd = $stream;
 		}
+		$box_class = CodeBlocksCacheIndex::getRedefinition(
+			InitConfig::REDEF_BOX,
+			Box::class
+		);
 
 		$callback = !empty($s->postprocessing_callback)
 			?Closure::fromCallable($s->postprocessing_callback)
 			:null;
-		$res = [];
+		$res = new $box_class();
 		$header = null;
 		while (($line = fgetcsv($fd, 0, $s->separator, $s->enclosure, $s->escape)) !== false) {
 			if ($s->first_line_header && empty($header)) {
@@ -77,7 +81,7 @@ class CsvProcessor extends TextProcessor {
 			}
 
 			if (!empty($line)) {
-				$res[] = $line;
+				$res[] = new $box_class($line);
 			}
 		}
 

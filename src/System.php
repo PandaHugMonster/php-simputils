@@ -1,19 +1,18 @@
 <?php
 
 
-namespace spaf\simputils\helpers;
+namespace spaf\simputils;
 
 
 
-use spaf\simputils\components\SystemFingerprint;
 use spaf\simputils\generic\BasicSystemFingerprint;
+use spaf\simputils\models\SystemFingerprint;
 use spaf\simputils\models\Version;
-use spaf\simputils\PHP;
 
 /**
  *
  */
-class SystemHelper {
+class System {
 
 	/**
 	 * @return string

@@ -12,6 +12,7 @@ use spaf\simputils\models\Box;
 use spaf\simputils\models\DateTime;
 use spaf\simputils\models\File;
 use spaf\simputils\PHP;
+use spaf\simputils\Str;
 
 /**
  * Please Die function
@@ -101,26 +102,20 @@ function fl(null|string|File $file = null, $app = null): ?File {
  *
  * @return mixed returns value of the environment variable or if no `name` is provided returns all
  *               the env variables.
+ *
  * @see PHP::allEnvs()
+ * @see PHP::envSet()
  */
 #[Shortcut('PHP::env()')]
 function env(?string $name = null, bool $strict = true): mixed {
 	return PHP::env($name, $strict);
 }
 
-/**
- * @param string $name
- * @param mixed  $value
- * @param bool   $override
- *
- * @see PHP::envSet()
- */
-#[Shortcut('PHP::envSet()')]
-function env_set(string $name, mixed $value, bool $override = false) {
-	PHP::envSet($name, $value, $override);
-}
+// NOTE env_set() removed, because it's not a very "urgent" type of functionality that you need
+//      all over your code. + Naming was not really fitting the overall condition of this file.
+//      You always can use `\spaf\simputils\PHP::envSet()` functionality.
 
-#[Shortcut('PHP::uuid()')]
+#[Shortcut('Str::uuid()')]
 function uuid(): string {
-	return PHP::uuid();
+	return Str::uuid();
 }

@@ -70,8 +70,7 @@ By default, it uses `spaf\simputils\versions\DefaultVersionParser` class. If you
 your custom one - you need to run the following code as early as possible:
 
 ```php
-    use spaf\simputils\versions\DefaultVersionParser;
-    use spaf\simputils\models\Version;
+    use spaf\simputils\components\versions\parsers\DefaultVersionParser;use spaf\simputils\models\Version;
     
     // Instead of DefaultVersionParser use your another/custom class.
     Version::$default_parser_class = DefaultVersionParser::class;
@@ -85,9 +84,9 @@ The `Version::$default_parser_class` is being used during the new `Version` obje
 the `Version` object uses the parser of that type.
 
 Here is an example:
+
 ```php
-    use spaf\simputils\versions\DefaultVersionParser;
-    use spaf\simputils\models\Version;
+    use spaf\simputils\components\versions\parsers\DefaultVersionParser;use spaf\simputils\models\Version;
     
     class CustomParser extends DefaultVersionParser {
         // Your own custom parser
@@ -107,9 +106,9 @@ CustomParser
 ```
 
 While the new object will still be created with the default parser object in it:
+
 ```php
-    use spaf\simputils\versions\DefaultVersionParser;
-    use spaf\simputils\models\Version;
+    use spaf\simputils\components\versions\parsers\DefaultVersionParser;use spaf\simputils\models\Version;
     
     class CustomParser extends DefaultVersionParser {
         // Your own custom parser
@@ -138,8 +137,7 @@ For example, you are willing to change only the string representation of the ver
 
 ```php
 
-use spaf\simputils\models\Version;
-use spaf\simputils\versions\DefaultVersionParser;
+use spaf\simputils\components\versions\parsers\DefaultVersionParser;use spaf\simputils\models\Version;
 
 class MyVersionParser extends DefaultVersionParser {
 

@@ -184,7 +184,8 @@ trait PropertiesTrait {
 		throw new PropertyDoesNotExist('No such property '.$name);
 	}
 
-	// HERE Fix it after working optimizations
+	// FIX  If file does not exist, exception is raised, even though those properties should be
+	//      skipped (content, etc.)
 	public function __debugInfo(): ?array {
 		$ref = new ReflectionObject($this);
 		$res = [];

@@ -156,7 +156,7 @@ class Box extends ArrayObject {
 	 */
 	#[Property('keys')]
 	protected function getKeys(): static|Box|array {
-		return new Box(array_keys((array) $this));
+		return new static(array_keys((array) $this));
 	}
 
 	/**
@@ -164,7 +164,7 @@ class Box extends ArrayObject {
 	 */
 	#[Property('values')]
 	protected function getValues(): static|Box|array {
-		return new Box(array_values((array) $this));
+		return new static(array_values((array) $this));
 	}
 
 	/**
@@ -186,7 +186,7 @@ class Box extends ArrayObject {
 	 */
 	public function slice(int|array $from = 0, ?int $to = null): Box|array {
 		$size = $this->size;
-		$res = new Box();
+		$res = new static();
 
 		if (is_array($from)) {
 			foreach ($from as $key) {
@@ -250,7 +250,7 @@ class Box extends ArrayObject {
 	 */
 	#[Affecting]
 	public function shift(int $amount = 1, bool $from_start = true): static {
-		$temp_stash = new Box();
+		$temp_stash = new static();
 		$box = $from_start
 			?$this
 			:$this->reversed();
@@ -280,7 +280,7 @@ class Box extends ArrayObject {
 	 * @return Box|array
 	 */
 	public function reversed(): Box|array {
-		return new Box(array_reverse((array) $this));
+		return new static(array_reverse((array) $this));
 	}
 
 	/**

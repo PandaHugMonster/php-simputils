@@ -1,6 +1,6 @@
 <?php
 
-namespace spaf\simputils\components;
+namespace spaf\simputils\components\initblocks;
 
 use spaf\simputils\attributes\Property;
 use spaf\simputils\generic\BasicInitConfig;

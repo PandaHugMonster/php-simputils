@@ -2,7 +2,7 @@
 
 namespace spaf\simputils\models;
 
-use spaf\simputils\components\DotEnvInitBlock;
+use spaf\simputils\components\initblocks\DotEnvInitBlock;
 use spaf\simputils\generic\BasicInitConfig;
 
 /**

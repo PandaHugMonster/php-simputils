@@ -22,6 +22,8 @@ interface ConstPHPInfo {
 	const KEY_PHP_EXTENSION_BUILD = 'php_extension_build';
 
 	const KEY_PHP_VERSION = 'php_version';
+	const KEY_SIMP_UTILS_VERSION = 'simp_utils_version';
+	const KEY_SIMP_UTILS_LICENSE = 'simp_utils_license';
 	const KEY_INI_CONFIG = 'ini_config';
 	const KEY_MAIN_INI_FILE = 'main_ini_file';
 	const KEY_EXTRA_INI_FILES = 'extra_ini_files';

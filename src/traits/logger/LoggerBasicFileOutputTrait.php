@@ -5,7 +5,7 @@ namespace spaf\simputils\traits\logger;
 
 
 use spaf\simputils\attributes\Property;
-use spaf\simputils\PHP;
+use spaf\simputils\FS;
 
 trait LoggerBasicFileOutputTrait {
 
@@ -29,7 +29,7 @@ trait LoggerBasicFileOutputTrait {
 		$path = $this->composeFilePath();
 		$this->prepareStorage($path);
 
-		PHP::mkFile($path, $data_str);
+		FS::mkFile($path, $data_str);
 	}
 
 	public function addToFile(string $data_str) {
@@ -53,7 +53,7 @@ trait LoggerBasicFileOutputTrait {
 	protected function prepareStorage($path) {
 		if ($this->is_structure_auto_created) {
 			$basedir = dirname($path);
-			PHP::mkDir($basedir, true);
+			FS::mkDir($basedir, true);
 		}
 	}
 
@@ -62,7 +62,7 @@ trait LoggerBasicFileOutputTrait {
 			$file_path = $this->composeFilePath($i);
 			if (file_exists($file_path)) {
 				if ($i === $this->max_rotation_level) {
-					PHP::rmFile($file_path);
+					FS::rmFile($file_path);
 				} else {
 					$prev_i = $i + 1;
 					$new_file_path = $this->composeFilePath($prev_i);

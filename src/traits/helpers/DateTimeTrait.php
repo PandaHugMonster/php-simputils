@@ -6,6 +6,8 @@ namespace spaf\simputils\traits\helpers;
 
 use DateTimeZone;
 use spaf\simputils\models\DateTime;
+use spaf\simputils\models\InitConfig;
+use spaf\simputils\special\CodeBlocksCacheIndex;
 
 /**
  * DateTime Helper Trait
@@ -15,6 +17,13 @@ use spaf\simputils\models\DateTime;
  * @package spaf\simputils\traits\helpers
  */
 trait DateTimeTrait {
+
+	private static function _getClass() {
+		return CodeBlocksCacheIndex::getRedefinition(
+			InitConfig::REDEF_DATE_TIME,
+			DateTime::class
+		);
+	}
 
 	public static ?string $now_string = null;
 
@@ -64,13 +73,14 @@ trait DateTimeTrait {
 		string $fmt = null,
 		bool $is_clone_allowed = true,
 	): ?DateTime {
+		$class = static::_getClass();
 
 		if (is_string($dt)) {
 			$res = !empty($fmt)
-				?DateTime::createFromFormat($fmt, $dt, $tz)
-				:new DateTime($dt, $tz);
+				?$class::createFromFormat($fmt, $dt, $tz)
+				:new $class($dt, $tz);
 		} elseif (is_integer($dt))
-			$res = new DateTime(date(DATE_ATOM, $dt), $tz);
+			$res = new $class(date(DATE_ATOM, $dt), $tz);
 		else
 			$res = $is_clone_allowed?clone $dt:$dt;
 

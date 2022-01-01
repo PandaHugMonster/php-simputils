@@ -12,8 +12,6 @@ use Exception;
 use Iterator;
 use ReflectionClass;
 use spaf\simputils\attributes\markers\Shortcut;
-use spaf\simputils\components\InternalMemoryCache;
-use spaf\simputils\exceptions\NotImplementedYet;
 use spaf\simputils\generic\BasicInitConfig;
 use spaf\simputils\helpers\DateTimeHelper;
 use spaf\simputils\models\Box;
@@ -23,18 +21,13 @@ use spaf\simputils\models\InitConfig;
 use spaf\simputils\models\PhpInfo;
 use spaf\simputils\models\Version;
 use spaf\simputils\special\CodeBlocksCacheIndex;
+use spaf\simputils\special\CommonMemoryCacheIndex;
 use spaf\simputils\traits\MetaMagic;
 use Throwable;
-use function array_merge;
 use function class_exists;
 use function class_parents;
 use function dirname;
-use function file_exists;
-use function file_get_contents;
-use function file_put_contents;
-use function in_array;
 use function is_array;
-use function is_callable;
 use function is_dir;
 use function is_null;
 use function is_object;
@@ -43,13 +36,7 @@ use function is_string;
 use function json_decode;
 use function json_encode;
 use function json_last_error;
-use function mkdir;
-use function realpath;
-use function rmdir;
-use function scandir;
 use function serialize;
-use function sort;
-use function unlink;
 use function unserialize;
 use const JSON_ERROR_NONE;
 
@@ -67,8 +54,6 @@ use const JSON_ERROR_NONE;
  * Especially if you will be implementing your own Box class and overriding some of it's methods.
  *
  * TODO Checkout and make sure all works efficiently enough etc.
- * FIX  Reformat the file. Extract `Str`, `File` and other stuff to corresponding classes.
- *
  *
  * @see Box
  * @package spaf\simputils
@@ -318,274 +303,38 @@ class PHP {
 	}
 
 	/**
-	 * Check if a string is JSON parsable
+	 * PHP Version
 	 *
-	 * @param string $json_or_not String to check
-	 *
-	 * @return bool
-	 */
-	public static function isJsonString(string $json_or_not): bool {
-		json_decode($json_or_not, true);
-		if (json_last_error() === JSON_ERROR_NONE)
-			return true;
-		return false;
-	}
-
-	//// Start Files related
-
-	/**
-	 * Delete file or directory
-	 *
-	 * This function should be used in the most cases for both deletion of regular files or
-	 * directories. But, for some cases, if you want you can supply `$strict` param as true,
-	 * in this case the function will delete only regular files, and raise exception if directory
-	 * path is supplied.
-	 *
-	 * @param null|string|File $file        File path
-	 * @param bool             $recursively Recursively delete files (only in case of directories)
-	 * @param bool             $strict      If true supplied - then exception is raised in case of
-	 *                                      directory path supplied instead of a regular file path.
-	 *
-	 * @return bool|null
-	 * @throws \Exception Exception if `$strict` param is true and the file path provided is
-	 *                    a directory.
-	 */
-	public static function rmFile(
-		null|string|File $file,
-		bool $recursively = false,
-		bool $strict = false
-	): ?bool {
-		if (empty($file)) {
-			return null;
-		}
-
-		if ($file instanceof File) {
-			$file = $file->name_full;
-		}
-
-		if (!file_exists($file)) {
-			return true;
-		}
-
-		if (is_dir($file)) {
-			if ($strict) {
-				// TODO Fix exception
-				throw new Exception("{$file} is a directory, and a strict mode is on");
-			} else {
-				return static::rmDir($file, $recursively);
-			}
-		}
-
-		return unlink($file);
-	}
-
-	/**
-	 * Removes only directories
-	 *
-	 * Recommended to use {@see static::rmFile()} instead when applicable
-	 *
-	 * @param string|null $directory_path Directory path
-	 * @param bool        $recursively    Recursively deletes directories (required if not empty)
-	 *
-	 * @return bool|null
-	 * @throws \Exception Exception if regular file path is supplied, and not a directory path
-	 * @todo Add root dir protection
-	 */
-	public static function rmDir(?string $directory_path, bool $recursively = false): ?bool {
-		if (!is_dir($directory_path)) {
-			// TODO Fix exception
-			throw new Exception("{$directory_path} is not a directory");
-		}
-		if ($recursively) {
-			$res = false;
-			$files = static::listFiles($directory_path, true, 'rsort');
-			foreach ($files as $file) {
-				// Attention: Recursion is here possible in case of directories
-				$res = static::rmFile($file, $recursively) || $res;
-			}
-
-			return static::rmFile($directory_path) || $res;
-		}
-
-		return rmdir($directory_path);
-	}
-
-	/**
-	 * List files in the folder recursively or not
-	 *
-	 * In case of file provided instead of folder path, will be returned an array containing
-	 * just a name of the file (if not excluded).
-	 *
-	 * ```php
-	 *      $dir = '/tmp';
-	 *      $res = PHP::listFiles($dir, true, true);
-	 *      print_r($res);
-	 *      // Would output recursively content of your /tmp folder sorted from the top
-	 *      // Equivalent of PHP::listFiles($dir, true, 'sort');
-	 *
-	 *      $dir = '/tmp';
-	 *      $res = PHP::listFiles($dir, true, false);
-	 *      print_r($res);
-	 *      // Would output recursively content of your /tmp folder unsorted (on the order
-	 *      // of processing/looking up)
-	 *
-	 *      $dir = '/tmp';
-	 *      $res = PHP::listFiles($dir, true, 'rsort');
-	 *      print_r($res);
-	 *      // Would output recursively content of your /tmp folder in a reversed sort order
-	 *
-	 * ```
-	 *
-	 * @param ?string     $file_path             File path
-	 * @param bool        $recursively           Recursively create directories
-	 * @param bool|string $sorting               True/False or sorting callable
-	 *                                           like "sort" or "rsort"
-	 * @param bool        $exclude_original_path Exclude original file path from the array.
-	 *                                           Default is true, and in the most cases it's fine.
-	 *
-	 * @return ?array
-	 */
-	public static function listFiles(
-		?string $file_path,
-		bool $recursively = false,
-		bool|string $sorting = true,
-		bool $exclude_original_path = true
-	): ?array {
-		$res = $exclude_original_path?[]:[$file_path];
-		if (file_exists($file_path)) {
-			if (!is_dir($file_path))
-				return $res;
-
-			// TODO bug here!
-			$scanned_dir = scandir($file_path);
-			if ($recursively) {
-				foreach ($scanned_dir as $file) {
-					if (in_array($file, ['.', '..'])) continue;
-
-					$full_sub_file_path = realpath($file_path.'/'.$file);
-					$sub_list = static::listFiles(
-						$full_sub_file_path,
-						$recursively,
-						exclude_original_path: false
-					);
-					if (!empty($sub_list) && is_array($sub_list)) {
-						$res = array_merge($res, $sub_list);
-					}
-				}
-			}
-		}
-
-		if (!empty($sorting)) {
-			if (is_string($sorting) || is_callable($sorting)) {
-				$sorting($res);
-			} else {
-				sort($res);
-			}
-		}
-
-		return $res;
-	}
-
-	/**
-	 * Create directory
-	 *
-	 * @param string|null $directory_path Directory path
-	 * @param bool        $recursively    Should be directories recursively created
-	 *
-	 * @return bool|null
-	 *@see \mkdir()
-	 */
-	public static function mkDir(?string $directory_path, bool $recursively = true): ?bool {
-		if (!file_exists($directory_path))
-			return mkdir($directory_path, recursive: $recursively);
-
-		return true;
-	}
-
-	/**
-	 * Create file
-	 *
-	 * @param string|null $file_path   File path
-	 * @param mixed       $content     Content to put to file
-	 * @param bool        $recursively Create folders recursively
-	 *
-	 * @return bool|null
-	 * @see \file_put_contents()
-	 */
-	public static function mkFile(
-		?string $file_path,
-		mixed $content = null,
-		bool $recursively = true
-	): ?bool {
-		if ($recursively) {
-			$base_dir = dirname($file_path);
-			// Make sure the parent dir for the file is created
-			static::mkDir($base_dir);
-		}
-		if (is_null($content))
-			$content = '';
-		return (bool) file_put_contents($file_path, $content);
-	}
-
-	/**
-	 * @param string|null $file_path File path
-	 *
-	 * FIX  Replace with File infrastructure
-	 *
-	 * @return string|false|null
-	 */
-	public static function getFileContent(?string $file_path = null): null|string|false {
-		if (empty($file_path) || !file_exists($file_path))
-			return false;
-
-		return file_get_contents($file_path);
-	}
-
-	/**
-	 * Splits full file path on 3 components:
-	 *  * Directory
-	 *  * File name without extension and directory
-	 *  * Extension
-	 *
-	 * @param string $path Full file path
-	 *
-	 * @return array Array with a first item "directory",
-	 *               then second "filename" and third "extension".
-	 * @see \pathinfo()
-	 */
-	public static function splitFullFilePath(string $path): array {
-		$tmp_parts = pathinfo($path);
-		return [
-			$tmp_parts['dirname'] ?? '',
-			$tmp_parts['filename'] ?? '',
-			$tmp_parts['extension'] ?? ''
-		];
-	}
-
-	/**
-	 * Opposite of `splitFullFilePath()`
-	 *
-	 * @param string $dir  Directory
-	 * @param string $name File name without extension and directory
-	 * @param string $ext  Extension
-	 *
-	 * @see splitFullFilePath()
-	 * @return string
-	 */
-	public static function glueFullFilePath(string $dir, string $name, string $ext): string {
-		if (!empty($ext)) {
-			$ext = ".{$ext}";
-		}
-		return "{$dir}/{$name}{$ext}";
-	}
-
-	//// End Files related
-
-	/**
 	 * @return Version|string
 	 */
 	public static function version(): Version|string {
-		return new Version(phpversion());
+		$class = CodeBlocksCacheIndex::getRedefinition(
+			InitConfig::REDEF_VERSION,
+			Version::class
+		);
+		return new $class(phpversion(), 'PHP');
+	}
+
+	/**
+	 * Framework/lib version
+	 *
+	 * @return Version|string
+	 */
+	public static function simpUtilsVersion(): Version|string {
+		$class = CodeBlocksCacheIndex::getRedefinition(
+			InitConfig::REDEF_VERSION,
+			Version::class
+		);
+		return new $class('0.2.3', 'SimpUtils');
+	}
+
+	/**
+	 * Framework/lib license
+	 *
+	 * @return string
+	 */
+	public static function simpUtilsLicense(): string {
+		return 'MIT';
 	}
 
 	/**
@@ -594,10 +343,14 @@ class PHP {
 	 * @return \spaf\simputils\models\PhpInfo|array|string
 	 */
 	public static function info(bool $use_fresh = false): PhpInfo|array|string {
-		if ($use_fresh || empty(InternalMemoryCache::$default_phpinfo_object)) {
-			InternalMemoryCache::$default_phpinfo_object = new PhpInfo();
+		if ($use_fresh || empty(CommonMemoryCacheIndex::$default_phpinfo_object)) {
+			$class = CodeBlocksCacheIndex::getRedefinition(
+				InitConfig::REDEF_PHP_INFO,
+				PhpInfo::class
+			);
+			CommonMemoryCacheIndex::$default_phpinfo_object = new $class();
 		}
-		return InternalMemoryCache::$default_phpinfo_object;
+		return CommonMemoryCacheIndex::$default_phpinfo_object;
 	}
 
 	/**
@@ -791,20 +544,10 @@ class PHP {
 	 * Besides that, the functionality can be redefined. For example if you want
 	 * use your own implementation, you can just redefine it on a very early runtime stage
 	 * with the following code:
-	 * ```php
-	 *      use spaf\simputils\Settings;
-	 *      Settings::redefine_pd($your_obj->$method_name(...));
-	 *      // or using anonymous functions
-	 *      Settings::redefine_pd(
-	 *          function (...$args) {
-	 *              echo "MY CALLBACK IS BEING USED\n";
-	 *              print_r($args);
-	 *              die;
-	 *          }
-	 *      );
-	 * ```
+	 * FIX  Prepare example!
 	 *
 	 * @todo implement simple log integration
+	 * FIX  Implement $allow_dying
 	 *
 	 * @param mixed ...$args Anything you want to print out before dying
 	 *
@@ -814,8 +557,7 @@ class PHP {
 	 * @return void
 	 */
 	public static function pd(...$args) {
-		if (Settings::isRedefined(Settings::REDEFINED_PD)) {
-			$callback = Settings::getRedefined(Settings::REDEFINED_PD);
+		if ($callback = CodeBlocksCacheIndex::getRedefinition(InitConfig::REDEF_PD)) {
 			$res = (bool) $callback(...$args);
 		} else {
 			foreach ($args as $arg) {
@@ -838,7 +580,11 @@ class PHP {
 	 * @return Box|array
 	 */
 	public static function box(?array $array = null): Box|array {
-		return new Box($array);
+		$class = CodeBlocksCacheIndex::getRedefinition(
+			InitConfig::REDEF_BOX,
+			Box::class
+		);
+		return new $class($array);
 	}
 
 	/**
@@ -875,7 +621,11 @@ class PHP {
 	}
 
 	public static function file(null|string|File $file = null, $app = null): ?File {
-		return new File($file, $app);
+		$class = CodeBlocksCacheIndex::getRedefinition(
+			InitConfig::REDEF_FILE,
+			File::class
+		);
+		return new $class($file, $app);
 	}
 
 	/**
@@ -890,7 +640,7 @@ class PHP {
 	 */
 	#[Shortcut('\$_ENV')]
 	public static function allEnvs(): array|Box {
-		return InternalMemoryCache::$initial_get_env_state ?? [];
+		return CommonMemoryCacheIndex::$initial_get_env_state ?? [];
 	}
 
 	/**
@@ -943,16 +693,5 @@ class PHP {
 				$info->updateEnvVar($name, $value);
 			}
 		}
-	}
-
-	/**
-	 * Quick uuid solution
-	 *
-	 * @see Uuid
-	 *
-	 * @return string
-	 */
-	public static function uuid(): string {
-		throw new NotImplementedYet();
 	}
 }

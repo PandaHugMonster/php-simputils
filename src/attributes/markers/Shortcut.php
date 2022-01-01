@@ -13,7 +13,7 @@ use spaf\simputils\generic\BasicAttribute;
  *
  * It's basically just a marker
  */
-#[Attribute(Attribute::TARGET_METHOD)]
+#[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_FUNCTION)]
 class Shortcut extends BasicAttribute {
 
 	/**

@@ -234,7 +234,6 @@ abstract class BasicSystemFingerprint extends SimpleObject {
 			'name' => $base_parts[0],
 		];
 		[$res['first_hash'], $res['second_hash']] = explode(',', $base_parts[1]);
-//		pd($res);
 		return $res;
 	}
 
@@ -247,6 +246,7 @@ abstract class BasicSystemFingerprint extends SimpleObject {
 
 	/**
 	 * @return string
+	 * @throws \Exception
 	 */
 	public function __toString(): string {
 		return $this->generateString();

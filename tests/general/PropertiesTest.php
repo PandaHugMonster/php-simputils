@@ -145,6 +145,7 @@ class B extends Box {
 		'var300' => 'get 300',
 		'var400' => 'get 400',
 	];
+
 	#[PropertyBatch(type: 'get')]
 	protected $fields2_2 = [
 		'var1000' => 'get 1000',

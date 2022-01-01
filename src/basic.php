@@ -7,6 +7,7 @@
 namespace spaf\simputils\basic;
 
 use DateTimeZone;
+use spaf\simputils\attributes\markers\Shortcut;
 use spaf\simputils\models\Box;
 use spaf\simputils\models\DateTime;
 use spaf\simputils\models\files\File;
@@ -40,6 +41,7 @@ use spaf\simputils\PHP;
  * @see \die()
  * @see \print_r()
  */
+#[Shortcut('PHP::pd()')]
 function pd(...$args) {
 	PHP::pd(...$args);
 }
@@ -49,6 +51,7 @@ function pd(...$args) {
  *
  * @return \spaf\simputils\models\Box|array
  */
+#[Shortcut('PHP::box()')]
 function box(?array $array = null): Box|array {
 	return PHP::box($array);
 }
@@ -62,6 +65,7 @@ function box(?array $array = null): Box|array {
  *
  * @throws \Exception Parsing error
  */
+#[Shortcut('PHP::now()')]
 function now(?DateTimeZone $tz = null): ?DateTime {
 	return PHP::now($tz);
 }
@@ -78,10 +82,12 @@ function now(?DateTimeZone $tz = null): ?DateTime {
  *
  * @throws \Exception Parsing error
  */
+#[Shortcut('PHP::ts()')]
 function ts(DateTime|string|int $dt, ?DateTimeZone $tz = null, string $fmt = null): ?DateTime {
 	return PHP::ts($dt, $tz, $fmt);
 }
 
+#[Shortcut('PHP::file()')]
 function fl(null|string|File $file = null, $app = null): ?File {
 	return PHP::file($file, $app);
 }
@@ -97,20 +103,24 @@ function fl(null|string|File $file = null, $app = null): ?File {
  *               the env variables.
  * @see PHP::allEnvs()
  */
+#[Shortcut('PHP::env()')]
 function env(?string $name = null, bool $strict = true): mixed {
-	if (empty($name)) {
-		return PHP::allEnvs();
-	}
 	return PHP::env($name, $strict);
 }
 
 /**
  * @param string $name
- * @param mixed $value
- * @param bool $strict
+ * @param mixed  $value
+ * @param bool   $override
  *
  * @see PHP::envSet()
  */
-function env_set(string $name, mixed $value, bool $strict = true) {
-	PHP::envSet($name, $value, $strict);
+#[Shortcut('PHP::envSet()')]
+function env_set(string $name, mixed $value, bool $override = false) {
+	PHP::envSet($name, $value, $override);
+}
+
+#[Shortcut('PHP::uuid()')]
+function uuid(): string {
+	return PHP::uuid();
 }

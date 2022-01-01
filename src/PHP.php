@@ -13,6 +13,7 @@ use Iterator;
 use ReflectionClass;
 use spaf\simputils\attributes\markers\Shortcut;
 use spaf\simputils\components\InternalMemoryCache;
+use spaf\simputils\exceptions\NotImplementedYet;
 use spaf\simputils\generic\BasicInitConfig;
 use spaf\simputils\helpers\DateTimeHelper;
 use spaf\simputils\models\Box;
@@ -948,7 +949,7 @@ class PHP {
 	 */
 	#[Shortcut('\$_ENV')]
 	public static function allEnvs(): array|Box {
-		return InternalMemoryCache::$initial_get_env_state;
+		return InternalMemoryCache::$initial_get_env_state ?? [];
 	}
 
 	/**
@@ -963,7 +964,10 @@ class PHP {
 	 *
 	 * @return mixed Returns value, or null if does not exist
 	 */
-	public static function env(string $name): mixed {
+	public static function env(?string $name = null, bool $strict = true): mixed {
+		if (empty($name)) {
+			return static::allEnvs();
+		}
 		return $_ENV[$name] ?? null;
 	}
 
@@ -998,5 +1002,16 @@ class PHP {
 				$info->updateEnvVar($name, $value);
 			}
 		}
+	}
+
+	/**
+	 * Quick uuid solution
+	 *
+	 * @see Uuid
+	 *
+	 * @return string
+	 */
+	public static function uuid(): string {
+		throw new NotImplementedYet();
 	}
 }

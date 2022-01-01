@@ -175,16 +175,6 @@ class PHPClassTest extends TestCase {
 		PHP::rmFile($file_path);
 	}
 
-	/**
-	 * @return void
-	 * @runInSeparateProcess
-	 * @throws \ReflectionException
-	 */
-	public function testDeserializationException() {
-		$this->expectException(Exception::class);
-		PHP::deserialize('??');
-	}
-
 	public function testFilesRelatedFunctionality() {
 		$dir = '/tmp/simputils/tests/test-files-related-functionality';
 		$file = "{$dir}/my-very-file.txt";

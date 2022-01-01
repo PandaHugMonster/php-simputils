@@ -3,8 +3,8 @@
 namespace spaf\simputils\generic;
 
 use spaf\simputils\attributes\Property;
+use spaf\simputils\Data;
 use spaf\simputils\FS;
-use spaf\simputils\helpers\DataHelper;
 
 /**
  * Basic resource abstract model
@@ -60,7 +60,7 @@ abstract class BasicResource extends SimpleObject {
 
 	#[Property('size_hr')]
 	protected function getSizeHuman(): ?string {
-		return DataHelper::humanReadable($this->size);
+		return Data::humanReadable($this->size);
 	}
 
 	#[Property('extension')]

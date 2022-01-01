@@ -13,7 +13,6 @@ use Iterator;
 use ReflectionClass;
 use spaf\simputils\attributes\markers\Shortcut;
 use spaf\simputils\generic\BasicInitConfig;
-use spaf\simputils\helpers\DateTimeHelper;
 use spaf\simputils\models\Box;
 use spaf\simputils\models\DateTime;
 use spaf\simputils\models\File;
@@ -597,7 +596,7 @@ class PHP {
 	 * @throws \Exception Parsing error
 	 */
 	public static function now(?DateTimeZone $tz = null): ?DateTime {
-		return DateTimeHelper::now($tz);
+		return DT::now($tz);
 	}
 
 	/**
@@ -617,7 +616,7 @@ class PHP {
 		?DateTimeZone $tz = null,
 		string $fmt = null
 	): ?DateTime {
-		return DateTimeHelper::normalize($dt, $tz, $fmt);
+		return DT::normalize($dt, $tz, $fmt);
 	}
 
 	public static function file(null|string|File $file = null, $app = null): ?File {

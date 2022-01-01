@@ -1,7 +1,7 @@
 <?php
 
 
-namespace spaf\simputils\helpers;
+namespace spaf\simputils;
 
 
 use spaf\simputils\exceptions\NonExistingDataUnit;
@@ -18,7 +18,7 @@ use spaf\simputils\exceptions\UnspecifiedDataUnit;
  * @todo Bug with above YB level (fix it asap!)
  * @package spaf\simputils\helpers
  */
-class DataHelper {
+class Data {
 
 	/**
 	 * Represents the unit of "Byte"
@@ -117,7 +117,7 @@ class DataHelper {
 	 * @return string Cleared and normalized unit abbreviation
 	 * @throws NonExistingDataUnit
 	 * @throws UnspecifiedDataUnit
-	 * @see DataHelper::unitCodeToPowerArray()
+	 * @see Data::unitCodeToPowerArray()
 	 *
 	 */
 	public static function clearUnit(string $unit): string {
@@ -203,7 +203,7 @@ class DataHelper {
 	 * @return float Resulting value of "$to_unit" level as a float number
 	 * @throws \spaf\simputils\exceptions\NonExistingDataUnit
 	 * @throws \spaf\simputils\exceptions\UnspecifiedDataUnit
-	 * @see \spaf\simputils\helpers\DataHelper::unitTo()
+	 * @see \spaf\simputils\helpers\Data::unitTo()
 	 */
 	public static function bytesTo(int $bytes, string $to_unit): float {
 		return static::unitTo("{$bytes}b", $to_unit);

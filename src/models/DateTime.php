@@ -3,7 +3,7 @@
 
 namespace spaf\simputils\models;
 
-use spaf\simputils\helpers\DateTimeHelper;
+use spaf\simputils\DT;
 use spaf\simputils\traits\PropertiesTrait;
 
 /**
@@ -13,6 +13,6 @@ class DateTime extends \DateTime {
 	use PropertiesTrait;
 
 	public function __toString(): string {
-		return DateTimeHelper::stringify($this);
+		return DT::stringify($this);
 	}
 }

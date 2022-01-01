@@ -216,7 +216,7 @@ class PHPClassTest extends TestCase {
 	 * @uses \spaf\simputils\traits\SimpleObjectTrait
 	 * @uses \spaf\simputils\components\versions\parsers\DefaultVersionParser
 	 *
-	 * @uses \spaf\simputils\helpers\SystemHelper
+	 * @uses \spaf\simputils\System
 	 */
 	public function testPhpInfo() {
 		$php_info = PHP::info(true);

@@ -3,9 +3,9 @@
 namespace spaf\simputils\models;
 
 
+use spaf\simputils\DT;
 use spaf\simputils\exceptions\GitDirectoryNotFound;
 use spaf\simputils\generic\SimpleObject;
-use spaf\simputils\helpers\DateTimeHelper;
 
 /**
  * @codeCoverageIgnore
@@ -70,7 +70,7 @@ class GitRepo extends SimpleObject {
 	//  Get timestamp:				git show --format="%at" --no-patch
 	public function getAuthorDatetime($ref = 'HEAD'): ?DateTime {
 		$ts = $this->show('%at', $ref);
-		return !empty($ts)?DateTimeHelper::normalize((int) $ts):null;
+		return !empty($ts)?DT::normalize((int) $ts):null;
 	}
 
 	//  Get committer:				git show --format="%cn" --no-patch
@@ -86,7 +86,7 @@ class GitRepo extends SimpleObject {
 	//  Get committer datetime:		git show --format="%cI" --no-patch
 	public function getCommitterDatetime($ref = 'HEAD'): ?DateTime {
 		$ts = $this->show('%ct', $ref);
-		return !empty($ts)?DateTimeHelper::normalize((int) $ts):null;
+		return !empty($ts)?DT::normalize((int) $ts):null;
 	}
 
 	//  Subject:					git show --format="%s" --no-patch

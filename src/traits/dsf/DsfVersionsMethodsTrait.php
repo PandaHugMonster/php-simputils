@@ -12,7 +12,7 @@ use spaf\simputils\PHP;
  *
  * Represents history of methods to get fingerprint-data for each version
  *
- * @see \spaf\simputils\components\SystemFingerprint
+ * @see \spaf\simputils\models\SystemFingerprint
  * @see \spaf\simputils\traits\DefaultSystemFingerprintTrait
  */
 trait DsfVersionsMethodsTrait {

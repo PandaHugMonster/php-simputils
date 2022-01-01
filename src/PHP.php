@@ -639,7 +639,7 @@ class PHP {
 	 */
 	#[Shortcut('\$_ENV')]
 	public static function allEnvs(): array|Box {
-		return CommonMemoryCacheIndex::$initial_get_env_state ?? [];
+		return PHP::box($_ENV ?? CommonMemoryCacheIndex::$initial_get_env_state ?? []);
 	}
 
 	/**

@@ -22,10 +22,12 @@ use function is_string;
  * manually as a new object, but rather using {@see PHP::info()} method, because it caches
  * the object, and you receive the same object with every call.
  *
+ * FIX  Wrap all the `array`s into `Box`s
+ *
  * @property-read Version $php_version
  * @property-read Version $simp_utils_version
  * @property-read string $simp_utils_license
- * @property-read array $ini_config
+ * @property-read Box $ini_config
  * @property-read string $main_ini_file
  * @property-read array $extra_ini_files
  * @property-read array $stream_wrappers
@@ -137,6 +139,8 @@ class PhpInfo extends Box {
 	/**
 	 * Acquiring values of PHP info and similar
 	 *
+	 * FIX  Review and implement $box_class for arrays
+	 *
 	 * @return array
 	 */
 	protected static function compose(): array {
@@ -145,13 +149,17 @@ class PhpInfo extends Box {
 			InitConfig::REDEF_VERSION,
 			Version::class
 		);
+		$box_class = CodeBlocksCacheIndex::getRedefinition(
+			InitConfig::REDEF_BOX,
+			Box::class
+		);
 
 		$data = [];
 
 		$data[constants::KEY_PHP_VERSION] = PHP::version();
 		$data[constants::KEY_SIMP_UTILS_VERSION] = PHP::simpUtilsVersion();
 		$data[constants::KEY_SIMP_UTILS_LICENSE] = PHP::simpUtilsLicense();
-		$data[constants::KEY_INI_CONFIG] = ini_get_all(details: false);
+		$data[constants::KEY_INI_CONFIG] = new $box_class(ini_get_all(details: false));
 		$data[constants::KEY_MAIN_INI_FILE] = php_ini_loaded_file();
 		$data[constants::KEY_EXTRA_INI_FILES] = explode(
 			',', preg_replace('/\n*/', '', php_ini_scanned_files())

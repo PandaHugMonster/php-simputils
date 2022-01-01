@@ -118,6 +118,8 @@ use function is_object;
  *
  * TODO Implement more of array-related functionality from default PHP pool
  *
+ * FIX  Implement switchable on/off for silent "null" instead of exception return
+ *
  * @package spaf\simputils\generic
  *
  * @property-read mixed $stash Stash suppose to contain additional data that was prepared during
@@ -214,7 +216,7 @@ class Box extends ArrayObject {
 
 			foreach ($this->keys as $key) {
 				if ($i >= $from && $i < $to) {
-					$res[$key] = is_object($this[$key])
+					$res[] = is_object($this[$key])
 						?clone $this[$key]
 						:$this[$key];
 				}

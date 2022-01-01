@@ -40,10 +40,12 @@ trait DsfVersionsMethodsTrait {
 	private function versionApplicableMethodChoose(Version $version): callable {
 		return match (true) {
 			// ... new conditions should be added on the top ...
+			// $version->gt($z = '2.0.0') && $version->lte($z = '3.0.0')
+			//	    => Closure::fromCallable([$this, static::autoPrepareMethodName('2.0.0')]),
 
 			// The default condition
 			default
-			=> Closure::fromCallable([$this, static::autoPrepareMethodName('1.0.0')])
+				=> Closure::fromCallable([$this, static::autoPrepareMethodName('1.0.0')])
 		};
 	}
 

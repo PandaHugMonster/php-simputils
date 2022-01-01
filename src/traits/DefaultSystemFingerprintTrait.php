@@ -94,7 +94,19 @@ trait DefaultSystemFingerprintTrait {
 		return parent::preCheckProperty($field, $val);
 	}
 
-	public function fit(SystemFingerprint|string|null $val, bool $strict = false): bool {
+	/**
+	 * Checks if `$this` fingerprint is fitting the `$val` fingerprint
+	 *
+	 * @param SystemFingerprint|string|null $val    The target fingerprint against of which check
+	 *                                              is performed
+	 * @param bool                          $strict Strict parsing, if set to true - checks exact
+	 *                                              match!
+	 *
+	 * @return bool True if `$this` is fitting to `$val`, false otherwise
+	 *
+	 * @throws \Exception Error
+	 */
+	public function fits(SystemFingerprint|string|null $val, bool $strict = false): bool {
 		if (is_null($val)) {
 			return false;
 		}

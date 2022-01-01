@@ -43,21 +43,23 @@ trait ArrayReadOnlyAccessTrait {
 	 * Sets the read-only flag
 	 *
 	 * TODO Has to be refactored/or reorganized at some point
+	 * FIX  Temporarily set as public instead of protected. Fix it at some point!
 	 * @param bool $val Enable or Disable, default is to enable
 	 *
 	 * @return void
 	 */
-	protected function ____setReadOnly(bool $val = true) {
+	public function ____setReadOnly(bool $val = true) {
 		$this->____read_only = $val;
 	}
 
 	/**
 	 * Checks read-only flag
 	 *
+	 * FIX  Temporarily set as public instead of protected. Fix it at some point!
 	 * TODO Has to be refactored/or reorganized at some point
 	 * @return bool
 	 */
-	protected function ____isReadOnly(): bool {
+	public function ____isReadOnly(): bool {
 		return $this->____read_only;
 	}
 

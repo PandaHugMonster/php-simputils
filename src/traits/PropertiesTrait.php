@@ -7,19 +7,12 @@ use ReflectionClass;
 use ReflectionMethod;
 use ReflectionObject;
 use ReflectionProperty;
-use ReflectionUnionType;
 use spaf\simputils\attributes\Property;
 use spaf\simputils\attributes\PropertyBatch;
 use spaf\simputils\exceptions\PropertyAccessError;
 use spaf\simputils\exceptions\PropertyDoesNotExist;
 use spaf\simputils\special\PropertiesCacheIndex;
-use function implode;
 use function in_array;
-use function is_null;
-use function is_numeric;
-use function method_exists;
-use function strtolower;
-use function ucfirst;
 
 /**
  * MARK Provide explanation for the traits messiness.
@@ -42,19 +35,20 @@ use function ucfirst;
  * (better use layer class or your own basic class before the target class). After that you can use
  * all the `Property*` attributes in the class and it's child classes.
  *
- * __Afternote:__ Basically it's safe enough for performance to use `Properties`, though if you have
- * extremely complex and big monolith code (which is not a good thing in the most cases),
+ * __After-note:__ Basically it's safe enough for performance to use `Properties`, though if you
+ * have extremely complex and big monolith code (which is not a good thing in the most cases),
  * you might have some dropdowns of efficiency if compared to direct calls, but in the most cases
  * it will be so negligible, that almost always it would be much more efficient to fix/optimize
  * the "complexities" of your own solution/code first.
  *
  * TODO Implement normal PropertyReflection class!
  *
- * FIX  !!! Absolute MESS! Fully refactor and improve, but do not damage functionality
+ * TODO Subject to even more optimization
  */
 trait PropertiesTrait {
 
-	private $____property_batch_storage = [];
+	// FIX  Public modifier is a temporary solution, due to external modification of the field
+	public $____property_batch_storage = [];
 
 	/**
 	 * @param string $name
@@ -123,192 +117,64 @@ trait PropertiesTrait {
 	}
 
 	/**
-	 * @param $ref_name
-	 * @param $ref_name_type
-	 * @param $name
-	 * @param $call_type
-	 * @param null $value
+	 * @param string $name
+	 * @param string $call_type
+	 * @param mixed $value
 	 * @param bool $check_and_do_not_call
 	 *
-	 * @return bool|void
-	 * @throws \ReflectionException
-	 * @throws \spaf\simputils\exceptions\PropertyAccessError
-	 * @throws \spaf\simputils\exceptions\PropertyDoesNotExist
+	 * @return bool
+	 * @throws PropertyAccessError
+	 * @throws PropertyDoesNotExist
 	 */
 	private function ____prepareProperty(
-		$name, $call_type, $value = null, $check_and_do_not_call = false
-	) {
-		$ref_name = static::class.'#'.$name;
-		$ref_name_type = $ref_name.'#'.Property::TYPE_GET;
-
-		####
-		if (!isset(PropertiesCacheIndex::$index[$ref_name_type])) {
-			PropertiesCacheIndex::$index[$ref_name_type] = null;
-		}
-		$index = &PropertiesCacheIndex::$index;
-		####
-
+		string $name,
+		string $call_type,
+		mixed $value = null,
+		bool $check_and_do_not_call = false
+	): mixed {
 		$sub = null;
 
-		$ref = new ReflectionClass($this);
-		$class_items = array_merge($ref->getMethods(), $ref->getProperties());
+		$class_reflection = new ReflectionClass($this);
 
-		foreach ($class_items as $item) {
-			// NOTE PropertyBatch part
-			if (!empty($attr = $item->getAttributes(PropertyBatch::class)[0] ?? null)) {
-				$args = $attr->getArguments();
-				$expected_names = $this->_propertyBatchExpectedNames($item, $attr);
+		$applicable_items = array_merge(
+			$class_reflection->getMethods(),
+			$class_reflection->getProperties()
+		);
 
-				if (in_array($name, $expected_names)) {
-					$method_name = '____propertyBatchMethod';
+		$applicable_attribute_classes = [PropertyBatch::class, Property::class];
 
-					$access_type = $this->_propertyBatchAccessType($item, $attr);
-					$value_store_ref = $args[2] ?? $args['storage'] ?? '____property_batch_storage';
-					if ($value_store_ref === PropertyBatch::STORAGE_SELF) {
-						$value_store = &$this;
-					} else {
-						$value_store = &$this->$value_store_ref;
-					}
-					if (!empty($default_values)) {
-						if (
-							$value_store_ref === PropertyBatch::STORAGE_SELF
-							&& method_exists($this, '____setReadOnly')
-						) {
-							// FIX Fix those at some point
-							$this->____setReadOnly(false);
-						}
-						foreach ($default_values as $k => $v) {
-							$value_store[$k] = $v;
-						}
-						if (
-							$value_store_ref === PropertyBatch::STORAGE_SELF
-							&& method_exists($this, '____setReadOnly')
-						) {
-							// FIX Fix those at some point
-							$this->____setReadOnly(true);
-						}
-					}
+		foreach ($applicable_items as $item) {
+			/** @var ReflectionMethod|ReflectionProperty $item */
+			/** @var \ReflectionAttribute $attr */
 
-					if ($access_type === PropertyBatch::TYPE_BOTH) {
-						foreach ($expected_names as $exp_name) {
-							$key = static::class.'#'.$exp_name;
-							PropertiesCacheIndex::$property_settings[$key]['storage']
-								= $value_store_ref;
-							if (!isset($index[$key_type = $key.'#'.PropertyBatch::TYPE_GET])) {
-								$index[$key_type] = $method_name.'Get';
-							} else if (
-								!isset($index[$key_type = $key.'#'.PropertyBatch::TYPE_SET])
-							) {
-								$index[$key_type] = $method_name.'Set';
-							}
-						}
+			foreach ($item->getAttributes() as $attr) {
+				$attr_class = $attr->getName();
+				if (in_array($attr_class, $applicable_attribute_classes)) {
 
-						if ($check_and_do_not_call) {
+					[$func_ref, $status] = call_user_func(
+						[$attr_class, 'subProcess'],
+						$this, $item, $attr, $name, $call_type
+					);
+
+					if ($status === true) {
+						if ($check_and_do_not_call && $call_type !== Property::TYPE_SET) {
+							// NOTE Relevant for `isset()`
 							return true;
 						}
-						return $this->{$method_name.ucfirst($call_type)}(
-							$value, $call_type, $name
-						);
-
-					} else if ($access_type === $call_type) {
-
-						foreach ($expected_names as $exp_name) {
-							$key = static::class.'#'.$exp_name;
-							PropertiesCacheIndex::$property_settings[$key]['storage']
-								= $value_store_ref;
-
-							$key_type = $key.'#'.$access_type;
-							$index[$key_type] = $method_name.ucfirst($access_type);
-						}
-
-						if ($access_type === PropertyBatch::TYPE_GET) {
-							if ($check_and_do_not_call) {
-								return true;
-							}
-							return $this->{$method_name.ucfirst($access_type)}(
-								null, $call_type, $name
-							);
-
-						} else if ($access_type === PropertyBatch::TYPE_SET) {
-							return $this->{$method_name.ucfirst($access_type)}(
-								$value, $call_type, $name
-							);
-
-						}
-
-					} else if (empty($sub)) {
-						$sub = $access_type === Property::TYPE_GET?'read-only':'write-only';
+						return $this->$func_ref($value, $call_type, $name);
+					} else if ($status !== false && empty($sub)) {
+						$sub = $status;
 					}
-
-					if ($check_and_do_not_call) {
-						return false;
-					}
-				}
-
-			// NOTE Property part
-			} else {
-				if (!empty($attr = $item->getAttributes(Property::class)[0] ?? null)) {
-					if (!empty($attr)) {
-						/** @var \ReflectionAttribute $attr */
-
-						if ($name === $this->_propertyExpectedName($item, $attr)) {
-							$method_type = $this->_propertyMethodAccessType($item, $attr);
-
-							if ($method_type === Property::TYPE_BOTH) {
-								if (!isset($index[$key_type = $ref_name.'#'.Property::TYPE_GET])) {
-									$index[$key_type] = $item->name;
-								}
-								if (!isset($index[$key_type = $ref_name.'#'.Property::TYPE_SET])) {
-									$index[$key_type] = $item->name;
-								}
-
-								if ($check_and_do_not_call) {
-									return true;
-								}
-								return $this->{$item->name}(
-									$value, $call_type, $name
-								);
-							} else if ($call_type === $method_type) {
-								if ($method_type === Property::TYPE_GET) {
-									if (
-										!isset($index[$key_type = $ref_name.'#'.Property::TYPE_GET])
-									) {
-										$index[$key_type] = $item->name;
-									}
-
-									if ($check_and_do_not_call) {
-										return true;
-									}
-									return $this->{$item->name}(
-										null, $call_type, $name
-									);
-								} else if ($method_type === Property::TYPE_SET) {
-									if (
-										!isset($index[$key_type = $ref_name.'#'.Property::TYPE_SET])
-									) {
-										$index[$key_type] = $item->name;
-									}
-									return $this->{$item->name}(
-										$value, $call_type, $name
-									);
-								}
-							}
-							if (empty($sub)) {
-								$sub = $method_type === Property::TYPE_GET?'read-only':'write-only';
-							}
-
-							if ($check_and_do_not_call) {
-								return false;
-							}
-						}
-					}
+					break;
 				}
 			}
-
 		}
+
 		if ($check_and_do_not_call) {
+			// NOTE Relevant for `isset()`
 			return false;
 		}
+
 		if (!empty($sub)) {
 			throw new PropertyAccessError(
 				'Property '.$name.' of "'.$sub.'" access'
@@ -318,90 +184,7 @@ trait PropertiesTrait {
 		throw new PropertyDoesNotExist('No such property '.$name);
 	}
 
-	private function _propertyBatchExpectedNames($ref, \ReflectionAttribute $attr): ?array {
-		$args = $attr->getArguments();
-
-		$expected_names = $args[3] ?? null;
-
-		if (empty($expected_names)) {
-			$ref->setAccessible(true);
-			$_group = [];
-			$expected_names = [];
-			$default_values = [];
-			if ($ref instanceof ReflectionMethod) {
-				$_group = (array) $ref->invoke($this);
-			} else if ($ref instanceof ReflectionProperty) {
-				$_group = (array) $ref->getValue($this);
-			}
-			$ref->setAccessible(false);
-			if (!empty($_group)) {
-				foreach ($_group as $k => $v) {
-					if (is_numeric($k)) {
-						$expected_names[] = $v;
-					} else {
-						$default_values[$k] = $v;
-						$expected_names[] = $k;
-					}
-
-				}
-			}
-		}
-
-		return $expected_names;
-	}
-
-	private function _propertyExpectedName($ref, \ReflectionAttribute $attr) {
-		$args = $attr->getArguments();
-		return $args[0] ?? $args['name'] ?? $ref->name;
-	}
-
-	private function _propertyBatchAccessType($ref, \ReflectionAttribute $attr) {
-		$args = $attr->getArguments();
-		return $args[0] ?? $args['type'] ?? PropertyBatch::TYPE_BOTH;
-	}
-
-	private function _propertyMethodAccessType($ref, \ReflectionAttribute $attr) {
-		$args = $attr->getArguments();
-
-		$method_type = $args[1] ?? $args['type'] ?? null;
-
-		if (!empty($method_type)) {
-			$method_type = strtolower($method_type);
-		} else {
-			$ref_ret_type = $ref?->getReturnType() ?? null;
-			if ($ref_ret_type instanceof ReflectionUnionType) {
-				$r = [];
-				foreach ($ref_ret_type->getTypes() as $ref_ret_type_item) {
-					$r[] = $ref_ret_type_item;
-				}
-				$return_type = implode('|', $r);
-			} else {
-				$return_type = $ref_ret_type?->getName() ?? null;
-			}
-
-			$is_setter = (bool) $ref->getNumberOfParameters()
-				|| $return_type === 'void'
-				|| $return_type === 'never';
-			$is_getter = !$is_setter || ($is_setter
-					&& !is_null($return_type)
-					&& $return_type !== 'void'
-					&& $return_type !== 'never');
-
-			if ($is_setter && $is_getter) {
-				// BOTH
-				$method_type = Property::TYPE_BOTH;
-			} else if ($is_getter) {
-				// GET
-				$method_type = Property::TYPE_GET;
-			} else if ($is_setter) {
-				// SET
-				$method_type = Property::TYPE_SET;
-			}
-		}
-
-		return $method_type;
-	}
-
+	// HERE Fix it after working optimizations
 	public function __debugInfo(): ?array {
 		$ref = new ReflectionObject($this);
 		$res = [];
@@ -424,8 +207,10 @@ trait PropertiesTrait {
 		foreach ($items as $item) {
 			$attr = $item->getAttributes(Property::class)[0] ?? null;
 			if (!empty($attr)) {
-				$expected_name = $this->_propertyExpectedName($item, $attr);
-				$method_type = $this->_propertyMethodAccessType($item, $attr);
+//				$expected_name = $this->_propertyExpectedName($item, $attr);
+//				$method_type = $this->_propertyMethodAccessType($item, $attr);
+				$expected_name = Property::expectedName($item, $attr);
+				$method_type = Property::methodAccessType($item, $attr);
 
 				if ($this->_debugOutputDisabled($item, $attr)) {
 					$value = '<..skipped..>';
@@ -443,8 +228,9 @@ trait PropertiesTrait {
 		foreach ($items as $item) {
 			$attr = $item->getAttributes(PropertyBatch::class)[0] ?? null;
 			if (!empty($attr)) {
-				$expected_names = $this->_propertyBatchExpectedNames($item, $attr);
-				$access_type = $this->_propertyBatchAccessType($item, $attr);
+				[$expected_names, $_]
+					= PropertyBatch::expectedNamesAndDefaultValues($this, $item, $attr);
+				$access_type = PropertyBatch::accessType($attr);
 
 				if ($access_type === Property::TYPE_GET || $access_type === Property::TYPE_BOTH) {
 					foreach ($expected_names as $expected_name) {

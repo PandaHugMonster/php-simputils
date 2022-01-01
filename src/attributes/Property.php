@@ -3,7 +3,9 @@
 namespace spaf\simputils\attributes;
 
 use Attribute;
+use ReflectionUnionType;
 use spaf\simputils\generic\BasicAttribute;
+use spaf\simputils\special\PropertiesCacheIndex;
 
 /**
  * Property attribute for methods
@@ -50,4 +52,110 @@ class Property extends BasicAttribute {
 		public ?string $type = null,
 		public bool $debug_output = true,
 	) {}
+
+	public static function subProcess(
+		$obj,
+		$item,
+		$attr,
+		$name,
+		$call_type
+	): array {
+		$ref_name = $obj::class.'#'.$name;
+		$ref_name_type = $ref_name.'#'.Property::TYPE_GET;
+		$func_ref = $item->name;
+
+		//// NOTE   Impossible to optimize and extract due to PHP limitations on passing by ref...
+		if (!isset(PropertiesCacheIndex::$index[$ref_name_type])) {
+			PropertiesCacheIndex::$index[$ref_name_type] = null;
+		}
+		$index = &PropertiesCacheIndex::$index;
+		////
+
+		$args = $attr->getArguments();
+
+		if ($name === static::expectedName($func_ref, $attr, $args)) {
+			$method_type = static::methodAccessType($item, $attr, $args);
+
+			if ($method_type === Property::TYPE_BOTH) {
+				if (!isset($index[$key_type = $ref_name.'#'.Property::TYPE_GET])) {
+					$index[$key_type] = $func_ref;
+				}
+				if (!isset($index[$key_type = $ref_name.'#'.Property::TYPE_SET])) {
+					$index[$key_type] = $func_ref;
+				}
+
+				return [$func_ref, true];
+			} else if ($call_type === $method_type) {
+				if ($method_type === Property::TYPE_GET) {
+					if (
+						!isset($index[$key_type = $ref_name.'#'.Property::TYPE_GET])
+					) {
+						$index[$key_type] = $func_ref;
+					}
+
+					return [$func_ref, true];
+				} else if ($method_type === Property::TYPE_SET) {
+					if (
+						!isset($index[$key_type = $ref_name.'#'.Property::TYPE_SET])
+					) {
+						$index[$key_type] = $func_ref;
+					}
+
+					return [$func_ref, true];
+				}
+			}
+
+			return [$func_ref, $method_type === Property::TYPE_GET?'read-only':'write-only'];
+		}
+
+		return [$func_ref, false];
+	}
+
+	public static function expectedName($func_ref, \ReflectionAttribute $attr, $args = null) {
+		$args = $args ?? $attr->getArguments();
+		return $args[0] ?? $args['name'] ?? $func_ref;
+	}
+
+	public static function methodAccessType($ref, \ReflectionAttribute $attr, $args = null) {
+		// FIX  Optimize later
+		$args = $args ?? $attr->getArguments();
+
+		$method_type = $args[1] ?? $args['type'] ?? null;
+
+		if (!empty($method_type)) {
+			$method_type = strtolower($method_type);
+		} else {
+			$ref_ret_type = $ref?->getReturnType() ?? null;
+			if ($ref_ret_type instanceof ReflectionUnionType) {
+				$r = [];
+				foreach ($ref_ret_type->getTypes() as $ref_ret_type_item) {
+					$r[] = $ref_ret_type_item;
+				}
+				$return_type = implode('|', $r);
+			} else {
+				$return_type = $ref_ret_type?->getName() ?? null;
+			}
+
+			$is_setter = (bool) $ref->getNumberOfParameters()
+				|| $return_type === 'void'
+				|| $return_type === 'never';
+			$is_getter = !$is_setter || ($is_setter
+					&& !is_null($return_type)
+					&& $return_type !== 'void'
+					&& $return_type !== 'never');
+
+			if ($is_setter && $is_getter) {
+				// BOTH
+				$method_type = Property::TYPE_BOTH;
+			} else if ($is_getter) {
+				// GET
+				$method_type = Property::TYPE_GET;
+			} else if ($is_setter) {
+				// SET
+				$method_type = Property::TYPE_SET;
+			}
+		}
+
+		return $method_type;
+	}
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace spaf\simputils\models\files;
+namespace spaf\simputils\models;
 
 use Exception;
 use spaf\simputils\attributes\Property;

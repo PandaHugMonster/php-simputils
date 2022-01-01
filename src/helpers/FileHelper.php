@@ -3,7 +3,7 @@
 namespace spaf\simputils\helpers;
 
 use finfo;
-use spaf\simputils\models\files\File;
+use spaf\simputils\models\File;
 use spaf\simputils\PHP;
 
 class FileHelper {

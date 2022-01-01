@@ -4,6 +4,7 @@ namespace spaf\simputils\models;
 
 use Exception;
 use spaf\simputils\attributes\PropertyBatch;
+use spaf\simputils\Boolean;
 use spaf\simputils\components\InternalMemoryCache;
 use spaf\simputils\generic\constants\ConstPHPInfo as constants;
 use spaf\simputils\helpers\SystemHelper;
@@ -119,7 +120,7 @@ class PhpInfo extends Box {
 		$phpinfo = static::getOriginalPhpInfo();
 		if (is_string($callback)) {
 			$callback = match ($callback) {
-				'bool', 'boolean' => fn($v) => PHP::asBool($v ?? ''),
+				'bool', 'boolean' => fn($v) => Boolean::from($v ?? ''),
 				'empty-null' => fn($v) => empty($v)?null:$v,
 			};
 		}
@@ -322,8 +323,8 @@ class PhpInfo extends Box {
 	 * @return string
 	 */
 	public static function getYesNoArrayAsRegExpChoices(): string {
-		$yeses = PHP::$array_yes;
-		$noes = PHP::$array_no;
+		$yeses = Boolean::$array_yes;
+		$noes = Boolean::$array_no;
 		$both = array_merge($yeses, $noes);
 		$to_escape = ['+', '-'];
 		foreach ($both as $key => $item) {

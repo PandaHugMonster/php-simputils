@@ -286,5 +286,4 @@ class DataHelper {
 		}
 		return $res;
 	}
-
 }

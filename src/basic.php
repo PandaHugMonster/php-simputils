@@ -10,7 +10,7 @@ use DateTimeZone;
 use spaf\simputils\attributes\markers\Shortcut;
 use spaf\simputils\models\Box;
 use spaf\simputils\models\DateTime;
-use spaf\simputils\models\files\File;
+use spaf\simputils\models\File;
 use spaf\simputils\PHP;
 
 /**

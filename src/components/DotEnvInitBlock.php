@@ -6,7 +6,7 @@ use spaf\simputils\attributes\Property;
 use spaf\simputils\generic\BasicInitConfig;
 use spaf\simputils\generic\SimpleObject;
 use spaf\simputils\interfaces\InitBlockInterface;
-use spaf\simputils\models\files\File;
+use spaf\simputils\models\File;
 use spaf\simputils\PHP;
 use function spaf\simputils\basic\fl;
 

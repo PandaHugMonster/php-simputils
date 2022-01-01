@@ -1,12 +1,14 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
+use spaf\simputils\Boolean;
 use spaf\simputils\generic\SimpleObject;
 use spaf\simputils\models\Box;
 use spaf\simputils\models\PhpInfo;
 use spaf\simputils\models\Version;
 use spaf\simputils\PHP;
 use spaf\simputils\Settings;
+use spaf\simputils\Str;
 use spaf\simputils\traits\MetaMagic;
 use function spaf\simputils\basic\box;
 use function spaf\simputils\basic\pd;
@@ -57,8 +59,8 @@ class PHPClassTest extends TestCase {
 	 * @runInSeparateProcess
 	 */
 	public function testBoolStr(): void {
-		$true = PHP::boolStr(true);
-		$false = PHP::boolStr(false);
+		$true = Str::from(true);
+		$false = Str::from(false);
 		$this->assertEquals('true', $true, 'Check if true is true');
 		$this->assertEquals('false', $false, 'Check if false is false');
 	}
@@ -243,7 +245,7 @@ class PHPClassTest extends TestCase {
 	 * @return void
 	 */
 	public function testAsBool(mixed $mixed_val, ?bool $expected_val) {
-		$sub_res = PHP::asBool($mixed_val);
+		$sub_res = Boolean::from($mixed_val);
 
 		// Due to dataProviderToBool works for both strict and non strict, adjusting null
 		$expected_val = $expected_val === null?false:$expected_val;
@@ -263,7 +265,7 @@ class PHPClassTest extends TestCase {
 	 * @return void
 	 */
 	public function testAsBoolStrict(mixed $mixed_val, ?bool $expected_val) {
-		$sub_res = PHP::asBool($mixed_val, true);
+		$sub_res = Boolean::from($mixed_val, true);
 		$this->assertEquals(
 			$expected_val,
 			$sub_res,

@@ -4,7 +4,7 @@ use PHPUnit\Framework\TestCase;
 use spaf\simputils\exceptions\IncorrectVersionFormat;
 use spaf\simputils\generic\BasicVersionParser;
 use spaf\simputils\models\Version;
-use spaf\simputils\PHP;
+use spaf\simputils\Str;
 use spaf\simputils\versions\DefaultVersionParser;
 
 class CustomParserSample extends DefaultVersionParser {
@@ -126,67 +126,67 @@ class VersionTest extends TestCase {
 
 		// $v1 vs $v2
 		$r = $v1->gte($v2);
-		$this->assertFalse($r, "{$v1} >= {$v2}: ".PHP::boolStr($r));
+		$this->assertFalse($r, "{$v1} >= {$v2}: ".Str::from($r));
 		$r = $v1->gt($v2);
-		$this->assertFalse($r, "{$v1} > {$v2}: ".PHP::boolStr($r));
+		$this->assertFalse($r, "{$v1} > {$v2}: ".Str::from($r));
 		$r = $v1->lt($v2);
-		$this->assertTrue($r, "{$v1} < {$v2}: ".PHP::boolStr($r));
+		$this->assertTrue($r, "{$v1} < {$v2}: ".Str::from($r));
 		$r = $v1->lte($v2);
-		$this->assertTrue($r, "{$v1} <= {$v2}: ".PHP::boolStr($r));
+		$this->assertTrue($r, "{$v1} <= {$v2}: ".Str::from($r));
 		$r = $v1->e($v2);
-		$this->assertFalse($r, "{$v1} = {$v2}: ".PHP::boolStr($r));
+		$this->assertFalse($r, "{$v1} = {$v2}: ".Str::from($r));
 
 		// $v1 vs $v3
 		$r = $v1->gte($v3);
-		$this->assertFalse($r, "{$v1} >= {$v3}: ".PHP::boolStr($r));
+		$this->assertFalse($r, "{$v1} >= {$v3}: ".Str::from($r));
 		$r = $v1->gt($v3);
-		$this->assertFalse($r, "{$v1} > {$v3}: ".PHP::boolStr($r));
+		$this->assertFalse($r, "{$v1} > {$v3}: ".Str::from($r));
 		$r = $v1->lt($v3);
-		$this->assertTrue($r, "{$v1} < {$v3}: ".PHP::boolStr($r));
+		$this->assertTrue($r, "{$v1} < {$v3}: ".Str::from($r));
 		$r = $v1->lte($v3);
-		$this->assertTrue($r, "{$v1} <= {$v3}: ".PHP::boolStr($r));
+		$this->assertTrue($r, "{$v1} <= {$v3}: ".Str::from($r));
 		$r = $v1->e($v3);
-		$this->assertFalse($r, "{$v1} = {$v3}: ".PHP::boolStr($r));
+		$this->assertFalse($r, "{$v1} = {$v3}: ".Str::from($r));
 
 		// $v2 vs $v3
 		$r = $v2->gte($v3);
-		$this->assertFalse($r, "{$v2} >= {$v3}: ".PHP::boolStr($r));
+		$this->assertFalse($r, "{$v2} >= {$v3}: ".Str::from($r));
 		$r = $v2->gt($v3);
-		$this->assertFalse($r, "{$v2} > {$v3}: ".PHP::boolStr($r));
+		$this->assertFalse($r, "{$v2} > {$v3}: ".Str::from($r));
 		$r = $v2->lt($v3);
-		$this->assertTrue($r, "{$v2} < {$v3}: ".PHP::boolStr($r));
+		$this->assertTrue($r, "{$v2} < {$v3}: ".Str::from($r));
 		$r = $v2->lte($v3);
-		$this->assertTrue($r, "{$v2} <= {$v3}: ".PHP::boolStr($r));
+		$this->assertTrue($r, "{$v2} <= {$v3}: ".Str::from($r));
 		$r = $v2->e($v3);
-		$this->assertFalse($r, "{$v2} = {$v3}: ".PHP::boolStr($r));
+		$this->assertFalse($r, "{$v2} = {$v3}: ".Str::from($r));
 
 		// $v3 vs $v4
 		$r = $v3->gte($v4);
-		$this->assertTrue($r, "{$v3} >= {$v4}: ".PHP::boolStr($r));
+		$this->assertTrue($r, "{$v3} >= {$v4}: ".Str::from($r));
 		$r = $v3->gt($v4);
-		$this->assertFalse($r, "{$v3} > {$v4}: ".PHP::boolStr($r));
+		$this->assertFalse($r, "{$v3} > {$v4}: ".Str::from($r));
 		$r = $v3->lt($v4);
-		$this->assertFalse($r, "{$v3} < {$v4}: ".PHP::boolStr($r));
+		$this->assertFalse($r, "{$v3} < {$v4}: ".Str::from($r));
 		$r = $v3->lte($v4);
-		$this->assertTrue($r, "{$v3} <= {$v4}: ".PHP::boolStr($r));
+		$this->assertTrue($r, "{$v3} <= {$v4}: ".Str::from($r));
 		$r = $v3->e($v4);
-		$this->assertTrue($r, "{$v3} = {$v4}: ".PHP::boolStr($r));
+		$this->assertTrue($r, "{$v3} = {$v4}: ".Str::from($r));
 
 		// $v2 vs $v1
 		$r = $v2->gte($v1);
-		$this->assertTrue($r, "{$v2} >= {$v1}: ".PHP::boolStr($r));
+		$this->assertTrue($r, "{$v2} >= {$v1}: ".Str::from($r));
 		$r = $v2->gt($v1);
-		$this->assertTrue($r, "{$v2} > {$v1}: ".PHP::boolStr($r));
+		$this->assertTrue($r, "{$v2} > {$v1}: ".Str::from($r));
 		$r = $v2->lt($v1);
-		$this->assertFalse($r, "{$v2} < {$v1}: ".PHP::boolStr($r));
+		$this->assertFalse($r, "{$v2} < {$v1}: ".Str::from($r));
 		$r = $v2->lte($v1);
-		$this->assertFalse($r, "{$v2} <= {$v1}: ".PHP::boolStr($r));
+		$this->assertFalse($r, "{$v2} <= {$v1}: ".Str::from($r));
 		$r = $v2->e($v1);
-		$this->assertFalse($r, "{$v2} == {$v1}: ".PHP::boolStr($r));
+		$this->assertFalse($r, "{$v2} == {$v1}: ".Str::from($r));
 
 		// $v4 != $v5
 		$r = !$v4->e($v5);
-		$this->assertTrue($r, "{$v4} != {$v5}: ".PHP::boolStr($r));
+		$this->assertTrue($r, "{$v4} != {$v5}: ".Str::from($r));
 
 	}
 

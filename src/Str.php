@@ -9,7 +9,6 @@ use spaf\simputils\attributes\markers\Shortcut;
  * Due to some significantly outdated limitations of PHP, it's too overcomplicated to have a native
  * String class. So this class will remain static as `Math` and `PHP`
  *
- * FIX  Unfinished. Proceed after DotEnv
  */
 class Str {
 
@@ -46,5 +45,29 @@ class Str {
 	#[Shortcut('static::ing()')]
 	public static function get(string $str, string ...$params): string {
 		return static::ing($str, ...$params);
+	}
+
+	/**
+	 * Turns value of any type to string
+	 *
+	 * For boolean:
+	 *      Turn bool true or false into string "true" or "false"
+	 *      Opposite functionality of {@see \spaf\simputils\Boolean::from()}.
+	 *
+	 * IMP  It recognizes different between 1 and true, so if you want "bool" representation string,
+	 *      provide bool-value, and not the integer one
+	 *
+	 * @param mixed $value Value to convert
+	 *
+	 * TODO Improve further...
+	 * @return string|null
+	 *@see \spaf\simputils\Boolean::from()
+	 */
+	public static function from(mixed $value): ?string {
+		if ($value === true || $value === false) {
+			return $value ?'true':'false';
+		}
+
+		return "$value";
 	}
 }

@@ -485,7 +485,7 @@ importantly be consistent per project**)
 The "SimpUtils" is a minimal set of flexible perks, so it should be extremely transparent
 when using with other libs and frameworks like "laravel", "Yii2", "Zend Framework", etc.
 
-And one of the biggest challenge in this case is to provide functionality above without
+And one of the biggest challenges in this case is to provide functionality above without
 locking out user from using their favourite frameworks "base objects".
 
 In PHP multiple inheritance is not allowed, at least directly. So in this case,
@@ -801,7 +801,7 @@ spaf\simputils\models\PhpInfo Object
 
 
 
-    ... OUTPUT IS SO BIG THAT IT WAS STRIPPED ...
+    ... OUTPUT IS SO BIG THAT IT WAS REMOVED ...
 
 
 
@@ -826,9 +826,7 @@ spaf\simputils\models\PhpInfo Object
 
 ```
 
-The output left untrimmed exactly to show how much data is parsed and easily available.
-
-Besides that all the version information is wrapped into `Version` objects
+Worth noting that all version information is wrapped into `Version` objects
 
 ```php
 use spaf\simputils\PHP;
@@ -855,8 +853,8 @@ echo PHP::info()->ini_config['date.sunset_zenith'];
 ### DotEnv and Env Vars
 
 Out of the box, if you did not disable it (and called `PHP::init()` !) if `.env` 
-file exists in your working directory (code directory) - it would load those variables
-into `$_ENV` or `env()`
+file exists in your working directory (code directory) - those variable will be available
+through `$_ENV` or `env()`.
 
 `.env` file content
 ```dotenv
@@ -878,13 +876,13 @@ print_r(env());
 // Output:
 // spaf\simputils\models\Box Object
 // (
-//    ... all other vars are stripped out ...
+//    ... ALL OTHER VARS ARE REMOVED ...
 //    
 //    [PARAM_1] => 12.2
 //    [PARAM_2] => TEST test
 // )
 
-// So "PARAM_1" and "PARAM_2" vars of our `.env` are loaded!
+// So "PARAM_1" and "PARAM_2" vars of our `.env` are available in your app!
 
 // And to get value of the exact variable:
 echo env('PARAM_2');
@@ -983,32 +981,20 @@ echo "Or current date-time-stamp is: {$dt}\n";
 // Working with custom time
 $dt = ts('1990-02-22');
 
-echo "My B-day is: {$dt->format(DT::FMT_DATE)}\n";
+echo "My B-day is: {$dt->date}\n";
 // Output: "My B-day is: 1990-02-22"
 
 // Cool calculations, right?! :D
-echo $dt->modify('+6 months -2 days +100 years')->format(DT::FMT_DATE);
+echo $dt->modify('+6 months -2 days +100 years')->date;
 // Output: 2090-08-20
 
 ```
 
-**Important:** Currently not all planned is added to the `DateTime` object. But it's 
-planned in the nearest time to enhance the functionality the same way as it was done for
-`Box`s and `Version`s!
+**Important:** Currently not everything that is planned - implemented for `DateTime` 
+object. But in the nearest time it should be improved!
 
 ## Further documentation
 
+_UNDONE OR OUTDATED YET_
+
 [docs/use-cases.md](docs/use-cases.md)
-
------
-
-OLD
-
- 2.   `spaf\simputils\SimpleObject` - simple lightweight object foundation allowing to use "setter/getter" methods functionality
-      for properties similar to "Yii2" related functionality. (Recommended to do not use directly in the frameworks like Yii2.
-      Because such frameworks already having nice functionality for getting/setting properties). 
-      But for purpose of not only yii2 project compatibility, functionality can be used of course.
- 6.   `/src/traits` - Contains traits for the initial functionality of the corresponding classes.
-      The most of functionality is done through traits for the purpose of extensibility. 
-      Those traits could be used in other frameworks/libs to inherit and improve the initial functionality of this one.
-

@@ -1,6 +1,8 @@
 # SimpUtils
 
-Minimum required PHP version is **8.0**
+Current framework version: **0.3.0** (min required PHP: **8.0**)
+
+----
 
 Micro-framework extending PHP language with some useful perks, partly can even remind 
 python 3 development capabilities.
@@ -13,8 +15,7 @@ At this context the words "library" and "framework" both refers to the same mean
 of "micro-framework".
 
 **Important:** The code is partly unfinished. If you are interested in the lib and it's 
-functionality - please wait until the stable release of **1.0.0** 
-(currently it's **0.2.3**). 
+functionality - please wait until the stable release of **1.0.0**. 
 Starting from **1.0.0** version, overall architecture will remain the same (at least until 
 the next major version change).
 

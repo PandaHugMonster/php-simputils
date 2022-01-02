@@ -112,7 +112,8 @@ class Data {
 	 * // Output would be: 'GB'
 	 * ```
 	 *
-	 * @param string $unit Unit that should be cleared and normalized (can include digits, that will be stripped out)
+	 * @param string $unit Unit that should be cleared and normalized (can include digits,
+	 *                     that will be removed)
 	 *
 	 * @return string Cleared and normalized unit abbreviation
 	 * @throws NonExistingDataUnit

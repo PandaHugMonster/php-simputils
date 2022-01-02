@@ -17,9 +17,6 @@
   "autoload": {
     "psr-4": {
       "": "src/"
-    },
-    "files": [
-      "src/basic.php"
-    ]
+    }
   }
 }

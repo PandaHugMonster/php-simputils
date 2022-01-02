@@ -24,18 +24,18 @@ More about semantic versioning: [Semantic Versioning Explanation](https://semver
 ## Index
 
  1. [Installation](#Installation)
- 2. [Ground Reasons and Design Decisions](#Ground_Reasons_and_Design_Decisions)
- 3. [Main Components](#Main Components)
- 4. [Other Components](#Other Components) (Empty for now)
+ 2. [Ground Reasons and Design Decisions](#Ground-Reasons-and-Design-Decisions)
+ 3. [Main Components](#Main-Components)
+ 4. [Other Components](#Other-Components) (Empty for now)
  5. [Examples](#Examples)
     1. [Properties](#Properties)
-    2. [Working with files](#Working with files)
-    3. [Version objects and working with versions](#Version objects and working with versions)
-    4. [Advanced PHP Info object](#Advanced PHP Info object)
-    5. [DotEnv and Env Vars](#DotEnv and Env Vars)
-    6. [Boxes or advanced arrays](#Boxes or advanced arrays)
-    7. [Advanced Date and Time](#Advanced Date and Time)
- 6. [Further documentation](#Further documentation)
+    2. [Working with files](#Working-with-files)
+    3. [Version objects and working with versions](#Version-objects-and-working-with-versions)
+    4. [Advanced PHP Info object](#Advanced-PHP-Info-object)
+    5. [DotEnv and Env Vars](#DotEnv-and-Env-Vars)
+    6. [Boxes or advanced arrays](#Boxes-or-advanced-arrays)
+    7. [Advanced Date and Time](#Advanced-Date-and-Time)
+ 6. [Further documentation](#Further-documentation)
  
 ## Installation
 

@@ -1,7 +1,8 @@
 {
   "name": "spaf/simputils",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Simple minimal but useful set of utils (strings, datetimes, etc.) ",
+  "minimum-stability": "stable",
   "license": "MIT",
   "authors": [
     {

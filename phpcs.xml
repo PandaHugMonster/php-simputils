@@ -1,0 +1,126 @@
+<?xml version="1.0"?>
+<ruleset name="spaf">
+	<description>SPAF general</description>
+	<rule ref="PSR1">
+		<exclude name="PSR1.Files.SideEffects.FoundWithSymbols" />
+	</rule>
+	<rule ref="Generic.Arrays.ArrayIndent">
+		<properties>
+			<property name="indent" value="4" />
+		</properties>
+	</rule>
+	<rule ref="Generic.Files.LineLength">
+		<properties>
+			<property name="lineLimit" value="100" />
+			<property name="ignoreComments" value="false" />
+			<property name="absoluteLineLimit" value="100" />
+		</properties>
+	</rule>
+
+	<rule ref="Generic.Formatting.SpaceAfterCast">
+		<properties>
+			<property name="spacing" value="1" />
+		</properties>
+	</rule>
+	<rule ref="Generic.Formatting.SpaceAfterNot">
+		<properties>
+			<property name="spacing" value="0" />
+		</properties>
+	</rule>
+	<rule ref="Generic.NamingConventions.CamelCapsFunctionName">
+		<properties>
+			<property name="strict" value="false" />
+		</properties>
+		<exclude name="Generic.NamingConventions.CamelCapsFunctionName.MethodDoubleUnderscore" />
+	</rule>
+	<rule ref="Generic.PHP.ForbiddenFunctions" />
+	<rule ref="Generic.Strings.UnnecessaryStringConcat">
+		<properties>
+			<property name="allowMultiline" value="true" />
+		</properties>
+	</rule>
+	<rule ref="Generic.WhiteSpace.ArbitraryParenthesesSpacing">
+		<properties>
+			<property name="spacing" value="0" />
+		</properties>
+		<exclude name="Generic.WhiteSpace.ArbitraryParenthesesSpacing.SpaceAfterOpen" />
+		<exclude name="Generic.WhiteSpace.ArbitraryParenthesesSpacing.SpaceBeforeClose" />
+	</rule>
+	<rule ref="Generic.WhiteSpace.ScopeIndent">
+		<properties>
+			<property name="indent" value="4" />
+		</properties>
+	</rule>
+	<rule ref="Generic.WhiteSpace.SpreadOperatorSpacingAfter">
+		<properties>
+			<property name="spacing" value="0" />
+		</properties>
+	</rule>
+	<rule ref="PEAR.ControlStructures.MultiLineCondition">
+		<properties>
+			<property name="indent" value="4" />
+		</properties>
+		<exclude name="PEAR.ControlStructures.MultiLineCondition.SpacingAfterOpenBrace" />
+		<exclude name="PEAR.ControlStructures.MultiLineCondition.StartWithBoolean" />
+	</rule>
+	<rule ref="PEAR.Formatting.MultiLineAssignment">
+		<properties>
+			<property name="indent" value="4" />
+		</properties>
+	</rule>
+	<rule ref="PEAR.Functions.FunctionCallSignature">
+		<exclude name="PEAR.Functions.FunctionCallSignature.ContentAfterOpenBracket" />
+		<exclude name="PEAR.Functions.FunctionCallSignature.CloseBracketLine" />
+		<properties>
+			<property name="requiredSpacesAfterOpen" value="0" />
+			<property name="requiredSpacesBeforeClose" value="0" />
+			<property name="indent" value="4" />
+		</properties>
+	</rule>
+
+	<rule ref="PEAR.Functions.FunctionDeclaration">
+		<properties>
+			<property name="indent" value="4" />
+		</properties>
+		<exclude name="PEAR.Functions.FunctionDeclaration.BraceOnSameLine" />
+		<exclude name="PEAR.Functions.FunctionDeclaration.BraceOnNewLine" />
+	</rule>
+	<rule ref="PEAR.WhiteSpace.ObjectOperatorIndent">
+		<properties>
+			<property name="indent" value="4" />
+		</properties>
+	</rule>
+	<rule ref="Squiz.Commenting.FunctionComment">
+		<properties>
+			<property name="skipIfInheritdoc" value="true" />
+		</properties>
+		<exclude name="Squiz.Commenting.FunctionComment.ParamCommentFullStop" />
+		<exclude name="Squiz.Commenting.FunctionComment.InvalidReturn" />
+		<exclude name="Squiz.Commenting.FunctionComment.InvalidTypeHint" />
+		<exclude name="Squiz.Commenting.FunctionComment.ThrowsNoFullStop" />
+		<exclude name="Squiz.Commenting.FunctionComment.IncorrectParamVarName" />
+		<exclude name="Squiz.Commenting.FunctionComment.MissingParamTag" />
+		<exclude name="Squiz.Commenting.FunctionComment.MissingReturn" />
+	</rule>
+	<arg name="tab-width" value="4"/>
+	<rule ref="Generic.WhiteSpace.DisallowSpaceIndent"/>
+	<rule ref="Generic.WhiteSpace.ScopeIndent">
+		<properties>
+			<property name="indent" value="4"/>
+			<property name="tabIndent" value="true"/>
+		</properties>
+		<exclude name="Generic.WhiteSpace.ScopeIndent.IncorrectExact" />
+	</rule>
+	<rule ref="Squiz.WhiteSpace.FunctionSpacing">
+		<properties>
+			<property name="spacing" value="1" />
+			<property name="spacingBeforeFirst" value="1" />
+			<property name="spacingAfterLast" value="0" />
+		</properties>
+		<exclude name="Squiz.WhiteSpace.FunctionSpacing.Before" />
+		<exclude name="Squiz.Commenting.FunctionComment.Missing" />
+	</rule>
+	<rule ref="Squiz.Classes.ValidClassName.MissingBrace">
+		<exclude name="Squiz.Classes.ValidClassName.MissingBrace" />
+	</rule>
+</ruleset>

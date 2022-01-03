@@ -2,18 +2,22 @@
 
 namespace spaf\simputils\models;
 
+use Closure;
 use Exception;
 use spaf\simputils\attributes\Property;
-use spaf\simputils\exceptions\NotImplementedYet;
 use spaf\simputils\FS;
 use spaf\simputils\generic\BasicResource;
 use spaf\simputils\generic\BasicResourceApp;
-use spaf\simputils\models\files\apps\CsvProcessor;
-use spaf\simputils\models\files\apps\DotenvProcessor;
-use spaf\simputils\models\files\apps\JsonProcessor;
-use spaf\simputils\models\files\apps\TextProcessor;
+use spaf\simputils\PHP;
 use ValueError;
+use function fclose;
 use function file_exists;
+use function file_put_contents;
+use function fopen;
+use function is_callable;
+use function is_string;
+use function rewind;
+use function stream_get_contents;
 
 /**
  * File representation object
@@ -32,6 +36,8 @@ use function file_exists;
  * FIX  Maybe some kind of caching mechanism should be done for `$this->content` property, OR
  *      turn it back to method!
  *
+ * FIX  Implement low-level format separation as "binary" and "text"
+ *
  * @property ?BasicResourceApp $app
  * @property mixed $content Each use of the property causes real file read/write. Make sure to
  *                          cache value.
@@ -40,22 +46,6 @@ use function file_exists;
  * @property-read mixed $backup_content
  */
 class File extends BasicResource {
-
-	public static array $processors = [
-		// Generic text processor
-		'text/plain' => TextProcessor::class,
-
-		// JSON processors
-		'application/json' => JsonProcessor::class,
-
-		// CSV processors
-		'text/csv' => CsvProcessor::class,
-		'application/csv' => CsvProcessor::class,
-
-		// DotEnv processor
-		'text/dotenv' => DotenvProcessor::class,
-		'application/dotenv' => DotenvProcessor::class,
-	];
 
 	/**
 	 * @var bool $is_backup_preserved   When this option is set to true, then file is not deleted,
@@ -68,35 +58,77 @@ class File extends BasicResource {
 	 */
 	public bool $is_backup_preserved = false;
 
-	protected $_app = null;
+	protected mixed $_app = null;
 	protected ?string $_backup_file = null;
 
 	/**
-	 * @param null|string|resource $file Local File reference
+	 * Constructor
 	 *
-	 * @note Currently only local files are supported
+	 * Currently only local files are supported
 	 *
-	 * @throws \spaf\simputils\exceptions\NotImplementedYet Temporary
+	 * IMP  If `File` object is provided as $file argument, the result would be
+	 *      the new object (basically clone/copy) and the supplied object and the current
+	 *      object would have different references.
+	 *      So this will not be a fully transparent approach, use `fl()` or `PHP::file()`,
+	 *      if you want fully transparent approach
+	 *
+	 * IMP  Really important to mention: This class does not do `close($fd)` for those
+	 *      descriptors which it didn't open! So responsibility on opening in this case on
+	 *      shoulders of users of the objects.
+	 *
+	 * IMP  All the mime-less files would be processing by default `TextProcessor`.
+	 *
+	 * @param mixed                         $file      File reference
+	 * @param string|\Closure|callable|null $app       Callable/Closure or Class string that
+	 *                                                 would be used for file processing (read
+	 *                                                 and write)
+	 * @param ?string                       $mime_type Enforcing mime type (recommended to
+	 *                                                 supply it always when file descriptor
+	 *                                                 or null is supplied to `$file` argument)
+	 *
+	 * @throws \Exception Wrong argument type
 	 */
-	public function __construct(mixed $file = null, $app = null) {
+	public function __construct(
+		mixed $file = null,
+		null|string|Closure|callable $app = null,
+		?string $mime_type = null
+	) {
+
 		if (is_null($file)) {
-			// In case of a new file, or temp file
-			throw new NotImplementedYet();
+			// Temp file, created in memory
+			// In this case you have to provide $app explicitly
+
+			$this->_fd = fopen('php://memory', 'r+');
 		} else if (is_resource($file)) {
-			throw new NotImplementedYet();
-		} else if (!is_string($file)) {
-			throw new ValueError('File object can receive only null|string|resource argument');
+			// If file descriptor provided
+			$this->_fd = $file;
+			$this->_mime_type = $mime_type;
+		} else if ($file instanceof File) {
+			// File instance is supplied
+			if (!empty($file->fd)) {
+				$this->_fd = $file;
+			} else {
+				$this->_path = $file->path;
+				$this->_name = $file->name;
+				$this->_ext = $file->extension;
+			}
+			$this->_mime_type = $mime_type ?? $file->mime_type;
+		} else if (is_string($file)) {
+			// File path is supplied
+			[$this->_path, $this->_name, $this->_ext] = FS::splitFullFilePath($file);
+			$this->_mime_type = $mime_type ?? FS::getFileMimeType($file);
+		} else {
+			throw new ValueError('File object can receive only null|string|resource|File argument');
 		}
 
-		// TODO Use string for file. Implement here
 
-		[$this->_path, $this->_name, $this->_ext] = FS::splitFullFilePath($file);
-
-		$this->_mime_type = FS::getFileMimeType($file);
-		if (empty($app)) {
-			$app = static::$processors[$this->_mime_type] ?? TextProcessor::class;
+		if (empty($app) || is_string($app)) {
+			$app = static::getCorrespondingProcessor($this->name_full, $this->mime_type);
+		} else if (!is_callable($app)) {
+			throw new Exception('$app argument is not of a correct data type');
 		}
-		$this->_app = new $app();
+
+		$this->_app = $app;
 	}
 
 	/**
@@ -145,8 +177,12 @@ class File extends BasicResource {
 			);
 		}
 
+		if (empty($dir)) {
+			$dir = null;
+		}
+
 		return FS::glueFullFilePath(
-			$dir ?? $this->path,
+			$dir ?? $this->path ?? PHP::getInitConfig()->working_dir,
 			$name ?? $this->name,
 			$ext ?? $this->extension
 		);
@@ -176,8 +212,17 @@ class File extends BasicResource {
 		$file_path = $this->_prepareCopyMoveDest($new_location_dir, $name, $ext);
 
 		if (!file_exists($file_path) || $overwrite) {
+			$split_data = FS::splitFullFilePath($file_path);
+			if (!empty($fd = $this->fd)) {
+				rewind($fd);
+				$res = stream_get_contents($fd);
+				if (file_put_contents($file_path, $res)) {
+					[$this->_path, $this->_name, $this->_ext] = $split_data;
+				}
+			}
+
 			if (rename($this->name_full, $file_path)) {
-				$this->name_full = $file_path;
+				[$this->_path, $this->_name, $this->_ext] = $split_data;
 			}
 		}
 
@@ -211,6 +256,15 @@ class File extends BasicResource {
 			if ((!file_exists($file_path) || $overwrite) && copy($this->name_full, $file_path)) {
 				return new static($file_path);
 			}
+		} else {
+			if (!empty($fd = $this->fd)) {
+				$split_data = FS::splitFullFilePath($file_path);
+				rewind($fd);
+				$res = stream_get_contents($fd);
+				if (file_put_contents($file_path, $res)) {
+					[$this->_path, $this->_name, $this->_ext] = $split_data;
+				}
+			}
 		}
 
 		return null;
@@ -237,18 +291,37 @@ class File extends BasicResource {
 	}
 
 	#[Property('app')]
-	protected function getResourceApp(): ?BasicResourceApp {
+	protected function getResourceApp(): null|Closure|array|BasicResourceApp {
 		return $this->_app;
 	}
 
 	#[Property('app')]
-	protected function setResourceApp($var): void {
+	protected function setResourceApp(null|Closure|array|BasicResourceApp $var): void {
 		$this->_app = $var;
 	}
 
 	#[Property('content', debug_output: false)]
 	protected function getContent(): mixed {
-		return $this->app::getContent($this->name_full, $this);
+		$app = $this->app;
+		$is_opened_locally = false;
+		$fd = $this->fd;
+
+		if (empty($fd)) {
+			$is_opened_locally = true;
+			if (!$this->exists) {
+				return null;
+			}
+			$fd = fopen($this->name_full, 'r');
+		}
+
+		rewind($fd);
+		$res = $app($this, $fd, true, null);
+
+		if ($is_opened_locally) {
+			fclose($fd);
+		}
+
+		return $res;
 	}
 
 	#[Property('content')]
@@ -256,7 +329,21 @@ class File extends BasicResource {
 		if ($this->is_backup_preserved) {
 			$this->preserveFile();
 		}
-		$this->app::setContent($this->name_full, $data, $this);
+		$app = $this->app;
+		$is_opened_locally = false;
+		$fd = $this->fd;
+
+		if (empty($fd)) {
+			$is_opened_locally = true;
+			$fd = fopen($this->name_full, 'w');
+		}
+
+		rewind($fd);
+		$app($this, $fd, false, $data);
+
+		if ($is_opened_locally) {
+			fclose($fd);
+		}
 	}
 
 	#[Property('exists')]
@@ -284,6 +371,6 @@ class File extends BasicResource {
 	 * @return string
 	 */
 	public function __toString(): string {
-		return $this->name_full;
+		return $this->name_full ?? "{$this->_fd}";
 	}
 }

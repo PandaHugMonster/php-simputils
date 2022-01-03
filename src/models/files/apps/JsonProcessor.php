@@ -10,15 +10,15 @@ use spaf\simputils\PHP;
  */
 class JsonProcessor extends TextProcessor {
 
-	public static function getContent(mixed $stream, ?BasicResource $file = null): mixed {
+	public function getContent(mixed $fd, ?BasicResource $file = null): mixed {
 		return PHP::deserialize(
-			parent::getContent($stream, $file),
+			parent::getContent($fd, $file),
 			enforced_type: PHP::SERIALIZATION_TYPE_JSON
 		);
 	}
 
-	public static function setContent(mixed $stream, $data, ?BasicResource $file = null): void {
+	public function setContent(mixed $fd, $data, ?BasicResource $file = null): void {
 		$res = PHP::serialize($data, enforced_type: PHP::SERIALIZATION_TYPE_JSON);
-		parent::setContent($stream, $res, $file);
+		parent::setContent($fd, $res, $file);
 	}
 }

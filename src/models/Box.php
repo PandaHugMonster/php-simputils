@@ -9,6 +9,7 @@ use spaf\simputils\attributes\Property;
 use spaf\simputils\PHP;
 use spaf\simputils\traits\MetaMagic;
 use spaf\simputils\traits\SimpleObjectTrait;
+use function array_flip;
 use function array_keys;
 use function array_values;
 use function count;
@@ -127,6 +128,7 @@ use function is_object;
  * @property-read int $size
  * @property-read Box|array $keys
  * @property-read Box|array $values
+ * @property-read Box|array $flipped
  */
 class Box extends ArrayObject {
 	use SimpleObjectTrait;
@@ -167,6 +169,14 @@ class Box extends ArrayObject {
 	#[Property('values')]
 	protected function getValues(): static|Box|array {
 		return new static(array_values((array) $this));
+	}
+
+	/**
+	 * @return static|Box|array
+	 */
+	#[Property('flipped')]
+	protected function getFlipped(): static|Box|array {
+		return new static(array_flip((array) $this));
 	}
 
 	/**

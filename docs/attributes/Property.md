@@ -120,7 +120,7 @@ The general borderline - is efficiency of PHP mechanisms, any usage of a field
 through `__set` and `__get` have it's drawbacks when compared to direct method call. 
 
 At this point efficiency is **almost 1:1** (+/- 10%) with Yii2 getters and setters.
-In some cases the php-simputils framework Properties might work even quicker than 
+In some cases the SimpUtils framework Properties might work even quicker than 
 Yii2 getters and setters.
 
 In the most cases, any of your code implementations will play much more role than 

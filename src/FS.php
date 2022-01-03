@@ -206,12 +206,12 @@ class FS {
 		return unlink($file);
 	}
 
-	public static function getFileMimeType(string|File $file) {
-		if ($file instanceof File) {
+	public static function getFileMimeType(string|File $file, string $ext = null) {
+		if ($file instanceof File && !empty($file->mime_type)) {
 			return $file->mime_type;
 		}
 
-		$ext = pathinfo($file, PATHINFO_EXTENSION);
+		$ext = $ext ?? pathinfo($file, PATHINFO_EXTENSION);
 
 		if (!file_exists($file)) {
 			return static::mimeTypeRealMapper('application/x-empty', $ext, $file);

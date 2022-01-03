@@ -19,6 +19,7 @@ class MyObject {
 /**
  * @covers \spaf\simputils\traits\MetaMagic
  * @uses \spaf\simputils\PHP
+ * @uses \spaf\simputils\special\CodeBlocksCacheIndex
  */
 class MetaMagicTest extends TestCase {
 

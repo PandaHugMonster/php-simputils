@@ -6,6 +6,7 @@ namespace spaf\simputils\models;
 use spaf\simputils\attributes\Property;
 use spaf\simputils\DT;
 use spaf\simputils\traits\PropertiesTrait;
+use spaf\simputils\traits\RedefinableComponentTrait;
 
 /**
  * DateTime model of the framework
@@ -19,6 +20,7 @@ use spaf\simputils\traits\PropertiesTrait;
  */
 class DateTime extends \DateTime {
 	use PropertiesTrait;
+	use RedefinableComponentTrait;
 
 	#[Property('date')]
 	protected function getDateStr(): string {
@@ -32,5 +34,9 @@ class DateTime extends \DateTime {
 
 	public function __toString(): string {
 		return DT::stringify($this);
+	}
+
+	public static function redefComponentName(): string {
+		return InitConfig::REDEF_DATE_TIME;
 	}
 }

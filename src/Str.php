@@ -3,6 +3,7 @@
 namespace spaf\simputils;
 
 use spaf\simputils\attributes\markers\Shortcut;
+use function strlen;
 
 /**
  *
@@ -72,10 +73,21 @@ class Str {
 	}
 
 	/**
+	 * @param string $var Target string
+	 *
+	 * @return int
+	 */
+	#[Shortcut('\strlen()')]
+	public static function len(string $var) {
+		return strlen($var);
+	}
+
+	/**
 	 * Quick uuid solution
 	 *
 	 * @see Uuid
 	 *
+	 * @codeCoverageIgnore
 	 * @return string
 	 */
 	public static function uuid(): string {

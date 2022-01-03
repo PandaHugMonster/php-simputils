@@ -7,6 +7,7 @@ use spaf\simputils\attributes\Property;
 use spaf\simputils\components\versions\parsers\DefaultVersionParser;
 use spaf\simputils\generic\SimpleObject;
 use spaf\simputils\interfaces\VersionParserInterface;
+use spaf\simputils\traits\RedefinableComponentTrait;
 
 /**
  * Version object class
@@ -74,6 +75,7 @@ use spaf\simputils\interfaces\VersionParserInterface;
  * @package spaf\simputils\models
  */
 class Version extends SimpleObject {
+	use RedefinableComponentTrait;
 
 	/**
 	 * Default version parser is used for newly created `Version` objects
@@ -359,5 +361,9 @@ class Version extends SimpleObject {
 			$res['orig_version'] = strval($this->original_value);
 
 		return $res;
+	}
+
+	public static function redefComponentName(): string {
+		return InitConfig::REDEF_VERSION;
 	}
 }

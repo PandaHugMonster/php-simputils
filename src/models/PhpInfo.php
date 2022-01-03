@@ -11,6 +11,7 @@ use spaf\simputils\special\CodeBlocksCacheIndex;
 use spaf\simputils\special\CommonMemoryCacheIndex;
 use spaf\simputils\System;
 use spaf\simputils\traits\ArrayReadOnlyAccessTrait;
+use spaf\simputils\traits\RedefinableComponentTrait;
 use function in_array;
 use function is_string;
 
@@ -61,6 +62,7 @@ use function is_string;
  */
 class PhpInfo extends Box {
 	use ArrayReadOnlyAccessTrait;
+	use RedefinableComponentTrait;
 
 	public static bool $to_string_format_json = true;
 	private static array $replace_php_info_reg_exp_array = [];
@@ -366,5 +368,9 @@ class PhpInfo extends Box {
 	 */
 	public function updateEnvVar(string $key, mixed $val): void {
 		$this['env_vars'][$key] = $val;
+	}
+
+	public static function redefComponentName(): string {
+		return InitConfig::REDEF_PHP_INFO;
 	}
 }

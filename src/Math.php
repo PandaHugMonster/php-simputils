@@ -593,6 +593,7 @@ class Math {
 	 * If you need a cryptographically secure value, consider using
 	 * `random_int()`, `random_bytes()`, or `openssl_random_pseudo_bytes()` instead.
 	 *
+	 * @codeCoverageIgnore
 	 * @see https://www.php.net/manual/en/function.lcg-value.php
 	 * @return float A pseudo random float value between 0.0 and 1.0, inclusive.
 	 */
@@ -807,6 +808,7 @@ class Math {
 	 * @param int  $min The lowest value to return (default: 0)
 	 * @param ?int $max The highest value to return (default: `Math::getRandMax()`)
 	 *
+	 * @codeCoverageIgnore
 	 * @see https://www.php.net/manual/en/function.rand.php
 	 * @return int A pseudo random value between min (or 0) and
 	 *             max (or `Math::getRandMax()`, inclusive).
@@ -902,6 +904,7 @@ class Math {
 	 * **Important:** There is no need to seed the random number generator with `Math::srand()` or
 	 * `mt_srand()` as this is done automatically.
 	 *
+	 * @codeCoverageIgnore
 	 * @param int $seed An arbitrary int seed value.
 	 * @param int $mode MT_RAND_MT19937
 	 *

@@ -9,14 +9,17 @@ use spaf\simputils\FS;
 use spaf\simputils\generic\BasicResource;
 use spaf\simputils\generic\BasicResourceApp;
 use spaf\simputils\PHP;
+use spaf\simputils\traits\RedefinableComponentTrait;
 use ValueError;
 use function fclose;
 use function file_exists;
 use function file_put_contents;
 use function fopen;
+use function fstat;
 use function is_callable;
 use function is_string;
 use function rewind;
+use function stat;
 use function stream_get_contents;
 
 /**
@@ -44,8 +47,10 @@ use function stream_get_contents;
  * @property-read bool $exists
  * @property-read ?string $backup_location
  * @property-read mixed $backup_content
+ * @property-read Box $stat
  */
 class File extends BasicResource {
+	use RedefinableComponentTrait;
 
 	/**
 	 * @var bool $is_backup_preserved   When this option is set to true, then file is not deleted,
@@ -283,11 +288,18 @@ class File extends BasicResource {
 		$this->copy($dir, $name, $ext,true);
 	}
 
+	#[Property('stat')]
+	protected function getStat(): Box {
+		if (!empty($this->_fd)) {
+			return new Box(fstat($this->_fd));
+		}
+
+		return new Box(stat($this->name_full));
+	}
+
 	#[Property('size')]
 	protected function getSize(): ?int {
-		return file_exists($this->name_full)
-			?filesize($this->name_full)
-			:null;
+		return $this->stat['size'];
 	}
 
 	#[Property('app')]
@@ -372,5 +384,13 @@ class File extends BasicResource {
 	 */
 	public function __toString(): string {
 		return $this->name_full ?? "{$this->_fd}";
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 * @return string
+	 */
+	public static function redefComponentName(): string {
+		return InitConfig::REDEF_FILE;
 	}
 }

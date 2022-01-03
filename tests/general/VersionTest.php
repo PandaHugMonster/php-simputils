@@ -6,9 +6,12 @@ use spaf\simputils\exceptions\IncorrectVersionFormat;
 use spaf\simputils\generic\BasicVersionParser;
 use spaf\simputils\models\InitConfig;
 use spaf\simputils\models\Version;
+use spaf\simputils\PHP;
 use spaf\simputils\special\CodeBlocksCacheIndex;
 use spaf\simputils\Str;
 
+/**
+ */
 class CustomParserSample extends DefaultVersionParser {
 
 	public function parse(Version $version_object, ?string $string_version): array {
@@ -35,6 +38,9 @@ class CustomParserSample extends DefaultVersionParser {
  * @uses \spaf\simputils\traits\MetaMagic
  * @uses \spaf\simputils\interfaces\VersionParserInterface
  * @uses \spaf\simputils\traits\PropertiesTrait
+ * @uses \spaf\simputils\special\CodeBlocksCacheIndex
+ * @uses \spaf\simputils\Str::from
+ * @uses spaf\simputils\attributes\Property
  */
 class VersionTest extends TestCase {
 
@@ -83,16 +89,14 @@ class VersionTest extends TestCase {
 	 * @param $str_v2
 	 * @param $str_v3
 	 *
+	 *
 	 * @return void
 	 */
 	public function testVersionObjectCreationAndParsing($str_v1, $str_v2, $str_v3): void {
-		$version_class = CodeBlocksCacheIndex::getRedefinition(
-			InitConfig::REDEF_VERSION,
-			Version::class
-		);
+		$version_class = PHP::redef(Version::class);
 
 		$v1 = new $version_class($str_v1);
-		$this->assertInstanceOf($version_class::class, $v1, 'Checking non-empty object creation');
+		$this->assertInstanceOf($version_class, $v1, 'Checking non-empty object creation');
 
 		$this->assertEquals(0, $v1->major, 'Major version value check');
 		$this->assertEquals(1, $v1->minor, 'Minor version value check');
@@ -122,10 +126,7 @@ class VersionTest extends TestCase {
 	 * @return void
 	 */
 	public function testComparisonOfVersions($str_v1, $str_v2, $str_v3, $str_v4, $str_v5): void {
-		$version_class = CodeBlocksCacheIndex::getRedefinition(
-			InitConfig::REDEF_VERSION,
-			Version::class
-		);
+		$version_class = PHP::redef(Version::class);
 
 		$v1 = new $version_class($str_v1, static::APP_NAME);
 		$v2 = new $version_class($str_v2, static::APP_NAME);
@@ -273,6 +274,6 @@ class VersionTest extends TestCase {
 		$this->assertEmpty($res, 'Normalization of null must return null');
 
 		$res = BasicVersionParser::normalize('1.2.3');
-		$this->assertInstanceOf($version_class::class, $res, 'String normalization creates object on the fly');
+		$this->assertInstanceOf($version_class, $res, 'String normalization creates object on the fly');
 	}
 }

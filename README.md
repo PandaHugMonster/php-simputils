@@ -923,6 +923,54 @@ being overwritten. So the system-wise env vars values are having precedence in f
 
 `spaf\simputils\basic\box()` function is a shortcut for `new Box()`
 
+**IMPORTANT:** There is a significant difference between "php array" and "box". 
+"box" - is an object, so when it's supplied to a function/method/callable, etc. - it will be passed
+by reference, and not copied.
+
+The behaviour is similar to behaviour of "arrays" in python 3.
+
+Example of the situation:
+```php
+
+// 2.   When receiving here the supplied box object
+//      so the $arg var now is referencing to the original box object, modifying it
+//      will cause modification of the original box object.
+function myFunc($arg) {
+    // $arg is the same object $box
+}
+
+$box = box(['my', 'elements', '!']);
+
+// 1.   Passing this box object
+myFunc($box);
+
+```
+
+To simulate behaviour of passing by copying you could do this:
+```php
+
+// 2.   When receiving here the supplied box object
+//      so the $arg var now is referencing to the original box object, modifying it
+//      will cause modification of the original box object.
+function myFunc($arg) {
+    // $arg is the same object $box
+}
+
+$box = box(['my', 'elements', '!']);
+
+// 1.   Passing this box object
+/** @var \spaf\simputils\models\Box $box 
+ */
+myFunc($box->clone());
+// or
+myFunc(clone $box);
+
+```
+
+Example above will provide a copy of the "box" object to the method!
+
+Further examples:
+
 ```php
 use spaf\simputils\PHP;
 use function spaf\simputils\basic\box;

@@ -5,6 +5,9 @@ use spaf\simputils\FS;
 
 
 /**
+ * @covers \spaf\simputils\FS
+ * @covers \spaf\simputils\models\File
+ *
  */
 class FilesManagementTest extends TestCase {
 

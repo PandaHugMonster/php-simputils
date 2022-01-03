@@ -5,8 +5,13 @@ namespace spaf\simputils\special;
 use Closure;
 use Exception;
 use spaf\simputils\generic\BasicInitConfig;
+use spaf\simputils\logger\Logger;
+use spaf\simputils\models\Box;
+use spaf\simputils\models\DateTime;
+use spaf\simputils\models\File;
 use spaf\simputils\models\InitConfig;
-use function in_array;
+use spaf\simputils\models\PhpInfo;
+use spaf\simputils\models\Version;
 
 /**
  * It stores registry of all the registered InitConfigs
@@ -16,6 +21,18 @@ class CodeBlocksCacheIndex {
 
 	private static $index = [];
 	private static $redefinitions = [];
+
+	public static function listDefaultRedefinableComponents(): Box {
+		return new Box([
+			InitConfig::REDEF_PD => InitConfig::REDEF_PD,
+			InitConfig::REDEF_BOX => Box::class,
+			InitConfig::REDEF_DATE_TIME => DateTime::class,
+			InitConfig::REDEF_FILE => File::class,
+			InitConfig::REDEF_PHP_INFO => PhpInfo::class,
+			InitConfig::REDEF_VERSION => Version::class,
+			InitConfig::REDEF_LOGGER => Logger::class,
+		]);
+	}
 
 	public static function registerInitBlock(BasicInitConfig $config): ?bool {
 		$name = $config->name ?? 'app';
@@ -28,19 +45,11 @@ class CodeBlocksCacheIndex {
 		}
 
 		if ($name === 'app') {
-			$list = [
-				InitConfig::REDEF_PD,
-				InitConfig::REDEF_BOX,
-				InitConfig::REDEF_DATE_TIME,
-				InitConfig::REDEF_FILE,
-				InitConfig::REDEF_PHP_INFO,
-				InitConfig::REDEF_VERSION,
-				InitConfig::REDEF_LOGGER,
-			];
+			$list = static::listDefaultRedefinableComponents();
 
 			if (!empty($config->redefinitions)) {
 				foreach ($config->redefinitions as $key => $redef) {
-					if (!in_array($key, $list)) {
+					if (empty($list[$key])) {
 						throw new Exception('');
 					}
 					static::$redefinitions[$key] = $redef;
@@ -66,6 +75,10 @@ class CodeBlocksCacheIndex {
 		null|Closure|string $default = null
 	): null|Closure|string {
 		if (empty(static::$redefinitions[$key])) {
+			$list = static::listDefaultRedefinableComponents();
+			if (!empty($list[$key])) {
+				return $list[$key];
+			}
 			return $default;
 		}
 		return static::$redefinitions[$key];

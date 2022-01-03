@@ -46,6 +46,15 @@ trait SimpleObjectTrait {
 	}
 
 	/**
+	 * This is just a shortcut of "clone $obj"
+	 *
+	 * @return static
+	 */
+	public function clone(): static {
+		return clone $this;
+	}
+
+	/**
 	 *
 	 * @return string
 	 */

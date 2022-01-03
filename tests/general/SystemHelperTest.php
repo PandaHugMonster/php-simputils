@@ -8,6 +8,9 @@ use spaf\simputils\System;
 
 /**
  *
+ * @covers \spaf\simputils\System
+ * @uses spaf\simputils\attributes\Property
+ * @uses spaf\simputils\special\CodeBlocksCacheIndex
  */
 class SystemHelperTest extends TestCase {
 
@@ -47,7 +50,6 @@ class SystemHelperTest extends TestCase {
 	/**
 	 * @covers \spaf\simputils\models\SystemFingerprint
 	 * @covers \spaf\simputils\generic\BasicSystemFingerprint
-	 * @uses \spaf\simputils\System
 	 * @uses \spaf\simputils\PHP
 	 * @uses \spaf\simputils\generic\BasicVersionParser
 	 * @uses \spaf\simputils\models\Version

@@ -12,6 +12,7 @@ use spaf\simputils\generic\BasicAttribute;
  * the arguments further to the target method
  *
  * It's basically just a marker
+ * @codeCoverageIgnore
  */
 #[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_FUNCTION)]
 class Shortcut extends BasicAttribute {

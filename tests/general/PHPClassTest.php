@@ -1,10 +1,13 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
+use spaf\simputils\attributes\Property;
 use spaf\simputils\Boolean;
 use spaf\simputils\FS;
 use spaf\simputils\generic\SimpleObject;
 use spaf\simputils\models\Box;
+use spaf\simputils\models\DateTime;
+use spaf\simputils\models\File;
 use spaf\simputils\models\InitConfig;
 use spaf\simputils\models\PhpInfo;
 use spaf\simputils\models\Version;
@@ -13,9 +16,23 @@ use spaf\simputils\special\CodeBlocksCacheIndex;
 use spaf\simputils\Str;
 use spaf\simputils\traits\MetaMagic;
 use function spaf\simputils\basic\box;
+use function spaf\simputils\basic\now;
+use function spaf\simputils\basic\pd;
 
 class MyObjectExample {
 	use MetaMagic;
+}
+
+class MyDT extends DateTime {
+	#[Property('date')]
+	protected function getDateStr(): string {
+		return "This is day: {$this->format('d')}, this is month: {$this->format('m')}, " .
+			"this is year: {$this->format('Y')}";
+	}
+}
+
+class MyDT2 {
+
 }
 
 /**
@@ -29,6 +46,15 @@ class MyObjectExample {
  * @uses \spaf\simputils\generic\BasicVersionParser
  * @uses \spaf\simputils\traits\PropertiesTrait
  * @uses \spaf\simputils\models\Box
+ * @uses \spaf\simputils\special\CodeBlocksCacheIndex
+ * @uses \spaf\simputils\FS
+ * @uses \spaf\simputils\attributes\Property
+ * @uses \spaf\simputils\models\File
+ * @uses \spaf\simputils\generic\BasicResource
+ * @uses \spaf\simputils\generic\BasicResourceApp
+ * @uses \spaf\simputils\models\files\apps\DotenvProcessor
+ * @uses \spaf\simputils\models\files\apps\TextProcessor
+ * @uses \spaf\simputils\models\files\apps\settings\DotEnvSettings
  */
 class PHPClassTest extends TestCase {
 
@@ -41,7 +67,7 @@ class PHPClassTest extends TestCase {
 	 * @return void
 	 * @runInSeparateProcess
 	 */
-	public function testPleaseDie(): void {
+//	public function testPleaseDie(): void {
 //		PHP::$allow_dying = false;
 //
 //		Settings::redefinePd(function ($data) {
@@ -55,7 +81,7 @@ class PHPClassTest extends TestCase {
 //		pd($str);
 //		$this->expectOutputString($str.$str."\n");
 //		PHP::$allow_dying = true;
-	}
+//	}
 
 	/**
 	 * @return void
@@ -96,10 +122,7 @@ class PHPClassTest extends TestCase {
 	 * @uses \spaf\simputils\traits\MetaMagic
 	 */
 	public function testSerializationAndDeserialization() {
-		$version_class = CodeBlocksCacheIndex::getRedefinition(
-			InitConfig::REDEF_VERSION,
-			Version::class
-		);
+		$version_class = PHP::redef(Version::class);
 		// JSON no meta-magic
 		$obj1 = new stdClass();
 		$obj1->option1 = 'test';
@@ -123,7 +146,7 @@ class PHPClassTest extends TestCase {
 		$this->assertTrue($is_json, 'By default should be json');
 
 		$obj2 = PHP::deserialize($data1);
-		$this->assertInstanceOf($version_class::class, $obj2, 'Checking deserialization');
+		$this->assertInstanceOf($version_class, $obj2, 'Checking deserialization');
 
 		// PHP Standard
 		PHP::$serialization_mechanism = PHP::SERIALIZATION_TYPE_PHP;
@@ -137,7 +160,7 @@ class PHPClassTest extends TestCase {
 		$this->assertFalse($is_json, 'Should not be json');
 
 		$obj2 = PHP::deserialize($data1);
-		$this->assertInstanceOf($version_class::class, $obj2, 'Checking deserialization');
+		$this->assertInstanceOf($version_class, $obj2, 'Checking deserialization');
 
 		// stdClass version
 		$obj1 = new stdClass();
@@ -163,6 +186,9 @@ class PHPClassTest extends TestCase {
 		$res = PHP::deserialize(null);
 		$this->assertNull($res, 'Incorrect deserialization');
 
+		$res = PHP::deserialize('no json data here', enforced_type: PHP::SERIALIZATION_TYPE_JSON);
+		$this->assertNull($res, 'Incorrect deserialization');
+
 		PHP::$serialization_mechanism = PHP::SERIALIZATION_TYPE_JSON;
 	}
 
@@ -184,6 +210,15 @@ class PHPClassTest extends TestCase {
 		FS::rmFile($file_path);
 	}
 
+	/**
+	 * @return void
+	 * @covers spaf\simputils\FS::lsFiles
+	 * @covers spaf\simputils\FS::mkDir
+	 * @covers spaf\simputils\FS::mkFile
+	 * @covers spaf\simputils\FS::rmDir
+	 * @covers spaf\simputils\FS::rmFile
+	 * @throws \Exception
+	 */
 	public function testFilesRelatedFunctionality() {
 		$dir = '/tmp/simputils/tests/test-files-related-functionality';
 		$file = "{$dir}/my-very-file.txt";
@@ -212,9 +247,11 @@ class PHPClassTest extends TestCase {
 	 *
 	 * @covers \spaf\simputils\models\PhpInfo
 	 * @return void
-	 *@uses \spaf\simputils\models\Version
+	 *
+	 * @uses \spaf\simputils\models\Version
 	 * @uses \spaf\simputils\traits\SimpleObjectTrait
 	 * @uses \spaf\simputils\components\versions\parsers\DefaultVersionParser
+	 * @uses \spaf\simputils\Boolean::from
 	 *
 	 * @uses \spaf\simputils\System
 	 */
@@ -224,7 +261,7 @@ class PHPClassTest extends TestCase {
 			InitConfig::REDEF_PHP_INFO,
 			PhpInfo::class
 		);
-		$this->assertInstanceOf($phpinfo_class::class, $php_info, 'PHP info is the object');
+		$this->assertInstanceOf($phpinfo_class, $php_info, 'PHP info is the object');
 		$this->assertNotEmpty($php_info, 'PHP info is not empty');
 
 		$expected_keys = array_keys($php_info->toArray());
@@ -253,6 +290,7 @@ class PHPClassTest extends TestCase {
 	 * @param bool  $expected_val Expected value from dp
 	 *
 	 * @dataProvider dataProviderToBool
+	 * @covers \spaf\simputils\Boolean::from
 	 * @return void
 	 */
 	public function testAsBool(mixed $mixed_val, ?bool $expected_val) {
@@ -273,6 +311,7 @@ class PHPClassTest extends TestCase {
 	 * @param bool  $expected_val Expected value from dp
 	 *
 	 * @dataProvider dataProviderToBool
+	 * @covers \spaf\simputils\Boolean::from
 	 * @return void
 	 */
 	public function testAsBoolStrict(mixed $mixed_val, ?bool $expected_val) {
@@ -298,8 +337,8 @@ class PHPClassTest extends TestCase {
 			['anotherstringishere', 'string'],
 			[12, 'integer'],
 			[22.22, 'double'],
-			[new $version_class('0.0.0', 'no app'), $version_class::class],
-			[PHP::info(), $phpinfo_class::class],
+			[new $version_class('0.0.0', 'no app'), $version_class],
+			[PHP::info(), $phpinfo_class],
 			[true, 'boolean'],
 			[false, 'boolean'],
 		];
@@ -323,7 +362,7 @@ class PHPClassTest extends TestCase {
 			Box::class
 		);
 		$box = box(['My array', 'data' => 'in my array']);
-		$this->assertEquals($box_class::class, PHP::type($box));
+		$this->assertEquals($box_class, PHP::type($box));
 	}
 
 	/**
@@ -337,7 +376,7 @@ class PHPClassTest extends TestCase {
 			Box::class
 		);
 		$phpi = PHP::info();
-		$this->assertInstanceOf($box_class::class, $phpi->keys);
+		$this->assertInstanceOf($box_class, $phpi->keys);
 
 		$this->expectException(Exception::class);
 
@@ -360,13 +399,13 @@ class PHPClassTest extends TestCase {
 			Version::class
 		);
 		$this->assertFalse(PHP::isClass('IaMnOtAcLaSs'));
-		$this->assertTrue(PHP::isClass($phpinfo_class::class));
+		$this->assertTrue(PHP::isClass($phpinfo_class));
 
-		$this->assertFalse(PHP::isClassIn($phpinfo_class::class, $version_class::class));
-		$this->assertTrue(PHP::isClassIn(SimpleObject::class, $version_class::class));
+		$this->assertFalse(PHP::isClassIn($phpinfo_class, $version_class));
+		$this->assertTrue(PHP::isClassIn(SimpleObject::class, $version_class));
 
 		$obj1 = new $version_class('1.1.1');
-		$cls1 = $version_class::class;
+		$cls1 = $version_class;
 
 		$obj2 = new $version_class('1.1.2');
 
@@ -381,12 +420,110 @@ class PHPClassTest extends TestCase {
 
 		$this->assertTrue(PHP::classContains($obj1, $obj2));
 
-		$this->assertIsObject(PHP::createDummy($version_class::class));
+		$this->assertIsObject(PHP::createDummy($version_class));
 		$this->assertIsObject(PHP::createDummy($obj1));
 
 		$this->assertTrue(PHP::isArrayCompatible([]));
 		$this->assertTrue(PHP::isArrayCompatible(box([])));
 		$this->assertFalse(PHP::isArrayCompatible($obj1));
+
+	}
+
+	/**
+	 *
+	 * @runInSeparateProcess
+	 * @covers \spaf\simputils\models\DateTime::redefComponentName
+	 * @uses \spaf\simputils\traits\helpers\DateTimeTrait
+	 * @uses \spaf\simputils\generic\BasicInitConfig
+	 * @uses \spaf\simputils\components\initblocks\DotEnvInitBlock
+	 * @uses \spaf\simputils\basic\now
+	 * @return void
+	 */
+	function testRedef() {
+
+		$dt = now();
+		$this->assertInstanceOf(DateTime::class, $dt);
+		$this->assertNotInstanceOf(MyDT::class, $dt);
+
+		PHP::init([
+			'redefinitions' => [
+				DateTime::redefComponentName() => MyDT::class
+			]
+		]);
+
+		$dt = now();
+		$this->assertInstanceOf(MyDT::class, $dt);
+
+		$this->assertEquals(MyDT::class, PHP::redef(DateTime::class));
+	}
+
+	/**
+	 *
+	 * @covers \spaf\simputils\models\DateTime::redefComponentName
+	 * @return void
+	 */
+	function testRedefException1() {
+		$this->expectException(Exception::class);
+		$this->assertEquals(MyDT::class, PHP::redef('just a nonsense string'));
+	}
+
+	/**
+	 *
+	 * @covers \spaf\simputils\models\DateTime::redefComponentName
+	 * @return void
+	 */
+	function testRedefException2() {
+		$this->expectException(Exception::class);
+		$this->assertEquals(MyDT2::class, PHP::redef(MyDT2::class));
+	}
+
+	function testFileTransparentSupply() {
+		$memory_file = PHP::file();
+
+		$this->assertInstanceOf(File::class, $memory_file);
+		$b = PHP::file($memory_file);
+
+		$this->assertEquals($b->obj_id, $memory_file->obj_id);
+	}
+
+	function testBoxTransparentOrNullSupply() {
+		$box = PHP::box();
+
+		$this->assertInstanceOf(Box::class, $box);
+		$b = PHP::box($box);
+
+		$this->assertEquals($b->obj_id, $box->obj_id);
+	}
+
+	/**
+	 * @runInSeparateProcess
+	 * @return void
+	 */
+	function testGetInitConfig() {
+		$a = PHP::init();
+
+		$b = PHP::getInitConfig();
+
+		$this->assertInstanceOf(InitConfig::class, $a);
+		$this->assertEquals($b, $a);
+	}
+
+	/**
+	 * @runInSeparateProcess
+	 * @return void
+	 */
+	function testRedefPd() {
+		$a = PHP::init([
+			'redefinitions' => [
+				InitConfig::REDEF_PD => function () {
+					echo "my custom dying method.";
+				}
+			]
+		]);
+
+		$this->expectOutputString('my custom dying method.');
+
+		pd('Some text that will be ignored');
 
 	}
 }

@@ -1,5 +1,4 @@
 <?php
-// TODO @noinspection Generic.NamingConventions.CamelCapsFunctionName.NotCamelCaps
 /**
  * Procedural shortcuts for functionality of different core classes
  * like `spaf\simputils\PHP`, `spaf\simputils\Str`, etc.
@@ -13,6 +12,10 @@ use spaf\simputils\models\DateTime;
 use spaf\simputils\models\File;
 use spaf\simputils\PHP;
 use spaf\simputils\Str;
+
+// NOTE env_set() removed, because it's not a very "urgent" type of functionality that you need
+//      all over your code. + Naming was not really fitting the overall condition of this file.
+//      You always can use `\spaf\simputils\PHP::envSet()` functionality.
 
 /**
  * Please Die function
@@ -111,10 +114,10 @@ function env(?string $name = null, bool $strict = true): mixed {
 	return PHP::env($name, $strict);
 }
 
-// NOTE env_set() removed, because it's not a very "urgent" type of functionality that you need
-//      all over your code. + Naming was not really fitting the overall condition of this file.
-//      You always can use `\spaf\simputils\PHP::envSet()` functionality.
-
+/**
+ * @return string
+ * @codeCoverageIgnore
+ */
 #[Shortcut('Str::uuid()')]
 function uuid(): string {
 	return Str::uuid();

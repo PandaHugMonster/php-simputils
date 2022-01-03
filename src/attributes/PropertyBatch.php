@@ -10,7 +10,6 @@ use spaf\simputils\special\PropertiesCacheIndex;
 
 /**
  * @package spaf\simputils\attributes
- * @codeCoverageIgnore
  */
 #[Attribute(Attribute::TARGET_PROPERTY | Attribute::TARGET_METHOD)]
 class PropertyBatch extends Property {

@@ -20,6 +20,8 @@ use spaf\simputils\logger\outputs\TextFileOutput;
  * @uses \spaf\simputils\models\DateTime
  * @uses \spaf\simputils\PHP
  * @uses \spaf\simputils\traits\PropertiesTrait
+ * @uses \spaf\simputils\attributes\Property
+ * @uses \spaf\simputils\special\CodeBlocksCacheIndex
  *
  */
 class LoggerTest extends TestCase {

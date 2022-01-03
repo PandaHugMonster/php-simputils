@@ -35,6 +35,7 @@ use function is_string;
 use function json_decode;
 use function json_encode;
 use function json_last_error;
+use function method_exists;
 use function serialize;
 use function unserialize;
 use const JSON_ERROR_NONE;
@@ -372,7 +373,7 @@ class PHP {
 	 */
 	public static function isClass(mixed $class_or_not): bool {
 		if (is_string($class_or_not)) {
-			if (class_exists($class_or_not, false)) {
+			if (class_exists($class_or_not, true)) {
 				return true;
 			}
 		}
@@ -557,7 +558,8 @@ class PHP {
 	 * @return void
 	 */
 	public static function pd(...$args) {
-		if ($callback = CodeBlocksCacheIndex::getRedefinition(InitConfig::REDEF_PD)) {
+		$callback = CodeBlocksCacheIndex::getRedefinition(InitConfig::REDEF_PD);
+		if ($callback && $callback !== InitConfig::REDEF_PD) {
 			$res = (bool) $callback(...$args);
 		} else {
 			foreach ($args as $arg) {
@@ -657,7 +659,7 @@ class PHP {
 	 */
 	#[Shortcut('\$_ENV')]
 	public static function allEnvs(): array|Box {
-		return PHP::box($_ENV ?? CommonMemoryCacheIndex::$initial_get_env_state ?? []);
+		return new Box($_ENV ?? CommonMemoryCacheIndex::$initial_get_env_state ?? []);
 	}
 
 	/**
@@ -710,5 +712,46 @@ class PHP {
 				$info->updateEnvVar($name, $value);
 			}
 		}
+	}
+
+	/**
+	 * Quick and improved version of getting class string of redefinable components
+	 *
+	 * Shortcut for this:
+	 * ```php
+	 *      $class = CodeBlocksCacheIndex::getRedefinition(
+	 *          InitConfig::REDEF_DATE_TIME,
+	 *          DateTime::class
+	 *      );
+	 * ```
+	 *
+	 * **Important:** This is one of the internal functionality of the framework. In the most
+	 * cases, if you don't know what it is - you should not use it.
+	 *
+	 * @param string  $target_class Target class, used as default if no redefinition
+	 * @param ?string $hint         Hinting name of the redefinable component,
+	 *                              usually is not needed when the target class uses
+	 *                              `\spaf\simputils\traits\RedefinableComponentTrait`
+	 *
+	 * @return ?string Returns the final class name string that could be used for creation
+	 *                 of objects, and usage of static methods.
+	 * @throws \Exception If arguments are not provided correctly
+	 */
+	public static function redef(string $target_class, string $hint = null): ?string {
+		if (!static::isClass($target_class)) {
+			throw new Exception("String \"{$target_class}\" is not a valid class reference");
+		}
+
+		if (empty($hint)) {
+			if (!method_exists($target_class, 'redefComponentName')) {
+				throw new Exception(
+					"Class \"{$target_class}\" does not have " .
+					"\"redefComponentName\" method, and \$hint argument was not provided"
+				);
+			}
+			$hint = $target_class::redefComponentName();
+		}
+
+		return CodeBlocksCacheIndex::getRedefinition($hint, $target_class);
 	}
 }

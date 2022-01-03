@@ -8,7 +8,6 @@ use spaf\simputils\generic\SimpleObject;
 use spaf\simputils\interfaces\InitBlockInterface;
 use spaf\simputils\models\File;
 use spaf\simputils\PHP;
-use function spaf\simputils\basic\fl;
 
 /**
  * @property-read ?File $default_file The default file reference (.env) or null if file does
@@ -35,7 +34,7 @@ class DotEnvInitBlock extends SimpleObject implements InitBlockInterface {
 	public function initBlock(BasicInitConfig $config): bool {
 		$res = true;
 
-		$file = fl($config->working_dir.'/'.static::DEFAULT_FILE_NAME);
+		$file = new File(static::DEFAULT_FILE_NAME);
 		$this->_default_file = $file->exists
 			?$file
 			:null;

@@ -8,6 +8,7 @@ use spaf\simputils\attributes\markers\Affecting;
 use spaf\simputils\attributes\Property;
 use spaf\simputils\PHP;
 use spaf\simputils\traits\MetaMagic;
+use spaf\simputils\traits\RedefinableComponentTrait;
 use spaf\simputils\traits\SimpleObjectTrait;
 use function array_flip;
 use function array_keys;
@@ -133,6 +134,7 @@ use function is_object;
 class Box extends ArrayObject {
 	use SimpleObjectTrait;
 	use MetaMagic;
+	use RedefinableComponentTrait;
 
 	public static bool $to_string_format_json = true;
 	public static bool $is_json_pretty = false;
@@ -333,5 +335,13 @@ class Box extends ArrayObject {
 	 */
 	public function __debugInfo(): ?array {
 		return $this->toArray();
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 * @return string
+	 */
+	public static function redefComponentName(): string {
+		return InitConfig::REDEF_BOX;
 	}
 }

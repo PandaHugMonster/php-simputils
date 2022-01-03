@@ -48,12 +48,12 @@ function pd(...$args) {
 }
 
 /**
- * @param ?array $array Array that should be wrapped into a box
+ * @param null|Box|array $array Array that should be wrapped into a box
  *
- * @return \spaf\simputils\models\Box|array
+ * @return Box|array
  */
 #[Shortcut('PHP::box()')]
-function box(?array $array = null): Box|array {
+function box(null|Box|array $array = null): Box|array {
 	return PHP::box($array);
 }
 

@@ -1,12 +1,11 @@
 {
   "name": "spaf/simputils",
-  "version": "0.3.0",
   "description": "Simple minimal but useful set of utils (strings, datetimes, etc.) ",
   "keywords": [
     "simple", "utils", "micro", "framework", "quick prototyping",
     "properties", "phpinfo", "php", "easy cast", "meta-magic", "files",
     "dotenv", "csv", "json", "namespaced", "routines", "data unit conversion",
-    "box", "wrappers"
+    "box", "wrappers", "library"
   ],
   "minimum-stability": "stable",
   "license": "MIT",

@@ -52,14 +52,10 @@ class CsvProcessor extends TextProcessor {
 		return $line;
 	}
 
-	public static function getContent(mixed $stream, ?BasicResource $file = null): mixed {
+	public function getContent(mixed $fd, ?BasicResource $file = null): mixed {
 		/** @var CsvSettings $s */
 		$s = static::getSettings($file);
-		if (is_string($stream)) {
-			$fd = fopen($stream, 'r');
-		} else if (is_resource($stream)) {
-			$fd = $stream;
-		}
+
 		$box_class = CodeBlocksCacheIndex::getRedefinition(
 			InitConfig::REDEF_BOX,
 			Box::class
@@ -85,10 +81,6 @@ class CsvProcessor extends TextProcessor {
 			}
 		}
 
-		if (is_string($stream)) {
-			fclose($fd);
-		}
-
 		return $res;
 	}
 
@@ -98,26 +90,20 @@ class CsvProcessor extends TextProcessor {
 	 * NOTE Due to some flexibility, current mechanisms might not be fully efficient (maybe will be
 	 *      fixed in the future!)
 	 *
-	 * @param mixed          $stream
+	 * @param mixed          $fd
 	 * @param mixed          $data
 	 * @param ?BasicResource $file
 	 *
 	 * @throws \Exception
 	 */
-	public static function setContent(mixed $stream, $data, ?BasicResource $file = null): void {
+	public function setContent(mixed $fd, $data, ?BasicResource $file = null): void {
 		/** @var CsvSettings $s */
 
 		$s = static::getSettings($file);
 
-		if (is_string($stream)) {
-			$fd = fopen($stream, 'w');
-		} else if (is_resource($stream)) {
-			$fd = $stream;
-		}
-
-		if (!is_array($data)) {
+		if (!is_array($data) && !$data instanceof Box) {
 			if ($s->allow_raw_string_saving) {
-				parent::setContent($file, $stream, $data);
+				parent::setContent($fd, $data, $file);
 			} else {
 				throw new Exception('Data format is not correct. Data must be array/matrix');
 			}
@@ -126,7 +112,9 @@ class CsvProcessor extends TextProcessor {
 		$header = static::prepareHeader($data);
 		$header_flipped = null;
 		if (!empty($header)) {
-			$header_flipped = array_flip($header);
+			$header_flipped = $header instanceof Box
+				?$header->flipped
+				:array_flip($header);
 		}
 
 		$is_header_one_set = false;
@@ -135,7 +123,7 @@ class CsvProcessor extends TextProcessor {
 			if (!empty($header)) {
 				if (!$is_header_one_set) {
 					// NOTE Setting the very first line header from keys
-					fputcsv($fd, $header, $s->separator, $s->enclosure, $s->escape);
+					fputcsv($fd, (array) $header, $s->separator, $s->enclosure, $s->escape);
 					$is_header_one_set = true;
 				}
 				$sub_row = [];
@@ -150,10 +138,6 @@ class CsvProcessor extends TextProcessor {
 			}
 
 			fputcsv($fd, $row, $s->separator, $s->enclosure, $s->escape);
-		}
-
-		if (is_string($stream)) {
-			fclose($fd);
 		}
 	}
 
@@ -190,7 +174,9 @@ class CsvProcessor extends TextProcessor {
 		}
 		return empty($res)
 			?null
-			:array_values($res);
+			:($res instanceof Box
+				?$res->values
+				:array_values($res));
 	}
 
 	protected static function _checkMixUpOfKeys($key, &$is_index_used, &$is_assoc_used) {

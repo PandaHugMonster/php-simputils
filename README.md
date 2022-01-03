@@ -44,7 +44,7 @@ More about semantic versioning: [Semantic Versioning Explanation](https://semver
 
 For safe and stable release, it's recommended to use the following command:
 ```shell
-composer require spaf/php-simputils "~1"
+composer require spaf/simputils "~1"
 ```
 This command will always make sure your major version is the same (because if
 major version is different - then it can break expected behaviour)
@@ -52,7 +52,7 @@ major version is different - then it can break expected behaviour)
 
 The latest available version can be installed through composer (unsafe method!):
 ```shell
-composer require spaf/php-simputils "*"
+composer require spaf/simputils "*"
 ```
 
 ## Ground Reasons and Design Decisions

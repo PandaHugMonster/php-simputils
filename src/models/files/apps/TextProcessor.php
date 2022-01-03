@@ -14,41 +14,18 @@ use spaf\simputils\generic\BasicResourceApp;
  */
 class TextProcessor extends BasicResourceApp {
 
-	public static function getContent(mixed $stream, ?BasicResource $file = null): mixed {
-
-		if (is_string($stream)) {
-			$fd = fopen($stream, 'r');
-		} else if (is_resource($stream)) {
-			$fd = $stream;
-		}
-
-		$content = stream_get_contents($fd);
-
-		if (is_string($stream)) {
-			fclose($fd);
-		}
-
-		return $content;
+	public function getContent(mixed $fd, ?BasicResource $file = null): mixed {
+		return stream_get_contents($fd);
 	}
 
 	/**
 	 *
-	 * @param mixed          $stream Stream/Pointer/FileDescriptor/Path etc.
-	 * @param mixed          $data   Data to store
-	 * @param ?BasicResource $file   File instance
+	 * @param mixed          $fd   Stream/Pointer/FileDescriptor/Path etc.
+	 * @param mixed          $data Data to store
+	 * @param ?BasicResource $file File instance
 	 *
 	 */
-	public static function setContent(mixed $stream, $data, ?BasicResource $file = null): void {
-		if (is_string($stream)) {
-			$fd = fopen($stream, 'w');
-		} else if (is_resource($stream)) {
-			$fd = $stream;
-		}
-
+	public function setContent(mixed $fd, $data, ?BasicResource $file = null): void {
 		fwrite($fd, $data);
-
-		if (is_string($stream)) {
-			fclose($fd);
-		}
 	}
 }

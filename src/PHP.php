@@ -372,8 +372,9 @@ class PHP {
 	 */
 	public static function isClass(mixed $class_or_not): bool {
 		if (is_string($class_or_not)) {
-			if (class_exists($class_or_not, false))
+			if (class_exists($class_or_not, false)) {
 				return true;
+			}
 		}
 		return false;
 	}
@@ -571,14 +572,18 @@ class PHP {
 	}
 
 	/**
-	 * @param ?array $array Array, elements of which should be used as elements of the newly created
-	 *                      box.
-	 *
-	 * TODO Implement transparent Box supplying instead of array?
+	 * @param null|Box|array $array Array, elements of which should be used as elements
+	 *                              of the newly created box.
 	 *
 	 * @return Box|array
 	 */
-	public static function box(?array $array = null): Box|array {
+	public static function box(null|Box|array $array = null): Box|array {
+		if ($array instanceof Box) {
+			return $array;
+		}
+		if (is_null($array)) {
+			$array = [];
+		}
 		$class = CodeBlocksCacheIndex::getRedefinition(
 			InitConfig::REDEF_BOX,
 			Box::class
@@ -619,7 +624,20 @@ class PHP {
 		return DT::normalize($dt, $tz, $fmt);
 	}
 
+	/**
+	 * Returns File instance for the provided argument
+	 *
+	 * @param string|File|null $file Can be a string - then it's a path to a file, or
+	 *                               a File instance, then it's just provided back
+	 *                               transparently
+	 * @param mixed            $app  Read/Write processor
+	 *
+	 * @return \spaf\simputils\models\File|null
+	 */
 	public static function file(null|string|File $file = null, $app = null): ?File {
+		if ($file instanceof File) {
+			return $file;
+		}
 		$class = CodeBlocksCacheIndex::getRedefinition(
 			InitConfig::REDEF_FILE,
 			File::class

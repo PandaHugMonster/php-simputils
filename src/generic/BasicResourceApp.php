@@ -11,25 +11,25 @@ abstract class BasicResourceApp extends SimpleObject {
 	/**
 	 * Getting content at once
 	 *
-	 * @param mixed          $stream Stream/Pointer/FileDescriptor/Path etc.
-	 * @param ?BasicResource $file   File instance
+	 * @param mixed          $fd   Stream/Pointer/FileDescriptor/Path etc.
+	 * @param ?BasicResource $file File instance
 	 *
 	 * @return mixed
 	 */
-	abstract public static function getContent(
-		mixed $stream,
+	abstract public function getContent(
+		mixed $fd,
 		?BasicResource $file = null
 	): mixed;
 
 	/**
 	 * Setting content at once
 	 *
-	 * @param mixed          $stream Stream/Pointer/FileDescriptor/Path etc.
-	 * @param mixed          $data   Data to store
-	 * @param ?BasicResource $file   File instance
+	 * @param mixed          $fd   Stream/Pointer/FileDescriptor/Path etc.
+	 * @param mixed          $data Data to store
+	 * @param ?BasicResource $file File instance
 	 */
-	abstract public static function setContent(
-		mixed $stream,
+	abstract public function setContent(
+		mixed $fd,
 		mixed $data,
 		?BasicResource $file = null
 	): void;
@@ -58,5 +58,18 @@ abstract class BasicResourceApp extends SimpleObject {
 		}
 
 		return $file->processor_settings ?? static::defaultProcessorSettings();
+	}
+
+	public function __invoke(
+		BasicResource $file,
+		$fd,
+		bool $is_reading = true,
+		mixed $data = null
+	) {
+		if ($is_reading) {
+			return $this->getContent($fd, $file);
+		}
+
+		$this->setContent($fd, $data, $file);
 	}
 }

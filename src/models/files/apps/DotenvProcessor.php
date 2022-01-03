@@ -33,7 +33,7 @@ class DotenvProcessor extends TextProcessor {
 	}
 
 	/**
-	 * @param mixed $stream
+	 * @param mixed $fd
 	 * @param ?BasicResource $file
 	 *
 	 *
@@ -42,10 +42,10 @@ class DotenvProcessor extends TextProcessor {
 	 * @return mixed
 	 * @throws \Exception
 	 */
-	public static function getContent(mixed $stream, ?BasicResource $file = null): ?array {
+	public function getContent(mixed $fd, ?BasicResource $file = null): ?array {
 		$s = static::getSettings($file);
 		/** @var DotEnvSettings $s */
-		$content = parent::getContent($stream, $file);
+		$content = parent::getContent($fd, $file);
 		$lines = explode("\n", $content);
 		$res = [];
 		foreach ($lines as $line) {
@@ -89,8 +89,6 @@ class DotenvProcessor extends TextProcessor {
 			// FIX  Implement clearing of "export ..." stuff if present
 			// FIX  Implement DotEnv functionality for $_ENV etc...
 		}
-//		pd($res);
-//		pd($lines, $res);
 		return $res;
 	}
 
@@ -100,13 +98,13 @@ class DotenvProcessor extends TextProcessor {
 	 * NOTE Due to some flexibility, current mechanisms might not be fully efficient (maybe will be
 	 *      fixed in the future!)
 	 *
-	 * @param mixed          $stream Stream/Pointer/FileDescriptor/Path etc.
-	 * @param mixed          $data   Data to store
-	 * @param ?BasicResource $file   File instance
+	 * @param mixed          $fd   Stream/Pointer/FileDescriptor/Path etc.
+	 * @param mixed          $data Data to store
+	 * @param ?BasicResource $file File instance
 	 *
 	 * @throws \Exception Error
 	 */
-	public static function setContent(mixed $stream, $data, ?BasicResource $file = null): void {
+	public function setContent(mixed $fd, $data, ?BasicResource $file = null): void {
 		$lines = [];
 		/** @var DotEnvSettings $s */
 		$s = static::getSettings($file);
@@ -140,6 +138,6 @@ class DotenvProcessor extends TextProcessor {
 		}
 
 		$res = implode("\n", $lines);
-		parent::setContent($stream, $res, $file);
+		parent::setContent($fd, $res, $file);
 	}
 }

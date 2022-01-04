@@ -19,7 +19,7 @@ use function fwrite;
  * @covers \spaf\simputils\models\File
  * @uses \spaf\simputils\PHP
  * @uses \spaf\simputils\Str
- * @uses \spaf\simputils\generic\BasicResource
+ * @covers \spaf\simputils\generic\BasicResource
  * @uses \spaf\simputils\models\files\apps\TextProcessor
  * @uses \spaf\simputils\special\CodeBlocksCacheIndex
  * @uses \spaf\simputils\traits\SimpleObjectTrait
@@ -27,7 +27,7 @@ use function fwrite;
  * @uses \spaf\simputils\traits\SimpleObjectTrait::__set
  * @uses \spaf\simputils\traits\SimpleObjectTrait::____prepareProperty
  * @uses \spaf\simputils\traits\SimpleObjectTrait::__isset
- * @uses \spaf\simputils\generic\BasicResourceApp
+ * @covers \spaf\simputils\generic\BasicResourceApp
  * @uses \spaf\simputils\FS
  * @uses \spaf\simputils\attributes\Property
  */

@@ -139,6 +139,9 @@ class DotEnvSettings extends SimpleObject {
 		}
 		$length = strlen($value);
 		$last = $length - 1;
+		if (empty($value)) {
+			return null;
+		}
 		if (
 			($value[0] == '"' && $value[$last] == '"') ||
 			($value[0] == "'" && $value[$last] == "'")

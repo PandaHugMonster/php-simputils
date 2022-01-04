@@ -12,6 +12,8 @@ use spaf\simputils\PHP;
  *
  * Represents history of methods to get fingerprint-data for each version
  *
+ * @codeCoverageIgnore Unfinished
+ *
  * @see \spaf\simputils\models\SystemFingerprint
  * @see \spaf\simputils\traits\DefaultSystemFingerprintTrait
  */

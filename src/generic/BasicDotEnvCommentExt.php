@@ -26,7 +26,7 @@ abstract class BasicDotEnvCommentExt extends SimpleObject {
 	const PREFIX_GLOBAL = '#:';
 	const PREFIX_ROW = '#:#';
 
-	protected mixed $_value;
+	protected mixed $_value = null;
 
 	/**
 	 * Returns unique name of this comment-extension

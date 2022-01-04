@@ -20,7 +20,10 @@ class PropertyBatch extends Property {
 	 */
 	const STORAGE_SELF = '#SELF';
 
-	/** @noinspection PhpMissingParentConstructorInspection */
+	/**
+	 * @noinspection PhpMissingParentConstructorInspection
+	 * @codeCoverageIgnore
+	 */
 	public function __construct(
 		public ?string $type = null,
 		public ?string $modifier = null,

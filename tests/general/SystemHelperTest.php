@@ -4,6 +4,7 @@
 use PHPUnit\Framework\TestCase;
 use spaf\simputils\generic\BasicSystemFingerprint;
 use spaf\simputils\models\SystemFingerprint;
+use spaf\simputils\models\Version;
 use spaf\simputils\System;
 
 /**
@@ -60,6 +61,7 @@ class SystemHelperTest extends TestCase {
 	 * @uses \spaf\simputils\traits\dsf\DsfVersionsMethodsTrait
 	 */
 	public function testDefaultFingerPrint() {
+		/** @var SystemFingerprint $d */
 		$d = System::systemFingerprint();
 
 		$fp = new SystemFingerprint();
@@ -67,5 +69,27 @@ class SystemHelperTest extends TestCase {
 
 		$fp = SystemFingerprint::parse(strval($d));
 		$this->assertInstanceOf(SystemFingerprint::class, $fp);
+
+		$res = $d->generateString(true);
+		$this->assertGreaterThan(3, $res);
+
+		$this->assertTrue($d->fits(System::systemFingerprint(new Version('12.12.12'))));
+		$this->assertFalse($d->fits(null));
+	}
+
+	/**
+	 * @covers \spaf\simputils\generic\BasicSystemFingerprint
+	 * @uses \spaf\simputils\models\Box
+	 * @uses \spaf\simputils\traits\SimpleObjectTrait
+	 *
+	 * @runInSeparateProcess
+	 * @return void
+	 * @throws \Exception
+	 */
+	public function testCustomFingerPrintParsingException() {
+		$this->expectException(Exception::class);
+		SystemFingerprint::parse(
+			'PAN/cac55efcadcea418138717390e7ec654,5ed77353205283d243ec7d0f5804cfb367ec5149b51cd2362d9f6a4659da2cba/0.2.3/0'
+		);
 	}
 }

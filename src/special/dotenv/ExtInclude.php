@@ -13,6 +13,7 @@ use spaf\simputils\generic\BasicDotEnvCommentExt;
  *
  * FIX  Unfinished. Proceed with comment-extensions after the current pull-request is resolved.
  * FIX  Maybe define the full format for the extension params, will be better!
+ * @codeCoverageIgnore
  */
 class ExtInclude extends BasicDotEnvCommentExt {
 

@@ -29,6 +29,8 @@ abstract class BasicSystemFingerprint extends SimpleObject {
 
 	protected bool $is_no_data = false;
 
+	abstract public function fits(mixed $val, bool $strict = false): bool;
+
 	/**
 	 * Getting parts
 	 *
@@ -117,7 +119,7 @@ abstract class BasicSystemFingerprint extends SimpleObject {
 			$t = PHP::type($k);
 			if (is_null($index_type)) {
 				$index_type = $t;
-			} else if ($index_type !== $t) {
+			} else if ($index_type !== $t) {// @codeCoverageIgnore
 				// FIX  Should be implemented differently (to use both int and str keys)
 				throw new Exception( // @codeCoverageIgnore
 					'Index/keys must be of the same type' // @codeCoverageIgnore
@@ -131,8 +133,8 @@ abstract class BasicSystemFingerprint extends SimpleObject {
 			}
 
 			$val = $index_type === 'integer'
-				?$params[$i]
-				:$params[$field];
+				?$params[$i]// @codeCoverageIgnore
+				:$params[$field];// @codeCoverageIgnore
 
 			$this->$field = $this->preCheckProperty($field, $val);
 		}
@@ -166,7 +168,7 @@ abstract class BasicSystemFingerprint extends SimpleObject {
 	 * @return string
 	 * @throws \Exception
 	 */
-	protected function generateString(bool $only_base = false): string {
+	public function generateString(bool $only_base = false): string {
 		$res = $this->name.'/'.$this->first_hash.','.$this->second_hash;
 		if ($only_base) {
 			return $res;

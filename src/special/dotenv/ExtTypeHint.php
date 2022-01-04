@@ -21,6 +21,7 @@ use spaf\simputils\PHP;
  *      Uncontrolled "code/scripts execution" from dotenv and comments - strictly prohibited!
  *      If you remove this lock in your sub-libraries, your library must be considered UNSAFE!
  *      And you need to make a notable statement that you changed those mechanisms.
+ * @codeCoverageIgnore
  */
 class ExtTypeHint extends BasicDotEnvCommentExt {
 

@@ -26,7 +26,7 @@ use spaf\simputils\special\dotenv\ExtTypeHint;
  *
  * @package spaf\simputils\models\files\apps
  */
-class DotenvProcessor extends TextProcessor {
+class DotEnvProcessor extends TextProcessor {
 
 	public static function defaultProcessorSettings(): mixed {
 		return new DotEnvSettings();

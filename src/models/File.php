@@ -16,7 +16,6 @@ use function file_exists;
 use function file_put_contents;
 use function fopen;
 use function fstat;
-use function is_callable;
 use function is_string;
 use function rewind;
 use function stat;
@@ -64,6 +63,7 @@ class File extends BasicResource {
 	public bool $is_backup_preserved = false;
 
 	protected mixed $_app = null;
+	protected bool $_is_default_app = true;
 	protected ?string $_backup_file = null;
 
 	/**
@@ -111,7 +111,7 @@ class File extends BasicResource {
 		} else if ($file instanceof File) {
 			// File instance is supplied
 			if (!empty($file->fd)) {
-				$this->_fd = $file;
+				$this->_fd = $file->fd;
 			} else {
 				$this->_path = $file->path;
 				$this->_name = $file->name;
@@ -127,10 +127,12 @@ class File extends BasicResource {
 		}
 
 
+		// FIX  Reconsider the code
 		if (empty($app) || is_string($app)) {
-			$app = static::getCorrespondingProcessor($this->name_full, $this->mime_type);
-		} else if (!is_callable($app)) {
-			throw new Exception('$app argument is not of a correct data type');
+			if (!empty($app)) {
+				$this->_is_default_app = false; // @codeCoverageIgnore
+			}
+			$app = static::getCorrespondingProcessor($this->name_full, $this->mime_type, $app);
 		}
 
 		$this->_app = $app;
@@ -147,7 +149,7 @@ class File extends BasicResource {
 	public function delete(bool $i_am_sure = false): bool {
 		if ($i_am_sure) {
 			if ($this->is_backup_preserved) {
-				$this->preserveFile();
+				$this->preserveFile(); // @codeCoverageIgnore
 			}
 			return FS::rmFile($this);
 		}
@@ -155,6 +157,11 @@ class File extends BasicResource {
 		return false;
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 * @return void
+	 * @throws \spaf\simputils\exceptions\NotImplementedYet
+	 */
 	public function recoverFromBackup() {
 		if ($this->is_backup_preserved) {
 			if (empty($this->_backup_file) || !file_exists($this->_backup_file)) {
@@ -200,6 +207,11 @@ class File extends BasicResource {
 	 *
 	 * If some of the main params are skipped, they are picked from the current values of the object
 	 *
+	 * **Important:** If you trying to move file-system non-existing file (non-ram file),
+	 * it will not create anything, it will just adjust all the required things like file-name/path
+	 * and in case of default app - it will set an appropriate app (but only if it was not
+	 * explicitly set!)
+	 *
 	 * @param ?string $new_location_dir New location path (location dir, not the full path!)
 	 * @param ?string $name             Filename without extension and path
 	 * @param ?string $ext              Extension
@@ -217,19 +229,27 @@ class File extends BasicResource {
 		$file_path = $this->_prepareCopyMoveDest($new_location_dir, $name, $ext);
 
 		if (!file_exists($file_path) || $overwrite) {
-			$split_data = FS::splitFullFilePath($file_path);
-			if (!empty($fd = $this->fd)) {
+			if (!empty($fd = $this->_fd)) {
 				rewind($fd);
 				$res = stream_get_contents($fd);
 				if (file_put_contents($file_path, $res)) {
-					[$this->_path, $this->_name, $this->_ext] = $split_data;
+					// Swittching context to use real file (through file path and name)
+					fclose($this->_fd);
+					$this->_fd = null;
 				}
-			}
-
-			if (rename($this->name_full, $file_path)) {
-				[$this->_path, $this->_name, $this->_ext] = $split_data;
+			} else if (rename($this->name_full, $file_path)) {
+//				[$this->_path, $this->_name, $this->_ext] = $split_data;
 			}
 		}
+
+		[$this->_path, $this->_name, $this->_ext] = FS::splitFullFilePath($file_path);
+
+		if ($this->_is_default_app) {
+			// If app was not explicitly set, we adjust default app for the file
+			$this->_app = static::getCorrespondingProcessor($this->name_full);
+		}
+
+		$this->_mime_type = FS::getFileMimeType($this->name_full);
 
 		return $this;
 	}
@@ -257,24 +277,28 @@ class File extends BasicResource {
 	): ?static {
 		$file_path = $this->_prepareCopyMoveDest($new_location_dir, $name, $ext);
 
-		if ($this->exists) {
-			if ((!file_exists($file_path) || $overwrite) && copy($this->name_full, $file_path)) {
-				return new static($file_path);
-			}
-		} else {
+		if (!file_exists($file_path) || $overwrite) {
 			if (!empty($fd = $this->fd)) {
-				$split_data = FS::splitFullFilePath($file_path);
+				// $split_data = FS::splitFullFilePath($file_path);
 				rewind($fd);
 				$res = stream_get_contents($fd);
 				if (file_put_contents($file_path, $res)) {
-					[$this->_path, $this->_name, $this->_ext] = $split_data;
+					return new static($file_path);
+					// [$this->_path, $this->_name, $this->_ext] = $split_data;
 				}
+			} else if (copy($this->name_full, $file_path)) {
+				return new static($file_path);
 			}
 		}
 
 		return null;
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 * @return void
+	 * @throws \spaf\simputils\exceptions\NotImplementedYet
+	 */
 	protected function preserveFile() {
 		if (empty($this->_backup_file)) {
 			$this->_backup_file = tempnam('/tmp', 'simp-utils-');
@@ -326,7 +350,10 @@ class File extends BasicResource {
 			$fd = fopen($this->name_full, 'r');
 		}
 
-		rewind($fd);
+		$meta = stream_get_meta_data($fd);
+		if ($meta['seekable']) {
+			rewind($fd);
+		}
 		$res = $app($this, $fd, true, null);
 
 		if ($is_opened_locally) {
@@ -339,7 +366,7 @@ class File extends BasicResource {
 	#[Property('content')]
 	protected function setContent($data) {
 		if ($this->is_backup_preserved) {
-			$this->preserveFile();
+			$this->preserveFile(); // @codeCoverageIgnore
 		}
 		$app = $this->app;
 		$is_opened_locally = false;
@@ -356,6 +383,9 @@ class File extends BasicResource {
 		if ($is_opened_locally) {
 			fclose($fd);
 		}
+		if (!empty($this->name_full)) {
+			$this->_mime_type = FS::getFileMimeType($this->name_full);
+		}
 	}
 
 	#[Property('exists')]
@@ -363,11 +393,20 @@ class File extends BasicResource {
 		return file_exists($this->name_full);
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 * @return string|null
+	 */
 	#[Property('backup_location')]
 	protected function getBackupLocation(): ?string {
 		return $this->_backup_file;
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 * @return string|null
+	 * @throws \Exception
+	 */
 	#[Property('backup_content', debug_output: false)]
 	protected function getBackupContent(): ?string {
 		if (file_exists($this->_backup_file)) {

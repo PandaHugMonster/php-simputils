@@ -2,14 +2,25 @@
 
 use PHPUnit\Framework\TestCase;
 use spaf\simputils\FS;
+use spaf\simputils\PHP;
 
 
 /**
  * @covers \spaf\simputils\FS
  * @covers \spaf\simputils\models\File
  *
+ * @uses \spaf\simputils\PHP
+ * @uses \spaf\simputils\generic\BasicResource
+ * @uses \spaf\simputils\models\files\apps\TextProcessor
+ * @uses \spaf\simputils\special\CodeBlocksCacheIndex
+ * @uses \spaf\simputils\traits\SimpleObjectTrait
+ * @uses \spaf\simputils\traits\SimpleObjectTrait::__get
+ * @uses \spaf\simputils\traits\SimpleObjectTrait::__set
+ * @uses \spaf\simputils\traits\SimpleObjectTrait::__isset
+ * @uses \spaf\simputils\generic\BasicResourceApp
+ * @uses \spaf\simputils\models\files\apps\CsvProcessor
  */
-class FilesManagementTest extends TestCase {
+class FSTest extends TestCase {
 
 	public function testCreateAndDelete() {
 		$location = '/tmp/simputils/tests';
@@ -79,5 +90,25 @@ class FilesManagementTest extends TestCase {
 
 		// Exception here because strict file deletion does not allow dir deletion
 		FS::rmFile($dir, strict: true);
+	}
+
+	function testRmFileObject() {
+		$file = PHP::file('/tmp/dot-dot-dot-test-file-blabla-bla.txt');
+		$file->content = " --- FILE CONTENT --- ";
+
+		$this->assertFileExists($file->name_full);
+		FS::rmFile($file);
+		$this->assertFileDoesNotExist($file->name_full);
+	}
+
+	function testMimeTypeCheck() {
+		$file = PHP::file('/tmp/dot-dot-dot-test-file-blabla-bla.txt');
+		$this->assertEquals('application/x-empty', $file->mime_type);
+		$file->move(ext: 'csv');
+
+		$file->content = [[1, 2, 3]];
+
+		$mime = FS::getFileMimeType($file);
+		$this->assertEquals('text/csv', $mime);
 	}
 }

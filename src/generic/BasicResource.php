@@ -8,7 +8,7 @@ use spaf\simputils\Data;
 use spaf\simputils\FS;
 use spaf\simputils\models\Box;
 use spaf\simputils\models\files\apps\CsvProcessor;
-use spaf\simputils\models\files\apps\DotenvProcessor;
+use spaf\simputils\models\files\apps\DotEnvProcessor;
 use spaf\simputils\models\files\apps\JsonProcessor;
 use spaf\simputils\models\files\apps\TextProcessor;
 
@@ -47,8 +47,8 @@ abstract class BasicResource extends SimpleObject {
 		'application/csv' => CsvProcessor::class,
 
 		// DotEnv processor
-		'text/dotenv' => DotenvProcessor::class,
-		'application/dotenv' => DotenvProcessor::class,
+		'text/dotenv' => DotEnvProcessor::class,
+		'application/dotenv' => DotEnvProcessor::class,
 	];
 
 	protected static $processors_index = null;
@@ -87,10 +87,11 @@ abstract class BasicResource extends SimpleObject {
 	public static function getCorrespondingProcessor(
 		?string $file_name = null,
 		?string $mime = null,
+		?string $enforced_class = null
 	): BasicResourceApp|TextProcessor {
 		$mime = $mime ?? (!empty($file_name)?FS::getFileMimeType($file_name):null);
 
-		$class = static::$processors[$mime] ?? TextProcessor::class;
+		$class = $enforced_class ?? static::$processors[$mime] ?? TextProcessor::class;
 
 		if (empty(static::$processors_index[$class])) {
 			static::$processors_index[$class] = new $class();

@@ -7,9 +7,7 @@ use Exception;
 use spaf\simputils\generic\BasicResource;
 use spaf\simputils\models\Box;
 use spaf\simputils\models\files\apps\settings\CsvSettings;
-use spaf\simputils\models\InitConfig;
 use spaf\simputils\PHP;
-use spaf\simputils\special\CodeBlocksCacheIndex;
 
 /**
  * CSV data processor
@@ -56,10 +54,7 @@ class CsvProcessor extends TextProcessor {
 		/** @var CsvSettings $s */
 		$s = static::getSettings($file);
 
-		$box_class = CodeBlocksCacheIndex::getRedefinition(
-			InitConfig::REDEF_BOX,
-			Box::class
-		);
+		$box_class = PHP::redef(Box::class);
 
 		$callback = !empty($s->postprocessing_callback)
 			?Closure::fromCallable($s->postprocessing_callback)
@@ -73,7 +68,7 @@ class CsvProcessor extends TextProcessor {
 			}
 			$line = static::wrapWithKeys($line, $header);
 			if (!empty($callback)) {
-				$line = $callback(static::wrapWithKeys($line, $header));
+				$line = $callback($line);
 			}
 
 			if (!empty($line)) {
@@ -104,6 +99,7 @@ class CsvProcessor extends TextProcessor {
 		if (!is_array($data) && !$data instanceof Box) {
 			if ($s->allow_raw_string_saving) {
 				parent::setContent($fd, $data, $file);
+				return;
 			} else {
 				throw new Exception('Data format is not correct. Data must be array/matrix');
 			}
@@ -112,9 +108,7 @@ class CsvProcessor extends TextProcessor {
 		$header = static::prepareHeader($data);
 		$header_flipped = null;
 		if (!empty($header)) {
-			$header_flipped = $header instanceof Box
-				?$header->flipped
-				:array_flip($header);
+			$header_flipped = $header->flipped;
 		}
 
 		$is_header_one_set = false;
@@ -144,14 +138,11 @@ class CsvProcessor extends TextProcessor {
 	/**
 	 * Picks up all the keys of the array/matrix for CSV
 	 */
-	public static function prepareHeader(array|Box $data): null|array|Box {
+	public static function prepareHeader(array|Box $data): null|Box {
 		$is_box_used = $data instanceof Box && PHP::$use_box_instead_of_array;
 		$is_assoc_used = false;
 		$is_index_used = false;
-		$box_class = CodeBlocksCacheIndex::getRedefinition(
-			InitConfig::REDEF_BOX,
-			Box::class
-		);
+		$box_class = PHP::redef(Box::class);
 
 		$res = $is_box_used
 			?new $box_class()
@@ -176,7 +167,7 @@ class CsvProcessor extends TextProcessor {
 			?null
 			:($res instanceof Box
 				?$res->values
-				:array_values($res));
+				:new Box(array_values($res)));
 	}
 
 	protected static function _checkMixUpOfKeys($key, &$is_index_used, &$is_assoc_used) {

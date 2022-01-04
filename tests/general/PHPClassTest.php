@@ -52,7 +52,7 @@ class MyDT2 {
  * @uses \spaf\simputils\models\File
  * @uses \spaf\simputils\generic\BasicResource
  * @uses \spaf\simputils\generic\BasicResourceApp
- * @uses \spaf\simputils\models\files\apps\DotenvProcessor
+ * @uses \spaf\simputils\models\files\apps\DotEnvProcessor
  * @uses \spaf\simputils\models\files\apps\TextProcessor
  * @uses \spaf\simputils\models\files\apps\settings\DotEnvSettings
  */

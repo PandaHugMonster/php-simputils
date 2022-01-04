@@ -636,14 +636,11 @@ class PHP {
 	 *
 	 * @return \spaf\simputils\models\File|null
 	 */
-	public static function file(null|string|File $file = null, $app = null): ?File {
+	public static function file(mixed $file = null, $app = null): ?File {
 		if ($file instanceof File) {
 			return $file;
 		}
-		$class = CodeBlocksCacheIndex::getRedefinition(
-			InitConfig::REDEF_FILE,
-			File::class
-		);
+		$class = static::redef(File::class);
 		return new $class($file, $app);
 	}
 

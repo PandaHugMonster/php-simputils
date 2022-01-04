@@ -370,6 +370,10 @@ class PhpInfo extends Box {
 		$this['env_vars'][$key] = $val;
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 * @return string
+	 */
 	public static function redefComponentName(): string {
 		return InitConfig::REDEF_PHP_INFO;
 	}

@@ -246,12 +246,12 @@ class FS {
 		if (!empty($file)) {
 			[$_, $file_name, $_ext] = static::splitFullFilePath($file);
 			if (empty($ext)) {
-				$ext = $_ext;
+				$ext = $_ext; // @codeCoverageIgnore
 			}
 		}
 		if (in_array($orig_mime, ['text/plain', 'application/x-empty'])) {
 			if (in_array($ext, ['json'])) {
-				return 'application/json';
+				return 'application/json'; // @codeCoverageIgnore
 			}
 			$check = in_array($ext, ['env']);
 			$check = $check || (
@@ -263,16 +263,16 @@ class FS {
 				// DotEnv files are extremely loosely defined
 				// FIX  Implement detailed description/documentation compiled from all other
 				//      languages implementations. Maybe define a specification of that compilation
-				return 'application/dotenv';
+				return 'application/dotenv'; // @codeCoverageIgnore
 			}
 			if (in_array($ext, ['js'])) {
-				return 'application/javascript';
+				return 'application/javascript'; // @codeCoverageIgnore
 			}
 			if (in_array($ext, ['csv', 'tsv'])) {
 				return 'text/csv';
 			}
 			if (in_array($ext, ['xml'])) {
-				return 'text/xml';
+				return 'text/xml'; // @codeCoverageIgnore
 			}
 		}
 		return $orig_mime;

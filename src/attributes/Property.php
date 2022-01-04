@@ -45,6 +45,7 @@ class Property extends BasicAttribute {
 	 *                                  property to the output. If false - value will be replaced
 	 *                                  with a "cap". The mostly useful for cases when getter will
 	 *                                  cause heavy calculation, network traffic, or files reading.
+	 * @codeCoverageIgnore
 	 */
 	public function __construct(
 		public ?string $name = null,

@@ -9,6 +9,7 @@ use function spaf\simputils\basic\box;
  *
  * FIX  Improve format!
  *
+ * @codeCoverageIgnore
  */
 class ExtMetaData extends BasicDotEnvCommentExt {
 

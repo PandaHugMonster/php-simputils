@@ -25,7 +25,7 @@ trait LoggerTrait {
 			$init_config = PHP::getInitConfig();
 			$default_name = 'default';
 			$this->name = !empty($init_config->name)
-				?($default_name.'-'.$init_config->name)
+				?($default_name.'-'.$init_config->name) // @codeCoverageIgnore
 				:$default_name;
 		}
 

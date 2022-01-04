@@ -19,6 +19,10 @@ class DotEnvInitBlock extends SimpleObject implements InitBlockInterface {
 
 	protected ?File $_default_file = null;
 
+	/**
+	 * @codeCoverageIgnore
+	 * @return \spaf\simputils\models\File|null
+	 */
 	#[Property('default_file')]
 	protected function getDefaultFile(): ?File {
 		return $this->_default_file;
@@ -37,7 +41,7 @@ class DotEnvInitBlock extends SimpleObject implements InitBlockInterface {
 		$file = new File(static::DEFAULT_FILE_NAME);
 		$this->_default_file = $file->exists
 			?$file
-			:null;
+			:null; // @codeCoverageIgnore
 
 		if (!empty($this->_default_file)) {
 			$content = $this->_default_file->content;

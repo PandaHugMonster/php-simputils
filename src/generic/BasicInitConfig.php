@@ -61,14 +61,14 @@ abstract class BasicInitConfig extends SimpleObject {
 		// The only place getenv is used. It might be safe enough, though not sure yet.
 		if (empty($this->name) || $this->name === 'app') {
 			$_ENV = CommonMemoryCacheIndex::$initial_get_env_state = !empty($_ENV)
-				?$_ENV
+				?$_ENV // @codeCoverageIgnore
 				:(getenv() ?? []);
 		}
 
 		foreach ($this->init_blocks as $block_class) {
 			if (class_exists($block_class)) {
 				if (in_array($block_class, $this->disable_init_for)) {
-					continue;
+					continue; // @codeCoverageIgnore
 				}
 
 				$init_block_obj = new $block_class();

@@ -66,6 +66,9 @@ class DotEnvProcessor extends TextProcessor {
 			[$key, $val] = explode('=', $line, 2);
 
 			$val = trim($val);
+			if (empty($val)) {
+				continue;
+			}
 			$is_pre_quoted = in_array($val[0], ['"', "'"]);
 
 			if (!$is_pre_quoted) {

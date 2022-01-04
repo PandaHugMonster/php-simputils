@@ -105,6 +105,10 @@ abstract class BasicResource extends SimpleObject {
 		return $this->_fd;
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 * @return string|null
+	 */
 	#[Property('uri')]
 	protected function getUri(): ?string {
 		return $this->urn;
@@ -115,16 +119,30 @@ abstract class BasicResource extends SimpleObject {
 		return $this->_mime_type;
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 * @return string|null
+	 */
 	#[Property('md5')]
 	protected function getMd5(): ?string {
 		return $this->_md5;
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 * @return int|null
+	 */
 	#[Property('size')]
 	protected function getSize(): ?int {
 		return $this->_size;
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 * @return string|null
+	 * @throws \spaf\simputils\exceptions\NonExistingDataUnit
+	 * @throws \spaf\simputils\exceptions\UnspecifiedDataUnit
+	 */
 	#[Property('size_hr')]
 	protected function getSizeHuman(): ?string {
 		return Data::humanReadable($this->size ?? 0);
@@ -153,11 +171,19 @@ abstract class BasicResource extends SimpleObject {
 		return $this->_path;
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 * @return bool
+	 */
 	#[Property('is_local')]
 	protected function getIsLocal(): bool {
 		return $this->_is_local;
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 * @return string
+	 */
 	#[Property('urn')]
 	protected function getUrn(): string {
 		return 'urn:'.$this->_urn;

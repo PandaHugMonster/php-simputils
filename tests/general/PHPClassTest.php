@@ -40,6 +40,7 @@ class MyDT2 {
  * @covers \spaf\simputils\basic\pd
  * @covers \spaf\simputils\basic\box
  * @covers \spaf\simputils\models\PhpInfo
+ * @covers \spaf\simputils\generic\BasicInitConfig
  * @uses \spaf\simputils\models\Version
  * @uses \spaf\simputils\traits\SimpleObjectTrait
  * @uses \spaf\simputils\traits\MetaMagic
@@ -433,9 +434,9 @@ class PHPClassTest extends TestCase {
 	 *
 	 * @runInSeparateProcess
 	 * @covers \spaf\simputils\models\DateTime::redefComponentName
-	 * @uses \spaf\simputils\traits\helpers\DateTimeTrait
+	 * @covers \spaf\simputils\components\initblocks\DotEnvInitBlock
+	 * @covers \spaf\simputils\special\CodeBlocksCacheIndex
 	 * @uses \spaf\simputils\generic\BasicInitConfig
-	 * @uses \spaf\simputils\components\initblocks\DotEnvInitBlock
 	 * @uses \spaf\simputils\basic\now
 	 * @return void
 	 */
@@ -455,6 +456,45 @@ class PHPClassTest extends TestCase {
 		$this->assertInstanceOf(MyDT::class, $dt);
 
 		$this->assertEquals(MyDT::class, PHP::redef(DateTime::class));
+	}
+
+	/**
+	 * @covers \spaf\simputils\generic\BasicInitConfig
+	 * @covers \spaf\simputils\special\CodeBlocksCacheIndex
+	 * @runInSeparateProcess
+	 * @return void
+	 */
+	function testRedefException3() {
+
+		$this->expectException(Exception::class);
+
+		PHP::init([
+			'redefinitions' => [
+				'test22' => MyDT::class
+			]
+		]);
+	}
+
+	/**
+	 * @covers \spaf\simputils\special\CodeBlocksCacheIndex
+	 * @runInSeparateProcess
+	 * @return void
+	 */
+	function testRedefException4() {
+
+		$this->expectException(Exception::class);
+
+		PHP::init([
+			'redefinitions' => [
+				DateTime::redefComponentName() => MyDT::class
+			]
+		]);
+
+		PHP::init([
+			'redefinitions' => [
+				DateTime::redefComponentName() => MyDT::class
+			]
+		]);
 	}
 
 	/**

@@ -9,9 +9,16 @@ use spaf\simputils\models\files\apps\CsvProcessor;
 use spaf\simputils\models\files\apps\DotEnvProcessor;
 use spaf\simputils\models\files\apps\JsonProcessor;
 use spaf\simputils\models\files\apps\settings\CsvSettings;
+use spaf\simputils\models\files\apps\settings\DotEnvSettings;
+use spaf\simputils\models\files\apps\TextProcessor;
 use spaf\simputils\PHP;
+use spaf\simputils\special\dotenv\ExtInclude;
+use spaf\simputils\special\dotenv\ExtMetaData;
+use spaf\simputils\special\dotenv\ExtTypeHint;
 use function file_get_contents;
+use function file_put_contents;
 use function spaf\simputils\basic\box;
+use function spaf\simputils\basic\fl;
 
 /**
  * @covers \spaf\simputils\models\files\apps\JsonProcessor
@@ -35,6 +42,7 @@ use function spaf\simputils\basic\box;
  * @uses \spaf\simputils\attributes\Property
  * @uses \spaf\simputils\basic\box
  * @uses \spaf\simputils\traits\SimpleObjectTrait::____prepareProperty
+ * @uses \spaf\simputils\basic\fl
  */
 class DefaultAppProcessorsTest extends TestCase {
 
@@ -53,6 +61,10 @@ class DefaultAppProcessorsTest extends TestCase {
 	}
 
 	/**
+	 * @covers \spaf\simputils\generic\BasicDotEnvCommentExt
+	 * @covers \spaf\simputils\special\dotenv\ExtInclude
+	 * @covers \spaf\simputils\special\dotenv\ExtMetaData
+	 * @covers \spaf\simputils\special\dotenv\ExtTypeHint
 	 * @return void
 	 */
 	function testDotEnvProcessor() {
@@ -64,6 +76,95 @@ class DefaultAppProcessorsTest extends TestCase {
 
 		$this->assertArrayHasKey('CODE_1', $file->content);
 		$this->assertIsArray($file->content);
+
+		$target_file_path = '/tmp/test-dot-env-file-unittestsss.env';
+		$file = fl($target_file_path);
+		$file->content = [
+			'PARAM_100500' => 'test',
+			null,
+			'',
+			'DOT_DOT_1' => 'kot',
+		];
+		$this->assertFileExists($target_file_path);
+		$example = "PARAM_100500=\"test\"\n#\t\n#\t\nDOT_DOT_1=\"kot\"";
+		$this->assertEquals($example, file_get_contents($target_file_path));
+
+		$replace_content_with = "PARAM_1=\"Value 1\"\n\n\nPARAM_2=";
+		file_put_contents($target_file_path, $replace_content_with);
+
+		$this->assertEquals(['PARAM_1' => 'Value 1'], $file->content);
+
+		$file->processor_settings = new DotEnvSettings();
+		$file->processor_settings->auto_type_hinting = true;
+		$file->processor_settings->show_comments = true;
+
+		$file->content = [
+			'new param 1' => 1,
+			new ExtInclude('/tmp/file/stuff.txt'),
+			new ExtMetaData(name: 'UnitTestsStuff', author: 'Pandytch'),
+			'HO HO ho' => new ExtTypeHint('mixed'),
+			new ExtTypeHint('int'),
+			'12boooooo' => 12,
+			'onemore' => "'12'",
+		];
+
+		$example = [
+			'#:#	type-hint integer',
+			'NEW_PARAM_1' => '1',
+			'#:	include /tmp/file/stuff.txt',
+			'#:	meta-data {"name":"UnitTestsStuff","author":"Pandytch"}',
+			'#:#	type-hint mixed',
+			'#:#	type-hint int',
+			'#:#	type-hint integer',
+			'_12BOOOOOO' => '12',
+			'#:#	type-hint string',
+			'ONEMORE' => '12',
+		];
+		$this->assertEquals($example, $file->content);
+
+		$file = fl($target_file_path, TextProcessor::class);
+		$file->content = "NEW_PARAM_1=1\nBOOOOOO=12 # Comment here\nDOOOO=45.4";
+
+		$file = fl($target_file_path, DotEnvProcessor::class);
+		$example = [
+			'NEW_PARAM_1' => '1',
+			'BOOOOOO' => '12',
+			'DOOOO' => '45.4',
+		];
+		$this->assertEquals($example, $file->content);
+
+	}
+
+	/**
+	 * @runInSeparateProcess
+	 * @return void
+	 */
+	function testDotEnvProcessorException() {
+		$this->expectException(Exception::class);
+
+		$file = fl('/tmp/test-dot-env-file-unittestsss.env');
+		$file->content = [
+			'in-line-param-with-non-inline-extension' => new ExtMetaData(name: 'Wut?'),
+		];
+	}
+
+	/**
+	 * @runInSeparateProcess
+	 * @return void
+	 */
+	function testDotEnvProcessorSettingsException1() {
+		$this->expectException(Exception::class);
+
+		$file = fl('/tmp/test-dot-env-file-unittestsss.env');
+		$file->processor_settings = new DotEnvSettings();
+		$file->processor_settings->enforce_letter_case = 'non-existing-letter-case';
+
+		$this->expectException(Exception::class);
+
+		$file->content = [
+			'test',
+			'test' => 'test',
+		];
 	}
 
 	/**

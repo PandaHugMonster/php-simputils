@@ -14,7 +14,6 @@ use spaf\simputils\logger\outputs\TextFileOutput;
  * @covers \spaf\simputils\logger\outputs\BasicOutput
  *
  * @uses \spaf\simputils\interfaces\LoggerInterface
- * @uses \spaf\simputils\traits\helpers\DateTimeTrait
  * @uses \spaf\simputils\DT
  * @uses \spaf\simputils\interfaces\helpers\DateTimeHelperInterface
  * @uses \spaf\simputils\models\DateTime

@@ -38,7 +38,7 @@ class CodeBlocksCacheIndex {
 		$name = $config->name ?? 'app';
 		if (static::hasInitBlock($name)) {
 			throw new Exception(
-				'Code block can be registered just ones with a unique name. '.
+				'Code block can be registered just once with a unique name. '.
 				"Name \"$config->name\" is not unique. Config: {$config}"
 			);
 			// return false;
@@ -70,6 +70,11 @@ class CodeBlocksCacheIndex {
 		return (bool) static::getInitBlock($name);
 	}
 
+	/**
+	 * @param string $key
+	 * @param \Closure|string|null $default
+	 * @return \Closure|string|null
+	 */
 	public static function getRedefinition(
 		string $key,
 		null|Closure|string $default = null
@@ -79,7 +84,7 @@ class CodeBlocksCacheIndex {
 			if (!empty($list[$key])) {
 				return $list[$key];
 			}
-			return $default;
+			return $default; // @codeCoverageIgnore
 		}
 		return static::$redefinitions[$key];
 	}

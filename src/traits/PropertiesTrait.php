@@ -184,8 +184,14 @@ trait PropertiesTrait {
 		throw new PropertyDoesNotExist('No such property '.$name);
 	}
 
-	// FIX  If file does not exist, exception is raised, even though those properties should be
-	//      skipped (content, etc.)
+	/**
+	 *
+	 *  FIX  If file does not exist, exception is raised, even though those properties should be
+	 *  skipped (content, etc.)
+	 *
+	 * @codeCoverageIgnore Unfinished
+	 * @return array|null
+	 */
 	public function __debugInfo(): ?array {
 		$ref = new ReflectionObject($this);
 		$res = [];
@@ -243,6 +249,14 @@ trait PropertiesTrait {
 		return $res;
 	}
 
+	/**
+	 * @param $ref
+	 * @param \ReflectionAttribute $attr
+	 *
+	 * @codeCoverageIgnore Unfinished
+	 *
+	 * @return bool
+	 */
 	private function _debugOutputDisabled($ref, ReflectionAttribute $attr): bool {
 		$args = $attr->getArguments();
 		return

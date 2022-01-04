@@ -11,6 +11,9 @@ use spaf\simputils\PHP;
 use spaf\simputils\special\CodeBlocksCacheIndex;
 use spaf\simputils\traits\dsf\DsfVersionsMethodsTrait;
 
+/**
+ * @codeCoverageIgnore Unfinished
+ */
 trait DefaultSystemFingerprintTrait {
 	use DsfVersionsMethodsTrait;
 
@@ -116,7 +119,7 @@ trait DefaultSystemFingerprintTrait {
 	 *
 	 * @throws \Exception Error
 	 */
-	public function fits(SystemFingerprint|string|null $val, bool $strict = false): bool {
+	public function fits(mixed $val, bool $strict = false): bool {
 		if (is_null($val)) {
 			return false;
 		}

@@ -20,7 +20,6 @@ use function spaf\simputils\basic\ts;
  * @uses \spaf\simputils\models\Box
  * @uses \spaf\simputils\special\CodeBlocksCacheIndex
  * @uses \spaf\simputils\traits\PropertiesTrait
- * @uses \spaf\simputils\traits\helpers\DateTimeTrait
  * @uses \spaf\simputils\models\DateTime
  * @uses \spaf\simputils\interfaces\helpers\DateTimeHelperInterface
  * @uses \spaf\simputils\generic\BasicResource
@@ -60,6 +59,7 @@ class ShortcutsTest extends TestCase {
 	 *
 	 * @covers \spaf\simputils\basic\now
 	 * @covers \spaf\simputils\PHP::now
+	 * @uses \spaf\simputils\DT
 	 *
 	 * @return void
 	 */
@@ -75,6 +75,8 @@ class ShortcutsTest extends TestCase {
 	 *
 	 * @covers \spaf\simputils\basic\ts
 	 * @covers \spaf\simputils\PHP::ts
+	 *
+	 * @uses \spaf\simputils\DT
 	 *
 	 * @return void
 	 */

@@ -11,7 +11,6 @@ use function spaf\simputils\basic\ts;
 /**
  *
  * @covers \spaf\simputils\DT
- * @covers \spaf\simputils\traits\helpers\DateTimeTrait
  * @covers \spaf\simputils\models\DateTime
  *
  * @uses \spaf\simputils\interfaces\helpers\DateTimeHelperInterface
@@ -76,6 +75,7 @@ class DateTimeTest extends TestCase {
 
 	/**
 	 * @uses \spaf\simputils\basic\ts
+	 * @uses \spaf\simputils\attributes\Property
 	 * @return void
 	 */
 	function testDateAndTimeProperties() {

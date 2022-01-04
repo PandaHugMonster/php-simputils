@@ -39,6 +39,8 @@ abstract class BasicResourceApp extends SimpleObject {
 	 *
 	 * Can be empty
 	 *
+	 * @codeCoverageIgnore
+	 *
 	 * @return mixed
 	 */
 	public static function defaultProcessorSettings(): mixed {
@@ -47,6 +49,8 @@ abstract class BasicResourceApp extends SimpleObject {
 
 	/**
 	 * Getting hierarchically settings from file, if not, then default ones for processor
+	 *
+	 * @codeCoverageIgnore
 	 *
 	 * @param ?BasicResource $file Target file
 	 *

@@ -135,7 +135,7 @@ class PhpInfo extends Box {
 
 		$tmp = [];
 		preg_match($reg_exps[$key], $phpinfo, $tmp);
-		return $callback($tmp['val']);
+		return $callback($tmp['val'] ?? null);
 	}
 
 	/**

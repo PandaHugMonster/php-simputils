@@ -5,15 +5,12 @@ namespace spaf\simputils\models;
 
 use spaf\simputils\attributes\Property;
 use spaf\simputils\DT;
-use spaf\simputils\traits\PropertiesTrait;
-use spaf\simputils\traits\RedefinableComponentTrait;
+use spaf\simputils\generic\fixups\FixUpDateTime;
 
 /**
  * DateTime model of the framework
  *
  * It's inherited from the php-native DateTime object
- *
- * TODO Add more reasonable fields like year and month, etc.
  *
  * @property-read string $date Date part
  * @property-read string $time Time part
@@ -33,11 +30,9 @@ use spaf\simputils\traits\RedefinableComponentTrait;
  * @property int $second Seconds
  *
  * @property-read int $milli Milliseconds, at most 3 digits
- * @property-read int $micro Microseconds at most 6 digits
+ * @property int $micro Microseconds at most 6 digits
  */
-class DateTime extends \DateTime {
-	use PropertiesTrait;
-	use RedefinableComponentTrait;
+class DateTime extends FixUpDateTime {
 
 	#[Property('date')]
 	protected function getDateExt(): string {
@@ -71,8 +66,13 @@ class DateTime extends \DateTime {
 	}
 
 	#[Property('tz')]
-	public function setTimezone($timezone): void {
-		parent::setTimezone($timezone);
+	#[\ReturnTypeWillChange]
+	public function setTimezone($timezone) {
+		// IMP  This method is original native PHP method, and it expects to return something,
+		//      And when it's used as a method it works exactly the same, but in case of
+		//      property - it will be used ONLY for setting, without returning anything.
+		//      This is why return-type signature has no definition!
+		return parent::setTimezone($timezone);
 	}
 
 	#[Property('year')]
@@ -120,14 +120,29 @@ class DateTime extends \DateTime {
 		return (int) $this->format('i');
 	}
 
+	#[Property('minute')]
+	protected function setMinute(int $minute): void {
+		$this->setTime($this->hour, $minute, $this->second, $this->micro);
+	}
+
 	#[Property('second')]
 	protected function getSecond(): int {
 		return (int) $this->format('s');
 	}
 
+	#[Property('second')]
+	protected function setSecond(int $second): void {
+		$this->setTime($this->hour, $this->minute, $second, $this->micro);
+	}
+
 	#[Property('micro')]
 	protected function getMicro(): int {
 		return (int) $this->format('u');
+	}
+
+	#[Property('micro')]
+	protected function setMicro(int $micro): void {
+		$this->setTime($this->hour, $this->minute, $this->second, $micro);
 	}
 
 	#[Property('milli')]
@@ -137,9 +152,5 @@ class DateTime extends \DateTime {
 
 	public function __toString(): string {
 		return DT::stringify($this);
-	}
-
-	public static function redefComponentName(): string {
-		return InitConfig::REDEF_DATE_TIME;
 	}
 }

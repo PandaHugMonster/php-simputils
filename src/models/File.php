@@ -4,6 +4,7 @@ namespace spaf\simputils\models;
 
 use Closure;
 use Exception;
+use spaf\simputils\attributes\DebugHide;
 use spaf\simputils\attributes\Property;
 use spaf\simputils\FS;
 use spaf\simputils\generic\BasicResource;
@@ -52,6 +53,7 @@ class File extends BasicResource {
 	use RedefinableComponentTrait;
 
 	/**
+	 * FIX  Implement as property
 	 * @var bool $is_backup_preserved   When this option is set to true, then file is not deleted,
 	 *                                  but relocated to "/tmp" folder with temporary random name
 	 *                                  when `delete()` method is called. This allows to recover
@@ -62,6 +64,7 @@ class File extends BasicResource {
 	 */
 	public bool $is_backup_preserved = false;
 
+	#[DebugHide]
 	protected mixed $_app = null;
 	protected bool $_is_default_app = true;
 	protected ?string $_backup_file = null;
@@ -336,7 +339,8 @@ class File extends BasicResource {
 		$this->_app = $var;
 	}
 
-	#[Property('content', debug_output: false)]
+	#[DebugHide(false)]
+	#[Property('content')]
 	protected function getContent(): mixed {
 		$app = $this->app;
 		$is_opened_locally = false;
@@ -390,7 +394,7 @@ class File extends BasicResource {
 
 	#[Property('exists')]
 	protected function getExists(): bool {
-		return file_exists($this->name_full);
+		return !empty($this->name_full) && file_exists($this->name_full);
 	}
 
 	/**
@@ -407,7 +411,8 @@ class File extends BasicResource {
 	 * @return string|null
 	 * @throws \Exception
 	 */
-	#[Property('backup_content', debug_output: false)]
+	#[DebugHide(false)]
+	#[Property('backup_content')]
 	protected function getBackupContent(): ?string {
 		if (file_exists($this->_backup_file)) {
 			return (new static($this->_backup_file))->content;

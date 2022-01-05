@@ -21,6 +21,7 @@ use spaf\simputils\logger\outputs\TextFileOutput;
  * @uses \spaf\simputils\traits\PropertiesTrait
  * @uses \spaf\simputils\attributes\Property
  * @uses \spaf\simputils\special\CodeBlocksCacheIndex
+ * @uses \spaf\simputils\generic\fixups\FixUpDateTime
  *
  */
 class LoggerTest extends TestCase {

@@ -43,6 +43,7 @@ use function spaf\simputils\basic\fl;
  * @uses \spaf\simputils\basic\box
  * @uses \spaf\simputils\traits\SimpleObjectTrait::____prepareProperty
  * @uses \spaf\simputils\basic\fl
+ * @uses \spaf\simputils\traits\SimpleObjectTrait::getAllTheLastMethodsAndProperties
  */
 class DefaultAppProcessorsTest extends TestCase {
 

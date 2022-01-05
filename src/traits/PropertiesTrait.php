@@ -2,11 +2,11 @@
 
 namespace spaf\simputils\traits;
 
-use ReflectionAttribute;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionObject;
 use ReflectionProperty;
+use spaf\simputils\attributes\DebugHide;
 use spaf\simputils\attributes\Property;
 use spaf\simputils\attributes\PropertyBatch;
 use spaf\simputils\exceptions\PropertyAccessError;
@@ -48,6 +48,7 @@ use function in_array;
 trait PropertiesTrait {
 
 	// FIX  Public modifier is a temporary solution, due to external modification of the field
+	#[DebugHide]
 	public $____property_batch_storage = [];
 
 	/**
@@ -117,6 +118,30 @@ trait PropertiesTrait {
 	}
 
 	/**
+	 * Prepares reflection objects that will be used for Properties
+	 *
+	 * @return array
+	 */
+	private function getAllTheLastMethodsAndProperties() {
+		$class_reflection = new ReflectionClass($this);
+		$res = [];
+		// Progressing from original class, back to the root classes
+		while ($class_reflection) {
+			$stub = array_merge(
+				$class_reflection->getMethods(),
+				$class_reflection->getProperties()
+			);
+			foreach ($stub as $item) {
+				if (empty($res[$item->getName()])) {
+					$res[$item->getName()] = $item;
+				}
+			}
+			$class_reflection = $class_reflection->getParentClass();
+		}
+		return $res;
+	}
+
+	/**
 	 * @param string $name
 	 * @param string $call_type
 	 * @param mixed $value
@@ -134,14 +159,13 @@ trait PropertiesTrait {
 	): mixed {
 		$sub = null;
 
-		$class_reflection = new ReflectionClass($this);
+		// TODO Question of efficiency!?
+		$applicable_items = $this->getAllTheLastMethodsAndProperties();
 
-		$applicable_items = array_merge(
-			$class_reflection->getMethods(),
-			$class_reflection->getProperties()
-		);
-
+		// TODO Integrate this filter into method above?
 		$applicable_attribute_classes = [PropertyBatch::class, Property::class];
+
+		$already_defined = [];
 
 		foreach ($applicable_items as $item) {
 			/** @var ReflectionMethod|ReflectionProperty $item */
@@ -150,13 +174,20 @@ trait PropertiesTrait {
 			foreach ($item->getAttributes() as $attr) {
 				$attr_class = $attr->getName();
 				if (in_array($attr_class, $applicable_attribute_classes)) {
-
 					[$func_ref, $status] = call_user_func(
 						[$attr_class, 'subProcess'],
 						$this, $item, $attr, $name, $call_type
 					);
 
 					if ($status === true) {
+						if (in_array($name, $already_defined)) {
+							// NOTE Skipping already found methods, so the parent stuff
+							//      would not overwrite/return data
+
+							continue;
+						}
+						$already_defined[] = $name;
+
 						if ($check_and_do_not_call && $call_type !== Property::TYPE_SET) {
 							// NOTE Relevant for `isset()`
 							return true;
@@ -186,81 +217,107 @@ trait PropertiesTrait {
 
 	/**
 	 *
-	 *  FIX  If file does not exist, exception is raised, even though those properties should be
-	 *  skipped (content, etc.)
-	 *
 	 * @codeCoverageIgnore Unfinished
 	 * @return array|null
 	 */
 	public function __debugInfo(): ?array {
-		$ref = new ReflectionObject($this);
 		$res = [];
-		foreach ($ref->getProperties() as $property) {
-			$name = $property->name;
 
-			$property->setAccessible(true);
-			$value = $property->getValue($this);
-			$property->setAccessible(false);
+		// NOTE If the whole class is marked
+		$self_class = new ReflectionObject($this);
+		if ($self_class->getAttributes(DebugHide::class) ?? false) {
+			return ['-- CLASS IS SILENCED --'];
+		}
 
-			$name = "\${$name}";
-			if ($property->isStatic()) {
-				$name = "static::{$name}";
+		$it_items = $this->getAllTheLastMethodsAndProperties();
+		$batch_array_of_prop_types = [PropertyBatch::TYPE_GET, PropertyBatch::TYPE_BOTH];
+		$property_array_of_prop_types = [Property::TYPE_GET, Property::TYPE_BOTH];
+
+		foreach ($it_items as $item) {
+			$prefix = null;
+			$name = $item->getName();
+			$ta = null; // target attribute
+			$value = null;
+			$is_show_instead_set = false;
+
+			/** @var ReflectionMethod|ReflectionProperty $item */
+			if ($item->isStatic()) {
+				// FIX  Implement options in InitConfig
+				$prefix = 'static::';
+				continue;
 			}
 
-			$res[$name] = $value;
-		}
-		$ref_class = new ReflectionClass($this);
-		$items = $ref_class->getMethods();
-		foreach ($items as $item) {
-			$attr = $item->getAttributes(Property::class)[0] ?? null;
-			if (!empty($attr)) {
-//				$expected_name = $this->_propertyExpectedName($item, $attr);
-//				$method_type = $this->_propertyMethodAccessType($item, $attr);
-				$expected_name = Property::expectedName($item, $attr);
-				$method_type = Property::methodAccessType($item, $attr);
+			foreach ($item->getAttributes() as $attr) {
+				$dh = null;
+				if ($attr->getName() === DebugHide::class) {
+					if ($dh = $attr->newInstance()) {
+						/** @var DebugHide $dh */
+						// NOTE Don't optimize or reformat this code block.
+						//      It should not be invoked if the "DebugHide" is being used.
+						if ($dh->hide_all) {
+							// Skipping the whole field output
+							continue 2;
+						} else {
+							$value = $dh->show_instead ?? '****';
+							$is_show_instead_set = true;
+						}
+					}
+				} else if (empty($ta)) {
+					$ta = $attr;
+				}
+			}
 
-				if ($this->_debugOutputDisabled($item, $attr)) {
-					$value = '<..skipped..>';
+			if ($item instanceof ReflectionProperty) {
+				if (!empty($ta) && $ta->getName() === PropertyBatch::class) {
+					// NOTE PropertyBatch from method
+
+					[$expected_names, $_] = PropertyBatch::expectedNamesAndDefaultValues(
+						$this, $item, $ta
+					);
+					$access_type = PropertyBatch::accessType($ta);
+
+					if (in_array($access_type, $batch_array_of_prop_types)) {
+						foreach ($expected_names as $expected_name) {
+							$res["{$expected_name}"] = $is_show_instead_set
+								?$value
+								:$this->{$expected_name};
+						}
+					}
 				} else {
-					// Do not optimize additionally. This code must not be called if debugOutput
-					// is disabled!
-					$value = $this->{$expected_name};
+					// NOTE Real PHP native property
+					$item->setAccessible(true);
+					$res["{$prefix}{$name}"] = $item->getValue($this);
+					$item->setAccessible(false);
 				}
-				if ($method_type === Property::TYPE_GET || $method_type === Property::TYPE_BOTH) {
-					$res["\${$expected_name}"] = $value;
-				}
-			}
-		}
-		$items = array_merge($ref_class->getProperties(), $ref_class->getMethods());
-		foreach ($items as $item) {
-			$attr = $item->getAttributes(PropertyBatch::class)[0] ?? null;
-			if (!empty($attr)) {
-				[$expected_names, $_]
-					= PropertyBatch::expectedNamesAndDefaultValues($this, $item, $attr);
-				$access_type = PropertyBatch::accessType($attr);
+			} else if ($item instanceof ReflectionMethod) {
+				// NOTE Property/PropertyBatch from method
 
-				if ($access_type === Property::TYPE_GET || $access_type === Property::TYPE_BOTH) {
-					foreach ($expected_names as $expected_name) {
-						$res["\${$expected_name}"] = $this->{$expected_name};
+				if (!empty($ta) && $ta->getName() === Property::class) {
+					$expected_name = Property::expectedName($item, $attr);
+					$method_type = Property::methodAccessType($item, $attr);
+
+					if (in_array($method_type, $property_array_of_prop_types)) {
+						$res["{$expected_name}"] = $is_show_instead_set
+							?$value
+							:$this->{$expected_name};
+					}
+				} else if (!empty($ta) && $ta->getName() === PropertyBatch::class) {
+					[$expected_names, $_] = PropertyBatch::expectedNamesAndDefaultValues(
+						$this, $item, $ta
+					);
+					$access_type = PropertyBatch::accessType($ta);
+
+					if (in_array($access_type, $batch_array_of_prop_types)) {
+
+						foreach ($expected_names as $expected_name) {
+							$res["{$expected_name}"] = $is_show_instead_set
+								?$value
+								:$this->{$expected_name};;
+						}
 					}
 				}
 			}
 		}
 		return $res;
-	}
-
-	/**
-	 * @param $ref
-	 * @param \ReflectionAttribute $attr
-	 *
-	 * @codeCoverageIgnore Unfinished
-	 *
-	 * @return bool
-	 */
-	private function _debugOutputDisabled($ref, ReflectionAttribute $attr): bool {
-		$args = $attr->getArguments();
-		return
-			(isset($args['debug_output']) && $args['debug_output'] === false) ||
-			(isset($args[2]) && $args[2] === false);
 	}
 }

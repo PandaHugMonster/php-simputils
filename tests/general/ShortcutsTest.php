@@ -29,6 +29,7 @@ use function spaf\simputils\basic\ts;
  * @uses \spaf\simputils\Str
  * @uses \spaf\simputils\PHP::isClass
  * @uses \spaf\simputils\PHP::redef
+ * @uses \spaf\simputils\generic\fixups\FixUpDateTime
  */
 class ShortcutsTest extends TestCase {
 
@@ -131,6 +132,7 @@ class ShortcutsTest extends TestCase {
 	/**
 	 * @covers \spaf\simputils\basic\pd
 	 * @covers \spaf\simputils\PHP::pd
+	 * @covers \spaf\simputils\PHP::pr
 	 * @return void
 	 */
 	function testPd() {

@@ -30,6 +30,7 @@ use function fwrite;
  * @covers \spaf\simputils\generic\BasicResourceApp
  * @uses \spaf\simputils\FS
  * @uses \spaf\simputils\attributes\Property
+ * @uses \spaf\simputils\traits\SimpleObjectTrait::getAllTheLastMethodsAndProperties
  */
 class FileModelTest extends TestCase {
 

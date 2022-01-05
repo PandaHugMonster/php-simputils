@@ -333,7 +333,7 @@ class Box extends ArrayObject {
 	 * @codeCoverageIgnore
 	 * @return array|null
 	 */
-	public function __debugInfo(): ?array {
+	public function __debugInfo(): array {
 		return $this->toArray();
 	}
 

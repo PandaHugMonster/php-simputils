@@ -27,6 +27,10 @@ More about semantic versioning: [Semantic Versioning Explanation](https://semver
  1. [Installation](#Installation)
  2. [Ground Reasons and Design Decisions](#Ground-Reasons-and-Design-Decisions)
  3. [Main Components](#Main-Components)
+    1. [Core Shortcuts](#Core-Shortcuts)
+    2. [Core Static Classes and Functions](#Core-Static-Classes-and-Functions)
+    3. [Core Models](#Core-Models)
+    4. [Core Attributes](#Core-Attributes)
  4. [Other Components](#Other-Components) (Empty for now)
  5. [Examples](#Examples)
     1. [Properties](#Properties)
@@ -85,6 +89,20 @@ of being maximally transparent and easy to use out of the box.
 
 _Hint: to understand all the benefits of components - see examples_
 
+### Core Shortcuts
+
+More info about shortcuts here: [Shortcuts](docs/shortcuts.md)
+ 1. `pd()`  - Please Die method shortcut | [pd()](docs/shortcuts.md#pd)
+ 2. `box()` - returns `Box` array wrapper object | [box()](docs/shortcuts.md#box)
+ 3. `now()` - returns [DateTime](docs/about-date-time.md) object of a current 
+    date time | [now()](docs/shortcuts.md#now)
+ 4. `ts()`  - returns [DateTime](docs/about-date-time.md) object of specified 
+    date time | [ts()](docs/shortcuts.md#ts)
+ 5. `fl()`  - returns `File` object representing real or 
+    virtual file | [fl()](docs/shortcuts.md#fl)
+ 6. `env()` - if argument provided then returns value of [Env Vars](docs/env-vars.md) 
+    or null, otherwise returns the full array of `$_ENV` | [env()](docs/shortcuts.md#env)
+
 
 ### Core Static Classes and Functions
 
@@ -104,7 +122,8 @@ _Hint: to understand all the benefits of components - see examples_
 ### Core Models
 
  1. `\spaf\simputils\models\Box` - model class as a wrapper for primitive arrays 
- 2. `\spaf\simputils\models\DateTime` - model for datetime value
+ 2. `\spaf\simputils\models\DateTime` - model for datetime
+    value [DateTime model](docs/about-date-time.md)
  3. `\spaf\simputils\models\File` - model for file value
  4. `\spaf\simputils\models\GitRepo` - model representing minimal git functionality 
     (through shell commands)

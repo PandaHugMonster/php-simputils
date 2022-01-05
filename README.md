@@ -1,6 +1,6 @@
 # SimpUtils
 
-Current framework version: **0.3.0** (min required PHP: **8.0**)
+Current framework version: **0.3.1** (min required PHP: **8.0**)
 
 ----
 
@@ -77,6 +77,10 @@ From which I would highlight at least those (but not limited to):
    (See `File` class)
  * Lack of replaceable components
  * ETC. (Lot's of other reasons behind)
+
+
+**Important stuff** about the PHP "edges", architecture and bugs: [PHP Edges](docs/php-edges.md)
+
 
 Basically **SimpUtils** provides interconnected, consistent tools (more or less) 
 for you to code and prototype easily.

@@ -1,3 +1,7 @@
+[< Back to README.md](../README.md)
+
+----
+
 ## In-place quick debugging or PleaseDie
 
 **Important:** `pd()` is a shortcut for `PHP::pd()`. In the most cases is recommended to use 

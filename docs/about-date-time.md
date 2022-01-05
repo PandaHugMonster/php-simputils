@@ -1,3 +1,7 @@
+[< Back to README.md](../README.md)
+
+----
+
 ## DateTime model
 
 Extended version of the original native PHP `DateTime` class.

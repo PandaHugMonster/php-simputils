@@ -25,7 +25,7 @@ class MyObjectExample {
 
 class MyDT extends DateTime {
 	#[Property('date')]
-	protected function getDateStr(): string {
+	protected function getDateExt(): string {
 		return "This is day: {$this->format('d')}, this is month: {$this->format('m')}, " .
 			"this is year: {$this->format('Y')}";
 	}

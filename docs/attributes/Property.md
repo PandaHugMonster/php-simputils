@@ -1,3 +1,7 @@
+[< Back to README.md](../../README.md)
+
+----
+
 ## Intro
 In the framework some definitions might be defined differently that commonly used:
  * `field` term is used for defined in class variables (commonly known as properties). 

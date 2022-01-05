@@ -1,3 +1,7 @@
+[< Back to README.md](../README.md)
+
+----
+
 # Shortcuts
 
 Shortcuts representing aliases for particular functionality.

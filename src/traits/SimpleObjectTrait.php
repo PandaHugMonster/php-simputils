@@ -38,6 +38,8 @@ trait SimpleObjectTrait {
 	}
 
 	/**
+	 * TODO Describe fact of "fake static properties"
+	 *
 	 * @return string
 	 */
 	#[Property('class_short')]

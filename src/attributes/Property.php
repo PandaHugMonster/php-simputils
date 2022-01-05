@@ -3,6 +3,7 @@
 namespace spaf\simputils\attributes;
 
 use Attribute;
+use ReflectionMethod;
 use ReflectionUnionType;
 use spaf\simputils\generic\BasicAttribute;
 use spaf\simputils\special\PropertiesCacheIndex;
@@ -41,16 +42,12 @@ class Property extends BasicAttribute {
 	/**
 	 * @param string|null $name         Property name
 	 * @param string|null $type         Enforced property type (get, set, both)
-	 * @param bool        $debug_output By default true, if set, then `__debugInfo()` will include
-	 *                                  property to the output. If false - value will be replaced
-	 *                                  with a "cap". The mostly useful for cases when getter will
-	 *                                  cause heavy calculation, network traffic, or files reading.
+	 *
 	 * @codeCoverageIgnore
 	 */
 	public function __construct(
 		public ?string $name = null,
-		public ?string $type = null,
-		public bool $debug_output = true,
+		public ?string $type = null
 	) {}
 
 	public static function subProcess(
@@ -113,7 +110,11 @@ class Property extends BasicAttribute {
 
 	public static function expectedName($func_ref, \ReflectionAttribute $attr, $args = null) {
 		$args = $args ?? $attr->getArguments();
-		return $args[0] ?? $args['name'] ?? $func_ref;
+		$res = $args[0] ?? $args['name'] ?? $func_ref;
+		if ($res instanceof ReflectionMethod) {
+			$res = $res->getName();
+		}
+		return $res;
 	}
 
 	public static function methodAccessType($ref, \ReflectionAttribute $attr, $args = null) {

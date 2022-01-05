@@ -114,6 +114,16 @@ function env(?string $name = null, bool $strict = true): mixed {
 	return PHP::env($name, $strict);
 }
 
+#[Shortcut('PHP::pr()')]
+function pr(...$args): void {
+	PHP::pr(...$args);
+}
+
+#[Shortcut('PHP::prstr()')]
+function prstr(...$args): ?string {
+	return PHP::prstr(...$args);
+}
+
 /**
  * @return string
  * @codeCoverageIgnore

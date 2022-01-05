@@ -49,8 +49,8 @@ class DefaultVersionParser extends BasicVersionParser {
 				$symbol_prev = $i > 0?$string_version[$i-1]:null;
 				$symbol_current = !empty($string_version[$i])?$string_version[$i]:0;
 
-				$left_side = preg_match('/[A-Z]/', $symbol_current) && preg_match('/[0-9]/', $symbol_prev);
-				$right_side = preg_match('/[0-9]/', $symbol_current) && preg_match('/[A-Z]/', $symbol_prev);
+				$left_side = preg_match('/[A-Z]/', $symbol_current ?? '') && preg_match('/[0-9]/', $symbol_prev ?? '');
+				$right_side = preg_match('/[0-9]/', $symbol_current ?? '') && preg_match('/[A-Z]/', $symbol_prev ?? '');
 
 				if ($left_side || $right_side) {
 					$res .= '.';

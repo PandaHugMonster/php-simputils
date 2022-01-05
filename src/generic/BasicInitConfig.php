@@ -13,6 +13,7 @@ use spaf\simputils\special\CommonMemoryCacheIndex;
 abstract class BasicInitConfig extends SimpleObject {
 
 	const REDEF_PD = 'pd';
+	const REDEF_PR = 'pr';
 	const REDEF_BOX = 'Box';
 	const REDEF_DATE_TIME = 'DateTime';
 	const REDEF_FILE = 'File';

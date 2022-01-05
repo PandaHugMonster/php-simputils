@@ -25,6 +25,7 @@ class CodeBlocksCacheIndex {
 	public static function listDefaultRedefinableComponents(): Box {
 		return new Box([
 			InitConfig::REDEF_PD => InitConfig::REDEF_PD,
+			InitConfig::REDEF_PR => InitConfig::REDEF_PR,
 			InitConfig::REDEF_BOX => Box::class,
 			InitConfig::REDEF_DATE_TIME => DateTime::class,
 			InitConfig::REDEF_FILE => File::class,

@@ -36,6 +36,9 @@ use function json_decode;
 use function json_encode;
 use function json_last_error;
 use function method_exists;
+use function ob_get_clean;
+use function ob_start;
+use function print_r;
 use function serialize;
 use function unserialize;
 use const JSON_ERROR_NONE;
@@ -545,15 +548,15 @@ class PHP {
 	 * Besides that, the functionality can be redefined. For example if you want
 	 * use your own implementation, you can just redefine it on a very early runtime stage
 	 * with the following code:
+
+	 * TODO implement simple log integration
 	 * FIX  Prepare example!
-	 *
-	 * @todo implement simple log integration
-	 * FIX  Implement $allow_dying
 	 *
 	 * @param mixed ...$args Anything you want to print out before dying
 	 *
 	 * @see \die()
 	 *
+	 * @see \spaf\simputils\basic\pr()
 	 * @see \print_r()
 	 * @return void
 	 */
@@ -562,15 +565,52 @@ class PHP {
 		if ($callback && $callback !== InitConfig::REDEF_PD) {
 			$res = (bool) $callback(...$args);
 		} else {
-			foreach ($args as $arg) {
-				print_r($arg);
-				echo "\n";
-			}
+			static::pr(...$args);
 			$res = true;
 		}
 		if (static::$allow_dying && $res) {
 			die(); // @codeCoverageIgnore
 		}
+	}
+
+	public static function pr(...$args): void {
+		$callback = CodeBlocksCacheIndex::getRedefinition(InitConfig::REDEF_PR);
+		if ($callback && $callback !== InitConfig::REDEF_PR) {
+			$callback(...$args);
+		} else {
+			foreach ($args as $arg) {
+				print_r($arg);
+				echo "\n";
+			}
+		}
+	}
+
+	/**
+	 * As `pr()` but returning string or null instead of printing to the buffer
+	 *
+	 * Basically a shortcut for ob_start() + pr() + ob_get_clean()
+	 *
+	 * Don't forget to get the result. If you run it without "echo" - then you will not see
+	 * output.
+	 *
+	 * @see \ob_start()
+	 * @see PHP::pr()
+	 * @see \ob_get_clean()
+	 *
+	 * @param ...$args
+	 *
+	 * @return string|null
+	 */
+	public static function prstr(...$args): ?string {
+		if (empty($args)) {
+			return null;
+		}
+
+		ob_start();
+		static::pr(...$args);
+		$res = ob_get_clean();
+
+		return $res;
 	}
 
 	/**

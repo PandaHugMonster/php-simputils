@@ -178,6 +178,8 @@ read here: https://php.watch/articles/php-attributes
 The good part is that we don't need to use any "prefixes" and special "name conventions",
 like it was done in the past for example like for "Yii", "Yii2", etc.
 
+More details and examples of properties, you can find here: [Properties](docs/properties.md)
+
 Some examples:
 
 ```php

@@ -4,6 +4,17 @@
 
 # Properties
 
+## Index
+
+ 1. [Intro](#Intro)
+ 2. [Property attribute](#Property-attribute)
+    1. [Basics of Property](#Basics-of-Property)
+    2. [Signature Definition Rules](#Signature-Definition-Rules)
+       1. [Property-Getter](#Property-Getter)
+       2. [Property-Setter](#Property-Setter)
+       3. [Property-Both (Getter + Setter)](#Property-Both-Getter-Setter)
+       4. [Property Getter-Setter reference table](#Property-Getter-Setter-reference-table)
+
 ## Intro
 
 Properties are "object-variables" that can store data related to a particular object.
@@ -272,7 +283,7 @@ enforces the type, and the signature of a method is ignored!
 
 So rules are:
 
-#### Getter
+#### Property-Getter
  1. If there are **no arguments** + **no return-type definition** - it is `GETTER`!
  2. If there are **no arguments** + **any return-type except `void` or `never`** - it is `GETTER`!
 
@@ -308,7 +319,7 @@ class MyTargetClassG extends BaseClassA {
 **Important:** The "return" directive of the method body code - does not play role 
 in the indication of the method type. **Only "method signature" matter for that!**
 
-#### Setter
+#### Property-Setter
  1. If there is **at least 1 argument** + **no return-type definition** - it is `SETTER`!
  2. If there are **return-type `void` or `never`** - it is `SETTER`!
 
@@ -344,7 +355,7 @@ class MyTargetClassH extends BaseClassA {
 
 ```
 
-#### Both (Getter + Setter)
+#### Property-Both (Getter + Setter)
  1. If there is **at least 1 argument** + **any return-type except `void` or `never`** - 
     it is `GETTER + SETTER` (both)!
 
@@ -364,13 +375,13 @@ class MyTargetClassI extends BaseClassA {
     
     // Both rule 1: at least 1 argument + any return-type except `void` or `never`
     #[Property('method_name_1')]
-    protected function methodName1($val, $type): ?string {/*...*/}
+    protected function methodName1($value, $call_type): ?string {/*...*/}
     
 }
 
 ```
 
-**Important:** For all the above 3 arguments are always supplied to the target method:
+**Important:** For all the above - 3 arguments are always supplied to the target method:
  * `$value` - First argument, it brings the value, that user assigned to the property (in case 
    of getter it's `null`)
  * `$call_type` - "get" or "set" string (only those 2!)
@@ -386,7 +397,7 @@ The third argument always caries the name of the property that was called.
 
 **In the most cases you need only first argument for setters!**
 
-#### Reference table
+#### Property Getter-Setter reference table
 
 For clearer understanding, here the table of those rules
 

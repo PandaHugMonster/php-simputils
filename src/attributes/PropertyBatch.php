@@ -26,9 +26,7 @@ class PropertyBatch extends Property {
 	 */
 	public function __construct(
 		public ?string $type = null,
-		public ?string $modifier = null,
 		public ?string $storage = null,
-		public ?array $names = null,
 	) {}
 
 	public static function valueStoreRef(

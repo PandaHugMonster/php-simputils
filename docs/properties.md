@@ -4,27 +4,43 @@
 
 # Properties
 
+Small term definition, any of those terms are interchangeably used (within a group): 
+ * read-only / get / getter
+ * write-only / set / setter
+ * read-write / both / getter-setter
+
+Except inside of the code, string literals would be: `get`, `set`, `both`
+
+
 ## Index
 
  1. [Intro](#Intro)
  2. [Property attribute](#Property-attribute)
     1. [Basics of Property](#Basics-of-Property)
-    2. [Signature Definition Rules](#Signature-Definition-Rules)
+    2. [Property attribute arguments](#Property-attribute-arguments)
+    3. [Signature Definition Rules](#Signature-Definition-Rules)
        1. [Property-Getter](#Property-Getter)
        2. [Property-Setter](#Property-Setter)
-       3. [Property-Both (Getter + Setter)](#Property-Both-Getter-Setter)
+       3. [Property-Both (Getter + Setter)](#Property-Both-Getter--Setter)
        4. [Property Getter-Setter reference table](#Property-Getter-Setter-reference-table)
+ 3. [PropertyBatch attribute](#PropertyBatch-attribute)
+    1. [Basics of PropertyBatch](#Basics-of-PropertyBatch)
+ 4. [Debugging and printing out](#Debugging-and-printing-out)
+    1. [DebugHide attribute](#DebugHide-attribute)
+       1. [Hiding the whole field](#Hiding-the-whole-field)
+       2. [Usage of DebugHide](#Usage-of-DebugHide)
+       3. 
 
 ## Intro
 
 Properties are "object-variables" that can store data related to a particular object.
 Usually "property" term is an alias of "field", but in the framework there is 
 a following terms definition:
- * Under **properties** or **Dynamically defined properties** meant "object-variables" 
-   with help of `\spaf\simputils\attributes\Property` or `\spaf\simputils\attributes\PropertyBatch`.
-   (Basically getter-setter ones)
+ * Under **properties**, **virtual properties** or **Dynamically defined properties** 
+   meant "object-variables" with help of `\spaf\simputils\attributes\Property` or 
+   `\spaf\simputils\attributes\PropertyBatch`. (Basically getter-setter ones)
  * **Statically defined properties** can be used to refer to "object-variables" that
-   are opposite to **properties** (**Dynamically defined properties**)
+   are opposite to **virtual properties** (**Dynamically defined properties**)
  * Under **fields** meant all the "object-variables" that can be accessed
    through direct name (Like: `$my_object->my_field`).
 
@@ -126,7 +142,6 @@ MyTargetClassB Object
 
 ## Property attribute
 
-
 ### Basics of Property
 
 `\spaf\simputils\attributes\Property` - is the main attribute for this functionality.
@@ -203,7 +218,9 @@ on those methods.
 
 ----
 
-All the examples above used 2 arguments each time for Property definition.
+### Property attribute arguments
+
+All the examples above use 2 arguments each time for Property definition.
 And I need to mention that both of them are technically optional.
 
 First argument or `$name` represents the Property name, by which you can access the Property.
@@ -317,7 +334,7 @@ class MyTargetClassG extends BaseClassA {
 **Important:** `null` return-type indicating "getter", despite the meaning similar to `void`.
 
 **Important:** The "return" directive of the method body code - does not play role 
-in the indication of the method type. **Only "method signature" matter for that!**
+in the indication of the method type. **Only "method signature" matters for that!**
 
 #### Property-Setter
  1. If there is **at least 1 argument** + **no return-type definition** - it is `SETTER`!
@@ -408,5 +425,1014 @@ For clearer understanding, here the table of those rules
 | return-type `void` or `never`        |    Setter    |       Setter        |
 
 
-// TODO Proceed here about:
-// DebugHide, `pr()` and `print_r()`
+----
+
+## PropertyBatch attribute
+
+**Important:** `PropertyBatch` works well, but it might be not as much polished as `Property`.
+
+### Basics of PropertyBatch
+`PropertyBatch` attribute works similarly to `Property`.
+`PropertyBatch` can be used for methods and statically defined fields.
+
+For example:
+
+```php
+
+/**
+ * @property-read $method_name
+ */
+ 
+use spaf\simputils\attributes\PropertyBatch;
+use spaf\simputils\Math;
+
+/**
+ * @property $var1
+ * @property $var2
+ * @property $var3
+ * @property $var4_with_default
+ * @property $var5
+ * @property $var6
+ * @property $var7
+ * 
+ * @property $d_var_10
+ * @property $d_var_20
+ * @property $d_var_30
+ * @property $d_var_40
+ * @property $d_var_50
+ * @property $d_var_60
+ * @property $d_var_70
+ * @property $d_var_80
+ * @property $d_var_90
+ * @property $d_var_100
+ */
+class MyTargetClassJ extends BaseClassA {
+    
+    // statically defined field with PropertyBatch
+    #[PropertyBatch]
+    protected $multiple_variables_definition = [
+        'var1', 'var2', 'var3',
+        'var4_with_default' => 'This is default value 1',
+        'var5' => 'This is default value 2',
+        'var6' => 'This is default value 3',
+        'var7' => 100500,
+    ];
+    
+    // method generating a batch of variables dynamically
+    #[PropertyBatch]
+    protected function methodDefinitionMultipleVars() {
+        $res = [];
+        foreach (Math::range(10, 100, 10) as $i) {
+            $res["d_var_{$i}"] = $i;
+        }
+        
+        return $res;
+    }
+    
+}
+
+```
+
+As you could see above, there are 2 simple examples of defining Properties in Batch.
+Both works the same way, they should return/contain array or [Box](boxes-arrays.md).
+
+If element of that array has a numerical/integer index - then value would be treated as
+a property name, and the default value of it would be `null`.
+```php
+[
+    'my_var_name', 
+    'another_var_name', 
+    3 => 'the_same_another_var_name',
+]
+```
+
+If element of that array has a string index (assoc) - then the `key` would be treated as
+a property name, and the default value of it would be `value`.
+```php
+[
+    'my_var_name' => null, 
+    'another_var_name' => 'default-value-here!', 
+    'the_same_another_var_name' => 'test test test',
+]
+```
+
+Both of those approaches can be mixed together:
+
+```php
+[
+    'my_var_name_1', 'my_var_name_2', 'my_var_name_3',
+    
+    'another_var_name' => 'default-value-here!', 
+    'the_same_another_var_name' => 'test test test',
+    
+    3 => 'the_var_name',
+]
+```
+
+----
+
+`PropertyBatch` has 2 optional arguments:
+```
+public ?string  $type = null,
+public ?string  $storage = null,
+```
+
+`$type` - is the same as for [Property](#Property-attribute-arguments) that defines if 
+it's a **read-only** or **write-only** or **read-write**. Even constant values would be 
+the same (`get`, `set`, `both`).
+
+`$storage` - This is a rare parameter, basically it should be defined into 
+`PropertyBatch::STORAGE_SELF` or "#SELF" string if the param names and values must 
+be stored inside of the object itself (if they are inherited from 
+[ArrayObject](https://www.php.net/manual/en/class.arrayobject.php)). 
+That allows to synchronize fields with "array-alike access". 
+Good example of it is `PhpInfo` class, access to values can be done 
+through `$obj->field_name` and/or `$obj['field_name']`.
+
+**Important**: Mainly, this is reasonable only for some rare cases, when you want 
+to process object through `foreach` or any other iterating-mechanics using "array-alike 
+access".
+
+
+----
+
+That's it about `PropertyBatch`.
+
+**Important:** `PropertyBatch` does not identify "read-only", "write-only" or "read-write"
+type by the signature of a method. 
+**The type should be explicitly defined, or omitted** (If omitted then "read-write"/"both"
+considered)
+
+
+## Debugging and printing out
+
+**Note:** `pr()` can be considered as `print_r()` (not always, but for the examples 
+it would be enough).
+
+Properties have some additional functionality that could be comfortably used for debugging.
+
+For example if you would print out an object with `pr()`, `prstr()`, `pd()` or `print_r()` (there are
+some bug related exceptions like 
+[Native PHP objects bug](php-edges.md#Native-PHP-objects-bug))
+
+```php
+
+class BaseClassA extends SimpleObject {
+
+}
+
+/**
+ * This comment property hinting is a good practice, but is not necessary for the functionality
+ * @property-read int $year
+ * @property array $reindeer
+ * @property string $cat
+ *
+ * @property $d_var_10
+ * @property $d_var_20
+ * @property $d_var_30
+ * @property $d_var_40
+ * @property $d_var_50
+ * @property $d_var_60
+ * @property $d_var_70
+ * @property $d_var_80
+ * @property $d_var_90
+ * @property $d_var_100
+ * @property $my_password
+ */
+class MyTargetClassB extends BaseClassA {
+
+	public $my_sd_field = 'Ho Ho Ho';
+
+	#[PropertyBatch]
+	protected $different_stuff = [
+		'reindeer' => [
+			'Dasher', 'Dancer', 'Prancer', 'Vixen',
+			'Comet', 'Cupid', 'Donner', 'Blitzen',
+			'Rudolph',
+		],
+		'cat' => 'Tom',
+	];
+
+	#[PropertyBatch]
+	protected function test() {
+		$res = box();
+		foreach (Math::range(10, 100, 10) as $i) {
+			$res["d_var_{$i}"] = $i;
+		}
+
+		return $res;
+	}
+
+	#[Property('year')]
+	protected function pseudoName(): int {
+		return 2022;
+	}
+
+	#[Property('my_password')]
+	protected function myPassword(): string {
+		return 'JJ-b23/ioio+9090';
+	}
+}
+
+$obj = new MyTargetClassB();
+
+pr($obj);
+
+```
+
+Output would be:
+```php
+
+MyTargetClassB Object
+(
+    [d_var_10] => 10
+    [d_var_20] => 20
+    [d_var_30] => 30
+    [d_var_40] => 40
+    [d_var_50] => 50
+    [d_var_60] => 60
+    [d_var_70] => 70
+    [d_var_80] => 80
+    [d_var_90] => 90
+    [d_var_100] => 100
+    [year] => 2022
+    [my_password] => JJ-b23/ioio+9090
+    [obj_id] => 117
+    [obj_type] => MyTargetClassB
+    [my_sd_field] => Ho Ho Ho
+    [reindeer] => Array
+        (
+            [0] => Dasher
+            [1] => Dancer
+            [2] => Prancer
+            [3] => Vixen
+            [4] => Comet
+            [5] => Cupid
+            [6] => Donner
+            [7] => Blitzen
+            [8] => Rudolph
+        )
+
+    [cat] => Tom
+)
+
+```
+
+As you can see, the output is really comfortably displaying all the fields of the object
+including virtual properties.
+
+The only problem  that it outputs some fields and their values, that can be highly unsafe.
+For example `$my_password` field.
+
+Besides that, if value is related to IO uncached/uncacheable stuff like files, or streams 
+content, etc. - we would have a problem that every debugging would read content of that
+virtual field, and including the content (which can be HUGE!) into the output.
+
+### DebugHide attribute
+
+The attribute `\spaf\simputils\attributes\DebugHide` can be applied
+to any field (virtual and/or statically defined) and even 
+to the whole class.
+
+#### Hiding the whole field
+
+**Important:** Be careful, you might hide a field, and forget that it
+is exists there, but it will be there anyways. Hiding the whole field
+can cause some troubles, be careful!
+
+#### Usage of DebugHide
+Just apply it to a field you want to hide completely:
+
+```php
+
+
+/**
+ * This comment property hinting is a good practice, but is not necessary for the functionality
+ * @property-read int $year
+ * @property array $reindeer
+ * @property string $cat
+ *
+ * @property $d_var_10
+ * @property $d_var_20
+ * @property $d_var_30
+ * @property $d_var_40
+ * @property $d_var_50
+ * @property $d_var_60
+ * @property $d_var_70
+ * @property $d_var_80
+ * @property $d_var_90
+ * @property $d_var_100
+ * @property $my_password
+ */
+class MyTargetClassB extends BaseClassA {
+
+	public $my_sd_field = 'Ho Ho Ho';
+
+	#[PropertyBatch]
+	protected $different_stuff = [
+		'reindeer' => [
+			'Dasher', 'Dancer', 'Prancer', 'Vixen',
+			'Comet', 'Cupid', 'Donner', 'Blitzen',
+			'Rudolph',
+		],
+		'cat' => 'Tom',
+	];
+
+	#[PropertyBatch]
+	protected function test() {
+		$res = box();
+		foreach (Math::range(10, 100, 10) as $i) {
+			$res["d_var_{$i}"] = $i;
+		}
+
+		return $res;
+	}
+
+    #[DebugHide]
+    #[Property('year')]
+    protected function pseudoName(): int {
+        return 2022;
+    }
+
+	#[Property('my_password')]
+	protected function myPassword(): string {
+		return 'JJ-b23/ioio+9090';
+	}
+}
+
+$obj = new MyTargetClassB();
+
+pr($obj);
+
+```
+
+The output would be:
+```php
+
+MyTargetClassB Object
+(
+    [d_var_10] => 10
+    [d_var_20] => 20
+    [d_var_30] => 30
+    [d_var_40] => 40
+    [d_var_50] => 50
+    [d_var_60] => 60
+    [d_var_70] => 70
+    [d_var_80] => 80
+    [d_var_90] => 90
+    [d_var_100] => 100
+    [my_password] => JJ-b23/ioio+9090
+    [obj_id] => 117
+    [obj_type] => MyTargetClassB
+    [my_sd_field] => Ho Ho Ho
+    [reindeer] => Array
+        (
+            [0] => Dasher
+            [1] => Dancer
+            [2] => Prancer
+            [3] => Vixen
+            [4] => Comet
+            [5] => Cupid
+            [6] => Donner
+            [7] => Blitzen
+            [8] => Rudolph
+        )
+
+    [cat] => Tom
+)
+
+```
+
+As you can see, the output does not have a field `$year` which is still accessible in the code.
+
+But if we want to hide `$my_password` value, but we don't want to hide the whole field?
+
+Simple enough. Just specify the first parameter (`$hide_all`) to the attribute as `false`:
+
+```php
+
+/**
+ * This comment property hinting is a good practice, but is not necessary for the functionality
+ * @property-read int $year
+ * @property array $reindeer
+ * @property string $cat
+ *
+ * @property $d_var_10
+ * @property $d_var_20
+ * @property $d_var_30
+ * @property $d_var_40
+ * @property $d_var_50
+ * @property $d_var_60
+ * @property $d_var_70
+ * @property $d_var_80
+ * @property $d_var_90
+ * @property $d_var_100
+ * @property $my_password
+ */
+class MyTargetClassB extends BaseClassA {
+
+	public $my_sd_field = 'Ho Ho Ho';
+
+	#[PropertyBatch]
+	protected $different_stuff = [
+		'reindeer' => [
+			'Dasher', 'Dancer', 'Prancer', 'Vixen',
+			'Comet', 'Cupid', 'Donner', 'Blitzen',
+			'Rudolph',
+		],
+		'cat' => 'Tom',
+	];
+
+	#[PropertyBatch]
+	protected function test() {
+		$res = box();
+		foreach (Math::range(10, 100, 10) as $i) {
+			$res["d_var_{$i}"] = $i;
+		}
+
+		return $res;
+	}
+
+	#[DebugHide]
+	#[Property('year')]
+	protected function pseudoName(): int {
+		return 2022;
+	}
+
+	#[DebugHide(false)]
+	#[Property('my_password')]
+	protected function myPassword(): string {
+		return 'JJ-b23/ioio+9090';
+	}
+}
+
+$obj = new MyTargetClassB();
+
+pr($obj);
+
+```
+
+The output would be like this:
+
+```php
+
+MyTargetClassB Object
+(
+    [d_var_10] => 10
+    [d_var_20] => 20
+    [d_var_30] => 30
+    [d_var_40] => 40
+    [d_var_50] => 50
+    [d_var_60] => 60
+    [d_var_70] => 70
+    [d_var_80] => 80
+    [d_var_90] => 90
+    [d_var_100] => 100
+    [my_password] => ****
+    [obj_id] => 117
+    [obj_type] => MyTargetClassB
+    [my_sd_field] => Ho Ho Ho
+    [reindeer] => Array
+        (
+            [0] => Dasher
+            [1] => Dancer
+            [2] => Prancer
+            [3] => Vixen
+            [4] => Comet
+            [5] => Cupid
+            [6] => Donner
+            [7] => Blitzen
+            [8] => Rudolph
+        )
+
+    [cat] => Tom
+)
+
+```
+
+The `$my_password` field now displayed, but it's value is hidden!
+Additionally if you specify the second param to non-empty value, the `****` string would be
+replaced with it:
+
+```php
+
+/**
+ * This comment property hinting is a good practice, but is not necessary for the functionality
+ * @property-read int $year
+ * @property array $reindeer
+ * @property string $cat
+ *
+ * @property $d_var_10
+ * @property $d_var_20
+ * @property $d_var_30
+ * @property $d_var_40
+ * @property $d_var_50
+ * @property $d_var_60
+ * @property $d_var_70
+ * @property $d_var_80
+ * @property $d_var_90
+ * @property $d_var_100
+ * @property $my_password
+ */
+class MyTargetClassB extends BaseClassA {
+
+	public $my_sd_field = 'Ho Ho Ho';
+
+	#[PropertyBatch]
+	protected $different_stuff = [
+		'reindeer' => [
+			'Dasher', 'Dancer', 'Prancer', 'Vixen',
+			'Comet', 'Cupid', 'Donner', 'Blitzen',
+			'Rudolph',
+		],
+		'cat' => 'Tom',
+	];
+
+	#[PropertyBatch]
+	protected function test() {
+		$res = box();
+		foreach (Math::range(10, 100, 10) as $i) {
+			$res["d_var_{$i}"] = $i;
+		}
+
+		return $res;
+	}
+
+	#[DebugHide]
+	#[Property('year')]
+	protected function pseudoName(): int {
+		return 2022;
+	}
+
+	#[DebugHide(false, ' ~~~ YOU SHALL NOT SEE MY PASSWORD! ~~~ ')]
+	#[Property('my_password')]
+	protected function myPassword(): string {
+		return 'JJ-b23/ioio+9090';
+	}
+}
+
+$obj = new MyTargetClassB();
+
+pr($obj);
+
+```
+
+The output would be:
+
+```php
+
+MyTargetClassB Object
+(
+    [d_var_10] => 10
+    [d_var_20] => 20
+    [d_var_30] => 30
+    [d_var_40] => 40
+    [d_var_50] => 50
+    [d_var_60] => 60
+    [d_var_70] => 70
+    [d_var_80] => 80
+    [d_var_90] => 90
+    [d_var_100] => 100
+    [my_password] =>  ~~~ YOU SHALL NOT SEE MY PASSWORD! ~~~ 
+    [obj_id] => 117
+    [obj_type] => MyTargetClassB
+    [my_sd_field] => Ho Ho Ho
+    [reindeer] => Array
+        (
+            [0] => Dasher
+            [1] => Dancer
+            [2] => Prancer
+            [3] => Vixen
+            [4] => Comet
+            [5] => Cupid
+            [6] => Donner
+            [7] => Blitzen
+            [8] => Rudolph
+        )
+
+    [cat] => Tom
+)
+
+```
+
+As you can see the shadowing string `****` 
+is replaced with ` ~~~ YOU SHALL NOT SEE MY PASSWORD! ~~~ `.
+
+----
+
+Till now we were hiding only virtual `Property` fields, but let's see what happens if you hide
+the virtual `PropertyBatch` fields:
+
+```php
+
+/**
+ * This comment property hinting is a good practice, but is not necessary for the functionality
+ * @property-read int $year
+ * @property array $reindeer
+ * @property string $cat
+ *
+ * @property $d_var_10
+ * @property $d_var_20
+ * @property $d_var_30
+ * @property $d_var_40
+ * @property $d_var_50
+ * @property $d_var_60
+ * @property $d_var_70
+ * @property $d_var_80
+ * @property $d_var_90
+ * @property $d_var_100
+ * @property $my_password
+ */
+class MyTargetClassB extends BaseClassA {
+
+	public $my_sd_field = 'Ho Ho Ho';
+
+	#[DebugHide(false)]
+	#[PropertyBatch]
+	protected $different_stuff = [
+		'reindeer' => [
+			'Dasher', 'Dancer', 'Prancer', 'Vixen',
+			'Comet', 'Cupid', 'Donner', 'Blitzen',
+			'Rudolph',
+		],
+		'cat' => 'Tom',
+	];
+
+	#[DebugHide]
+	#[PropertyBatch]
+	protected function test() {
+		$res = box();
+		foreach (Math::range(10, 100, 10) as $i) {
+			$res["d_var_{$i}"] = $i;
+		}
+
+		return $res;
+	}
+
+	#[DebugHide]
+	#[Property('year')]
+	protected function pseudoName(): int {
+		return 2022;
+	}
+
+	#[DebugHide(false, ' ~~~ YOU SHALL NOT SEE MY PASSWORD! ~~~ ')]
+	#[Property('my_password')]
+	protected function myPassword(): string {
+		return 'JJ-b23/ioio+9090';
+	}
+}
+
+$obj = new MyTargetClassB();
+
+pr($obj);
+
+```
+
+And the output would be:
+
+```php
+
+MyTargetClassB Object
+(
+    [my_password] =>  ~~~ YOU SHALL NOT SEE MY PASSWORD! ~~~ 
+    [obj_id] => 117
+    [obj_type] => MyTargetClassB
+    [my_sd_field] => Ho Ho Ho
+    [reindeer] => ****
+    [cat] => ****
+)
+
+```
+
+As minimum all the `$d_var_*` fields disappeared!
+But in addition to that - Reindeer and Cat are classified now!
+
+So the main logic - it does hide all of the underlying virtual fields.
+
+**Important:** For now, the statically defined array of field names for `PropertyBatch` are always
+hidden. Maybe it will change, but most likely - it will not change at all!
+
+----
+
+In regard to statically defined simple fields - it just works exactly the same:
+
+```php
+
+/**
+ * This comment property hinting is a good practice, but is not necessary for the functionality
+ * @property-read int $year
+ * @property array $reindeer
+ * @property string $cat
+ *
+ * @property $d_var_10
+ * @property $d_var_20
+ * @property $d_var_30
+ * @property $d_var_40
+ * @property $d_var_50
+ * @property $d_var_60
+ * @property $d_var_70
+ * @property $d_var_80
+ * @property $d_var_90
+ * @property $d_var_100
+ * @property $my_password
+ */
+class MyTargetClassB extends BaseClassA {
+
+	#[DebugHide(false)]
+	public $my_sd_field = 'Ho Ho Ho';
+
+	#[DebugHide(false)]
+	#[PropertyBatch]
+	protected $different_stuff = [
+		'reindeer' => [
+			'Dasher', 'Dancer', 'Prancer', 'Vixen',
+			'Comet', 'Cupid', 'Donner', 'Blitzen',
+			'Rudolph',
+		],
+		'cat' => 'Tom',
+	];
+
+	#[DebugHide]
+	#[PropertyBatch]
+	protected function test() {
+		$res = box();
+		foreach (Math::range(10, 100, 10) as $i) {
+			$res["d_var_{$i}"] = $i;
+		}
+
+		return $res;
+	}
+
+	#[DebugHide]
+	#[Property('year')]
+	protected function pseudoName(): int {
+		return 2022;
+	}
+
+	#[DebugHide(false, ' ~~~ YOU SHALL NOT SEE MY PASSWORD! ~~~ ')]
+	#[Property('my_password')]
+	protected function myPassword(): string {
+		return 'JJ-b23/ioio+9090';
+	}
+}
+
+$obj = new MyTargetClassB();
+
+pr($obj);
+
+```
+
+Output:
+
+```php
+
+MyTargetClassB Object
+(
+    [my_password] =>  ~~~ YOU SHALL NOT SEE MY PASSWORD! ~~~ 
+    [obj_id] => 117
+    [obj_type] => MyTargetClassB
+    [my_sd_field] => ****
+    [reindeer] => ****
+    [cat] => ****
+)
+
+```
+
+----
+
+The final thing is to silence the whole class. I don't know why you would
+want that, but there it is:
+
+```php
+
+/**
+ * This comment property hinting is a good practice, but is not necessary for the functionality
+ * @property-read int $year
+ * @property array $reindeer
+ * @property string $cat
+ *
+ * @property $d_var_10
+ * @property $d_var_20
+ * @property $d_var_30
+ * @property $d_var_40
+ * @property $d_var_50
+ * @property $d_var_60
+ * @property $d_var_70
+ * @property $d_var_80
+ * @property $d_var_90
+ * @property $d_var_100
+ * @property $my_password
+ */
+#[DebugHide]
+class MyTargetClassB extends BaseClassA {
+
+	public $my_sd_field = 'Ho Ho Ho';
+
+	#[PropertyBatch]
+	protected $different_stuff = [
+		'reindeer' => [
+			'Dasher', 'Dancer', 'Prancer', 'Vixen',
+			'Comet', 'Cupid', 'Donner', 'Blitzen',
+			'Rudolph',
+		],
+		'cat' => 'Tom',
+	];
+
+	#[PropertyBatch]
+	protected function test() {
+		$res = box();
+		foreach (Math::range(10, 100, 10) as $i) {
+			$res["d_var_{$i}"] = $i;
+		}
+
+		return $res;
+	}
+
+	#[Property('year')]
+	protected function pseudoName(): int {
+		return 2022;
+	}
+
+	#[DebugHide(false)]
+	#[Property('my_password')]
+	protected function myPassword(): string {
+		return 'JJ-b23/ioio+9090';
+	}
+}
+
+$obj = new MyTargetClassB();
+
+pr($obj);
+
+```
+
+Output would be:
+
+```php
+
+MyTargetClassB Object
+(
+)
+
+```
+
+**Important:** It can be dangerous to do it this way, so be careful and
+do not accidentally trick yourself of the object being "empty" when
+it's not!
+
+Much better approach is using `false` as first argument as minimum:
+
+```php
+
+/**
+ * This comment property hinting is a good practice, but is not necessary for the functionality
+ * @property-read int $year
+ * @property array $reindeer
+ * @property string $cat
+ *
+ * @property $d_var_10
+ * @property $d_var_20
+ * @property $d_var_30
+ * @property $d_var_40
+ * @property $d_var_50
+ * @property $d_var_60
+ * @property $d_var_70
+ * @property $d_var_80
+ * @property $d_var_90
+ * @property $d_var_100
+ * @property $my_password
+ */
+#[DebugHide(false)]
+class MyTargetClassB extends BaseClassA {
+
+	#[DebugHide(false)]
+	public $my_sd_field = 'Ho Ho Ho';
+
+	#[DebugHide(false)]
+	#[PropertyBatch]
+	protected $different_stuff = [
+		'reindeer' => [
+			'Dasher', 'Dancer', 'Prancer', 'Vixen',
+			'Comet', 'Cupid', 'Donner', 'Blitzen',
+			'Rudolph',
+		],
+		'cat' => 'Tom',
+	];
+
+	#[DebugHide]
+	#[PropertyBatch]
+	protected function test() {
+		$res = box();
+		foreach (Math::range(10, 100, 10) as $i) {
+			$res["d_var_{$i}"] = $i;
+		}
+
+		return $res;
+	}
+
+	#[DebugHide]
+	#[Property('year')]
+	protected function pseudoName(): int {
+		return 2022;
+	}
+
+	#[DebugHide(false, ' ~~~ YOU SHALL NOT SEE MY PASSWORD! ~~~ ')]
+	#[Property('my_password')]
+	protected function myPassword(): string {
+		return 'JJ-b23/ioio+9090';
+	}
+}
+
+$obj = new MyTargetClassB();
+
+pr($obj);
+
+```
+
+The output would be:
+```php
+
+MyTargetClassB Object
+(
+    [0] => ****
+)
+
+```
+
+And the very last example with the custom text:
+```php
+
+/**
+ * This comment property hinting is a good practice, but is not necessary for the functionality
+ * @property-read int $year
+ * @property array $reindeer
+ * @property string $cat
+ *
+ * @property $d_var_10
+ * @property $d_var_20
+ * @property $d_var_30
+ * @property $d_var_40
+ * @property $d_var_50
+ * @property $d_var_60
+ * @property $d_var_70
+ * @property $d_var_80
+ * @property $d_var_90
+ * @property $d_var_100
+ * @property $my_password
+ */
+#[DebugHide(false, '--- CLASS IS SILENCED ---')]
+class MyTargetClassB extends BaseClassA {
+
+	#[DebugHide(false)]
+	public $my_sd_field = 'Ho Ho Ho';
+
+	#[DebugHide(false)]
+	#[PropertyBatch]
+	protected $different_stuff = [
+		'reindeer' => [
+			'Dasher', 'Dancer', 'Prancer', 'Vixen',
+			'Comet', 'Cupid', 'Donner', 'Blitzen',
+			'Rudolph',
+		],
+		'cat' => 'Tom',
+	];
+
+	#[DebugHide]
+	#[PropertyBatch]
+	protected function test() {
+		$res = box();
+		foreach (Math::range(10, 100, 10) as $i) {
+			$res["d_var_{$i}"] = $i;
+		}
+
+		return $res;
+	}
+
+	#[DebugHide]
+	#[Property('year')]
+	protected function pseudoName(): int {
+		return 2022;
+	}
+
+	#[DebugHide(false, ' ~~~ YOU SHALL NOT SEE MY PASSWORD! ~~~ ')]
+	#[Property('my_password')]
+	protected function myPassword(): string {
+		return 'JJ-b23/ioio+9090';
+	}
+}
+
+$obj = new MyTargetClassB();
+
+pr($obj);
+
+```
+
+Output would be:
+```php
+
+MyTargetClassB Object
+(
+    [0] => --- CLASS IS SILENCED ---
+)
+
+```

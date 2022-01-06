@@ -225,8 +225,15 @@ trait PropertiesTrait {
 
 		// NOTE If the whole class is marked
 		$self_class = new ReflectionObject($this);
-		if ($self_class->getAttributes(DebugHide::class) ?? false) {
-			return ['-- CLASS IS SILENCED --'];
+		if (($attr = $self_class->getAttributes(DebugHide::class)[0]) ?? false) {
+			/** @var \ReflectionAttribute $attr */
+			/** @var DebugHide $dh */
+			$dh = $attr->newInstance();
+			if ($dh->hide_all) {
+				return [];
+			}
+
+			return [$dh->show_instead ?? '****'];
 		}
 
 		$it_items = $this->getAllTheLastMethodsAndProperties();
@@ -286,7 +293,9 @@ trait PropertiesTrait {
 				} else {
 					// NOTE Real PHP native property
 					$item->setAccessible(true);
-					$res["{$prefix}{$name}"] = $item->getValue($this);
+					$res["{$prefix}{$name}"] = $is_show_instead_set
+						?$value
+						:$item->getValue($this);
 					$item->setAccessible(false);
 				}
 			} else if ($item instanceof ReflectionMethod) {

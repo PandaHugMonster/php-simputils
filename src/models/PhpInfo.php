@@ -72,7 +72,6 @@ class PhpInfo extends Box {
 	/**
 	 * Defining the properties and it's defaults
 	 *
-	 * TODO Do we need this method?
 	 * @return array|\spaf\simputils\models\Box
 	 * @see PropertyBatch
 	 */

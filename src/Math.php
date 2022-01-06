@@ -945,4 +945,23 @@ class Math {
 	static function tanh(float $num): float {
 		return tanh($num);
 	}
+
+	/**
+	 * FIX  Maybe should be part of static "Array" helper?
+	 * FIX  Important! REVISE!
+	 *
+	 * @param string|int|float $start
+	 * @param string|int|float $end
+	 * @param int|float $step
+	 *
+	 * @return array
+	 */
+	#[Shortcut('\range()')]
+	static function range(
+		string|int|float $start,
+		string|int|float $end,
+		int|float $step = 1
+	): array {
+		return \range($start, $end, $step);
+	}
 }

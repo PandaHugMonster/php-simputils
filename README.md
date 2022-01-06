@@ -26,6 +26,7 @@ More about semantic versioning: [Semantic Versioning Explanation](https://semver
 
  1. [Installation](#Installation)
  2. [Ground Reasons and Design Decisions](#Ground-Reasons-and-Design-Decisions)
+    1. [PHP Edges >>](docs/php-edges.md)
  3. [Main Components](#Main-Components)
     1. [Core Shortcuts](#Core-Shortcuts)
     2. [Core Static Classes and Functions](#Core-Static-Classes-and-Functions)

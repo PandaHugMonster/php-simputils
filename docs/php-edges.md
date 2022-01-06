@@ -22,7 +22,7 @@ In total: PHP is super awesome! but can be even more awesome if fixed.
 ----
 
 
-## Native PHP objects bugs
+## Native PHP objects bug
 
 **2022-01-05** - I have found out that `print_r` or any other debugging printing/string tool
 that must use array from `__debugInfo` for output, does not use this custom magic method,

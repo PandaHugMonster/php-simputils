@@ -36,11 +36,13 @@ class CodeBlocksCacheIndex {
 	}
 
 	public static function registerInitBlock(BasicInitConfig $config): ?bool {
-		$name = $config->name ?? 'app';
+		$name = empty($config->name)
+			?'app'
+			:$config->name;
 		if (static::hasInitBlock($name)) {
 			throw new Exception(
 				'Code block can be registered just once with a unique name. '.
-				"Name \"$config->name\" is not unique. Config: {$config}"
+				"Name \"{$config->name}\" is not unique. Config: {$config}"
 			);
 			// return false;
 		}
@@ -64,7 +66,10 @@ class CodeBlocksCacheIndex {
 	}
 
 	public static function getInitBlock($name): ?BasicInitConfig {
-		return static::$index[$name ?? 'app'] ?? null;
+		$name = empty($name)
+			?'app'
+			:$name;
+		return static::$index[$name] ?? null;
 	}
 
 	public static function hasInitBlock($name): bool {

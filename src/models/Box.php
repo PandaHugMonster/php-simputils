@@ -3,6 +3,7 @@
 namespace spaf\simputils\models;
 
 use ArrayObject;
+use Closure;
 use Exception;
 use spaf\simputils\attributes\markers\Affecting;
 use spaf\simputils\attributes\Property;
@@ -311,6 +312,60 @@ class Box extends ArrayObject {
 		$res = (array) $this;
 		if ($with_class)
 			$res[PHP::$serialized_class_key_name] = static::class;
+		return $res;
+	}
+
+	/**
+	 * Filtering elements
+	 *
+	 * TODO Add more intuitive filtering ways
+	 *
+	 * @param \Closure|callable|null $callback Callback that receives $val, [$key, $self]
+	 *                                         arguments, and should return "true" if value
+	 *                                         should be resent in the result, and false
+	 *                                         otherwise
+	 *
+	 * @return static A new box instance with filtered elements
+	 */
+	public function filter(null|Closure|callable $callback = null): static {
+		if (is_null($callback)) {
+			return $this->clone();
+		}
+
+		$res = new static;
+		foreach ($this as $key => $val) {
+			if ($callback($val, $key, $this)) {
+				$res[$key] = $val;
+			}
+		}
+		return $res;
+	}
+
+	/**
+	 * Iterates through elements with a callback
+	 *
+	 * Additional perk - you can filter elements if you return null instead of array of 2 elements!
+	 *
+	 * @param \Closure|callable|null $callback Callback that should return array of 2
+	 *                                         elements [$key, $value] that should be
+	 *                                         included into the result.
+	 *                                         Returning empty value like null or empty array
+	 *                                         will filter the whole element out
+	 *
+	 * @return static A new box instance with processed elements
+	 */
+	public function each(null|Closure|callable $callback = null): static {
+		if (is_null($callback)) {
+			return $this->clone();
+		}
+		$res = new static;
+		foreach ($this as $key => $val) {
+			$sub_res = $callback($val, $key, $this);
+			if (!empty($sub_res)) {
+				[$key, $val] = $sub_res;
+				$res[$key] = $val;
+			}
+		}
 		return $res;
 	}
 

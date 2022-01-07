@@ -225,7 +225,7 @@ trait PropertiesTrait {
 
 		// NOTE If the whole class is marked
 		$self_class = new ReflectionObject($this);
-		if (($attr = $self_class->getAttributes(DebugHide::class)[0]) ?? false) {
+		if (($attr = ($self_class->getAttributes(DebugHide::class)[0] ?? null)) ?? false) {
 			/** @var \ReflectionAttribute $attr */
 			/** @var DebugHide $dh */
 			$dh = $attr->newInstance();

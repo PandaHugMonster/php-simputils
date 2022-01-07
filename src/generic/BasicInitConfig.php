@@ -2,13 +2,19 @@
 
 namespace spaf\simputils\generic;
 
+use Exception;
+use spaf\simputils\attributes\Property;
+use spaf\simputils\interfaces\InitBlockInterface;
 use spaf\simputils\models\Box;
 use spaf\simputils\models\InitConfig;
 use spaf\simputils\special\CodeBlocksCacheIndex;
 use spaf\simputils\special\CommonMemoryCacheIndex;
+use ValueError;
+use function is_numeric;
 
 /**
  *
+ * @property-read Box|array $successful_init_blocks
  */
 abstract class BasicInitConfig extends SimpleObject {
 
@@ -26,7 +32,17 @@ abstract class BasicInitConfig extends SimpleObject {
 	public ?string $working_dir = null;
 	public array|Box $disable_init_for = [];
 
-	protected array $successful_init_blocks = [];
+	protected array $_successful_init_blocks = [];
+	protected bool $_is_already_setup = false;
+
+
+	/**
+	 * @return array
+	 */
+	#[Property('successful_init_blocks')]
+	protected function getSuccessfulInitBlocks(): Box|array {
+		return new Box($this->_successful_init_blocks);
+	}
 
 	/**
 	 * @var array|Box|null $init_blocks List of classes FQNs (those classes must implement
@@ -39,10 +55,8 @@ abstract class BasicInitConfig extends SimpleObject {
 	 */
 	public null|array|Box $redefinitions = [];
 
-	public function __construct(mixed ...$params) {
-		foreach ($params as $key => $val) {
-			$this->$key = $val;
-		}
+	public function __construct(?array $args = null) {
+		$this->___setup($args ?? []);
 	}
 
 	/**
@@ -67,18 +81,57 @@ abstract class BasicInitConfig extends SimpleObject {
 		}
 
 		foreach ($this->init_blocks as $block_class) {
+			$orig_obj = null;
+			if ($block_class instanceof InitBlockInterface) {
+				$orig_obj = $block_class;
+				$block_class = $block_class::class;
+			}
 			if (class_exists($block_class)) {
 				if (in_array($block_class, $this->disable_init_for)) {
 					continue; // @codeCoverageIgnore
 				}
 
-				$init_block_obj = new $block_class();
+				$init_block_obj = $orig_obj ?? new $block_class;
 				/** @var \spaf\simputils\interfaces\InitBlockInterface $init_block_obj */
 				if ($init_block_obj->initBlock($this)) {
-					$this->successful_init_blocks[] = $init_block_obj;
+					$this->_successful_init_blocks[] = $init_block_obj;
 				}
 			}
 		}
+		$this->_is_already_setup = true;
+	}
+
+	/**
+	 * Setting up the InitConfig
+	 *
+	 * FIX  Changed the modifier to "public" maybe another solution?
+	 *
+	 * @param array $data Arguments for the object
+	 *
+	 * @return $this
+	 */
+	public function ___setup(array $data): static {
+		if (!$this->_is_already_setup) {
+			foreach ($data as $key => $item) {
+				if (is_numeric($key)) {
+					if ($item instanceof InitBlockInterface) {
+						$this->init_blocks[] = $item;
+
+						// More objects recognition could be added here
+					} else {
+						throw new ValueError("Not recognized argument: {$item}");
+					}
+				} else {
+					$this->$key = $item;
+				}
+			}
+		} else {
+			throw new Exception(
+				'The InitConfig object is already setup and initialized.' .
+				'It\'s no longer possible to change the setup.'
+			);
+		}
+		return $this;
 	}
 
 	public function __toString(): string {

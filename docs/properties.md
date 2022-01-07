@@ -1,8 +1,8 @@
-[< Back to README.md](../README.md)
+[<< Back to README.md](../README.md)
 
 ----
 
-# Properties
+# Properties - Getters and Setters
 
 Small term definition, any of those terms are interchangeably used (within a group): 
  * read-only / get / getter
@@ -29,7 +29,7 @@ Except inside of the code, string literals would be: `get`, `set`, `both`
     1. [DebugHide attribute](#DebugHide-attribute)
        1. [Hiding the whole field](#Hiding-the-whole-field)
        2. [Usage of DebugHide](#Usage-of-DebugHide)
-       3. 
+
 
 ## Intro
 

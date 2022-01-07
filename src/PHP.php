@@ -116,25 +116,17 @@ class PHP {
 	 *      you should not specify `$name` or you can set it to "app" which is being default.
 	 *
 	 */
-	public static function init(
-		null|BasicInitConfig|Box|array $config = null,
-		?string $name = null,
-		?string $code_root = null,
-		?string $working_dir = null
-	): BasicInitConfig {
-		if (empty($config)) {
-			$config = new InitConfig();
+	public static function init(null|array|Box|BasicInitConfig $args = null): BasicInitConfig {
+		$config = null;
+		if ($args instanceof BasicInitConfig) {
+			$config = $args;
+			$args = [];
 		}
-		if (is_array($config) || $config instanceof Box) {
-			$config = new InitConfig(...$config);
-		}
-		$config->name = $name ?? $config->name;
-		$code_root = $code_root ?? $config->code_root;
-		$working_dir = $working_dir ?? $config->working_dir;
 
+		$config = ($config ?? new InitConfig)->___setup($args ?? []);
 
-		$config->code_root = $code_root ?? debug_backtrace()[0]['file'];
-		$config->working_dir = $working_dir ?? $config->code_root;
+		$config->code_root = $config->code_root ?? debug_backtrace()[0]['file'];
+		$config->working_dir = $config->working_dir ?? $config->code_root;
 
 		// FIX  Implement code below into config through Properties
 		if (!is_dir($config->code_root)) {

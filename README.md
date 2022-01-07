@@ -3,6 +3,36 @@
 Current framework version: **0.3.1** (min required PHP: **8.0**)
 
 ----
+What has left to do with the documentation:
+
+ * [x] InitConfig and bootstrapping
+ * [ ] Integrated DotEnv functionality
+   * [ ] Comment DotEnv Extensions
+ * [ ] Files infrastructure
+   * [ ] `File` object
+   * [ ] File Processors
+ * [ ] Adjust and connect Version description
+ * [ ] Adjust and connect PhpInfo description
+ * [ ] Adjust and connect DateTime description
+ * [ ] Adjust and connect Box description
+   * [ ] `filter` method
+   * [ ] `each` method
+ * [ ] Short intro into GitRepo
+ * [ ] Per helper description:
+   * [ ] `System`
+   * [ ] `Str`
+   * [ ] `PHP`
+   * [ ] `Math`
+   * [ ] `FS`
+   * [ ] `DT`
+   * [ ] `Data`
+   * [ ] `Boolean`
+ * [ ] Architecture + Guidelines
+ * [ ] Build a md-documents-map
+ * [ ] Remove all the obsolete documents
+ * [ ] Clear up all the obsolete leftovers
+
+----
 
 Micro-framework extending PHP language with some useful perks, partly can even remind 
 python 3 development capabilities.
@@ -34,7 +64,7 @@ More about semantic versioning: [Semantic Versioning Explanation](https://semver
     4. [Core Attributes](#Core-Attributes)
  4. [Other Components](#Other-Components) (Empty for now)
  5. [Examples](#Examples)
-    1. [Properties](#Properties)
+    1. [Properties - Getters and Setters](#Properties--Getters-and-Setters)
     2. [Working with files](#Working-with-files)
     3. [Version objects and working with versions](#Version-objects-and-working-with-versions)
     4. [Advanced PHP Info object](#Advanced-PHP-Info-object)
@@ -44,7 +74,6 @@ More about semantic versioning: [Semantic Versioning Explanation](https://semver
  6. [Further documentation](#Further-documentation)
  
 ## Installation
-
 
 
 For safe and stable release, it's recommended to use the following command:
@@ -59,6 +88,7 @@ The latest available version can be installed through composer (unsafe method!):
 ```shell
 composer require spaf/simputils "*"
 ```
+
 
 ## Ground Reasons and Design Decisions
 
@@ -162,14 +192,359 @@ but I can not let having additional composer dependency just for a few attribute
 
 ## Other Components
 
-_will be added later_
-
 ## Examples
 
 _In this section will be shown examples and benefits of the architecture_
 
 **Important:** Not all the benefits and useful perks might be demonstrated on this page.
 Please refer to the corresponding page of each component, or Ref API pages.
+
+
+### InitConfigs and bootstrapping process
+
+**The main app**
+: Your target application (not a submodule or a library)
+
+**A sub app**
+: Library, sub-module, externel code package
+
+Bootstrapping of the framework is called init/initialization.
+
+It happens when called `PHP::init()`. It returns reference to the `InitConfig` object.
+
+Like this:
+
+```php
+use spaf\simputils\PHP;
+
+PHP::init();
+// or
+$config = PHP::init();
+```
+
+----
+
+The example above is valid only for **the main app**
+
+**Important:** More about initialization of **a sub app** you can find here: 
+[Init for external modules and libraries]()
+
+----
+
+Proceeding with `PHP::init()` in **the main app**. The init process is not required for 
+the most of utils and models, but can significantly improve development experience and operation.
+
+For example DotEnv functionality is activated by default as `InitBlock`.
+
+**InitBlock**
+: The functionality attached to the `InitConfig`, that should be initialized, when that 
+`InitConfig` will be initialized. Basically switchable "plugins" or "extensions"
+
+
+There are 2 ways of specifying InitConfigs
+
+First method is to just provide an array with key-value pair of fields for the InitConfig.
+
+Like that:
+
+```php
+
+use spaf\simputils\PHP;
+
+PHP::init([
+    'a_param_1' => 'a value content 1',
+    'a_param_2' => 'a value content 2',
+    'a_param_3' => 'a value content 3',
+    
+    /* ... */
+]);
+
+```
+
+In this case default `InitConfig` class will be used as an object, and this array of params
+will be applied to it. This is the simplest configuration you can do.
+
+Another way is to explicitly assign the InitConfig object by yourself. This is preferred way, 
+because it's highly intuitive and flexible option. You just create your own class extended 
+from `InitConfig`, and then redefine all the stuff you want!
+
+Example:
+
+```php
+
+use spaf\simputils\models\InitConfig;
+use spaf\simputils\PHP;
+
+class MyCustomInitConfig extends InitConfig {
+
+    // IMP  the code below will remove all the default InitBlocks' init process.
+    //      This will disable as minimum DotEnv functionality!
+    public null|array|Box $init_blocks = [];
+}
+
+
+PHP::init(new MyCustomInitConfig);
+
+```
+
+At any point of time you can receive the config by this command:
+
+```php
+
+use spaf\simputils\PHP;
+
+$config = PHP::getInitConfig();
+
+```
+
+This way you can have an access to the InitConfig object that is being used.
+
+### InitBlocks or subroutines
+
+Example of an InitBlock implementation: `\spaf\simputils\components\initblocks\DotEnvInitBlock`
+
+The InitBlock class could be defined by implementing interface 
+`\spaf\simputils\interfaces\InitBlockInterface`. 
+And after that you could just provide a new object to the config array like that:
+
+```php
+
+use spaf\simputils\interfaces\InitBlockInterface;
+use spaf\simputils\PHP;
+use function spaf\simputils\basic\env;
+use function spaf\simputils\basic\pr;
+
+class MyInitBlock implements InitBlockInterface {
+
+    public function initBlock(BasicInitConfig $config): bool {
+        // This code will be initialized during `PHP::init()` call
+        // This command will add environmental variable "MY_SPECIAL_ENV_VARIABLE" 
+        PHP::envSet('MY_SPECIAL_ENV_VARIABLE', 'Pandas love bamboo!', true);
+    }
+
+}
+
+
+PHP::init([ new MyInitBlock ])
+
+// IMP  At this point if our custom InitBlock class was successfully initialized
+//      we will have access to "MY_SPECIAL_ENV_VARIABLE" env variable!
+
+pr(env('MY_SPECIAL_ENV_VARIABLE'));
+
+```
+
+**Important:** This short syntax is preferable, but requires the definition of InitBlock 
+objects directly into the config-init array (This syntax will work only with real objects, 
+not class strings, and only for `PHP::init([])`), that InitBlock must 
+implement `\spaf\simputils\interfaces\InitBlockInterface`. 
+This syntax will not work with ...
+
+**<mark> REFACTOR, maybe requires architecture revision !</mark>**
+
+
+or add to `$init_blocks` field of InitConfig's like that:
+
+```php
+
+use spaf\simputils\interfaces\InitBlockInterface;
+use spaf\simputils\PHP;
+use function spaf\simputils\basic\env;use function spaf\simputils\basic\pr;
+
+class MyInitBlock implements InitBlockInterface {
+
+    public function initBlock(BasicInitConfig $config): bool {
+        // This code will be initialized during `PHP::init()` call
+        // This command will add environmental variable "MY_SPECIAL_ENV_VARIABLE" 
+        PHP::envSet('MY_SPECIAL_ENV_VARIABLE', 'Pandas love bamboo!', true);
+    }
+
+}
+
+
+PHP::init([ new MyInitBlock ])
+
+// IMP  At this point if our custom InitBlock class was successfully initialized
+//      we will have access to "MY_SPECIAL_ENV_VARIABLE" env variable!
+
+pr(env('MY_SPECIAL_ENV_VARIABLE'));
+
+```
+
+The code above will output: `Pandas love bamboo!`
+You can create as much such InitBlocks as you want. Just remember, all of them will be ran
+for each request... So if you are working with another framework, you should use their
+bootstrapping mechanisms. In case of Yii2 you should follow thise one: 
+https://www.yiiframework.com/doc/guide/2.0/en/runtime-bootstrapping
+
+If you use initially just the SimpUtils framework, then of course you could use this 
+InitConfig process. Just remember that his can lead to drastically under-performing solution
+of yours.
+
+If you asking question: "Then why would we want it, if we have such functionality in our
+preferred framework like Yii2, laravel, etc."?
+
+The answer would be: SimpUtils is a micro-framework, self-sufficient more or less, and
+it can be ran before any of your framework initialization/bootstrap process to provide more
+comfortable usage of your framework, even on the early stage of configuration.
+
+For example, in case of Yii2, in the "config" of your web-app, you operate with "plain"
+references to classes and components, and config stage is done before bootstrapping process.
+And if you would like to use quick access to ".env" variables inside of your Yii2 config 
+file - you will not be able to do that easily.
+
+**So the SimpUtils initialization/bootstrapping mechanisms are early-stage mechanisms**.
+
+Besides that, if you have to work raw without a big framework, you would have to implement
+your own bootstrapping mechanisms. And it would be inefficient. Much easier to use this 
+low-level mechanism of SimpUtils.
+
+
+#### Overall architecture of initialization process
+
+Initialization process of SimpUtils is modular with a single entry-point.
+
+**The main app** calls `PHP::init()`, this is a single entry point. No module should
+try to run it, in case if it's done outside of **the main app**, then that module must
+be considered as unsafe.
+
+But every **sub app** (module) can register their very own InitConfig.
+For that purpose they have to specify a unique name (usually own-module-name) for the
+`PHP::init()` call like this:
+
+```php
+
+/* ... IMP  this is code of an external library or module, not the main app! */
+
+use spaf\simputils\generic\SubAppInitConfig;
+use spaf\simputils\models\InitConfig;
+use spaf\simputils\PHP;
+
+class MyModCodeExampleInitConfig extends SubAppInitConfig {
+
+    // Make sure this is a reasonable and unique name
+    public ?string $name = 'my-mod-code-example-default-INIT';
+    public ?string $code_root = __FILE__;
+    public ?string $working_dir = '/tmp/my-module-working-directory';
+
+}
+
+
+// IMP  The $name, $code_root and/or $working_dir can be defined in the default value of
+//      your config, or redefined during the call
+PHP::init(new MyModCodeExampleInitConfig)
+
+/* ... */
+
+```
+
+At this point config for that name is registered with this config object.
+You can get the config object at any point (not recommended, but yes, even outside of your 
+code stub):
+
+```php
+
+use spaf\simputils\PHP;
+
+$module_config = PHP::getInitConfig('my-mod-code-example-default-INIT');
+
+
+// Here you can now access the location of the configs, etc.
+echo $module_config->working_dir;
+
+```
+
+The example above is really cool for the modular development, that each **sub app** can
+rely on it's own init-config with own "code_root" and "working_dir"!
+
+And the same time all of them can rely on each other's init config simply specifying name
+to `PHP::getInitConfig()` method.
+
+**Important:** When you are not specifying name or you use "app" name - it always refers to
+the main app.
+
+**Important:** The name "app" - is registered special name that means **the main app**, so
+it must not be used (empty name as well refers to "app").
+
+-----
+
+The example above is awesome, but it will not be automatically ran due to security reasons,
+so **the main** InitConfig has to explicitly specify InitBlock of your module, that will
+register your module's InitConfig. It seems a bit overwhelming, but it's not that difficult.
+
+So in the most cases if you develop **sub app** (module/lib/extension) you just need
+to create 1 class extending it from `SubAppInitConfig` and then a user of **the main app** 
+has to creat an object of that class of yours and provide it to and array of arguments of 
+InitConfig (or add it to `init_blocks` array manually).
+
+Here is an example:
+
+```php
+
+use spaf\simputils\generic\BasicInitConfig;
+use spaf\simputils\generic\SubAppInitConfig;
+use spaf\simputils\interfaces\InitBlockInterface;
+use spaf\simputils\models\InitConfig;
+use spaf\simputils\PHP;
+
+// Here is module defined classes
+class MyInitConfig extends SubAppInitConfig {
+    // Make sure this is a reasonable and unique name
+    public ?string $name = 'my-mod-ule';
+}
+
+
+/////////////// Below goes code in the main app entry-point (outside of sub app)
+
+
+PHP::init([ new MyInitConfig ]);
+
+```
+
+If you would want to do your additional initialization, just override the `init()` method in
+the class (don't always forget to run `parent::init()` in the end:
+
+```php
+
+use spaf\simputils\generic\BasicInitConfig;
+use spaf\simputils\generic\SubAppInitConfig;
+use spaf\simputils\interfaces\InitBlockInterface;
+use spaf\simputils\models\InitConfig;
+use spaf\simputils\PHP;
+
+// Here is module defined classes
+class MyInitConfig extends SubAppInitConfig {
+    // Make sure this is a reasonable and unique name
+    public ?string $name = 'my-mod-ule';
+    
+    public function init(){
+        
+        pd('Hello World, and die.... ^_^');
+        
+        parent::init(); // TODO: Change the autogenerated stub
+    }
+    
+}
+
+
+/////////////// Below goes code in the main app entry-point (outside of sub app)
+
+
+PHP::init([ new MyInitConfig ]);
+
+
+```
+
+**Important:** This way you can do infinite hierarchy of initialization. Though, just always
+keep in mind that this hierarchy will be called for an every single request. <mark>So when possible
+keep the init/bootstrapping process as ascetic as possible!</mark>
+
+That's it about the initialization process.
+
+Here goes some more examples:
+
+...... ADD EXAMPLES .......
+
 
 ### Properties
 

@@ -6,18 +6,6 @@ Current framework version: **0.3.1** (min required PHP: **8.0**)
 What has left to do with the documentation:
 
  * [x] InitConfig and bootstrapping
- * [ ] Integrated DotEnv functionality
-   * [ ] Comment DotEnv Extensions
- * [ ] Files infrastructure
-   * [ ] `File` object
-   * [ ] File Processors
- * [ ] Adjust and connect Version description
- * [ ] Adjust and connect PhpInfo description
- * [ ] Adjust and connect DateTime description
- * [ ] Adjust and connect Box description
-   * [ ] `filter` method
-   * [ ] `each` method
- * [ ] Short intro into GitRepo
  * [ ] Per helper description:
    * [ ] `System`
    * [ ] `Str`
@@ -27,6 +15,18 @@ What has left to do with the documentation:
    * [ ] `DT`
    * [ ] `Data`
    * [ ] `Boolean`
+ * [ ] Files infrastructure
+   * [ ] `File` object
+   * [ ] File Processors
+ * [ ] Integrated DotEnv functionality
+   * [ ] Comment DotEnv Extensions
+ * [ ] Adjust and connect Version description
+ * [ ] Adjust and connect PhpInfo description
+ * [ ] Adjust and connect DateTime description
+ * [ ] Adjust and connect Box description
+   * [ ] `filter` method
+   * [ ] `each` method
+ * [ ] Short intro into GitRepo
  * [ ] Architecture + Guidelines
  * [ ] Build a md-documents-map
  * [ ] Remove all the obsolete documents

@@ -2,6 +2,7 @@
 
 namespace spaf\simputils\traits;
 
+use Error;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionObject;
@@ -55,44 +56,54 @@ trait PropertiesTrait {
 	 * @param string $name
 	 *
 	 * @return mixed
-	 * @throws \Exception
 	 */
 	public function __get($name): mixed {
-		if (
-			$method_name = PropertiesCacheIndex
-			::$index[static::class.'#'.$name.'#'.Property::TYPE_GET]
-			?? false
-		) {
+		$ref = static::class.'#'.$name.'#'.Property::TYPE_GET;
+		if ($method_name = PropertiesCacheIndex::$index[$ref] ?? false) {
 			return $this->$method_name(null, Property::TYPE_GET, $name);
 		}
-		return $this->____prepareProperty($name, Property::TYPE_GET);
+		try {
+			return $this->____prepareProperty($name, Property::TYPE_GET);
+		} catch (PropertyAccessError | PropertyDoesNotExist $e) {
+			try {
+				/** @noinspection PhpUndefinedMethodInspection */
+				return parent::__get($name);
+			} catch (Error) {
+				/** @noinspection PhpUnhandledExceptionInspection */
+				throw $e;
+			}
+		}
 	}
 
 	public function __set($name, $value): void {
-		if (
-			$method_name = PropertiesCacheIndex
-			::$index[static::class.'#'.$name.'#'.Property::TYPE_SET]
-			?? false
-		) {
+		$ref = static::class.'#'.$name.'#'.Property::TYPE_SET;
+		if ($method_name = PropertiesCacheIndex::$index[$ref] ?? false) {
 			$this->$method_name($value, Property::TYPE_SET, $name);
 		} else {
-			$this->____prepareProperty($name, Property::TYPE_SET, $value);
+			try {
+				$this->____prepareProperty($name, Property::TYPE_SET, $value);
+			} catch (PropertyAccessError | PropertyDoesNotExist $e) {
+				try {
+					/** @noinspection PhpUndefinedMethodInspection */
+					parent::__set($name, $value);
+				} catch (Error) {
+					/** @noinspection PhpUnhandledExceptionInspection */
+					throw $e;
+				}
+			}
 		}
 	}
 
 	public function __isset($name) {
-		// FIX  Implementation is questionable. Urgently refactor!
-		if (
-			$method_name = PropertiesCacheIndex
-			::$index[static::class.'#'.$name.'#'.Property::TYPE_GET]
-			?? false
-		) {
-			return $this->$method_name(null, Property::TYPE_GET, $name);
+		return $this->____checkSimpUtilsPropertyAvailability($name);
+	}
+
+	private function ____checkSimpUtilsPropertyAvailability($name, $type = Property::TYPE_GET) {
+		$ref = static::class.'#'.$name.'#'.$type;
+		if ($method_name = PropertiesCacheIndex::$index[$ref] ?? false) {
+			return $this->$method_name(null, $type, $name);
 		}
-		return $this->____prepareProperty(
-			$name, Property::TYPE_GET,
-			check_and_do_not_call: true
-		);
+		return $this->____prepareProperty($name, $type, check_and_do_not_call: true);
 	}
 
 	private function ____propertyBatchMethodGet($value, $type, $name): mixed {
@@ -168,10 +179,10 @@ trait PropertiesTrait {
 		$already_defined = [];
 
 		foreach ($applicable_items as $item) {
-			/** @var ReflectionMethod|ReflectionProperty $item */
-			/** @var \ReflectionAttribute $attr */
+			/** @var \ReflectionMethod|\ReflectionProperty $item */
 
 			foreach ($item->getAttributes() as $attr) {
+
 				$attr_class = $attr->getName();
 				if (in_array($attr_class, $applicable_attribute_classes)) {
 					[$func_ref, $status] = call_user_func(
@@ -188,7 +199,8 @@ trait PropertiesTrait {
 						}
 						$already_defined[] = $name;
 
-						if ($check_and_do_not_call && $call_type !== Property::TYPE_SET) {
+//						if ($check_and_do_not_call && $call_type !== Property::TYPE_SET) {
+						if ($check_and_do_not_call) {
 							// NOTE Relevant for `isset()`
 							return true;
 						}

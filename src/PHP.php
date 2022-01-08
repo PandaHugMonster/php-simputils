@@ -88,6 +88,17 @@ class PHP {
 	public static bool $refresh_php_info_env_vars = true;
 
 	/**
+	 * Framework/lib version
+	 *
+	 * IMP  Always update version info before every release
+	 * @return Version|string
+	 */
+	public static function simpUtilsVersion(): Version|string {
+		$class = static::redef(Version::class);
+		return new $class('0.3.1', 'SimpUtils');
+	}
+
+	/**
 	 * Initializer of the framework
 	 *
 	 * Should be called just once by any code-group (Main app, independent libraries)
@@ -308,19 +319,6 @@ class PHP {
 			Version::class
 		);
 		return new $class(phpversion(), 'PHP');
-	}
-
-	/**
-	 * Framework/lib version
-	 *
-	 * @return Version|string
-	 */
-	public static function simpUtilsVersion(): Version|string {
-		$class = CodeBlocksCacheIndex::getRedefinition(
-			InitConfig::REDEF_VERSION,
-			Version::class
-		);
-		return new $class('0.2.3', 'SimpUtils');
 	}
 
 	/**
@@ -773,6 +771,7 @@ class PHP {
 
 		if (empty($hint)) {
 			if (!method_exists($target_class, 'redefComponentName')) {
+				// TODO Maybe default behaviour instead of Exception
 				throw new Exception(
 					"Class \"{$target_class}\" does not have " .
 					"\"redefComponentName\" method, and \$hint argument was not provided"

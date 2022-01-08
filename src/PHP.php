@@ -40,6 +40,8 @@ use function ob_get_clean;
 use function ob_start;
 use function print_r;
 use function serialize;
+use function str_contains;
+use function strtolower;
 use function unserialize;
 use const JSON_ERROR_NONE;
 
@@ -739,6 +741,24 @@ class PHP {
 				$info->updateEnvVar($name, $value);
 			}
 		}
+	}
+
+	/**
+	 * Checks whether the runtime is in "cli"/"console"/"terminal" mode or "web"
+	 *
+	 * It heavily relies on the value of PHP_SAPI, so the identification might not be perfectly
+	 * perfect :).
+	 *
+	 * @return bool Returns true if console, returns false if web
+	 */
+	public static function isConsole(): bool {
+		$sapi_value = strtolower(static::info()->sapi_name);
+		return str_contains($sapi_value, 'cli');
+	}
+
+	#[Shortcut('PHP::isConsole()')]
+	public static function isCLI(): bool {
+		return static::isConsole();
 	}
 
 	/**

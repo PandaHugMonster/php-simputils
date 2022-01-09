@@ -2,7 +2,6 @@
 
 use PHPUnit\Framework\TestCase;
 use spaf\simputils\FS;
-use spaf\simputils\PHP;
 
 
 /**
@@ -93,7 +92,7 @@ class FSTest extends TestCase {
 	}
 
 	function testRmFileObject() {
-		$file = PHP::file('/tmp/dot-dot-dot-test-file-blabla-bla.txt');
+		$file = FS::file('/tmp/dot-dot-dot-test-file-blabla-bla.txt');
 		$file->content = " --- FILE CONTENT --- ";
 
 		$this->assertFileExists($file->name_full);
@@ -103,7 +102,7 @@ class FSTest extends TestCase {
 
 //	function testMimeTypeCheck() {
 		// FIX  rename(/tmp/dot-dot-dot-test-file-blabla-bla.txt,/tmp/dot-dot-dot-test-file-blabla-bla.csv): No such file or directory
-//		$file = PHP::file('/tmp/dot-dot-dot-test-file-blabla-bla.txt');
+//		$file = FS::file('/tmp/dot-dot-dot-test-file-blabla-bla.txt');
 //		$this->assertEquals('application/x-empty', $file->mime_type);
 //		$file->move(ext: 'csv');
 //

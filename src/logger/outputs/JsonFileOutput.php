@@ -4,8 +4,8 @@
 namespace spaf\simputils\logger\outputs;
 
 
+use spaf\simputils\FS;
 use spaf\simputils\logger\Logger;
-use spaf\simputils\PHP;
 use function json_encode;
 
 class JsonFileOutput extends TextFileOutput {
@@ -34,7 +34,7 @@ class JsonFileOutput extends TextFileOutput {
 
 	public function log($msg, $priority = null) {
 		$path = $this->composeFilePath();
-		$content = PHP::file($path)->content ?? [];
+		$content = FS::file($path)->content ?? [];
 		$content[] = $msg;
 
 		// TODO Most likely outdated code, must be refactored with

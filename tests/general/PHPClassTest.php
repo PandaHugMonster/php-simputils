@@ -518,10 +518,10 @@ class PHPClassTest extends TestCase {
 	}
 
 	function testFileTransparentSupply() {
-		$memory_file = PHP::file();
+		$memory_file = FS::file();
 
 		$this->assertInstanceOf(File::class, $memory_file);
-		$b = PHP::file($memory_file);
+		$b = FS::file($memory_file);
 
 		$this->assertEquals($b->obj_id, $memory_file->obj_id);
 	}

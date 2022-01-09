@@ -4,6 +4,8 @@ namespace spaf\simputils;
 
 use Exception;
 use finfo;
+use spaf\simputils\generic\BasicResourceApp;
+use spaf\simputils\models\Dir;
 use spaf\simputils\models\File;
 
 /**
@@ -288,7 +290,11 @@ class FS {
 	 * @see splitFullFilePath()
 	 * @return string
 	 */
-	public static function glueFullFilePath(string $dir, string $name, string $ext): string {
+	public static function glueFullFilePath(
+		string $dir,
+		string $name,
+		?string $ext = null
+	): string {
 		if (!empty($ext)) {
 			$ext = ".{$ext}";
 		}
@@ -314,5 +320,42 @@ class FS {
 			$tmp_parts['filename'] ?? '',
 			$tmp_parts['extension'] ?? ''
 		];
+	}
+
+	/**
+	 * Returns File instance for the provided argument
+	 *
+	 * @param string|File|null $file Can be a string - then it's a path to a file, or
+	 *                               a File instance, then it's just provided back
+	 *                               transparently
+	 * @param mixed|null       $app  Read/Write processor
+	 *
+	 * @return \spaf\simputils\models\File|null
+	 * @throws \Exception
+	 */
+	public static function file(
+		mixed $file = null,
+		callable|string|array|BasicResourceApp $app = null
+	): ?File {
+		if ($file instanceof File) {
+			return $file;
+		}
+		$class = PHP::redef(File::class);
+		return new $class($file, $app);
+	}
+
+	/**
+	 * @param null|string|Dir $dir
+	 *
+	 * FIX  Improve supported params (Directory, Files that are directories, etc. Regexp strings)
+	 * @return Dir|null
+	 * @throws \Exception
+	 */
+	public static function dir(null|string|Dir $dir = null): ?Dir {
+		if ($dir instanceof Dir) {
+			return $dir;
+		}
+		$class = PHP::redef(Dir::class);
+		return new $class($dir);
 	}
 }

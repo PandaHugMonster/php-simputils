@@ -97,7 +97,7 @@ class ShortcutsTest extends TestCase {
 	/**
 	 *
 	 * @covers \spaf\simputils\basic\fl
-	 * @covers \spaf\simputils\PHP::file
+	 * @covers \spaf\simputils\FS::file
 	 * @return void
 	 */
 	function testFl() {

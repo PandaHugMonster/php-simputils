@@ -4,6 +4,7 @@ namespace general;
 
 use Exception;
 use PHPUnit\Framework\TestCase;
+use spaf\simputils\FS;
 use spaf\simputils\models\Box;
 use spaf\simputils\models\files\apps\CsvProcessor;
 use spaf\simputils\models\files\apps\DotEnvProcessor;
@@ -11,7 +12,6 @@ use spaf\simputils\models\files\apps\JsonProcessor;
 use spaf\simputils\models\files\apps\settings\CsvSettings;
 use spaf\simputils\models\files\apps\settings\DotEnvSettings;
 use spaf\simputils\models\files\apps\TextProcessor;
-use spaf\simputils\PHP;
 use spaf\simputils\special\dotenv\ExtInclude;
 use spaf\simputils\special\dotenv\ExtMetaData;
 use spaf\simputils\special\dotenv\ExtTypeHint;
@@ -51,7 +51,7 @@ class DefaultAppProcessorsTest extends TestCase {
 	 * @return void
 	 */
 	function testJsonProcessor() {
-		$file = PHP::file(app: JsonProcessor::class);
+		$file = FS::file(app: JsonProcessor::class);
 
 		$file->content = [
 			'code' => 'some funny code',
@@ -69,7 +69,7 @@ class DefaultAppProcessorsTest extends TestCase {
 	 * @return void
 	 */
 	function testDotEnvProcessor() {
-		$file = PHP::file(app: DotEnvProcessor::class);
+		$file = FS::file(app: DotEnvProcessor::class);
 
 		$file->content = [
 			'CODE 1' => 'AGAiN',
@@ -173,7 +173,7 @@ class DefaultAppProcessorsTest extends TestCase {
 	 */
 	function testCsvProcessor() {
 
-		$file = PHP::file(app: CsvProcessor::class);
+		$file = FS::file(app: CsvProcessor::class);
 
 		$example = box([
 			box(['col1' => 'AGAiN', 'col2' => 12, 'col3' => 55]),
@@ -192,7 +192,7 @@ class DefaultAppProcessorsTest extends TestCase {
 			echo "All good!\n";
 		};
 
-		$file = PHP::file(
+		$file = FS::file(
 			'/tmp/csv-test-file-example-bla-bla-bla.csv', app: CsvProcessor::class
 		);
 		$file->processor_settings = $settings;
@@ -202,7 +202,7 @@ class DefaultAppProcessorsTest extends TestCase {
 
 		$this->expectOutputString("All good!\nAll good!\n");
 
-		$file = PHP::file('/tmp/csv-test-file-example-bla-bla-bla.csv');
+		$file = FS::file('/tmp/csv-test-file-example-bla-bla-bla.csv');
 
 		$file->content = [
 			['head1', 'head2', 'head3', 'head4'],
@@ -219,7 +219,7 @@ class DefaultAppProcessorsTest extends TestCase {
 		$settings = new CsvSettings();
 		$settings->allow_raw_string_saving = true;
 
-		$file = PHP::file(
+		$file = FS::file(
 			'/tmp/csv-test-file-example-bla-bla-bla.csv', app: CsvProcessor::class
 		);
 		$file->processor_settings = $settings;
@@ -235,7 +235,7 @@ class DefaultAppProcessorsTest extends TestCase {
 	 * @return void
 	 */
 	function testCsvProcessorExceptionKeysMix() {
-		$file = PHP::file('/tmp/csv-test-file-example-bla-bla-bla.csv');
+		$file = FS::file('/tmp/csv-test-file-example-bla-bla-bla.csv');
 
 		$this->expectException(Exception::class);
 
@@ -250,7 +250,7 @@ class DefaultAppProcessorsTest extends TestCase {
 	 * @return void
 	 */
 	function testCsvProcessorExceptionWrongDataTypeOfContent() {
-		$file = PHP::file('/tmp/csv-test-file-example-bla-bla-bla.csv');
+		$file = FS::file('/tmp/csv-test-file-example-bla-bla-bla.csv');
 
 		$this->expectException(Exception::class);
 

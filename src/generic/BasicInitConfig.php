@@ -23,6 +23,7 @@ abstract class BasicInitConfig extends SimpleObject {
 	const REDEF_BOX = 'Box';
 	const REDEF_DATE_TIME = 'DateTime';
 	const REDEF_FILE = 'File';
+	const REDEF_DIR = 'Dir';
 	const REDEF_PHP_INFO = 'PhpInfo';
 	const REDEF_VERSION = 'Version';
 	const REDEF_LOGGER = 'Logger';

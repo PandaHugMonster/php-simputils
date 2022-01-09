@@ -41,7 +41,7 @@ class FileModelTest extends TestCase {
 	function testBasicsOfFileOperation() {
 		$file_class = PHP::redef(File::class);
 		// Creating in memory file
-		$file = PHP::file();
+		$file = FS::file();
 
 		$content = 'Some string content here';
 		$file->content = $content;
@@ -115,7 +115,7 @@ class FileModelTest extends TestCase {
 	}
 
 	function testAdditionalFileStuff() {
-		$file = PHP::file();
+		$file = FS::file();
 		$file->content = 'totoro';
 
 		$prefix = 'Our amazing guest: ';
@@ -126,7 +126,7 @@ class FileModelTest extends TestCase {
 		$fake_read = 'read: FAKED CONTENT! ^_^';
 		$fake_write = 'written: ANOTHER FAKED CONTENT! %_%';
 
-		$file = PHP::file(
+		$file = FS::file(
 			'/tmp/temp-file-simputils-test',
 			app: function ($self, $fd, $is_reading, $data) use ($fake_read, $fake_write) {
 				if ($is_reading) {
@@ -145,7 +145,7 @@ class FileModelTest extends TestCase {
 
 		// Other constructor coverage
 		$fd = fopen('/tmp/again-testing-simputils-file-bla-bla-bla.txt', 'w+');
-		$file = PHP::file($fd);
+		$file = FS::file($fd);
 		$content = 'Let\'s write something cool into a file descriptor';
 		$file->content = $content;
 		$this->assertEquals(Str::len($content), $file->size);
@@ -173,10 +173,10 @@ class FileModelTest extends TestCase {
 
 		$this->assertTrue($file1->app instanceof Closure);
 
-		$file_dev_null = PHP::file('/dev/null');
+		$file_dev_null = FS::file('/dev/null');
 		$this->assertEmpty($file_dev_null->content);
 
-		$file_non_existing_one = PHP::file('null100500----___');
+		$file_non_existing_one = FS::file('null100500----___');
 		$this->assertEmpty($file_non_existing_one->content);
 	}
 

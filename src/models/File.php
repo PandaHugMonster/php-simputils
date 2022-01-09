@@ -10,6 +10,7 @@ use spaf\simputils\FS;
 use spaf\simputils\generic\BasicResource;
 use spaf\simputils\generic\BasicResourceApp;
 use spaf\simputils\PHP;
+use spaf\simputils\traits\FilesDirsTrait;
 use spaf\simputils\traits\RedefinableComponentTrait;
 use ValueError;
 use function fclose;
@@ -48,9 +49,16 @@ use function stream_get_contents;
  * @property-read ?string $backup_location
  * @property-read mixed $backup_content
  * @property-read Box $stat
+ * @property-read string $type
  */
 class File extends BasicResource {
 	use RedefinableComponentTrait;
+	use FilesDirsTrait;
+
+	#[Property('type')]
+	protected function getType() {
+		return $this->mime_type;
+	}
 
 	/**
 	 * FIX  Implement as property
@@ -77,7 +85,7 @@ class File extends BasicResource {
 	 * IMP  If `File` object is provided as $file argument, the result would be
 	 *      the new object (basically clone/copy) and the supplied object and the current
 	 *      object would have different references.
-	 *      So this will not be a fully transparent approach, use `fl()` or `PHP::file()`,
+	 *      So this will not be a fully transparent approach, use `fl()` or `FS::file()`,
 	 *      if you want fully transparent approach
 	 *
 	 * IMP  Really important to mention: This class does not do `close($fd)` for those

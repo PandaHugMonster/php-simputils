@@ -7,8 +7,10 @@ namespace spaf\simputils\basic;
 
 use DateTimeZone;
 use spaf\simputils\attributes\markers\Shortcut;
+use spaf\simputils\FS;
 use spaf\simputils\models\Box;
 use spaf\simputils\models\DateTime;
+use spaf\simputils\models\Dir;
 use spaf\simputils\models\File;
 use spaf\simputils\PHP;
 use spaf\simputils\Str;
@@ -91,9 +93,14 @@ function ts(DateTime|string|int $dt, ?DateTimeZone $tz = null, string $fmt = nul
 	return PHP::ts($dt, $tz, $fmt);
 }
 
-#[Shortcut('PHP::file()')]
+#[Shortcut('FS::file()')]
 function fl(null|string|File $file = null, $app = null): ?File {
-	return PHP::file($file, $app);
+	return FS::file($file, $app);
+}
+
+#[Shortcut('FS::dir()')]
+function dr(null|string $path = null): ?Dir {
+	return FS::dir($path);
 }
 
 /**
@@ -122,6 +129,11 @@ function pr(...$args): void {
 #[Shortcut('PHP::prstr()')]
 function prstr(...$args): ?string {
 	return PHP::prstr(...$args);
+}
+
+#[Shortcut('PHP::path()')]
+function path(?string ...$args): ?string {
+	return PHP::path(...$args);
 }
 
 /**

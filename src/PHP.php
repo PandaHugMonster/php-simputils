@@ -15,7 +15,6 @@ use spaf\simputils\attributes\markers\Shortcut;
 use spaf\simputils\generic\BasicInitConfig;
 use spaf\simputils\models\Box;
 use spaf\simputils\models\DateTime;
-use spaf\simputils\models\File;
 use spaf\simputils\models\InitConfig;
 use spaf\simputils\models\PhpInfo;
 use spaf\simputils\models\Version;
@@ -39,6 +38,7 @@ use function method_exists;
 use function ob_get_clean;
 use function ob_start;
 use function print_r;
+use function realpath;
 use function serialize;
 use function str_contains;
 use function strtolower;
@@ -659,24 +659,6 @@ class PHP {
 	}
 
 	/**
-	 * Returns File instance for the provided argument
-	 *
-	 * @param string|File|null $file Can be a string - then it's a path to a file, or
-	 *                               a File instance, then it's just provided back
-	 *                               transparently
-	 * @param mixed            $app  Read/Write processor
-	 *
-	 * @return \spaf\simputils\models\File|null
-	 */
-	public static function file(mixed $file = null, $app = null): ?File {
-		if ($file instanceof File) {
-			return $file;
-		}
-		$class = static::redef(File::class);
-		return new $class($file, $app);
-	}
-
-	/**
 	 * Just a "shortcut" to $_ENV
 	 *
 	 * You would think why it's done like this, but situation in PHP is so weird in matter of
@@ -759,6 +741,20 @@ class PHP {
 	#[Shortcut('PHP::isConsole()')]
 	public static function isCLI(): bool {
 		return static::isConsole();
+	}
+
+	public static function path(?string ...$parts): ?string {
+		$res = '';
+		$sep = '/';
+		if ($parts) {
+			$i = 0;
+			foreach ($parts as $part) {
+				$res .= ($i++ == 0?'':$sep).$part;
+			}
+		}
+		return $res
+			?realpath($res)
+			:null;
 	}
 
 	/**

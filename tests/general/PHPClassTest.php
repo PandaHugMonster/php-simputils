@@ -15,7 +15,7 @@ use spaf\simputils\PHP;
 use spaf\simputils\special\CodeBlocksCacheIndex;
 use spaf\simputils\Str;
 use spaf\simputils\traits\MetaMagic;
-use function spaf\simputils\basic\box;
+use function spaf\simputils\basic\bx;
 use function spaf\simputils\basic\now;
 use function spaf\simputils\basic\pd;
 
@@ -38,7 +38,7 @@ class MyDT2 {
 /**
  * @covers \spaf\simputils\PHP
  * @covers \spaf\simputils\basic\pd
- * @covers \spaf\simputils\basic\box
+ * @covers \spaf\simputils\basic\bx
  * @covers \spaf\simputils\models\PhpInfo
  * @covers \spaf\simputils\generic\BasicInitConfig
  * @uses \spaf\simputils\models\Version
@@ -362,7 +362,7 @@ class PHPClassTest extends TestCase {
 			InitConfig::REDEF_BOX,
 			Box::class
 		);
-		$box = box(['My array', 'data' => 'in my array']);
+		$box = bx(['My array', 'data' => 'in my array']);
 		$this->assertEquals($box_class, PHP::type($box));
 	}
 
@@ -425,7 +425,7 @@ class PHPClassTest extends TestCase {
 		$this->assertIsObject(PHP::createDummy($obj1));
 
 		$this->assertTrue(PHP::isArrayCompatible([]));
-		$this->assertTrue(PHP::isArrayCompatible(box([])));
+		$this->assertTrue(PHP::isArrayCompatible(bx([])));
 		$this->assertFalse(PHP::isArrayCompatible($obj1));
 
 	}

@@ -68,8 +68,7 @@ class PHP {
 	const SERIALIZATION_TYPE_JSON = 0;
 	const SERIALIZATION_TYPE_PHP = 1;
 
-	// TODO Maybe #class? Checkout compatibility with JavaScript and other techs and standards
-	public static string $serialized_class_key_name = '_class';
+	public static string $serialized_class_key_name = '#class';
 	public static string|int $serialization_mechanism = self::SERIALIZATION_TYPE_JSON;
 
 	/**
@@ -606,23 +605,55 @@ class PHP {
 	}
 
 	/**
-	 * @param null|Box|array $array Array, elements of which should be used as elements
-	 *                              of the newly created box.
+	 * Quick box-array creation
+	 *
+	 * **Important:** All the arguments during merging are recursively merged,
+	 * when more right-side elements having higher precedence than the left ones, and so
+	 * values defined on the left side might be overwritten by the elements to the right.
+	 *
+	 * @param null|Box|array $array     Array, elements of which should be used as elements
+	 *                                  of the newly created box.
+	 * @param array|Box      ...$merger Additional arrays/boxes that should be merged into
+	 *                                  the resulting Box
 	 *
 	 * @return Box|array
+	 * @throws \Exception \Exception
 	 */
-	public static function box(null|Box|array $array = null): Box|array {
+	public static function box(mixed $array = null, mixed ...$merger): Box|array {
+		$class = static::redef(Box::class);
+
 		if ($array instanceof Box) {
-			return $array;
+			$res = $array;
+		} else if (is_null($array)) {
+			$res = new $class;
+		} else {
+			if (is_object($array) && !is_array($array) && !$array instanceof Box) {
+				$res = $array;
+				if (method_exists($array, 'toBox')) {
+					$res = $res->toBox(false);
+				}
+			} else {
+				$res = new $class($array);
+			}
 		}
-		if (is_null($array)) {
-			$array = [];
+
+		if (!empty($merger)) {
+			$sub_res = new $class;
+			foreach ($merger as $k => $v) {
+				if (is_object($v) && !is_array($v) && !$v instanceof Box) {
+					$sub_sub_res = $v;
+					if (method_exists($sub_sub_res, 'toBox')) {
+						$sub_sub_res = $sub_sub_res->toBox(false);
+					}
+					$sub_res[$k] = $sub_sub_res;
+				} else {
+					$sub_res[$k] = $v;
+				}
+			}
+			$res->mergeFrom(...$sub_res);
 		}
-		$class = CodeBlocksCacheIndex::getRedefinition(
-			InitConfig::REDEF_BOX,
-			Box::class
-		);
-		return new $class($array);
+
+		return $res;
 	}
 
 	/**
@@ -755,6 +786,10 @@ class PHP {
 		return $res
 			?realpath($res)
 			:null;
+	}
+
+	public static function extractFields() {
+
 	}
 
 	/**

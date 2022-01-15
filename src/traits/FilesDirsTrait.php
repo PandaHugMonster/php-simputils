@@ -58,7 +58,7 @@ trait FilesDirsTrait {
 	 *
 	 *
 	 */
-	public function format(int|string $relativity = 0, bool $include_ext = false): string {
+	public function format(int|string $relativity = 0, bool $include_ext = true): string {
 		$sep = '/';
 		$ext = $this?->extension ?? null;
 		$ext = $include_ext && $ext?".{$ext}":null;

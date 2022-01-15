@@ -42,6 +42,8 @@ use function stream_get_contents;
  *
  * FIX  Implement low-level format separation as "binary" and "text"
  *
+ * FIX  Implement path resolution on object creation
+ *
  * @property ?BasicResourceApp $app
  * @property mixed $content Each use of the property causes real file read/write. Make sure to
  *                          cache value.
@@ -324,17 +326,21 @@ class File extends BasicResource {
 	}
 
 	#[Property('stat')]
-	protected function getStat(): Box {
+	protected function getStat(): ?Box {
 		if (!empty($this->_fd)) {
 			return new Box(fstat($this->_fd));
 		}
 
-		return new Box(stat($this->name_full));
+		if ($this->exists) {
+			return new Box(stat($this->name_full));
+		}
+
+		return null;
 	}
 
 	#[Property('size')]
 	protected function getSize(): ?int {
-		return $this->stat['size'];
+		return $this->stat['size'] ?? null;
 	}
 
 	#[Property('app')]

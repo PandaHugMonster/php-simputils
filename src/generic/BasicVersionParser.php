@@ -10,7 +10,7 @@ use spaf\simputils\models\Version;
 use spaf\simputils\special\CodeBlocksCacheIndex;
 use function is_null;
 
-abstract class BasicVersionParser implements VersionParserInterface {
+abstract class BasicVersionParser extends SimpleObject implements VersionParserInterface {
 
 	public static array $build_type_priorities = [
 		'DEV' => 0,

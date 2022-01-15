@@ -17,7 +17,7 @@ use spaf\simputils\special\dotenv\ExtMetaData;
 use spaf\simputils\special\dotenv\ExtTypeHint;
 use function file_get_contents;
 use function file_put_contents;
-use function spaf\simputils\basic\box;
+use function spaf\simputils\basic\bx;
 use function spaf\simputils\basic\fl;
 
 /**
@@ -40,7 +40,7 @@ use function spaf\simputils\basic\fl;
  * @uses \spaf\simputils\models\Box
  * @uses \spaf\simputils\FS
  * @uses \spaf\simputils\attributes\Property
- * @uses \spaf\simputils\basic\box
+ * @uses \spaf\simputils\basic\bx
  * @uses \spaf\simputils\traits\SimpleObjectTrait::____prepareProperty
  * @uses \spaf\simputils\basic\fl
  * @uses \spaf\simputils\traits\SimpleObjectTrait::getAllTheLastMethodsAndProperties
@@ -175,9 +175,9 @@ class DefaultAppProcessorsTest extends TestCase {
 
 		$file = FS::file(app: CsvProcessor::class);
 
-		$example = box([
-			box(['col1' => 'AGAiN', 'col2' => 12, 'col3' => 55]),
-			box(['col1' => 'DOTDOT', 'col2' => 77, 'col3' => 99]),
+		$example = bx([
+			bx(['col1' => 'AGAiN', 'col2' => 12, 'col3' => 55]),
+			bx(['col1' => 'DOTDOT', 'col2' => 77, 'col3' => 99]),
 		]);
 		$file->content = $example;
 

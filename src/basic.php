@@ -58,8 +58,8 @@ function pd(...$args) {
  * @return Box|array
  */
 #[Shortcut('PHP::box()')]
-function box(null|Box|array $array = null): Box|array {
-	return PHP::box($array);
+function bx(mixed $array = null, mixed ...$merger): Box|array {
+	return PHP::box($array, ...$merger);
 }
 
 /**

@@ -17,6 +17,7 @@ use function array_values;
 use function count;
 use function is_array;
 use function is_null;
+use function is_numeric;
 use function is_object;
 
 /**
@@ -114,7 +115,7 @@ use function is_object;
  * enforce array returning instead of Box from this class (which is recommended against of that),
  * just redefine this class, and register your new child class instead of Box class.
  *
- * In the most cases it's intuitive enough to use {@see \spaf\simputils\basic\box()} syntax instead
+ * In the most cases it's intuitive enough to use {@see \spaf\simputils\basic\bx()} syntax instead
  * of `new Box()`. Because function is really short when imported/used. Though both notations are
  * identical by functionality. `box()` is just a shortcut for {@see PHP::box()}, and `PHP::box()`
  * is a shortcut for `new Box()`.
@@ -229,7 +230,7 @@ class Box extends ArrayObject {
 
 			foreach ($this->keys as $key) {
 				if ($i >= $from && $i < $to) {
-					$res[] = is_object($this[$key])
+					$res[$key] = is_object($this[$key])
 						?clone $this[$key]
 						:$this[$key];
 				}
@@ -299,20 +300,16 @@ class Box extends ArrayObject {
 	}
 
 	/**
-	 * To a normal PHP array
+	 * Clears the content and load from box/arrays the new one
 	 *
-	 * @inheritdoc
+	 * If multiple boxes/arrays supplied - then they are merged
 	 *
-	 * @param bool $with_class Pack with class, default is "false"
-	 *
-	 * @codeCoverageIgnore
-	 * @return array
+	 * @return self
 	 */
-	public function toArray(bool $with_class = false): array {
-		$res = (array) $this;
-		if ($with_class)
-			$res[PHP::$serialized_class_key_name] = static::class;
-		return $res;
+	public function load(Box|array ...$args) {
+		// NOTE Clearing content of our Box
+		$this->exchangeArray([]);
+		return $this->mergeFrom(...$args);
 	}
 
 	/**
@@ -367,6 +364,79 @@ class Box extends ArrayObject {
 			}
 		}
 		return $res;
+	}
+
+	/**
+	 * Removing elements by key(s)
+	 *
+	 * @param int|string ...$keys Keys of items that should be remove/unset
+	 *
+	 * FIX  Add "unsetByValue" and "removeDuplicates"
+	 * @return $this
+	 */
+	public function unsetByKey(int|string ...$keys): self {
+		foreach ($keys as $key) {
+			if (!empty($this[$key])) {
+				unset($this[$key]);
+			}
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Extract specified keys and their values
+	 *
+	 * Does not remove those keys and values from the current box
+	 *
+	 * @param int|string ...$keys Keys of items that should be extracted
+	 *
+	 * @return $this
+	 */
+	public function extract(int|string ...$keys): static {
+		$res = new static();
+		foreach ($keys as $key) {
+			$res[$key] = $this[$key];
+		}
+
+		return $res;
+	}
+
+	/**
+	 * Merge boxes/arrays arguments into current object
+	 *
+	 * All the numerical keys will not be overwritten.
+	 * All the non-numerical keys will be replaced if already present
+	 *
+	 * **Important:** The arguments will not be modified! The values from them are copied!
+	 *
+	 * The merge is not being done through {@see \array_replace_recursive()} due to
+	 * difference of logic.
+	 *
+	 * It's not recursive!
+	 *
+	 *
+	 * FIX  Implement "mergeFromRecursive" and "mergeFromStrict" at some point
+	 * @param self|array ...$boxes Boxes/Arrays that should be merged
+	 *
+	 * @return self Returns self reference
+	 */
+	public function mergeFrom(self|array ...$boxes): self {
+		foreach ($boxes as $item) {
+			foreach ($item as $k => $v) {
+				if (is_numeric($k)) {
+					// Numerical, then add
+					$this[] = $v;
+				} else {
+					// String, then replace if exists
+					if (!is_null($v)) {
+						$this[$k] = $v;
+					}
+				}
+			}
+		}
+
+		return $this;
 	}
 
 	/**

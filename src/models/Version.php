@@ -3,6 +3,8 @@
 namespace spaf\simputils\models;
 
 
+use spaf\simputils\attributes\DebugHide;
+use spaf\simputils\attributes\Extract;
 use spaf\simputils\attributes\Property;
 use spaf\simputils\components\versions\parsers\DefaultVersionParser;
 use spaf\simputils\generic\SimpleObject;
@@ -105,6 +107,8 @@ class Version extends SimpleObject {
 	 *
 	 * @var VersionParserInterface|null
 	 */
+	#[DebugHide]
+	#[Extract(false)]
 	protected ?VersionParserInterface $_parser = null;
 
 	/**

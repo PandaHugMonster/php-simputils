@@ -8,6 +8,7 @@ use ReflectionMethod;
 use ReflectionObject;
 use ReflectionProperty;
 use spaf\simputils\attributes\DebugHide;
+use spaf\simputils\attributes\Extract;
 use spaf\simputils\attributes\Property;
 use spaf\simputils\attributes\PropertyBatch;
 use spaf\simputils\exceptions\PropertyAccessError;
@@ -50,6 +51,7 @@ trait PropertiesTrait {
 
 	// FIX  Public modifier is a temporary solution, due to external modification of the field
 	#[DebugHide]
+	#[Extract(false)]
 	public $____property_batch_storage = [];
 
 	/**
@@ -228,16 +230,24 @@ trait PropertiesTrait {
 	}
 
 	/**
+	 * @param bool $extract_attr_on
+	 * @param bool $debug_hide_attr_on
 	 *
-	 * @codeCoverageIgnore Unfinished
-	 * @return array|null
+	 * FIX  Finalize $extract_attr_on arg
+	 * @return array|string[]
 	 */
-	public function __debugInfo(): ?array {
+	protected function ___extractFields(
+		bool $extract_attr_on = true,
+		bool $debug_hide_attr_on = false
+	) {
 		$res = [];
 
 		// NOTE If the whole class is marked
 		$self_class = new ReflectionObject($this);
-		if (($attr = ($self_class->getAttributes(DebugHide::class)[0] ?? null)) ?? false) {
+		if (
+			$debug_hide_attr_on &&
+			($attr = ($self_class->getAttributes(DebugHide::class)[0] ?? null)) ?? false
+		) {
 			/** @var \ReflectionAttribute $attr */
 			/** @var DebugHide $dh */
 			$dh = $attr->newInstance();
@@ -247,6 +257,17 @@ trait PropertiesTrait {
 
 			return [$dh->show_instead ?? '****'];
 		}
+//		if (
+//			$extract_attr_on &&
+//			($attr = ($self_class->getAttributes(Extract::class)[0] ?? null)) ?? false
+//		) {
+//			/** @var \ReflectionAttribute $attr */
+//			/** @var Extract $ex */
+//			$ex = $attr->newInstance();
+//			if (!$ex->enabled) {
+//				return [];
+//			}
+//		}
 
 		$it_items = $this->getAllTheLastMethodsAndProperties();
 		$batch_array_of_prop_types = [PropertyBatch::TYPE_GET, PropertyBatch::TYPE_BOTH];
@@ -268,7 +289,7 @@ trait PropertiesTrait {
 
 			foreach ($item->getAttributes() as $attr) {
 				$dh = null;
-				if ($attr->getName() === DebugHide::class) {
+				if ($debug_hide_attr_on && $attr->getName() === DebugHide::class) {
 					if ($dh = $attr->newInstance()) {
 						/** @var DebugHide $dh */
 						// NOTE Don't optimize or reformat this code block.
@@ -281,7 +302,13 @@ trait PropertiesTrait {
 							$is_show_instead_set = true;
 						}
 					}
-				} else if (empty($ta)) {
+				} else if (
+					$extract_attr_on && $attr->getName() === Extract::class &&
+					!$attr->newInstance()->enabled
+				) {
+					// Skipping the whole field output
+					continue 2;
+				}  else if (empty($ta)) {
 					$ta = $attr;
 				}
 			}
@@ -333,12 +360,21 @@ trait PropertiesTrait {
 						foreach ($expected_names as $expected_name) {
 							$res["{$expected_name}"] = $is_show_instead_set
 								?$value
-								:$this->{$expected_name};;
+								:$this->{$expected_name};
 						}
 					}
 				}
 			}
 		}
 		return $res;
+	}
+
+	/**
+	 *
+	 * @return array|null
+	 */
+	public function __debugInfo(): ?array {
+		// FIX  Recursive unwrapping shows "Array" instead of "Box". Really bad!
+		return $this->___extractFields(false, true);
 	}
 }

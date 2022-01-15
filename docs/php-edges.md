@@ -34,6 +34,8 @@ even in PHP 8.1 still not resolved.
 So in matter of `DateTime` or any other framework class that is extended from PHP native
 classes will not output well with `pr()`, `prstr()`, `pd()`, `print_r()` and others.
 
+Bug ref: https://bugs.php.net/bug.php?id=69264
+
 **All original classes not extended from PHP natives - are working very well!**
 You can check out how outputs this command:
 

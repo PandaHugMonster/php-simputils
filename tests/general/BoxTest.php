@@ -7,7 +7,7 @@ use spaf\simputils\models\InitConfig;
 use spaf\simputils\models\Version;
 use spaf\simputils\PHP;
 use spaf\simputils\special\CodeBlocksCacheIndex;
-use function spaf\simputils\basic\box;
+use function spaf\simputils\basic\bx;
 
 /**
  *
@@ -15,7 +15,7 @@ use function spaf\simputils\basic\box;
  * @uses \spaf\simputils\traits\PropertiesTrait
  * @uses \spaf\simputils\PHP::box
  * @uses \spaf\simputils\attributes\Property
- * @uses \spaf\simputils\basic\box
+ * @uses \spaf\simputils\basic\bx
  * @uses \spaf\simputils\special\CodeBlocksCacheIndex
  */
 class BoxTest extends TestCase {
@@ -71,7 +71,7 @@ class BoxTest extends TestCase {
 	 * @return void
 	 */
 	function testAdditionalStuff() {
-		$data = box([
+		$data = bx([
 			'key1' => 'val1',
 			'key2' => 'val2',
 			'key3' => 'val3',
@@ -92,11 +92,11 @@ class BoxTest extends TestCase {
 
 		$this->assertEquals(3, $data->size);
 		$this->assertEquals(2, $data->shift()->size);
-		$this->assertEquals(box(['key1' => 'val1']), $data->stash);
-		$this->assertEquals(box(['key3' => 'val3']), $data->shift(from_start: false)->stash);
+		$this->assertEquals(bx(['key1' => 'val1']), $data->stash);
+		$this->assertEquals(bx(['key3' => 'val3']), $data->shift(from_start: false)->stash);
 
 		$this->assertEquals(1, $data->size);
-		$this->assertEquals(box(['key2' => 'val2']), $data);
+		$this->assertEquals(bx(['key2' => 'val2']), $data);
 
 	}
 }

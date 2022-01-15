@@ -1083,6 +1083,98 @@ $file->content = $data_to_save;
 
 ```
 
+### Working with Directories
+
+Class `\spaf\simputils\models\Dir` is used for representing system directory.
+It works in a similar way as `File`, but has really nice features for working with content
+of folders.
+
+**Important:** `Dir` is not inherited from `File`. Both of them are basically independent
+classes with some common methods and properties!
+
+The shortcut for a quick directory object creation is: `\spaf\simputils\basic\dr()`
+
+Simple usage:
+
+```php
+
+use function spaf\simputils\basic\dr;
+
+
+$dir = dr('/usr/lib');
+
+pr("Object is easily casted to absolute path like \"{$dir}\"");
+
+```
+
+Output would be:
+```
+Object is easily casted to absolute path like "/usr/lib"
+```
+
+Besides that you can iterate over the content of it really intuitively:
+
+```php
+
+use spaf\simputils\models\Dir;use function spaf\simputils\basic\dr;use function spaf\simputils\basic\pr;
+
+
+$dir = dr('/usr/lib');
+
+foreach ($dir as $dir_or_file) {
+	if ($dir_or_file instanceof Dir) {
+		pr("It's a directory: {$dir_or_file}");
+	} else {
+		pr("It's a file: {$dir_or_file}");
+	}
+}
+
+
+```
+
+Output would be some thing like this (output is stripped):
+
+```
+...
+It's a directory: /usr/lib/kernel
+It's a directory: /usr/lib/klibc
+It's a file: /usr/lib/klibc-xcgdUApi-P9SoPhW_fi5gXfvWpw.so
+It's a directory: /usr/lib/language-selector
+It's a file: /usr/lib/ld-linux.so.2
+It's a file: /usr/lib/libBLT.2.5.so.8.6
+It's a file: /usr/lib/libBLTlite.2.5.so.8.6
+It's a file: /usr/lib/libgimp-2.0.so0
+...
+```
+
+But this usage is not recursive, what if you want to iterate over all the dirs and sub-dirs.
+Besides recursive approach, with this command you can filter out the resulting elements based
+on different filters, regexp or even custom filter objects!
+
+```php
+
+use spaf\simputils\components\filters\DirExtFilter;use spaf\simputils\components\filters\OnlyFilesFilter;use function spaf\simputils\basic\dr;
+
+$dir = dr('/usr/lib');
+
+$filters = [
+    new OnlyFilesFilter,
+    new DirExtFilter(exts: ['ko', 'so'])
+];
+
+foreach ($dir->walk(true, ...$filters) as $file) {
+    pr("{$file}");
+}
+
+```
+
+**Important:** Recursive `walk` can be really slow, it might be good for prototyping and 
+not deep folder structure, (or for independent microservice that does stuff
+independently, and  where speed does not matter much), but for production consider applying 
+optimizations (non-recursive manual iterations over folders). 
+The normal non-recursive `walk` **is efficient enough**!
+
+
 ### Version objects and working with versions
 
 `\spaf\simputils\models\Version` class allows to create version-objects and 
@@ -1374,12 +1466,12 @@ Further examples:
 
 ```php
 use spaf\simputils\PHP;
-use function spaf\simputils\basic\box;
+use function spaf\simputils\basic\bx;
 
 PHP::init();
 
 // It's just almost exactly as a native PHP array
-$b = box(['my special value', 'another special value']);
+$b = bx(['my special value', 'another special value']);
 print_r($b);
 // Output:
 // spaf\simputils\models\Box Object

@@ -947,21 +947,45 @@ class Math {
 	}
 
 	/**
-	 * FIX  Maybe should be part of static "Array" helper?
-	 * FIX  Important! REVISE!
+	 * Generate range of integer values
 	 *
-	 * @param string|int|float $start
-	 * @param string|int|float $end
-	 * @param int|float $step
+	 * It's a generator, can drastically spare memory usage.
 	 *
-	 * @return array
+	 * `$start` value and `$end` values are both included. So if you specify:
+	 * ```php
+	 * foreach (Math::range(0, 9) as $i) {
+	 *     pr($i);
+	 * }
+	 * ```
+	 * The output would be:
+	 * ```
+	 * 0
+	 * 1
+	 * 2
+	 * 3
+	 * 4
+	 * 5
+	 * 6
+	 * 7
+	 * 8
+	 * 9
+	 * ```
+	 *
+	 * **Important:** Is not a shortcut for `\range()` anymore.
+	 *
+	 * @param string|int|float $start Starting integer (inclusive)
+	 * @param string|int|float $end   Ending integer (inclusive)
+	 * @param int|float        $step  Step of the iteration
+	 *
+	 * @return \Generator
 	 */
-	#[Shortcut('\range()')]
 	static function range(
 		string|int|float $start,
 		string|int|float $end,
 		int|float $step = 1
-	): array {
-		return \range($start, $end, $step);
+	) {
+		for ($i = $start; $i <= $end; $i += $step) {
+			yield $i;
+		}
 	}
 }

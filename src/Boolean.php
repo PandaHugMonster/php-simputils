@@ -30,8 +30,8 @@ class Boolean {
 	 */
 	public static function from(mixed $val, bool $strict = false): ?bool {
 		$sub_res = false;
-		if (is_string($val))
-			$val = strtolower($val);
+		if (Str::is($val))
+			$val = Str::lower($val);
 		if (!isset($val))
 			return false;
 		if (in_array($val, static::$array_yes))

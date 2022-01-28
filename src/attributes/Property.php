@@ -7,6 +7,7 @@ use ReflectionMethod;
 use ReflectionUnionType;
 use spaf\simputils\generic\BasicAttribute;
 use spaf\simputils\special\PropertiesCacheIndex;
+use spaf\simputils\Str;
 
 /**
  * Property attribute for methods
@@ -124,7 +125,7 @@ class Property extends BasicAttribute {
 		$method_type = $args[1] ?? $args['type'] ?? null;
 
 		if (!empty($method_type)) {
-			$method_type = strtolower($method_type);
+			$method_type = Str::lower($method_type);
 		} else {
 			$ref_ret_type = $ref?->getReturnType() ?? null;
 			if ($ref_ret_type instanceof ReflectionUnionType) {

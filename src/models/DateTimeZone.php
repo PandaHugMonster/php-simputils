@@ -2,7 +2,9 @@
 
 namespace spaf\simputils\models;
 
-class DateTimeZone extends \DateTimeZone {
+use spaf\simputils\generic\fixups\FixUpDateTimeZone;
+
+class DateTimeZone extends FixUpDateTimeZone {
 
 	public function __toString(): string {
 		return $this->getName();

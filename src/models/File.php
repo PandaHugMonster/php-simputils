@@ -10,6 +10,7 @@ use spaf\simputils\FS;
 use spaf\simputils\generic\BasicResource;
 use spaf\simputils\generic\BasicResourceApp;
 use spaf\simputils\PHP;
+use spaf\simputils\Str;
 use spaf\simputils\traits\FilesDirsTrait;
 use spaf\simputils\traits\RedefinableComponentTrait;
 use ValueError;
@@ -18,7 +19,6 @@ use function file_exists;
 use function file_put_contents;
 use function fopen;
 use function fstat;
-use function is_string;
 use function rewind;
 use function stat;
 use function stream_get_contents;
@@ -131,7 +131,7 @@ class File extends BasicResource {
 				$this->_ext = $file->extension;
 			}
 			$this->_mime_type = $mime_type ?? $file->mime_type;
-		} else if (is_string($file)) {
+		} else if (Str::is($file)) {
 			// File path is supplied
 			[$this->_path, $this->_name, $this->_ext] = FS::splitFullFilePath($file);
 			$this->_mime_type = $mime_type ?? FS::getFileMimeType($file);
@@ -141,7 +141,7 @@ class File extends BasicResource {
 
 
 		// FIX  Reconsider the code
-		if (empty($app) || is_string($app)) {
+		if (empty($app) || Str::is($app)) {
 			if (!empty($app)) {
 				$this->_is_default_app = false; // @codeCoverageIgnore
 			}

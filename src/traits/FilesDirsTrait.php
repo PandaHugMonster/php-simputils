@@ -4,7 +4,6 @@ namespace spaf\simputils\traits;
 
 use spaf\simputils\PHP;
 use spaf\simputils\Str;
-use function is_string;
 use function str_starts_with;
 use function substr;
 
@@ -63,7 +62,7 @@ trait FilesDirsTrait {
 		$ext = $this?->extension ?? null;
 		$ext = $include_ext && $ext?".{$ext}":null;
 
-		if (is_string($relativity)) {
+		if (Str::is($relativity)) {
 			$relativity = preg_replace('#'.$sep.'+#', $sep, "{$sep}{$relativity}{$sep}");
 			if (str_starts_with($this->_path, $relativity)) {
 				return substr($this->_path, Str::len($relativity)).$sep.$this->name.$ext;

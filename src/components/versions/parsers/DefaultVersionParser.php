@@ -7,6 +7,7 @@ namespace spaf\simputils\components\versions\parsers;
 use spaf\simputils\exceptions\IncorrectVersionFormat;
 use spaf\simputils\generic\BasicVersionParser;
 use spaf\simputils\models\Version;
+use spaf\simputils\Str;
 
 /**
  *
@@ -35,9 +36,9 @@ class DefaultVersionParser extends BasicVersionParser {
 			$_patch = 0;
 			preg_match($regexp, $string_version, $matches);
 		} else {
-			$string_version = strtoupper($string_version);
+			$string_version = Str::upper($string_version);
 			if (!empty($version_object->software_name))
-				$string_version = str_replace(strtoupper($version_object->software_name), '', $string_version);
+				$string_version = str_replace(Str::upper($version_object->software_name), '', $string_version);
 
 			$string_version = preg_replace('/[-_+.]+/', '.', $string_version);
 			$string_version = str_replace(' ', '', $string_version);

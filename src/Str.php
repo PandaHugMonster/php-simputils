@@ -3,7 +3,10 @@
 namespace spaf\simputils;
 
 use spaf\simputils\attributes\markers\Shortcut;
+use function is_string;
 use function strlen;
+use function strtolower;
+use function strtoupper;
 
 /**
  *
@@ -106,5 +109,41 @@ class Str {
 		if (json_last_error() === JSON_ERROR_NONE)
 			return true;
 		return false;
+	}
+
+	/**
+	 * Change all the letters to upper-case letters
+	 *
+	 * @param string $string Target string
+	 *
+	 * @return string
+	 */
+	#[Shortcut('\strtoupper()')]
+	public static function upper(string $string): string {
+		return strtoupper($string);
+	}
+
+	/**
+	 * Change all the letters to lower-case letters
+	 *
+	 * @param string $string Target string
+	 *
+	 * @return string
+	 */
+	#[Shortcut('\strtolower()')]
+	public static function lower(string $string): string {
+		return strtolower($string);
+	}
+
+	/**
+	 * Checks if the value is string
+	 *
+	 * @param mixed $val Target value
+	 *
+	 * @return bool True if the value is a string
+	 */
+	#[Shortcut('\is_string()')]
+	public static function is(mixed $val): bool {
+		return is_string($val);
 	}
 }

@@ -30,7 +30,6 @@ use function is_dir;
 use function is_null;
 use function is_object;
 use function is_resource;
-use function is_string;
 use function json_decode;
 use function json_encode;
 use function json_last_error;
@@ -41,7 +40,6 @@ use function print_r;
 use function realpath;
 use function serialize;
 use function str_contains;
-use function strtolower;
 use function unserialize;
 use const JSON_ERROR_NONE;
 
@@ -67,6 +65,12 @@ class PHP {
 
 	const SERIALIZATION_TYPE_JSON = 0;
 	const SERIALIZATION_TYPE_PHP = 1;
+
+	private static $framework_location = null;
+
+	public static function frameworkDir() {
+		return static::$framework_location;
+	}
 
 	public static string $serialized_class_key_name = '#class';
 	public static string|int $serialization_mechanism = self::SERIALIZATION_TYPE_JSON;
@@ -114,21 +118,10 @@ class PHP {
 	 *      as early as possible in your main app. It should be the very first thing to be called
 	 *      right after the "composer autoloader".
 	 *
-	 * IMP  Modules/Libraries/Extensions and any external code that calls `PHP::init()` without
-	 *      `$name` or with value of "app" - must be considered as unsafe!
-	 *
-	 * IMP  `$name` argument must be always supplied (through `$config` or through `$name`).
-	 *      For the security reasons name must be unique and during runtime persist as final.
-	 *      So multiple libraries can not use the same name.
-	 *
-	 * NOTE `$name` parameter can be omit, in this case code will be consider as the "app code",
-	 *      and not "module/library/extension code". Modules/Libraries/Extensions MUST NEVER call
-	 *      `PHP::init()` without $name parameter, and not use reserved word "app".
-	 *      If you are developing the "leaf" code (main app, and not a library) - then
-	 *      you should not specify `$name` or you can set it to "app" which is being default.
-	 *
 	 */
 	public static function init(null|array|Box|BasicInitConfig $args = null): BasicInitConfig {
+		static::$framework_location = __DIR__;
+
 		$config = null;
 		if ($args instanceof BasicInitConfig) {
 			$config = $args;
@@ -366,7 +359,7 @@ class PHP {
 	 * @return bool
 	 */
 	public static function isClass(mixed $class_or_not): bool {
-		if (is_string($class_or_not)) {
+		if (Str::is($class_or_not)) {
 			if (class_exists($class_or_not, true)) {
 				return true;
 			}
@@ -663,6 +656,8 @@ class PHP {
 	 *
 	 * @return DateTime|null
 	 *
+	 * FIX  Must be from DT::, not PHP::
+	 *
 	 * @throws \Exception Parsing error
 	 */
 	public static function now(?DateTimeZone $tz = null): ?DateTime {
@@ -678,6 +673,8 @@ class PHP {
 	 *                                 a special date-time format to parse
 	 *
 	 * @return DateTime|null
+	 *
+	 * FIX  Must be from DT::, not PHP::
 	 *
 	 * @throws \Exception Parsing error
 	 */
@@ -765,7 +762,7 @@ class PHP {
 	 * @return bool Returns true if console, returns false if web
 	 */
 	public static function isConsole(): bool {
-		$sapi_value = strtolower(static::info()->sapi_name);
+		$sapi_value = Str::lower(static::info()->sapi_name);
 		return str_contains($sapi_value, 'cli');
 	}
 

@@ -2,7 +2,9 @@
 
 namespace spaf\simputils\traits;
 
+use spaf\simputils\FS;
 use spaf\simputils\models\Box;
+use spaf\simputils\models\File;
 use spaf\simputils\PHP;
 use function is_array;
 use function is_null;
@@ -341,6 +343,20 @@ trait MetaMagic {
 		return PHP::createDummy(static::class);
 	}
 
+	public static function createFrom(File|string $file) {
+		$file = FS::file($file);
+		$obj = static::createDummy();
+		$content = $file->content ?? [];
+		return static::_metaMagic($obj, '___setup', $content);
+	}
+
+	protected static function ___l10n(array $data) {
+		$prefix = 'l10n';
+		foreach ($data as $k => $v) {
+			static::${"{$prefix}_{$k}"} = $v;
+		}
+	}
+
 	/**
 	 * Setup object with fields values from assoc-array
 	 *
@@ -423,6 +439,7 @@ trait MetaMagic {
 	 * @see MetaMagic::___serialize() Serialization meta-magic
 	 * @see MetaMagic::___deserialize() Deserialization meta-magic
 	 * @see MetaMagic::___setup() Object fulfilling meta-magic
+	 * @see MetaMagic::___l10n() Object fulfilling meta-magic
 	 *
 	 * @see https://www.php.net/manual/en/language.oop5.visibility.php#language.oop5.visibility-other-objects
 	 *      Visibility of the "relatives"
@@ -438,6 +455,7 @@ trait MetaMagic {
 			'___serialize' => $context->___serialize(),
 			'___deserialize' => $context->___deserialize(...$spell),
 			'___setup' => $context->___setup(...$spell),
+			'___l10n' => $context::___l10n(...$spell),
 		};
 		return $res;
 	}

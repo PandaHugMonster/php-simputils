@@ -7,14 +7,18 @@ use spaf\simputils\attributes\Property;
 use spaf\simputils\interfaces\InitBlockInterface;
 use spaf\simputils\models\Box;
 use spaf\simputils\models\InitConfig;
+use spaf\simputils\models\L10n;
+use spaf\simputils\PHP;
 use spaf\simputils\special\CodeBlocksCacheIndex;
 use spaf\simputils\special\CommonMemoryCacheIndex;
+use spaf\simputils\Str;
 use ValueError;
 use function is_numeric;
 
 /**
  *
  * @property-read Box|array $successful_init_blocks
+ * @property-read ?L10n $l10n
  */
 abstract class BasicInitConfig extends SimpleObject {
 
@@ -22,20 +26,52 @@ abstract class BasicInitConfig extends SimpleObject {
 	const REDEF_PR = 'pr';
 	const REDEF_BOX = 'Box';
 	const REDEF_DATE_TIME = 'DateTime';
+	const REDEF_DATE_TIME_ZONE = 'DateTimeZone';
 	const REDEF_FILE = 'File';
 	const REDEF_DIR = 'Dir';
 	const REDEF_PHP_INFO = 'PhpInfo';
 	const REDEF_VERSION = 'Version';
 	const REDEF_LOGGER = 'Logger';
+	const REDEF_L10N = 'L10n';
 
 	public ?string $name = null;
 	public ?string $code_root = null;
 	public ?string $working_dir = null;
 	public array|Box $disable_init_for = [];
+	protected null|string $_l10n_name = null;
+	protected mixed $_l10n = null;
 
 	protected array $_successful_init_blocks = [];
 	protected bool $_is_already_setup = false;
 
+
+	#[Property('l10n_name')]
+	protected function getL10nName(): mixed {
+		return $this->_l10n_name;
+	}
+
+	#[Property('l10n')]
+	protected function getL10n(): mixed {
+		return $this->_l10n;
+	}
+
+	#[Property('l10n')]
+	protected function setL10n(null|string|L10n $val): void {
+		if (Str::is($val)) {
+			$this->_l10n_name = $val;
+
+			$class = PHP::redef(L10n::class);
+			$l10n_name = Str::upper($val);
+			$path = PHP::path(PHP::frameworkDir(), 'data', 'l10n', "{$l10n_name}.json");
+			$val = $class::createFrom($path);
+		}
+
+		/** @var L10n $val */
+		if ($val::$is_auto_setup) {
+			$val->doSetUp();
+		}
+		$this->_l10n = $val;
+	}
 
 	/**
 	 * @return array

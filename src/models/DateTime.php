@@ -6,14 +6,23 @@ namespace spaf\simputils\models;
 use spaf\simputils\attributes\Property;
 use spaf\simputils\DT;
 use spaf\simputils\generic\fixups\FixUpDateTime;
+use spaf\simputils\PHP;
 
 /**
  * DateTime model of the framework
  *
  * It's inherited from the php-native DateTime object
  *
- * @property-read string $date Date part
- * @property-read string $time Time part
+ * When you want to operate or store the object as a string in absolute, UTC and proper format
+ * use property `for_system`
+ * ```php
+ *  ts()
+ *
+ * ```
+ *
+ * @property-read \spaf\simputils\models\Date|string $date Date part (stringifiable object)
+ *
+ * @property-read \spaf\simputils\models\Time|string $time Time part
  * @property-read \spaf\simputils\models\DateTimeZone $tz
  *
  * @property int $week ISO 8601 week number of year, weeks starting on Monday
@@ -31,17 +40,35 @@ use spaf\simputils\generic\fixups\FixUpDateTime;
  *
  * @property-read int $milli Milliseconds, at most 3 digits
  * @property int $micro Microseconds at most 6 digits
+ *
+ * @property string $for_system Returns UTC absolute and ready to store in string format value
+ * @property string $for_user Returns formatted relative to a user settings/locale
  */
 class DateTime extends FixUpDateTime {
 
+	public static $l10n_user_date_format = DT::FMT_DATE;
+	public static $l10n_user_time_format = DT::FMT_TIME;
+	public static $l10n_user_datetime_format = DT::FMT_DATETIME;
+	public static $l10n_user_default_tz = 'UTC';
+
+	/**
+	 *
+	 * FIX  Implement caching of the value
+	 * @return string
+	 */
 	#[Property('date')]
-	protected function getDateExt(): string {
-		return $this->format(DT::FMT_DATE);
+	protected function getDateExt(): Date|string {
+		return new Date($this);
 	}
 
+	/**
+	 *
+	 * FIX  Implement caching of the value
+	 * @return string
+	 */
 	#[Property('time')]
-	protected function getTime(): string {
-		return $this->format(DT::FMT_TIME);
+	protected function getTime(): Time|string {
+		return new Time($this);
 	}
 
 	#[Property('week')]
@@ -150,7 +177,28 @@ class DateTime extends FixUpDateTime {
 		return (int) $this->format('v');
 	}
 
+	public function getForSystemObj() {
+		$tz_class = PHP::redef(DateTimeZone::class);
+		$obj = DT::normalize(
+			$this,
+			$this->tz,
+			is_clone_allowed: true
+		);
+		$obj->setTimezone(new $tz_class('UTC'));
+		return $obj;
+	}
+
+	#[Property('for_system')]
+	protected function getForSystem(): string {
+		return $this->getForSystemObj()->format(DT::FMT_DATETIME_FULL);
+	}
+
+	#[Property('for_user')]
+	protected function getForUser(): string {
+		return $this->format(static::$l10n_user_datetime_format);
+	}
+
 	public function __toString(): string {
-		return DT::stringify($this);
+		return $this->getForUser();
 	}
 }

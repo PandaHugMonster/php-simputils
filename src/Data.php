@@ -123,7 +123,7 @@ class Data {
 	 */
 	public static function clearUnit(string $unit): string {
 		$unit_codes = array_keys(static::unitCodeToPowerArray());
-		$unit = preg_replace('/[^A-Z]/', '', strtoupper($unit));
+		$unit = preg_replace('/[^A-Z]/', '', Str::upper($unit));
 		if (empty($unit))
 			throw new UnspecifiedDataUnit();
 		if (!in_array($unit, $unit_codes))

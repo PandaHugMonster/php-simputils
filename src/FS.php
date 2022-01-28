@@ -121,7 +121,7 @@ class FS {
 		}
 
 		if (!empty($sorting)) {
-			if (is_string($sorting) || is_callable($sorting)) {
+			if (Str::is($sorting) || is_callable($sorting)) {
 				$sorting($res);
 			} else {
 				sort($res);

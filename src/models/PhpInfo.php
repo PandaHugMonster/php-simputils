@@ -9,11 +9,11 @@ use spaf\simputils\generic\constants\ConstPHPInfo as constants;
 use spaf\simputils\PHP;
 use spaf\simputils\special\CodeBlocksCacheIndex;
 use spaf\simputils\special\CommonMemoryCacheIndex;
+use spaf\simputils\Str;
 use spaf\simputils\System;
 use spaf\simputils\traits\ArrayReadOnlyAccessTrait;
 use spaf\simputils\traits\RedefinableComponentTrait;
 use function in_array;
-use function is_string;
 
 /**
  * PHP Info class instance
@@ -124,7 +124,7 @@ class PhpInfo extends Box {
 	): mixed {
 		$reg_exps = $reg_exps ?? static::getPhpInfoRegExpArray();
 		$phpinfo = static::getOriginalPhpInfo();
-		if (is_string($callback)) {
+		if (Str::is($callback)) {
 			$callback = match ($callback) {
 				'bool', 'boolean' => fn($v) => Boolean::from($v ?? ''),
 				'empty-null' => fn($v) => empty($v)?null:$v,

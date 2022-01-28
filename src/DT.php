@@ -64,7 +64,7 @@ class DT implements DateTimeHelperInterface {
 	): ?DateTime {
 		$class = static::_getClass();
 
-		if (is_string($dt)) {
+		if (Str::is($dt)) {
 			$res = !empty($fmt)
 				?$class::createFromFormat($fmt, $dt, $tz)
 				:new $class($dt, $tz);

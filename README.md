@@ -31,6 +31,7 @@ What has left to do with the documentation:
  * [ ] Build a md-documents-map
  * [ ] Remove all the obsolete documents
  * [ ] Clear up all the obsolete leftovers
+ * [ ] Add highlights on the main page
 
 ----
 
@@ -62,16 +63,19 @@ More about semantic versioning: [Semantic Versioning Explanation](https://semver
     2. [Core Static Classes and Functions](#Core-Static-Classes-and-Functions)
     3. [Core Models](#Core-Models)
     4. [Core Attributes](#Core-Attributes)
- 4. [Other Components](#Other-Components) (Empty for now)
- 5. [Examples](#Examples)
-    1. [Properties - Getters and Setters](#Properties--Getters-and-Setters)
-    2. [Working with files](#Working-with-files)
-    3. [Version objects and working with versions](#Version-objects-and-working-with-versions)
-    4. [Advanced PHP Info object](#Advanced-PHP-Info-object)
-    5. [DotEnv and Env Vars](#DotEnv-and-Env-Vars)
-    6. [Boxes or advanced arrays](#Boxes-or-advanced-arrays)
-    7. [Advanced Date and Time](#Advanced-Date-and-Time)
- 6. [Further documentation](#Further-documentation)
+ 4. [Features](#Features)
+    1. [Date and Time](#Date-and-Time)
+ 5. [Other Components](#Other-Components) (Empty for now)
+ 6. [Examples](#Examples)
+    1. [InitConfigs and bootstrapping process](#InitConfigs-and-bootstrapping-process)
+    2. [Properties - Getters and Setters](#Properties--Getters-and-Setters)
+    3. [Working with files](#Working-with-files)
+    4. [Version objects and working with versions](#Version-objects-and-working-with-versions)
+    5. [Advanced PHP Info object](#Advanced-PHP-Info-object)
+    6. [DotEnv and Env Vars](#DotEnv-and-Env-Vars)
+    7. [Boxes or advanced arrays](#Boxes-or-advanced-arrays)
+    8. [Advanced Date and Time](#Advanced-Date-and-Time)
+ 7. [Further documentation](#Further-documentation)
  
 ## Installation
 
@@ -190,7 +194,49 @@ have JetBrains' (PHPStorm) composer dependency for similar attributes.
 And the answer would be: I really adore and love JetBrains and all of their products, 
 but I can not let having additional composer dependency just for a few attributes.
 
-## Other Components
+## Features
+
+### Date and Time
+
+Work with Date and Time was always a nightmare under as minimum PHP (Under other languages
+it's not much better).
+
+So this is a set of functionality suppose to improve overall satisfaction operating 
+with Date and Time.
+
+#### Relevant components
+ 1. `\spaf\simputils\models\DateTime` - Extended version of native PHP `\DateTime`
+ 2. `\spaf\simputils\models\DateTimeZone` - Extended version of native PHP `\DateTimeZone`
+ 3. `\spaf\simputils\DT` - Helper to work with Date and Time
+ 4. `\spaf\simputils\basic\now` - A shortcut to `\spaf\simputils\DT::now()`
+ 5. `\spaf\simputils\basic\ts` - A shortcut to `\spaf\simputils\DT::ts()`
+
+In the most cases you just need shortcuts `now()` and `ts()` to work with date and time
+
+#### Examples
+
+```php
+
+use spaf\simputils\PHP;
+use function spaf\simputils\basic\now;
+use function spaf\simputils\basic\pr;
+
+PHP::init();
+
+$dt_obj = now();
+
+pr($dt_obj->for_system);
+
+
+
+
+```
+
+
+
+
+-----------------
+
 
 ## Examples
 
@@ -206,7 +252,7 @@ Please refer to the corresponding page of each component, or Ref API pages.
 : Your target application (not a submodule or a library)
 
 **A sub app**
-: Library, sub-module, externel code package
+: Library, sub-module, external code package
 
 Bootstrapping of the framework is called init/initialization.
 
@@ -241,9 +287,9 @@ For example DotEnv functionality is activated by default as `InitBlock`.
 `InitConfig` will be initialized. Basically switchable "plugins" or "extensions"
 
 
-There are 2 ways of specifying InitConfigs
+There are 2 ways of specifying InitConfigs.
 
-First method is to just provide an array with key-value pair of fields for the InitConfig.
+First method is just to provide an array with key-value pair of fields for the InitConfig.
 
 Like that:
 
@@ -287,7 +333,8 @@ PHP::init(new MyCustomInitConfig);
 
 ```
 
-At any point of time you can receive the config by this command:
+At any point of time you can receive the config by this command (for **the main app** 
+init config object):
 
 ```php
 
@@ -320,11 +367,13 @@ class MyInitBlock implements InitBlockInterface {
         // This code will be initialized during `PHP::init()` call
         // This command will add environmental variable "MY_SPECIAL_ENV_VARIABLE" 
         PHP::envSet('MY_SPECIAL_ENV_VARIABLE', 'Pandas love bamboo!', true);
+        return true;
     }
 
 }
 
 
+// Mind the array brackets
 PHP::init([ new MyInitBlock ])
 
 // IMP  At this point if our custom InitBlock class was successfully initialized
@@ -333,55 +382,25 @@ PHP::init([ new MyInitBlock ])
 pr(env('MY_SPECIAL_ENV_VARIABLE'));
 
 ```
+The code above will output: `Pandas love bamboo!`
+
 
 **Important:** This short syntax is preferable, but requires the definition of InitBlock 
 objects directly into the config-init array (This syntax will work only with real objects, 
 not class strings, and only for `PHP::init([])`), that InitBlock must 
 implement `\spaf\simputils\interfaces\InitBlockInterface`. 
-This syntax will not work with ...
-
-**<mark> REFACTOR, maybe requires architecture revision !</mark>**
 
 
-or add to `$init_blocks` field of InitConfig's like that:
-
-```php
-
-use spaf\simputils\interfaces\InitBlockInterface;
-use spaf\simputils\PHP;
-use function spaf\simputils\basic\env;use function spaf\simputils\basic\pr;
-
-class MyInitBlock implements InitBlockInterface {
-
-    public function initBlock(BasicInitConfig $config): bool {
-        // This code will be initialized during `PHP::init()` call
-        // This command will add environmental variable "MY_SPECIAL_ENV_VARIABLE" 
-        PHP::envSet('MY_SPECIAL_ENV_VARIABLE', 'Pandas love bamboo!', true);
-    }
-
-}
-
-
-PHP::init([ new MyInitBlock ])
-
-// IMP  At this point if our custom InitBlock class was successfully initialized
-//      we will have access to "MY_SPECIAL_ENV_VARIABLE" env variable!
-
-pr(env('MY_SPECIAL_ENV_VARIABLE'));
-
-```
-
-The code above will output: `Pandas love bamboo!`
 You can create as much such InitBlocks as you want. Just remember, all of them will be ran
 for each request... So if you are working with another framework, you should use their
-bootstrapping mechanisms. In case of Yii2 you should follow thise one: 
+bootstrapping mechanisms. In case of Yii2 you should follow this one: 
 https://www.yiiframework.com/doc/guide/2.0/en/runtime-bootstrapping
 
 If you use initially just the SimpUtils framework, then of course you could use this 
-InitConfig process. Just remember that his can lead to drastically under-performing solution
+InitConfig process. Just remember that this can lead to drastically under-performing solution
 of yours.
 
-If you asking question: "Then why would we want it, if we have such functionality in our
+If you ask a question: "Then why would we want it, if we have such functionality in our
 preferred framework like Yii2, laravel, etc."?
 
 The answer would be: SimpUtils is a micro-framework, self-sufficient more or less, and
@@ -396,17 +415,17 @@ file - you will not be able to do that easily.
 **So the SimpUtils initialization/bootstrapping mechanisms are early-stage mechanisms**.
 
 Besides that, if you have to work raw without a big framework, you would have to implement
-your own bootstrapping mechanisms. And it would be inefficient. Much easier to use this 
+your own bootstrapping mechanisms. And to spare some time, much easier to use this 
 low-level mechanism of SimpUtils.
 
 
 #### Overall architecture of initialization process
 
-Initialization process of SimpUtils is modular with a single entry-point.
+Initialization process of SimpUtils is modular, with a single entry-point.
 
 **The main app** calls `PHP::init()`, this is a single entry point. No module should
 try to run it, in case if it's done outside of **the main app**, then that module must
-be considered as unsafe.
+be considered unsafe.
 
 But every **sub app** (module) can register their very own InitConfig.
 For that purpose they have to specify a unique name (usually own-module-name) for the
@@ -439,7 +458,7 @@ PHP::init(new MyModCodeExampleInitConfig)
 ```
 
 At this point config for that name is registered with this config object.
-You can get the config object at any point (not recommended, but yes, even outside of your 
+You can get the config object at any point ("not recommended", but yes, even outside of your 
 code stub):
 
 ```php

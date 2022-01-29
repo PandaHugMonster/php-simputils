@@ -2,13 +2,12 @@
 
 namespace spaf\simputils\generic\fixups;
 
-use DateInterval;
 use spaf\simputils\models\InitConfig;
 use spaf\simputils\traits\MetaMagic;
 use spaf\simputils\traits\PropertiesTrait;
 use spaf\simputils\traits\RedefinableComponentTrait;
 
-class FixUpDateInterval extends DateInterval {
+class FixUpDateInterval extends \DateInterval {
 	use PropertiesTrait;
 	use RedefinableComponentTrait;
 	use MetaMagic;

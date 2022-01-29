@@ -52,6 +52,10 @@ the next major version change).
 
 More about semantic versioning: [Semantic Versioning Explanation](https://semver.org).
 
+----
+
+The framework defines some special terms/meanings. 
+Here is [Glossary of SimpUtils terms](docs/glossary.md)
 
 ## Index
 
@@ -65,8 +69,11 @@ More about semantic versioning: [Semantic Versioning Explanation](https://semver
     4. [Core Attributes](#Core-Attributes)
  4. [Features](#Features)
     1. [Date and Time](#Date-and-Time)
- 5. [Other Components](#Other-Components) (Empty for now)
- 6. [Examples](#Examples)
+       1. [Date and Time relevant components](#Date-and-Time-relevant-components)
+       2. [Cool math and perks for Date and Time](#Cool-math-and-perks-for-Date-and-Time) 
+          (Useful examples are also here)
+       3. [Date and Time System output and User output](#Date-and-Time-System-output-and-User-output)
+ 5. [Examples](#Examples)
     1. [InitConfigs and bootstrapping process](#InitConfigs-and-bootstrapping-process)
     2. [Properties - Getters and Setters](#Properties--Getters-and-Setters)
     3. [Working with files](#Working-with-files)
@@ -75,7 +82,7 @@ More about semantic versioning: [Semantic Versioning Explanation](https://semver
     6. [DotEnv and Env Vars](#DotEnv-and-Env-Vars)
     7. [Boxes or advanced arrays](#Boxes-or-advanced-arrays)
     8. [Advanced Date and Time](#Advanced-Date-and-Time)
- 7. [Further documentation](#Further-documentation)
+ 6. [Further documentation](#Further-documentation)
  
 ## Installation
 
@@ -125,8 +132,6 @@ need of usage the whole framework code. It was developed with the logic
 of being maximally transparent and easy to use out of the box.
 
 ## Main Components
-
-_Hint: to understand all the benefits of components - see examples_
 
 ### Core Shortcuts
 
@@ -198,26 +203,26 @@ but I can not let having additional composer dependency just for a few attribute
 
 ### Date and Time
 
-Work with Date and Time was always a nightmare under as minimum PHP (Under other languages
-it's not much better).
+Work with Date and Time was always a nightmare in PHP (and in other languages as well).
 
 So this is a set of functionality suppose to improve overall satisfaction operating 
 with Date and Time.
 
-#### Relevant components
- 1. `\spaf\simputils\models\DateTime` - Extended version of native PHP `\DateTime`
+#### Date and Time relevant components
+ 1. `\spaf\simputils\models\DateTime` - Extended version of native PHP `\DateTime` some
+    more details here: [DateTime model](docs/about-date-time.md)
  2. `\spaf\simputils\models\DateTimeZone` - Extended version of native PHP `\DateTimeZone`
- 2. `\spaf\simputils\models\DateInterval` - Extended version of native PHP `\DateInterval`
- 2. `\spaf\simputils\models\DatePeriod` - Extended version of native PHP `\DatePeriod`
- 2. `\spaf\simputils\models\Date` - Date **Prism** for `DateTime`
- 2. `\spaf\simputils\models\Time` - Time **Prism** for `DateTime`
- 3. `\spaf\simputils\DT` - A static helper to work with Date and Time
- 4. `\spaf\simputils\basic\now` - A shortcut to `\spaf\simputils\DT::now()`
- 5. `\spaf\simputils\basic\ts` - A shortcut to `\spaf\simputils\DT::ts()`
+ 3. `\spaf\simputils\models\DateInterval` - Extended version of native PHP `\DateInterval`
+ 4. `\spaf\simputils\models\DatePeriod` - Extended version of native PHP `\DatePeriod`
+ 5. `\spaf\simputils\models\Date` - Date **Prism** for `DateTime`
+ 6. `\spaf\simputils\models\Time` - Time **Prism** for `DateTime`
+ 7. `\spaf\simputils\DT` - A static helper to work with Date and Time
+ 8. `\spaf\simputils\basic\now` - A shortcut to `\spaf\simputils\DT::now()`
+ 9. `\spaf\simputils\basic\ts` - A shortcut to `\spaf\simputils\DT::ts()`
 
 In the most cases you just need shortcuts `now()` and `ts()` to work with date and time
 
-#### Cool math and perks for date and time
+#### Cool math and perks for Date and Time
 
 Simple quick iterations over the date period
 ```php
@@ -410,15 +415,49 @@ echo "{$dt->diff()}\n";
 `$this->snapshotOrigValue(false)` with `false` first argument. If you call that method
 without argument or with `true` - it will override the condition with the current one.
 
------
+Example of `DatePeriod`
+```php
 
-Should be added more examples and documentation about DateInterval and DatePeriod
-=======
+use spaf\simputils\PHP;
+use function spaf\simputils\basic\pr;
+use function spaf\simputils\basic\ts;
 
------
+
+$conf = PHP::init([
+	'l10n' => 'AT'
+]);
+
+$dp = ts('2020-01-01')->walk('2020-05-05', '1 day');
+
+pr("$dp");
+
+// Output would be:
+//  01.01.2020 00:00 - 05.05.2020 00:00
+```
+
+Example of `DateInterval`
+
+```php
+
+use spaf\simputils\PHP;
+use spaf\simputils\models\DateInterval;
+
+$conf = PHP::init([
+	'l10n' => 'AT'
+]);
+
+$di = DateInterval::createFromDateString('2 days');
+
+pr("$di");
+// Output would be:
+//  + 2 days
+
+```
+
+Suggested to always use SimpUtils versions of DateTime related classes.
 
 
-#### System output and User output
+#### Date and Time System output and User output
 
 Worth mentioning that there are as minimum 2 important "output modes"
  * **User output** - this is an output in country/locale-wise format with TimeZones applied

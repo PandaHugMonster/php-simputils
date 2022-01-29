@@ -1,6 +1,6 @@
 {
   "name": "spaf/simputils",
-  "description": "Simple minimal but useful set of utils (strings, datetimes, etc.) ",
+  "description": "Simple minimal but useful set of utils (properties, strings, datetimes, etc.) ",
   "keywords": [
     "simple", "utils", "micro", "framework", "quick prototyping",
     "properties", "phpinfo", "php", "easy cast", "meta-magic", "files",

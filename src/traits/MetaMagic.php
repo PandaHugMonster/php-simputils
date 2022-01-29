@@ -2,10 +2,12 @@
 
 namespace spaf\simputils\traits;
 
+use Exception;
 use spaf\simputils\FS;
 use spaf\simputils\models\Box;
 use spaf\simputils\models\File;
 use spaf\simputils\PHP;
+use function get_object_vars;
 use function is_array;
 use function is_null;
 use function is_object;
@@ -281,6 +283,58 @@ trait MetaMagic {
 			}
 		}
 		return $res;
+	}
+
+	/**
+	 * Copies state of this object to the new object of specified class
+	 *
+	 * For the purpose of migrating the parent narrow class object, to the child wider
+	 * class object.
+	 *
+	 * @param string|object $class_or_object          Class/Object that should be filled up
+	 *                                                with data
+	 * @param bool          $strict_inheritance_check Additional check to make sure the provided
+	 *                                                class or object is a child from this one.
+	 *                                                By default is true
+	 *
+	 * @return object Always returns a new object of type provided as a first argument
+	 * @throws \Exception
+	 */
+//	public function expandTo(
+//		string|object $class_or_object,
+//		bool $strict_inheritance_check = true
+//	): object {
+//		if (Str::is($class_or_object)) {
+//			$obj = new $class_or_object();
+//		} else {
+//			$obj = $class_or_object;
+//		}
+//		if ($strict_inheritance_check) {
+//			if (!PHP::isClassIn($obj, $this)) {
+//				throw new Exception('Expanding object strict inheritance check failed');
+//			}
+//		}
+//
+//		static::_metaMagic($obj, '___setup', $this->toArray());
+//
+//		return $obj;
+//	}
+
+	public static function expandFrom(
+		object $parent,
+		?object $child = null,
+		bool $strict_inheritance_check = true
+	): object {
+		$obj = $child ?? static::createDummy();
+		if ($strict_inheritance_check) {
+			if (!PHP::isClassIn($parent, $obj)) {
+				throw new Exception('Expanding object strict inheritance check failed');
+			}
+		}
+
+		static::_metaMagic($obj, '___setup', get_object_vars($parent));
+
+		return $obj;
 	}
 
 //	/**

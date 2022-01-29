@@ -4,7 +4,7 @@ namespace spaf\simputils\models;
 
 use spaf\simputils\attributes\Property;
 use spaf\simputils\DT;
-use spaf\simputils\generic\BasicPrism;
+use spaf\simputils\generic\fixups\FixUpDateTimePrism;
 
 /**
  * Date Prism
@@ -15,7 +15,7 @@ use spaf\simputils\generic\BasicPrism;
  * @property-read string $for_system
  * @property-read string $for_user
  */
-class Time extends BasicPrism {
+class Time extends FixUpDateTimePrism {
 
 	#[Property('for_system')]
 	protected function getForSystem(): string {
@@ -26,9 +26,5 @@ class Time extends BasicPrism {
 	protected function getForUser(): string {
 		$obj = $this->_object;
 		return $obj->format($obj::$l10n_user_time_format);
-	}
-
-	public function __toString(): string {
-		return $this->getForUser();
 	}
 }

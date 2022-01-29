@@ -10,6 +10,8 @@ general purpose meaning.
 
  * [Prism](#term-prism)
  * [Property](#term-property)
+ * [Virtual Property](#term-virtual-property)
+ * [Real Property](#term-real-property)
 
 
 <dl>

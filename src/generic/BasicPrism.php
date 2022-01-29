@@ -28,7 +28,12 @@ abstract class BasicPrism extends SimpleObject {
 		return $this->_object;
 	}
 
-	public function __construct(object $target_object) {
+	public function init($target_object) {
 		$this->_object = $target_object;
+	}
+
+	public static function wrap(object $target_object) {
+		$self = static::createDummy();
+		$self->init($target_object);
 	}
 }

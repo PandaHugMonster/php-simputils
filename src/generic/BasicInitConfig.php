@@ -18,7 +18,7 @@ use function is_numeric;
 /**
  *
  * @property-read Box|array $successful_init_blocks
- * @property-read ?L10n $l10n
+ * @property ?L10n $l10n
  */
 abstract class BasicInitConfig extends SimpleObject {
 
@@ -27,6 +27,8 @@ abstract class BasicInitConfig extends SimpleObject {
 	const REDEF_BOX = 'Box';
 	const REDEF_DATE_TIME = 'DateTime';
 	const REDEF_DATE_TIME_ZONE = 'DateTimeZone';
+	const REDEF_DATE_INTERVAL = 'DateInterval';
+	const REDEF_DATE_PERIOD = 'DatePeriod';
 	const REDEF_FILE = 'File';
 	const REDEF_DIR = 'Dir';
 	const REDEF_PHP_INFO = 'PhpInfo';

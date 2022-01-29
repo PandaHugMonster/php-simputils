@@ -29,9 +29,9 @@ Other libraries will define their own basic shortcuts in their own `basic.php` f
 Here are basic core shortcuts:
 1. `pd()`  - Please Die method shortcut | [pd()](#pd)
 2. `box()` - returns `Box` array wrapper object | [box()](#box)
-3. `now()` - returns [DateTime](about-date-time.md) object of a current
+3. `now()` - returns [DateTime](date-and-time.md#DateTime-model) object of a current
    date time | [now()](#now)
-4. `ts()`  - returns [DateTime](about-date-time.md) object of specified
+4. `ts()`  - returns [DateTime](date-and-time.md#DateTime-model) object of specified
    date time | [ts()](#ts)
 5. `fl()`  - returns `File` object representing real or
    virtual file | [fl()](#fl)

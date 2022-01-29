@@ -26,9 +26,6 @@
   "suggest": {
     "spaf/yii2-simputils": "Extension for Yii2 framework integrating SimpUtils tools"
   },
-  "replace": {
-    "spaf/simputils": "*"
-  },
   "autoload": {
     "psr-4": {
       "spaf\\simputils\\": "src/"

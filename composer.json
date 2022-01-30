@@ -31,5 +31,10 @@
       "spaf\\simputils\\": "src/"
     },
     "files": ["src/basic.php"]
+  },
+  "scripts": {
+    "test": [
+      "phpunit tests"
+    ]
   }
 }

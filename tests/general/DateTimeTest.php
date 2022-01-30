@@ -4,6 +4,7 @@ use PHPUnit\Framework\TestCase;
 use spaf\simputils\DT;
 use spaf\simputils\models\DateTime;
 use spaf\simputils\PHP;
+use spaf\simputils\Str;
 use function spaf\simputils\basic\ts;
 
 /**
@@ -68,7 +69,11 @@ class DateTimeTest extends TestCase {
 		$dt_class = PHP::redef(DateTime::class);
 		$now = DT::now();
 		$this->assertInstanceOf($dt_class, $now, 'Is a date-time object');
-		$this->assertEquals(DT::stringify($now), strval($now), 'Is a string-compatible');
+		$this->assertEquals(
+			DT::stringify($now),
+			Str::ing($now->for_system),
+			'Is a string-compatible'
+		);
 	}
 
 	/**

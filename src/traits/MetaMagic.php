@@ -436,7 +436,10 @@ trait MetaMagic {
 	 * @return Box|array
 	 */
 	protected function ___serialize(): Box|array {
-		return $this->toArray(PHP::$serialization_mechanism === PHP::SERIALIZATION_TYPE_JSON);
+		return $this->toArray(
+			PHP::$serialization_mechanism === PHP::SERIALIZATION_TYPE_JSON,
+			true
+		);
 	}
 
 	/**

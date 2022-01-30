@@ -3,6 +3,7 @@
 namespace spaf\simputils;
 
 use spaf\simputils\attributes\markers\Shortcut;
+use function is_null;
 use function is_string;
 use function strlen;
 use function strtolower;
@@ -119,8 +120,8 @@ class Str {
 	 * @return string
 	 */
 	#[Shortcut('\strtoupper()')]
-	public static function upper(string $string): string {
-		return strtoupper($string);
+	public static function upper(null|string $string): string {
+		return is_null($string)?'':strtoupper($string);
 	}
 
 	/**
@@ -131,8 +132,8 @@ class Str {
 	 * @return string
 	 */
 	#[Shortcut('\strtolower()')]
-	public static function lower(string $string): string {
-		return strtolower($string);
+	public static function lower(null|string $string): string {
+		return is_null($string)?'':strtolower($string);
 	}
 
 	/**

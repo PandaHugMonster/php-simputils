@@ -271,4 +271,8 @@ class DateTime extends FixUpDateTime {
 	public function __toString(): string {
 		return $this->getForUser();
 	}
+
+	public static function redefComponentName(): string {
+		return InitConfig::REDEF_DATE_TIME;
+	}
 }

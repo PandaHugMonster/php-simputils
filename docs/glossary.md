@@ -46,3 +46,8 @@ general purpose meaning.
         In-class variables that are directly defined in a class (Non-virtual ones)
     </dd>
 </dl>
+
+## Additional clarifications
+
+ 1. "Lib", "Package", "Framework" and "Micro-framework" could be used in reference 
+    to this code-base.

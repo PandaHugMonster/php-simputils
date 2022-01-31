@@ -45,7 +45,7 @@ class MetaMagicTest extends TestCase {
 		$res = $obj->toJson(true, true);
 		$this->assertIsString($res, 'Is a pretty string');
 
-		$res = $obj->toJson(true);
+		$res = $obj->toJson(with_class: true);
 		$this->assertIsString($res, 'Is a string');
 
 		$json = json_decode($res, true);

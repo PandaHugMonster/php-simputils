@@ -1,3 +1,7 @@
+[<< Back to README.md](../README.md)
+
+----
+
 ## Version object
 Version object represents the information about software version in a form of an object, allowing to do some operations like
 "version string parsing", "comparison", "sorting", "easy conversion to string", etc.

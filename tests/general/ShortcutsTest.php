@@ -8,7 +8,7 @@ use spaf\simputils\models\DateTime;
 use spaf\simputils\models\File;
 use spaf\simputils\PHP;
 use spaf\simputils\Str;
-use function spaf\simputils\basic\box;
+use function spaf\simputils\basic\bx;
 use function spaf\simputils\basic\env;
 use function spaf\simputils\basic\fl;
 use function spaf\simputils\basic\now;
@@ -29,18 +29,19 @@ use function spaf\simputils\basic\ts;
  * @uses \spaf\simputils\Str
  * @uses \spaf\simputils\PHP::isClass
  * @uses \spaf\simputils\PHP::redef
+ * @uses \spaf\simputils\generic\fixups\FixUpDateTime
  */
 class ShortcutsTest extends TestCase {
 
 	/**
-	 * @covers \spaf\simputils\basic\box
+	 * @covers \spaf\simputils\basic\bx
 	 * @covers \spaf\simputils\PHP::box
 	 * @return void
 	 */
 	function testBox() {
 		$box_class = PHP::redef(Box::class);
 
-		$a = box(['my', 'special', 'boxy']);
+		$a = bx(['my', 'special', 'boxy']);
 
 		// Check instance
 		$this->assertInstanceOf($box_class, $a);
@@ -96,7 +97,7 @@ class ShortcutsTest extends TestCase {
 	/**
 	 *
 	 * @covers \spaf\simputils\basic\fl
-	 * @covers \spaf\simputils\PHP::file
+	 * @covers \spaf\simputils\FS::file
 	 * @return void
 	 */
 	function testFl() {
@@ -131,6 +132,7 @@ class ShortcutsTest extends TestCase {
 	/**
 	 * @covers \spaf\simputils\basic\pd
 	 * @covers \spaf\simputils\PHP::pd
+	 * @covers \spaf\simputils\PHP::pr
 	 * @return void
 	 */
 	function testPd() {

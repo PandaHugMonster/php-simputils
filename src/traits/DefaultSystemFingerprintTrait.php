@@ -9,6 +9,7 @@ use spaf\simputils\models\SystemFingerprint;
 use spaf\simputils\models\Version;
 use spaf\simputils\PHP;
 use spaf\simputils\special\CodeBlocksCacheIndex;
+use spaf\simputils\Str;
 use spaf\simputils\traits\dsf\DsfVersionsMethodsTrait;
 
 /**
@@ -73,7 +74,7 @@ trait DefaultSystemFingerprintTrait {
 			Version::class
 		);
 
-		if (is_string($version)) {
+		if (Str::is($version)) {
 			$version = new $class($version);
 		}
 		$res = "version_{$version->major}_{$version->minor}_{$version->patch}";
@@ -97,7 +98,7 @@ trait DefaultSystemFingerprintTrait {
 		if ($field === 'version') {
 			if (empty($val)) {
 				throw new Exception('Version parameter/property must be specified');
-			} else if (is_string($val)) {
+			} else if (Str::is($val)) {
 				return new $version_class($val);
 			} else if (!PHP::classContains($val, $version_class)) {
 				throw new Exception('Version object is not a correct one');
@@ -123,7 +124,7 @@ trait DefaultSystemFingerprintTrait {
 		if (is_null($val)) {
 			return false;
 		}
-		if (is_string($val)) {
+		if (Str::is($val)) {
 			$val = SystemFingerprint::parse($val);
 		}
 

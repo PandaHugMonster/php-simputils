@@ -5,6 +5,7 @@ namespace spaf\simputils\traits;
 
 
 use ReflectionClass;
+use spaf\simputils\attributes\Extract;
 use spaf\simputils\attributes\Property;
 use spaf\simputils\PHP;
 use function spl_object_id;
@@ -24,6 +25,7 @@ trait SimpleObjectTrait {
 	/**
 	 * @return int
 	 */
+	#[Extract(false)]
 	#[Property('obj_id')]
 	public function getObjId(): int {
 		return spl_object_id($this);
@@ -32,12 +34,15 @@ trait SimpleObjectTrait {
 	/**
 	 * @return string
 	 */
+	#[Extract(false)]
 	#[Property('obj_type')]
 	public function getObjType(): string {
 		return PHP::type($this);
 	}
 
 	/**
+	 * TODO Describe fact of "fake static properties"
+	 *
 	 * @return string
 	 */
 	#[Property('class_short')]

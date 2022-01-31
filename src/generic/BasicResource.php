@@ -3,6 +3,7 @@
 namespace spaf\simputils\generic;
 
 use Closure;
+use spaf\simputils\attributes\DebugHide;
 use spaf\simputils\attributes\Property;
 use spaf\simputils\Data;
 use spaf\simputils\FS;
@@ -55,14 +56,23 @@ abstract class BasicResource extends SimpleObject {
 
 	public mixed $processor_settings = null;
 
+	#[DebugHide]
 	protected ?string $_urn = null;
+	#[DebugHide]
 	protected bool $_is_local = true;
+	#[DebugHide]
 	protected ?string $_path = null;
+	#[DebugHide]
 	protected ?string $_name = null;
+	#[DebugHide]
 	protected ?string $_ext = null;
+	#[DebugHide]
 	protected ?int $_size = null;
+	#[DebugHide]
 	protected ?string $_mime_type = null;
+	#[DebugHide]
 	protected ?string $_md5 = null;
+	#[DebugHide]
 	protected mixed $_fd = null;
 
 	/**

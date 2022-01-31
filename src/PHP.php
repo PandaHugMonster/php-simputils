@@ -15,7 +15,6 @@ use spaf\simputils\attributes\markers\Shortcut;
 use spaf\simputils\generic\BasicInitConfig;
 use spaf\simputils\models\Box;
 use spaf\simputils\models\DateTime;
-use spaf\simputils\models\File;
 use spaf\simputils\models\InitConfig;
 use spaf\simputils\models\PhpInfo;
 use spaf\simputils\models\Version;
@@ -31,12 +30,16 @@ use function is_dir;
 use function is_null;
 use function is_object;
 use function is_resource;
-use function is_string;
 use function json_decode;
 use function json_encode;
 use function json_last_error;
 use function method_exists;
+use function ob_get_clean;
+use function ob_start;
+use function print_r;
+use function realpath;
 use function serialize;
+use function str_contains;
 use function unserialize;
 use const JSON_ERROR_NONE;
 
@@ -63,8 +66,13 @@ class PHP {
 	const SERIALIZATION_TYPE_JSON = 0;
 	const SERIALIZATION_TYPE_PHP = 1;
 
-	// TODO Maybe #class? Checkout compatibility with JavaScript and other techs and standards
-	public static string $serialized_class_key_name = '_class';
+	private static $framework_location = null;
+
+	public static function frameworkDir() {
+		return static::$framework_location;
+	}
+
+	public static string $serialized_class_key_name = '#class';
 	public static string|int $serialization_mechanism = self::SERIALIZATION_TYPE_JSON;
 
 	/**
@@ -85,6 +93,17 @@ class PHP {
 	public static bool $refresh_php_info_env_vars = true;
 
 	/**
+	 * Framework/lib version
+	 *
+	 * IMP  Always update version info before every release
+	 * @return Version|string
+	 */
+	public static function simpUtilsVersion(): Version|string {
+		$class = static::redef(Version::class);
+		return new $class('0.3.1', 'SimpUtils');
+	}
+
+	/**
 	 * Initializer of the framework
 	 *
 	 * Should be called just once by any code-group (Main app, independent libraries)
@@ -99,39 +118,20 @@ class PHP {
 	 *      as early as possible in your main app. It should be the very first thing to be called
 	 *      right after the "composer autoloader".
 	 *
-	 * IMP  Modules/Libraries/Extensions and any external code that calls `PHP::init()` without
-	 *      `$name` or with value of "app" - must be considered as unsafe!
-	 *
-	 * IMP  `$name` argument must be always supplied (through `$config` or through `$name`).
-	 *      For the security reasons name must be unique and during runtime persist as final.
-	 *      So multiple libraries can not use the same name.
-	 *
-	 * NOTE `$name` parameter can be omit, in this case code will be consider as the "app code",
-	 *      and not "module/library/extension code". Modules/Libraries/Extensions MUST NEVER call
-	 *      `PHP::init()` without $name parameter, and not use reserved word "app".
-	 *      If you are developing the "leaf" code (main app, and not a library) - then
-	 *      you should not specify `$name` or you can set it to "app" which is being default.
-	 *
 	 */
-	public static function init(
-		null|BasicInitConfig|Box|array $config = null,
-		?string $name = null,
-		?string $code_root = null,
-		?string $working_dir = null
-	): BasicInitConfig {
-		if (empty($config)) {
-			$config = new InitConfig();
-		}
-		if (is_array($config) || $config instanceof Box) {
-			$config = new InitConfig(...$config);
-		}
-		$config->name = $name ?? $config->name;
-		$code_root = $code_root ?? $config->code_root;
-		$working_dir = $working_dir ?? $config->working_dir;
+	public static function init(null|array|Box|BasicInitConfig $args = null): BasicInitConfig {
+		static::$framework_location = __DIR__;
 
+		$config = null;
+		if ($args instanceof BasicInitConfig) {
+			$config = $args;
+			$args = [];
+		}
 
-		$config->code_root = $code_root ?? debug_backtrace()[0]['file'];
-		$config->working_dir = $working_dir ?? $config->code_root;
+		$config = ($config ?? new InitConfig)->___setup($args ?? []);
+
+		$config->code_root = $config->code_root ?? debug_backtrace()[0]['file'];
+		$config->working_dir = $config->working_dir ?? $config->code_root;
 
 		// FIX  Implement code below into config through Properties
 		if (!is_dir($config->code_root)) {
@@ -316,19 +316,6 @@ class PHP {
 	}
 
 	/**
-	 * Framework/lib version
-	 *
-	 * @return Version|string
-	 */
-	public static function simpUtilsVersion(): Version|string {
-		$class = CodeBlocksCacheIndex::getRedefinition(
-			InitConfig::REDEF_VERSION,
-			Version::class
-		);
-		return new $class('0.2.3', 'SimpUtils');
-	}
-
-	/**
 	 * Framework/lib license
 	 *
 	 * @return string
@@ -372,7 +359,7 @@ class PHP {
 	 * @return bool
 	 */
 	public static function isClass(mixed $class_or_not): bool {
-		if (is_string($class_or_not)) {
+		if (Str::is($class_or_not)) {
 			if (class_exists($class_or_not, true)) {
 				return true;
 			}
@@ -545,15 +532,15 @@ class PHP {
 	 * Besides that, the functionality can be redefined. For example if you want
 	 * use your own implementation, you can just redefine it on a very early runtime stage
 	 * with the following code:
+
+	 * TODO implement simple log integration
 	 * FIX  Prepare example!
-	 *
-	 * @todo implement simple log integration
-	 * FIX  Implement $allow_dying
 	 *
 	 * @param mixed ...$args Anything you want to print out before dying
 	 *
 	 * @see \die()
 	 *
+	 * @see \spaf\simputils\basic\pr()
 	 * @see \print_r()
 	 * @return void
 	 */
@@ -562,10 +549,7 @@ class PHP {
 		if ($callback && $callback !== InitConfig::REDEF_PD) {
 			$res = (bool) $callback(...$args);
 		} else {
-			foreach ($args as $arg) {
-				print_r($arg);
-				echo "\n";
-			}
+			static::pr(...$args);
 			$res = true;
 		}
 		if (static::$allow_dying && $res) {
@@ -573,24 +557,96 @@ class PHP {
 		}
 	}
 
+	public static function pr(...$args): void {
+		$callback = CodeBlocksCacheIndex::getRedefinition(InitConfig::REDEF_PR);
+		if ($callback && $callback !== InitConfig::REDEF_PR) {
+			$callback(...$args);
+		} else {
+			foreach ($args as $arg) {
+				print_r($arg);
+				echo "\n";
+			}
+		}
+	}
+
 	/**
-	 * @param null|Box|array $array Array, elements of which should be used as elements
-	 *                              of the newly created box.
+	 * As `pr()` but returning string or null instead of printing to the buffer
+	 *
+	 * Basically a shortcut for ob_start() + pr() + ob_get_clean()
+	 *
+	 * Don't forget to get the result. If you run it without "echo" - then you will not see
+	 * output.
+	 *
+	 * @see \ob_start()
+	 * @see PHP::pr()
+	 * @see \ob_get_clean()
+	 *
+	 * @param ...$args
+	 *
+	 * @return string|null
+	 */
+	public static function prstr(...$args): ?string {
+		if (empty($args)) {
+			return null;
+		}
+
+		ob_start();
+		static::pr(...$args);
+		$res = ob_get_clean();
+
+		return $res;
+	}
+
+	/**
+	 * Quick box-array creation
+	 *
+	 * **Important:** All the arguments during merging are recursively merged,
+	 * when more right-side elements having higher precedence than the left ones, and so
+	 * values defined on the left side might be overwritten by the elements to the right.
+	 *
+	 * @param null|Box|array $array     Array, elements of which should be used as elements
+	 *                                  of the newly created box.
+	 * @param array|Box      ...$merger Additional arrays/boxes that should be merged into
+	 *                                  the resulting Box
 	 *
 	 * @return Box|array
+	 * @throws \Exception \Exception
 	 */
-	public static function box(null|Box|array $array = null): Box|array {
+	public static function box(mixed $array = null, mixed ...$merger): Box|array {
+		$class = static::redef(Box::class);
+
 		if ($array instanceof Box) {
-			return $array;
+			$res = $array;
+		} else if (is_null($array)) {
+			$res = new $class;
+		} else {
+			if (is_object($array) && !is_array($array) && !$array instanceof Box) {
+				$res = $array;
+				if (method_exists($array, 'toBox')) {
+					$res = $res->toBox(false);
+				}
+			} else {
+				$res = new $class($array);
+			}
 		}
-		if (is_null($array)) {
-			$array = [];
+
+		if (!empty($merger)) {
+			$sub_res = new $class;
+			foreach ($merger as $k => $v) {
+				if (is_object($v) && !is_array($v) && !$v instanceof Box) {
+					$sub_sub_res = $v;
+					if (method_exists($sub_sub_res, 'toBox')) {
+						$sub_sub_res = $sub_sub_res->toBox(false);
+					}
+					$sub_res[$k] = $sub_sub_res;
+				} else {
+					$sub_res[$k] = $v;
+				}
+			}
+			$res->mergeFrom(...$sub_res);
 		}
-		$class = CodeBlocksCacheIndex::getRedefinition(
-			InitConfig::REDEF_BOX,
-			Box::class
-		);
-		return new $class($array);
+
+		return $res;
 	}
 
 	/**
@@ -599,6 +655,8 @@ class PHP {
 	 * @param \DateTimeZone|null $tz TimeZone
 	 *
 	 * @return DateTime|null
+	 *
+	 * FIX  Must be from DT::, not PHP::
 	 *
 	 * @throws \Exception Parsing error
 	 */
@@ -616,6 +674,8 @@ class PHP {
 	 *
 	 * @return DateTime|null
 	 *
+	 * FIX  Must be from DT::, not PHP::
+	 *
 	 * @throws \Exception Parsing error
 	 */
 	public static function ts(
@@ -624,24 +684,6 @@ class PHP {
 		string $fmt = null
 	): ?DateTime {
 		return DT::normalize($dt, $tz, $fmt);
-	}
-
-	/**
-	 * Returns File instance for the provided argument
-	 *
-	 * @param string|File|null $file Can be a string - then it's a path to a file, or
-	 *                               a File instance, then it's just provided back
-	 *                               transparently
-	 * @param mixed            $app  Read/Write processor
-	 *
-	 * @return \spaf\simputils\models\File|null
-	 */
-	public static function file(mixed $file = null, $app = null): ?File {
-		if ($file instanceof File) {
-			return $file;
-		}
-		$class = static::redef(File::class);
-		return new $class($file, $app);
 	}
 
 	/**
@@ -712,6 +754,42 @@ class PHP {
 	}
 
 	/**
+	 * Checks whether the runtime is in "cli"/"console"/"terminal" mode or "web"
+	 *
+	 * It heavily relies on the value of PHP_SAPI, so the identification might not be perfectly
+	 * perfect :).
+	 *
+	 * @return bool Returns true if console, returns false if web
+	 */
+	public static function isConsole(): bool {
+		$sapi_value = Str::lower(static::info()->sapi_name);
+		return str_contains($sapi_value, 'cli');
+	}
+
+	#[Shortcut('PHP::isConsole()')]
+	public static function isCLI(): bool {
+		return static::isConsole();
+	}
+
+	public static function path(?string ...$parts): ?string {
+		$res = '';
+		$sep = '/';
+		if ($parts) {
+			$i = 0;
+			foreach ($parts as $part) {
+				$res .= ($i++ == 0?'':$sep).$part;
+			}
+		}
+		return $res
+			?realpath($res)
+			:null;
+	}
+
+	public static function extractFields() {
+
+	}
+
+	/**
 	 * Quick and improved version of getting class string of redefinable components
 	 *
 	 * Shortcut for this:
@@ -741,6 +819,7 @@ class PHP {
 
 		if (empty($hint)) {
 			if (!method_exists($target_class, 'redefComponentName')) {
+				// TODO Maybe default behaviour instead of Exception
 				throw new Exception(
 					"Class \"{$target_class}\" does not have " .
 					"\"redefComponentName\" method, and \$hint argument was not provided"

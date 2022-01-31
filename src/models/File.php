@@ -4,11 +4,14 @@ namespace spaf\simputils\models;
 
 use Closure;
 use Exception;
+use spaf\simputils\attributes\DebugHide;
 use spaf\simputils\attributes\Property;
 use spaf\simputils\FS;
 use spaf\simputils\generic\BasicResource;
 use spaf\simputils\generic\BasicResourceApp;
 use spaf\simputils\PHP;
+use spaf\simputils\Str;
+use spaf\simputils\traits\FilesDirsTrait;
 use spaf\simputils\traits\RedefinableComponentTrait;
 use ValueError;
 use function fclose;
@@ -16,7 +19,6 @@ use function file_exists;
 use function file_put_contents;
 use function fopen;
 use function fstat;
-use function is_string;
 use function rewind;
 use function stat;
 use function stream_get_contents;
@@ -40,6 +42,8 @@ use function stream_get_contents;
  *
  * FIX  Implement low-level format separation as "binary" and "text"
  *
+ * FIX  Implement path resolution on object creation
+ *
  * @property ?BasicResourceApp $app
  * @property mixed $content Each use of the property causes real file read/write. Make sure to
  *                          cache value.
@@ -47,11 +51,19 @@ use function stream_get_contents;
  * @property-read ?string $backup_location
  * @property-read mixed $backup_content
  * @property-read Box $stat
+ * @property-read string $type
  */
 class File extends BasicResource {
 	use RedefinableComponentTrait;
+	use FilesDirsTrait;
+
+	#[Property('type')]
+	protected function getType() {
+		return $this->mime_type;
+	}
 
 	/**
+	 * FIX  Implement as property
 	 * @var bool $is_backup_preserved   When this option is set to true, then file is not deleted,
 	 *                                  but relocated to "/tmp" folder with temporary random name
 	 *                                  when `delete()` method is called. This allows to recover
@@ -62,6 +74,7 @@ class File extends BasicResource {
 	 */
 	public bool $is_backup_preserved = false;
 
+	#[DebugHide]
 	protected mixed $_app = null;
 	protected bool $_is_default_app = true;
 	protected ?string $_backup_file = null;
@@ -74,7 +87,7 @@ class File extends BasicResource {
 	 * IMP  If `File` object is provided as $file argument, the result would be
 	 *      the new object (basically clone/copy) and the supplied object and the current
 	 *      object would have different references.
-	 *      So this will not be a fully transparent approach, use `fl()` or `PHP::file()`,
+	 *      So this will not be a fully transparent approach, use `fl()` or `FS::file()`,
 	 *      if you want fully transparent approach
 	 *
 	 * IMP  Really important to mention: This class does not do `close($fd)` for those
@@ -118,7 +131,7 @@ class File extends BasicResource {
 				$this->_ext = $file->extension;
 			}
 			$this->_mime_type = $mime_type ?? $file->mime_type;
-		} else if (is_string($file)) {
+		} else if (Str::is($file)) {
 			// File path is supplied
 			[$this->_path, $this->_name, $this->_ext] = FS::splitFullFilePath($file);
 			$this->_mime_type = $mime_type ?? FS::getFileMimeType($file);
@@ -128,7 +141,7 @@ class File extends BasicResource {
 
 
 		// FIX  Reconsider the code
-		if (empty($app) || is_string($app)) {
+		if (empty($app) || Str::is($app)) {
 			if (!empty($app)) {
 				$this->_is_default_app = false; // @codeCoverageIgnore
 			}
@@ -313,17 +326,21 @@ class File extends BasicResource {
 	}
 
 	#[Property('stat')]
-	protected function getStat(): Box {
+	protected function getStat(): ?Box {
 		if (!empty($this->_fd)) {
 			return new Box(fstat($this->_fd));
 		}
 
-		return new Box(stat($this->name_full));
+		if ($this->exists) {
+			return new Box(stat($this->name_full));
+		}
+
+		return null;
 	}
 
 	#[Property('size')]
 	protected function getSize(): ?int {
-		return $this->stat['size'];
+		return $this->stat['size'] ?? null;
 	}
 
 	#[Property('app')]
@@ -336,7 +353,8 @@ class File extends BasicResource {
 		$this->_app = $var;
 	}
 
-	#[Property('content', debug_output: false)]
+	#[DebugHide(false)]
+	#[Property('content')]
 	protected function getContent(): mixed {
 		$app = $this->app;
 		$is_opened_locally = false;
@@ -390,7 +408,7 @@ class File extends BasicResource {
 
 	#[Property('exists')]
 	protected function getExists(): bool {
-		return file_exists($this->name_full);
+		return !empty($this->name_full) && file_exists($this->name_full);
 	}
 
 	/**
@@ -407,7 +425,8 @@ class File extends BasicResource {
 	 * @return string|null
 	 * @throws \Exception
 	 */
-	#[Property('backup_content', debug_output: false)]
+	#[DebugHide(false)]
+	#[Property('backup_content')]
 	protected function getBackupContent(): ?string {
 		if (file_exists($this->_backup_file)) {
 			return (new static($this->_backup_file))->content;

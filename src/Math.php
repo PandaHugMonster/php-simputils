@@ -945,4 +945,47 @@ class Math {
 	static function tanh(float $num): float {
 		return tanh($num);
 	}
+
+	/**
+	 * Generate range of integer values
+	 *
+	 * It's a generator, can drastically spare memory usage.
+	 *
+	 * `$start` value and `$end` values are both included. So if you specify:
+	 * ```php
+	 * foreach (Math::range(0, 9) as $i) {
+	 *     pr($i);
+	 * }
+	 * ```
+	 * The output would be:
+	 * ```
+	 * 0
+	 * 1
+	 * 2
+	 * 3
+	 * 4
+	 * 5
+	 * 6
+	 * 7
+	 * 8
+	 * 9
+	 * ```
+	 *
+	 * **Important:** Is not a shortcut for `\range()` anymore.
+	 *
+	 * @param string|int|float $start Starting integer (inclusive)
+	 * @param string|int|float $end   Ending integer (inclusive)
+	 * @param int|float        $step  Step of the iteration
+	 *
+	 * @return \Generator
+	 */
+	static function range(
+		string|int|float $start,
+		string|int|float $end,
+		int|float $step = 1
+	) {
+		for ($i = $start; $i <= $end; $i += $step) {
+			yield $i;
+		}
+	}
 }

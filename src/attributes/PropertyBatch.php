@@ -26,9 +26,7 @@ class PropertyBatch extends Property {
 	 */
 	public function __construct(
 		public ?string $type = null,
-		public ?string $modifier = null,
 		public ?string $storage = null,
-		public ?array $names = null,
 	) {}
 
 	public static function valueStoreRef(
@@ -45,6 +43,7 @@ class PropertyBatch extends Property {
 			if ($value_store_ref === PropertyBatch::STORAGE_SELF) {
 				$value_store = &$obj;
 			} else {
+//				$value_store_ref
 				$value_store = &$obj->$value_store_ref;
 			}
 
@@ -65,21 +64,6 @@ class PropertyBatch extends Property {
 
 		return $value_store_ref;
 	}
-
-//	public static function prepareAllExpectedNames($obj, $expected_names, $value_store_ref) {
-//		foreach ($expected_names as $exp_name) {
-//			$key = $obj::class.'#'.$exp_name;
-//			PropertiesCacheIndex::$property_settings[$key]['storage'] = $value_store_ref;
-//
-//			if (!isset($index[$key_type = $key.'#'.PropertyBatch::TYPE_GET])) {
-//				$index[$key_type] = $func_ref_prefix.'Get';
-//			} else if (
-//				!isset($index[$key_type = $key.'#'.PropertyBatch::TYPE_SET])
-//			) {
-//				$index[$key_type] = $func_ref_prefix.'Set';
-//			}
-//		}
-//	}
 
 	/**
 	 * @param $obj

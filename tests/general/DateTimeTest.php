@@ -3,9 +3,8 @@
 use PHPUnit\Framework\TestCase;
 use spaf\simputils\DT;
 use spaf\simputils\models\DateTime;
-use spaf\simputils\models\InitConfig;
 use spaf\simputils\PHP;
-use spaf\simputils\special\CodeBlocksCacheIndex;
+use spaf\simputils\Str;
 use function spaf\simputils\basic\ts;
 
 /**
@@ -16,6 +15,12 @@ use function spaf\simputils\basic\ts;
  * @uses \spaf\simputils\interfaces\helpers\DateTimeHelperInterface
  * @uses \spaf\simputils\PHP
  * @uses \spaf\simputils\special\CodeBlocksCacheIndex
+ * @uses \spaf\simputils\generic\fixups\FixUpDateTime::redefComponentName
+ * @uses \spaf\simputils\attributes\Property
+ * @uses \spaf\simputils\traits\SimpleObjectTrait
+ * @uses \spaf\simputils\traits\SimpleObjectTrait::____prepareProperty
+ * @uses \spaf\simputils\traits\SimpleObjectTrait::__get
+ * @uses \spaf\simputils\traits\SimpleObjectTrait::getAllTheLastMethodsAndProperties
  */
 class DateTimeTest extends TestCase {
 
@@ -45,10 +50,7 @@ class DateTimeTest extends TestCase {
 	}
 
 	public function testNowObjectCreation(): void {
-		$dt_class = CodeBlocksCacheIndex::getRedefinition(
-			InitConfig::REDEF_DATE_TIME,
-			DateTime::class
-		);
+		$dt_class = PHP::redef(DateTime::class);
 		$dt = DT::now();
 		$this->assertInstanceOf($dt_class, $dt, 'Object type check');
 
@@ -64,18 +66,18 @@ class DateTimeTest extends TestCase {
 	}
 
 	public function testTransparentStringifyingDateTimeObject() {
-		$dt_class = CodeBlocksCacheIndex::getRedefinition(
-			InitConfig::REDEF_DATE_TIME,
-			DateTime::class
-		);
+		$dt_class = PHP::redef(DateTime::class);
 		$now = DT::now();
 		$this->assertInstanceOf($dt_class, $now, 'Is a date-time object');
-		$this->assertEquals(DT::stringify($now), strval($now), 'Is a string-compatible');
+		$this->assertEquals(
+			DT::stringify($now),
+			Str::ing($now->for_system),
+			'Is a string-compatible'
+		);
 	}
 
 	/**
 	 * @uses \spaf\simputils\basic\ts
-	 * @uses \spaf\simputils\attributes\Property
 	 * @return void
 	 */
 	function testDateAndTimeProperties() {

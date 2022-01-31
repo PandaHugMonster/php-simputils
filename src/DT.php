@@ -5,9 +5,23 @@ namespace spaf\simputils;
 
 
 use DateTimeZone;
+use spaf\simputils\attributes\markers\Shortcut;
 use spaf\simputils\interfaces\helpers\DateTimeHelperInterface;
+use spaf\simputils\models\DateInterval;
 use spaf\simputils\models\DateTime;
 
+/**
+ * General purpose DateTime static helper
+ *
+ * Performs DateTime object generation, conversions, walk-through the dates and times.
+ *
+ * @see DateTime
+ * @see \spaf\simputils\models\Date
+ * @see \spaf\simputils\models\Time
+ * @see DateInterval
+ * @see \spaf\simputils\models\DatePeriod
+ *
+ */
 class DT implements DateTimeHelperInterface {
 
 	private static function _getClass() {
@@ -64,7 +78,7 @@ class DT implements DateTimeHelperInterface {
 	): ?DateTime {
 		$class = static::_getClass();
 
-		if (is_string($dt)) {
+		if (Str::is($dt)) {
 			$res = !empty($fmt)
 				?$class::createFromFormat($fmt, $dt, $tz)
 				:new $class($dt, $tz);
@@ -96,5 +110,43 @@ class DT implements DateTimeHelperInterface {
 
 		$dt = static::normalize($dt, $tz, $parsing_fmt);
 		return $dt->format(!empty($fmt)?$fmt:static::FMT_STRINGIFY_DEFAULT);
+	}
+
+	/**
+	 * DatePeriod is returned for comfortable iterations
+	 *
+	 * Is somehow a shortcut to `DateTime::walk()` method
+	 *
+	 * Example 1:
+	 * ```php
+	 *  foreach (DT::walk('01.01.2022', '31.12.2022', '1 day') as $date) {
+	 *      pr("$date");
+	 *  }
+	 * ```
+	 * Will print out all the days of the year 2022
+	 *
+	 * Example 2:
+	 * ```php
+	 *  foreach (DT::walk('01.01.2022', '01.02.2022', '180 mins') as $date) {
+	 *      pr("$date");
+	 *  }
+	 * ```
+	 * Will print out all the hours between 2022-01-01 and 2022-02-01 with a step
+	 * of 3 hours (180 mins)
+	 *
+	 * @param \spaf\simputils\models\DateTime|string|int $start
+	 * @param \spaf\simputils\models\DateTime|string|int $end
+	 * @param string|\spaf\simputils\models\DateInterval $step
+	 *
+	 * @return \spaf\simputils\models\DatePeriod
+	 * @throws \Exception
+	 */
+	#[Shortcut('\spaf\simputils\models\DateTime::walk()')]
+	public static function walk(
+		DateTime|string|int $start,
+		DateTime|string|int $end,
+		string|DateInterval $step
+	) {
+		return static::normalize($start)->walk(static::normalize($end), $step);
 	}
 }

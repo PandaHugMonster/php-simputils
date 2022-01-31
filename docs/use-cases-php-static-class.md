@@ -1,3 +1,7 @@
+[<< Back to README.md](../README.md)
+
+----
+
 # PHP static class
 
 One of the key features of the framework is class `\spaf\simputils\PHP`.

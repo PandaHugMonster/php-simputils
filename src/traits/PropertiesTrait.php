@@ -2,11 +2,13 @@
 
 namespace spaf\simputils\traits;
 
-use ReflectionAttribute;
+use Error;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionObject;
 use ReflectionProperty;
+use spaf\simputils\attributes\DebugHide;
+use spaf\simputils\attributes\Extract;
 use spaf\simputils\attributes\Property;
 use spaf\simputils\attributes\PropertyBatch;
 use spaf\simputils\exceptions\PropertyAccessError;
@@ -48,50 +50,62 @@ use function in_array;
 trait PropertiesTrait {
 
 	// FIX  Public modifier is a temporary solution, due to external modification of the field
+	#[DebugHide]
+	#[Extract(false)]
 	public $____property_batch_storage = [];
 
 	/**
 	 * @param string $name
 	 *
 	 * @return mixed
-	 * @throws \Exception
 	 */
 	public function __get($name): mixed {
-		if (
-			$method_name = PropertiesCacheIndex
-			::$index[static::class.'#'.$name.'#'.Property::TYPE_GET]
-			?? false
-		) {
+		$ref = static::class.'#'.$name.'#'.Property::TYPE_GET;
+		if ($method_name = PropertiesCacheIndex::$index[$ref] ?? false) {
 			return $this->$method_name(null, Property::TYPE_GET, $name);
 		}
-		return $this->____prepareProperty($name, Property::TYPE_GET);
+		try {
+			return $this->____prepareProperty($name, Property::TYPE_GET);
+		} catch (PropertyAccessError | PropertyDoesNotExist $e) {
+			try {
+				/** @noinspection PhpUndefinedMethodInspection */
+				return parent::__get($name);
+			} catch (Error) {
+				/** @noinspection PhpUnhandledExceptionInspection */
+				throw $e;
+			}
+		}
 	}
 
 	public function __set($name, $value): void {
-		if (
-			$method_name = PropertiesCacheIndex
-			::$index[static::class.'#'.$name.'#'.Property::TYPE_SET]
-			?? false
-		) {
+		$ref = static::class.'#'.$name.'#'.Property::TYPE_SET;
+		if ($method_name = PropertiesCacheIndex::$index[$ref] ?? false) {
 			$this->$method_name($value, Property::TYPE_SET, $name);
 		} else {
-			$this->____prepareProperty($name, Property::TYPE_SET, $value);
+			try {
+				$this->____prepareProperty($name, Property::TYPE_SET, $value);
+			} catch (PropertyAccessError | PropertyDoesNotExist $e) {
+				try {
+					/** @noinspection PhpUndefinedMethodInspection */
+					parent::__set($name, $value);
+				} catch (Error) {
+					/** @noinspection PhpUnhandledExceptionInspection */
+					throw $e;
+				}
+			}
 		}
 	}
 
 	public function __isset($name) {
-		// FIX  Implementation is questionable. Urgently refactor!
-		if (
-			$method_name = PropertiesCacheIndex
-			::$index[static::class.'#'.$name.'#'.Property::TYPE_GET]
-			?? false
-		) {
-			return $this->$method_name(null, Property::TYPE_GET, $name);
+		return $this->____checkSimpUtilsPropertyAvailability($name);
+	}
+
+	private function ____checkSimpUtilsPropertyAvailability($name, $type = Property::TYPE_GET) {
+		$ref = static::class.'#'.$name.'#'.$type;
+		if ($method_name = PropertiesCacheIndex::$index[$ref] ?? false) {
+			return $this->$method_name(null, $type, $name);
 		}
-		return $this->____prepareProperty(
-			$name, Property::TYPE_GET,
-			check_and_do_not_call: true
-		);
+		return $this->____prepareProperty($name, $type, check_and_do_not_call: true);
 	}
 
 	private function ____propertyBatchMethodGet($value, $type, $name): mixed {
@@ -117,6 +131,30 @@ trait PropertiesTrait {
 	}
 
 	/**
+	 * Prepares reflection objects that will be used for Properties
+	 *
+	 * @return array
+	 */
+	private function getAllTheLastMethodsAndProperties() {
+		$class_reflection = new ReflectionClass($this);
+		$res = [];
+		// Progressing from original class, back to the root classes
+		while ($class_reflection) {
+			$stub = array_merge(
+				$class_reflection->getMethods(),
+				$class_reflection->getProperties()
+			);
+			foreach ($stub as $item) {
+				if (empty($res[$item->getName()])) {
+					$res[$item->getName()] = $item;
+				}
+			}
+			$class_reflection = $class_reflection->getParentClass();
+		}
+		return $res;
+	}
+
+	/**
 	 * @param string $name
 	 * @param string $call_type
 	 * @param mixed $value
@@ -134,30 +172,37 @@ trait PropertiesTrait {
 	): mixed {
 		$sub = null;
 
-		$class_reflection = new ReflectionClass($this);
+		// TODO Question of efficiency!?
+		$applicable_items = $this->getAllTheLastMethodsAndProperties();
 
-		$applicable_items = array_merge(
-			$class_reflection->getMethods(),
-			$class_reflection->getProperties()
-		);
-
+		// TODO Integrate this filter into method above?
 		$applicable_attribute_classes = [PropertyBatch::class, Property::class];
 
+		$already_defined = [];
+
 		foreach ($applicable_items as $item) {
-			/** @var ReflectionMethod|ReflectionProperty $item */
-			/** @var \ReflectionAttribute $attr */
+			/** @var \ReflectionMethod|\ReflectionProperty $item */
 
 			foreach ($item->getAttributes() as $attr) {
+
 				$attr_class = $attr->getName();
 				if (in_array($attr_class, $applicable_attribute_classes)) {
-
 					[$func_ref, $status] = call_user_func(
 						[$attr_class, 'subProcess'],
 						$this, $item, $attr, $name, $call_type
 					);
 
 					if ($status === true) {
-						if ($check_and_do_not_call && $call_type !== Property::TYPE_SET) {
+						if (in_array($name, $already_defined)) {
+							// NOTE Skipping already found methods, so the parent stuff
+							//      would not overwrite/return data
+
+							continue;
+						}
+						$already_defined[] = $name;
+
+//						if ($check_and_do_not_call && $call_type !== Property::TYPE_SET) {
+						if ($check_and_do_not_call) {
 							// NOTE Relevant for `isset()`
 							return true;
 						}
@@ -185,63 +230,138 @@ trait PropertiesTrait {
 	}
 
 	/**
+	 * @param bool $extract_attr_on
+	 * @param bool $debug_hide_attr_on
 	 *
-	 *  FIX  If file does not exist, exception is raised, even though those properties should be
-	 *  skipped (content, etc.)
-	 *
-	 * @codeCoverageIgnore Unfinished
-	 * @return array|null
+	 * FIX  Finalize $extract_attr_on arg
+	 * @return array|string[]
 	 */
-	public function __debugInfo(): ?array {
-		$ref = new ReflectionObject($this);
+	protected function ___extractFields(
+		bool $extract_attr_on = true,
+		bool $debug_hide_attr_on = false
+	) {
 		$res = [];
-		foreach ($ref->getProperties() as $property) {
-			$name = $property->name;
 
-			$property->setAccessible(true);
-			$value = $property->getValue($this);
-			$property->setAccessible(false);
-
-			$name = "\${$name}";
-			if ($property->isStatic()) {
-				$name = "static::{$name}";
+		// NOTE If the whole class is marked
+		$self_class = new ReflectionObject($this);
+		if (
+			$debug_hide_attr_on &&
+			($attr = ($self_class->getAttributes(DebugHide::class)[0] ?? null)) ?? false
+		) {
+			/** @var \ReflectionAttribute $attr */
+			/** @var DebugHide $dh */
+			$dh = $attr->newInstance();
+			if ($dh->hide_all) {
+				return [];
 			}
 
-			$res[$name] = $value;
+			return [$dh->show_instead ?? '****'];
 		}
-		$ref_class = new ReflectionClass($this);
-		$items = $ref_class->getMethods();
-		foreach ($items as $item) {
-			$attr = $item->getAttributes(Property::class)[0] ?? null;
-			if (!empty($attr)) {
-//				$expected_name = $this->_propertyExpectedName($item, $attr);
-//				$method_type = $this->_propertyMethodAccessType($item, $attr);
-				$expected_name = Property::expectedName($item, $attr);
-				$method_type = Property::methodAccessType($item, $attr);
+//		if (
+//			$extract_attr_on &&
+//			($attr = ($self_class->getAttributes(Extract::class)[0] ?? null)) ?? false
+//		) {
+//			/** @var \ReflectionAttribute $attr */
+//			/** @var Extract $ex */
+//			$ex = $attr->newInstance();
+//			if (!$ex->enabled) {
+//				return [];
+//			}
+//		}
 
-				if ($this->_debugOutputDisabled($item, $attr)) {
-					$value = '<..skipped..>';
+		$it_items = $this->getAllTheLastMethodsAndProperties();
+		$batch_array_of_prop_types = [PropertyBatch::TYPE_GET, PropertyBatch::TYPE_BOTH];
+		$property_array_of_prop_types = [Property::TYPE_GET, Property::TYPE_BOTH];
+
+		foreach ($it_items as $item) {
+			$prefix = null;
+			$name = $item->getName();
+			$ta = null; // target attribute
+			$value = null;
+			$is_show_instead_set = false;
+
+			/** @var ReflectionMethod|ReflectionProperty $item */
+			if ($item->isStatic()) {
+				// FIX  Implement options in InitConfig
+				$prefix = 'static::';
+				continue;
+			}
+
+			foreach ($item->getAttributes() as $attr) {
+				$dh = null;
+				if ($debug_hide_attr_on && $attr->getName() === DebugHide::class) {
+					if ($dh = $attr->newInstance()) {
+						/** @var DebugHide $dh */
+						// NOTE Don't optimize or reformat this code block.
+						//      It should not be invoked if the "DebugHide" is being used.
+						if ($dh->hide_all) {
+							// Skipping the whole field output
+							continue 2;
+						} else {
+							$value = $dh->show_instead ?? '****';
+							$is_show_instead_set = true;
+						}
+					}
+				} else if (
+					$extract_attr_on && $attr->getName() === Extract::class &&
+					!$attr->newInstance()->enabled
+				) {
+					// Skipping the whole field output
+					continue 2;
+				}  else if (empty($ta)) {
+					$ta = $attr;
+				}
+			}
+
+			if ($item instanceof ReflectionProperty) {
+				if (!empty($ta) && $ta->getName() === PropertyBatch::class) {
+					// NOTE PropertyBatch from method
+
+					[$expected_names, $_] = PropertyBatch::expectedNamesAndDefaultValues(
+						$this, $item, $ta
+					);
+					$access_type = PropertyBatch::accessType($ta);
+
+					if (in_array($access_type, $batch_array_of_prop_types)) {
+						foreach ($expected_names as $expected_name) {
+							$res["{$expected_name}"] = $is_show_instead_set
+								?$value
+								:$this->{$expected_name};
+						}
+					}
 				} else {
-					// Do not optimize additionally. This code must not be called if debugOutput
-					// is disabled!
-					$value = $this->{$expected_name};
+					// NOTE Real PHP native property
+					$item->setAccessible(true);
+					$res["{$prefix}{$name}"] = $is_show_instead_set
+						?$value
+						:$item->getValue($this);
+					$item->setAccessible(false);
 				}
-				if ($method_type === Property::TYPE_GET || $method_type === Property::TYPE_BOTH) {
-					$res["\${$expected_name}"] = $value;
-				}
-			}
-		}
-		$items = array_merge($ref_class->getProperties(), $ref_class->getMethods());
-		foreach ($items as $item) {
-			$attr = $item->getAttributes(PropertyBatch::class)[0] ?? null;
-			if (!empty($attr)) {
-				[$expected_names, $_]
-					= PropertyBatch::expectedNamesAndDefaultValues($this, $item, $attr);
-				$access_type = PropertyBatch::accessType($attr);
+			} else if ($item instanceof ReflectionMethod) {
+				// NOTE Property/PropertyBatch from method
 
-				if ($access_type === Property::TYPE_GET || $access_type === Property::TYPE_BOTH) {
-					foreach ($expected_names as $expected_name) {
-						$res["\${$expected_name}"] = $this->{$expected_name};
+				if (!empty($ta) && $ta->getName() === Property::class) {
+					$expected_name = Property::expectedName($item, $attr);
+					$method_type = Property::methodAccessType($item, $attr);
+
+					if (in_array($method_type, $property_array_of_prop_types)) {
+						$res["{$expected_name}"] = $is_show_instead_set
+							?$value
+							:$this->{$expected_name};
+					}
+				} else if (!empty($ta) && $ta->getName() === PropertyBatch::class) {
+					[$expected_names, $_] = PropertyBatch::expectedNamesAndDefaultValues(
+						$this, $item, $ta
+					);
+					$access_type = PropertyBatch::accessType($ta);
+
+					if (in_array($access_type, $batch_array_of_prop_types)) {
+
+						foreach ($expected_names as $expected_name) {
+							$res["{$expected_name}"] = $is_show_instead_set
+								?$value
+								:$this->{$expected_name};
+						}
 					}
 				}
 			}
@@ -250,17 +370,11 @@ trait PropertiesTrait {
 	}
 
 	/**
-	 * @param $ref
-	 * @param \ReflectionAttribute $attr
 	 *
-	 * @codeCoverageIgnore Unfinished
-	 *
-	 * @return bool
+	 * @return array|null
 	 */
-	private function _debugOutputDisabled($ref, ReflectionAttribute $attr): bool {
-		$args = $attr->getArguments();
-		return
-			(isset($args['debug_output']) && $args['debug_output'] === false) ||
-			(isset($args[2]) && $args[2] === false);
+	public function __debugInfo(): ?array {
+		// FIX  Recursive unwrapping shows "Array" instead of "Box". Really bad!
+		return $this->___extractFields(false, true);
 	}
 }

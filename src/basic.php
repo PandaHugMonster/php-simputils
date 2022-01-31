@@ -7,8 +7,10 @@ namespace spaf\simputils\basic;
 
 use DateTimeZone;
 use spaf\simputils\attributes\markers\Shortcut;
+use spaf\simputils\FS;
 use spaf\simputils\models\Box;
 use spaf\simputils\models\DateTime;
+use spaf\simputils\models\Dir;
 use spaf\simputils\models\File;
 use spaf\simputils\PHP;
 use spaf\simputils\Str;
@@ -56,8 +58,8 @@ function pd(...$args) {
  * @return Box|array
  */
 #[Shortcut('PHP::box()')]
-function box(null|Box|array $array = null): Box|array {
-	return PHP::box($array);
+function bx(mixed $array = null, mixed ...$merger): Box|array {
+	return PHP::box($array, ...$merger);
 }
 
 /**
@@ -91,9 +93,14 @@ function ts(DateTime|string|int $dt, ?DateTimeZone $tz = null, string $fmt = nul
 	return PHP::ts($dt, $tz, $fmt);
 }
 
-#[Shortcut('PHP::file()')]
+#[Shortcut('FS::file()')]
 function fl(null|string|File $file = null, $app = null): ?File {
-	return PHP::file($file, $app);
+	return FS::file($file, $app);
+}
+
+#[Shortcut('FS::dir()')]
+function dr(null|string $path = null): ?Dir {
+	return FS::dir($path);
 }
 
 /**
@@ -112,6 +119,21 @@ function fl(null|string|File $file = null, $app = null): ?File {
 #[Shortcut('PHP::env()')]
 function env(?string $name = null, bool $strict = true): mixed {
 	return PHP::env($name, $strict);
+}
+
+#[Shortcut('PHP::pr()')]
+function pr(...$args): void {
+	PHP::pr(...$args);
+}
+
+#[Shortcut('PHP::prstr()')]
+function prstr(...$args): ?string {
+	return PHP::prstr(...$args);
+}
+
+#[Shortcut('PHP::path()')]
+function path(?string ...$args): ?string {
+	return PHP::path(...$args);
 }
 
 /**

@@ -8,6 +8,7 @@ use spaf\simputils\generic\BasicResource;
 use spaf\simputils\models\Box;
 use spaf\simputils\models\files\apps\settings\CsvSettings;
 use spaf\simputils\PHP;
+use spaf\simputils\Str;
 
 /**
  * CSV data processor
@@ -176,7 +177,8 @@ class CsvProcessor extends TextProcessor {
 		if (is_integer($key)) {
 			$is_index_used = true;
 		}
-		if (is_string($key)) {
+
+		if (Str::is($key)) {
 			$is_assoc_used = true;
 		}
 		if ($is_assoc_used && $is_index_used) {

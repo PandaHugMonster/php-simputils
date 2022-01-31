@@ -1,39 +1,52 @@
 # SimpUtils
 
-Current framework version: **0.3.1** (min required PHP: **8.0**)
+**SimpUtils** is a micro-framework that provides interconnected, consistent utilities 
+to improve code maintenance, code quality, development speed. 
+Basically it should help you to make your code more "elegant",
+and provide tools for quick prototyping for any-scale project.
 
-Micro-framework extending PHP language with some useful perks, partly can even remind 
-python 3 development capabilities.
+It extends PHP language with some useful perks. Provides similar to native classes,
+but improves their capabilities. Normalizes naming and architecture.
+In the most cases it should be "compatible" with any framework, and you can use it in parallel
+to your main framework ( There is for now Yii2 + SimpUtils integration package: 
+https://github.com/PandaHugMonster/yii2-simputils )
 
-This library (and related other libs) I develop the mostly for myself, but you 
-are absolutely welcome to use it/those for your own good. 
+All the aspects of the framework were designed to improve code development and readability.
+All the components and features are designed to be intuitive and transparent for common use cases,
+but really flexible in case of need.
+
+P.S. This framework (and related other libs) I develop the mostly for myself, but you
+are absolutely welcome to use them for your own good.
 Feel free to propose updates and creating issues, bugfixes and stuff!
-
-At this context the words "library" and "framework" both refers to the same meaning 
-of "micro-framework".
-
-**Important:** The code is partly unfinished. If you are interested in the lib and it's 
-functionality - please wait until the stable release of **1.0.0**. 
-Starting from **1.0.0** version, overall architecture will remain the same (at least until 
-the next major version change).
-
-More about semantic versioning: [Semantic Versioning Explanation](https://semver.org).
 
 ----
 
 ## Index
 
- 1. [Glossary](docs/glossary.md)
- 2. [Installation](#Installation)
- 3. [Ground Reasons and Design Decisions](#Ground-Reasons-and-Design-Decisions)
-    1. [PHP Edges](docs/php-edges.md)
- 4. [Main components overview](docs/main-components-overview.md)
- 5. [Date and Time](docs/date-and-time.md)
+ 1. [Installation]()
+ 2. [Highlights]()
+ 3. [Glossary](docs/glossary.md)
+ 4. [Ground Reasons and Design Decisions](docs/reasoning-and-design.md)
+ 5. [Main components overview](docs/main-components-overview.md)
+ 6. [Date and Time](docs/date-and-time.md)
 
 ----
 
 
 ## Installation
+
+Current framework version: **0.3.1**
+
+Minimal PHP version: **8.0**
+
+**Important:** The code is partly unfinished. If you are interested in the lib and it's
+functionality - please wait until the stable release of **1.0.0**.
+Starting from **1.0.0** version, overall architecture will remain the same (at least until
+the next major version change).
+
+More about semantic versioning: [Semantic Versioning Explanation](https://semver.org).
+
+-----
 
 For safe and stable release, it's recommended to use the following command:
 ```shell
@@ -43,39 +56,20 @@ This command will always make sure your major version is the same (because if
 major version is different - then it can break expected behaviour)
 
 
-The latest available version can be installed through composer (unsafe method!):
+The latest available version can be installed through composer (**unsafe method**!):
 ```shell
 composer require spaf/simputils "*"
 ```
 
 
-## Ground Reasons and Design Decisions
+## Highlights
 
-I love PHP, but some of the architectural decisions of it are "a bit" weird. 
-From which I would highlight at least those (but not limited to):
- * Naming convention is not persistent even inside of the same section
-   (See `Math` class)
- * Poor namespacing of the vital functionality which makes it look like a soup 
-   (See `Math` class)
- * Lack of functional and comfortable basic instances like files and stuff
-   (See `File` and `DateTime` (not PHP version, but library one) classes)
- * Outdated and too random ways to create "Properties" from methods of a class
-   (See `Property` and `PropertyBatch` attribute classes)
- * Lack of transparent conversion between types. For example try to `echo ['my', 'array]`
-   (See `Box` class)
- * Lack of easy to use DotEnv (and auto-loading) and Env Vars
-   (See `File` class)
- * Lack of replaceable components
- * ETC. (Lot's of other reasons behind)
+__unimplemented yet__
 
-
-**Important stuff** about the PHP "edges", architecture and bugs: [PHP Edges](docs/php-edges.md)
-
-
-Basically **SimpUtils** provides interconnected, consistent tools (more or less) 
-for you to code and prototype easily.
-
-The coolest aspect of the framework, that you can use any functionality of it, without
-need of usage the whole framework code. It was developed with the logic 
-of being maximally transparent and easy to use out of the box.
-
+ - [ ] Properties
+ - [ ] Working with Date and Time
+ - [ ] Versions
+ - [ ] DotEnv
+ - [ ] Easy file reading/writing
+ - [ ] Data conversion
+ - [ ] Advanced PHP Info

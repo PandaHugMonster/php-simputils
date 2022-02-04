@@ -6,6 +6,7 @@ use Closure;
 use Exception;
 use spaf\simputils\attributes\DebugHide;
 use spaf\simputils\attributes\Property;
+use spaf\simputils\DT;
 use spaf\simputils\FS;
 use spaf\simputils\generic\BasicResource;
 use spaf\simputils\generic\BasicResourceApp;
@@ -37,8 +38,6 @@ use function stream_get_contents;
  *
  * TODO I would not rely right now on the backup functionality at all! Only on the future releases!
  *
- * FIX  Maybe some kind of caching mechanism should be done for `$this->content` property, OR
- *      turn it back to method!
  *
  * FIX  Implement low-level format separation as "binary" and "text"
  *
@@ -51,6 +50,18 @@ use function stream_get_contents;
  * @property-read ?string $backup_location
  * @property-read mixed $backup_content
  * @property-read Box $stat
+ * @property-read ?int $device_number
+ * @property-read ?int $inode_number
+ * @property-read ?int $inode_protection_mode
+ * @property-read ?int $links_amount
+ * @property-read ?int $file_uid
+ * @property-read ?int $file_gid
+ * @property-read ?int $device_type
+ * @property-read ?\spaf\simputils\models\DateTime $access_time
+ * @property-read ?\spaf\simputils\models\DateTime $modification_time
+ * @property-read ?\spaf\simputils\models\DateTime $inode_change_time
+ * @property-read ?int $block_size
+ * @property-read ?int $blocks
  * @property-read string $type
  */
 class File extends BasicResource {
@@ -325,22 +336,127 @@ class File extends BasicResource {
 		$this->copy($dir, $name, $ext,true);
 	}
 
+	const STAT_DEVICE_NUM = 'dev';
+	const STAT_INODE_NUM = 'ino';
+	const STAT_INODE_PROTECTION_MODE = 'mode';
+	const STAT_LINKS_AMOUNT = 'nlink';
+	const STAT_UID = 'uid';
+	const STAT_GID = 'gid';
+	const STAT_DEVICE_TYPE = 'rdev';
+	const STAT_SIZE = 'size';
+	const STAT_ACCESS_TIME = 'atime';
+	const STAT_MODIFICATION_TIME = 'mtime';
+	const STAT_INODE_CHANGE_TIME = 'ctime';
+	const STAT_BLOCK_SIZE = 'blksize';
+	const STAT_BLOCKS = 'blocks';
+
+	/**
+	 *
+	 * TODO Optimize
+	 *
+	 * @param $bx
+	 * @return mixed
+	 * @throws \Exception
+	 */
+	private function _preprocessStats($bx) {
+		if (isset($bx[static::STAT_ACCESS_TIME])) {
+			$bx[static::STAT_ACCESS_TIME] = $bx[8]
+				= DT::normalize($bx[static::STAT_ACCESS_TIME]);
+		}
+		if (isset($bx[static::STAT_MODIFICATION_TIME])) {
+			$bx[static::STAT_MODIFICATION_TIME] = $bx[9]
+				= DT::normalize($bx[static::STAT_MODIFICATION_TIME]);
+		}
+		if (isset($bx[static::STAT_INODE_CHANGE_TIME])) {
+			$bx[static::STAT_INODE_CHANGE_TIME] = $bx[10]
+				= DT::normalize($bx[static::STAT_INODE_CHANGE_TIME]);
+		}
+		return $bx;
+	}
+
+	/**
+	 * FIX  Implement manual cache through additional methods
+	 * FIX  Recursive toBox() is failing!
+	 * @return \spaf\simputils\models\Box|null
+	 */
+	#[DebugHide(false)]
 	#[Property('stat')]
 	protected function getStat(): ?Box {
 		if (!empty($this->_fd)) {
-			return new Box(fstat($this->_fd));
+			return $this->_preprocessStats(new Box(fstat($this->_fd)));
 		}
 
 		if ($this->exists) {
-			return new Box(stat($this->name_full));
+			return $this->_preprocessStats(new Box(stat($this->name_full)));
 		}
 
 		return null;
 	}
 
+	#[Property('device_number')]
+	protected function getDeviceNumber(): ?int {
+		return $this->stat[static::STAT_DEVICE_NUM] ?? null;
+	}
+
+	#[Property('inode_number')]
+	protected function getInodeNumber(): ?int {
+		return $this->stat[static::STAT_INODE_NUM] ?? null;
+	}
+
+	#[Property('inode_protection_mode')]
+	protected function getInodeProtectionMode(): ?int {
+		return $this->stat[static::STAT_INODE_PROTECTION_MODE] ?? null;
+	}
+
+	#[Property('links_amount')]
+	protected function getLinksAmount(): ?int {
+		return $this->stat[static::STAT_LINKS_AMOUNT] ?? null;
+	}
+
+	#[Property('file_uid')]
+	protected function getFileUid(): ?int {
+		return $this->stat[static::STAT_UID] ?? null;
+	}
+
+	#[Property('file_gid')]
+	protected function getFileGid(): ?int {
+		return $this->stat[static::STAT_GID] ?? null;
+	}
+
+	#[Property('device_type')]
+	protected function getDeviceType(): ?int {
+		return $this->stat[static::STAT_DEVICE_TYPE] ?? null;
+	}
+
 	#[Property('size')]
 	protected function getSize(): ?int {
-		return $this->stat['size'] ?? null;
+		return $this->stat[static::STAT_SIZE] ?? null;
+	}
+
+	#[Property('access_time')]
+	protected function getAccessTime(): ?DateTime {
+		return $this->stat[static::STAT_ACCESS_TIME] ?? null;
+	}
+
+	#[Property('modification_time')]
+	protected function getModificationTime(): ?DateTime {
+		return $this->stat[static::STAT_MODIFICATION_TIME] ?? null;
+	}
+
+	#[Property('inode_change_time')]
+	protected function getInodeChangeTime(): ?DateTime {
+		return $this->stat[static::STAT_INODE_CHANGE_TIME] ?? null;
+	}
+
+	#[Property('block_size')]
+	protected function getBlockSize(): ?int {
+		return $this->stat[static::STAT_BLOCK_SIZE] ?? null;
+	}
+
+	#[DebugHide(false)]
+	#[Property('blocks')]
+	protected function getBlocks(): ?int {
+		return $this->stat[static::STAT_BLOCKS] ?? null;
 	}
 
 	#[Property('app')]

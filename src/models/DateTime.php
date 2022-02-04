@@ -4,6 +4,7 @@
 namespace spaf\simputils\models;
 
 use DateTimeInterface;
+use spaf\simputils\attributes\DebugHide;
 use spaf\simputils\attributes\Property;
 use spaf\simputils\DT;
 use spaf\simputils\generic\fixups\FixUpDateTime;
@@ -60,13 +61,13 @@ class DateTime extends FixUpDateTime {
 
 	/**
 	 * Stores the copy of value before any of "modify", "add" or "sub" performed.
-	 * FIX  Implement!
 	 * @var static $_orig_value
 	 */
+	#[DebugHide]
 	protected $_orig_value;
 
 	#[Property('orig_value')]
-	protected function getOrigValue(): static {
+	protected function getOrigValue(): ?static {
 		return $this->_orig_value;
 	}
 

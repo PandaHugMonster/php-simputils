@@ -7,8 +7,10 @@ namespace spaf\simputils\basic;
 
 use DateTimeZone;
 use spaf\simputils\attributes\markers\Shortcut;
+use spaf\simputils\Data;
 use spaf\simputils\FS;
 use spaf\simputils\models\Box;
+use spaf\simputils\models\DataUnit;
 use spaf\simputils\models\DateTime;
 use spaf\simputils\models\Dir;
 use spaf\simputils\models\File;
@@ -143,4 +145,17 @@ function path(?string ...$args): ?string {
 #[Shortcut('Str::uuid()')]
 function uuid(): string {
 	return Str::uuid();
+}
+
+/**
+ * DataUnit shortcut
+ *
+ * @param int|string|\spaf\simputils\models\DataUnit|null $value
+ *
+ * @return \spaf\simputils\models\DataUnit
+ * @throws \Exception
+ */
+#[Shortcut('Data::du()')]
+function du(null|int|string|DataUnit $value = null, ?string $format = null): DataUnit {
+	return Data::du($value, $format);
 }

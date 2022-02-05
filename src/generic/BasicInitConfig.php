@@ -27,6 +27,7 @@ abstract class BasicInitConfig extends SimpleObject {
 	const REDEF_DATE_TIME_ZONE = 'DateTimeZone';
 	const REDEF_DATE_INTERVAL = 'DateInterval';
 	const REDEF_DATE_PERIOD = 'DatePeriod';
+	const REDEF_DATA_UNIT = 'DataUnit';
 	const REDEF_FILE = 'File';
 	const REDEF_DIR = 'Dir';
 	const REDEF_PHP_INFO = 'PhpInfo';

@@ -6,6 +6,8 @@ namespace spaf\simputils;
 
 use spaf\simputils\exceptions\NonExistingDataUnit;
 use spaf\simputils\exceptions\UnspecifiedDataUnit;
+use spaf\simputils\models\DataUnit;
+use function is_integer;
 
 /**
  * Helps to operate with data-units conversion, etc.
@@ -286,5 +288,32 @@ class Data {
 			}
 		}
 		return $res;
+	}
+
+	/**
+	 * Shortcut for creation of DataUnit object
+	 *
+	 * @param null|int|string|DataUnit $value
+	 *
+	 * @return \spaf\simputils\models\DataUnit
+	 * @throws \Exception
+	 */
+	public static function du(
+		null|int|string|DataUnit $value = null,
+		?string $format = null
+	): DataUnit {
+		if ($value instanceof DataUnit) {
+			return $value;
+		}
+		if (empty($value)) {
+			$value = '0B';
+		}
+		if (is_integer($value)) {
+			$value = $value.'B';
+		}
+		$class = PHP::redef(DataUnit::class);
+		$obj = new $class($value);
+		$obj->user_format = $format ?? $obj->user_format;
+		return $obj;
 	}
 }

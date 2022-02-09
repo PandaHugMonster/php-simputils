@@ -6,6 +6,7 @@ use ArrayObject;
 use Closure;
 use Exception;
 use spaf\simputils\attributes\markers\Affecting;
+use spaf\simputils\attributes\markers\Shortcut;
 use spaf\simputils\attributes\Property;
 use spaf\simputils\PHP;
 use spaf\simputils\traits\MetaMagic;
@@ -15,6 +16,7 @@ use function array_flip;
 use function array_keys;
 use function array_values;
 use function count;
+use function in_array;
 use function is_array;
 use function is_null;
 use function is_numeric;
@@ -437,6 +439,24 @@ class Box extends ArrayObject {
 		}
 
 		return $this;
+	}
+
+	/**
+	 *
+	 * TODO Add a flag for case-independent check
+	 *
+	 * @param string $key
+	 *
+	 * @return bool
+	 */
+	#[Shortcut('\in_array(key)')]
+	public function containsKey(string $key): bool {
+		return in_array($key, (array) $this->keys);
+	}
+
+	#[Shortcut('\in_array(value)')]
+	public function containsValue(mixed $value): bool {
+		return in_array($value, (array) $this);
 	}
 
 	/**

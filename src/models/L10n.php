@@ -19,6 +19,10 @@ class L10n extends SimpleObject {
 		'user_default_tz' => 'UTC',
 	];
 
+	protected $DataUnit = [
+		'translations' => []
+	];
+
 	/**
 	 * Apply those settings to other classes
 	 *
@@ -30,6 +34,9 @@ class L10n extends SimpleObject {
 		if (!empty($this?->DateTime['user_default_tz'])) {
 			date_default_timezone_set($this->DateTime['user_default_tz']);
 		}
+
+		$class = PHP::redef(DataUnit::class);
+		$class::_metaMagic($class, '___l10n', $this->DataUnit);
 	}
 
 	public static function redefComponentName(): string {

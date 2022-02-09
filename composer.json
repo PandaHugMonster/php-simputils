@@ -24,7 +24,7 @@
     "phpunit/phpunit": "^9"
   },
   "suggest": {
-    "spaf/yii2-simputils": "Extension for Yii2 framework integrating SimpUtils tools"
+    "ext-gmp": "GMP Extension (BigNumbers calculation functionality)"
   },
   "autoload": {
     "psr-4": {
@@ -36,5 +36,7 @@
     "test": [
       "phpunit tests"
     ]
-  }
+  },
+  "warning": "Make sure you have \"ext-gmp\" installed, otherwise some of the calculations with BigNumbers like DataUnit over PB will cause errors",
+  "warning-versions": ">=0"
 }

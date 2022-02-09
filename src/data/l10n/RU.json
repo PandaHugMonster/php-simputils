@@ -4,5 +4,18 @@
     "user_time_format": "H:i",
     "user_datetime_format": "d.m.Y H:i",
     "user_default_tz": "Europe/Moscow"
+  },
+  "DataUnit": {
+    "translations": {
+      "B": "Б",
+      "KB": "КБ",
+      "MB": "МБ",
+      "GB": "ГБ",
+      "TB": "ТБ",
+      "PB": "ПБ",
+      "EB": "ЭБ",
+      "ZB": "ЗБ",
+      "YB": "ЙБ"
+    }
   }
 }

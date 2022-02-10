@@ -7,7 +7,6 @@ use spaf\simputils\attributes\PropertyBatch;
 use spaf\simputils\Boolean;
 use spaf\simputils\generic\constants\ConstPHPInfo as constants;
 use spaf\simputils\PHP;
-use spaf\simputils\special\CodeBlocksCacheIndex;
 use spaf\simputils\special\CommonMemoryCacheIndex;
 use spaf\simputils\Str;
 use spaf\simputils\System;
@@ -38,7 +37,7 @@ use function in_array;
  * @property-read Version $xdebug_version
  * @property-read array $env_vars
  * @property-read array $server_var
- * @property-read array $extensions
+ * @property-read \spaf\simputils\models\Box $extensions
  * @property-read boolean $opcache
  * @property-read string $system_os
  * @property-read string $kernel_name
@@ -142,32 +141,26 @@ class PhpInfo extends Box {
 	 *
 	 * FIX  Review and implement $box_class for arrays
 	 *
-	 * @return array
+	 * @return array|\spaf\simputils\models\Box
 	 */
-	protected static function compose(): array {
+	protected static function compose(): array|Box {
 		$reg_exps = static::getPhpInfoRegExpArray();
-		$version_class = CodeBlocksCacheIndex::getRedefinition(
-			InitConfig::REDEF_VERSION,
-			Version::class
-		);
-		$box_class = CodeBlocksCacheIndex::getRedefinition(
-			InitConfig::REDEF_BOX,
-			Box::class
-		);
+		$version_class = PHP::redef(Version::class);
+		$box_class = PHP::redef(Box::class);
 
-		$data = [];
+		$data = new $box_class();
 
 		$data[constants::KEY_PHP_VERSION] = PHP::version();
 		$data[constants::KEY_SIMP_UTILS_VERSION] = PHP::simpUtilsVersion();
 		$data[constants::KEY_SIMP_UTILS_LICENSE] = PHP::simpUtilsLicense();
 		$data[constants::KEY_INI_CONFIG] = new $box_class(ini_get_all(details: false));
 		$data[constants::KEY_MAIN_INI_FILE] = php_ini_loaded_file();
-		$data[constants::KEY_EXTRA_INI_FILES] = explode(
+		$data[constants::KEY_EXTRA_INI_FILES] = new $box_class(explode(
 			',', preg_replace('/\n*/', '', php_ini_scanned_files())
-		);
-		$data[constants::KEY_STREAM_WRAPPERS] = stream_get_wrappers();
-		$data[constants::KEY_STREAM_TRANSPORTS] = stream_get_transports();
-		$data[constants::KEY_STREAM_FILTERS] = stream_get_filters();
+		));
+		$data[constants::KEY_STREAM_WRAPPERS] = new $box_class(stream_get_wrappers());
+		$data[constants::KEY_STREAM_TRANSPORTS] = new $box_class(stream_get_transports());
+		$data[constants::KEY_STREAM_FILTERS] = new $box_class(stream_get_filters());
 		$data[constants::KEY_ZEND_VERSION] = new $version_class(zend_version(), 'Zend');
 		$data[constants::KEY_XDEBUG_VERSION] = !empty($v = phpversion('xdebug'))
 			?new $version_class($v, 'xdebug')
@@ -175,10 +168,10 @@ class PhpInfo extends Box {
 		// IMP  Due to weird and volatile $_ENV, for PhpInfo `getenv()` is used,
 		//      what is thread-unsafe.
 		$data[constants::KEY_ENV_VARS] = PHP::allEnvs();
-		$data[constants::KEY_SERVER_VAR] = $_SERVER;
+		$data[constants::KEY_SERVER_VAR] = new $box_class($_SERVER);
 
-		$loaded_extensions = get_loaded_extensions();
-		$data[constants::KEY_EXTENSIONS] = [];
+		$loaded_extensions = new $box_class(get_loaded_extensions());
+		$data[constants::KEY_EXTENSIONS] = new $box_class();
 
 		foreach ($loaded_extensions as $ext) {
 			$data[constants::KEY_EXTENSIONS][$ext] = new $version_class(phpversion($ext), $ext);
@@ -367,6 +360,17 @@ class PhpInfo extends Box {
 	 */
 	public function updateEnvVar(string $key, mixed $val): void {
 		$this['env_vars'][$key] = $val;
+	}
+
+	public function hasExtension(string $name): bool {
+		$name = Str::lower($name);
+		foreach ($this->extensions->keys as $key) {
+			if (Str::lower($key) === $name) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**

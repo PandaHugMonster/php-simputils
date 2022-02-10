@@ -6,10 +6,8 @@ use Exception;
 use spaf\simputils\attributes\Property;
 use spaf\simputils\interfaces\InitBlockInterface;
 use spaf\simputils\models\Box;
-use spaf\simputils\models\InitConfig;
 use spaf\simputils\models\L10n;
 use spaf\simputils\PHP;
-use spaf\simputils\special\CodeBlocksCacheIndex;
 use spaf\simputils\special\CommonMemoryCacheIndex;
 use spaf\simputils\Str;
 use ValueError;
@@ -174,10 +172,7 @@ abstract class BasicInitConfig extends SimpleObject {
 	}
 
 	public function __toString(): string {
-		$box_class = CodeBlocksCacheIndex::getRedefinition(
-			InitConfig::REDEF_BOX,
-			Box::class
-		);
+		$box_class = PHP::redef(Box::class);
 		$init_blocks = $this->init_blocks;
 		if (!$init_blocks instanceof $box_class) {
 			$init_blocks = new $box_class($init_blocks);

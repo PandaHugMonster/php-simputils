@@ -5,9 +5,8 @@ namespace spaf\simputils\generic;
 
 
 use spaf\simputils\interfaces\VersionParserInterface;
-use spaf\simputils\models\InitConfig;
 use spaf\simputils\models\Version;
-use spaf\simputils\special\CodeBlocksCacheIndex;
+use spaf\simputils\PHP;
 use function is_null;
 
 abstract class BasicVersionParser extends SimpleObject implements VersionParserInterface {
@@ -69,10 +68,7 @@ abstract class BasicVersionParser extends SimpleObject implements VersionParserI
 	}
 
 	public static function normalize(Version|string|null $item, ?string $app_name = null): ?Version {
-		$class = CodeBlocksCacheIndex::getRedefinition(
-			InitConfig::REDEF_VERSION,
-			Version::class
-		);
+		$class = PHP::redef(Version::class);
 
 		if (is_null($item))
 			return null;

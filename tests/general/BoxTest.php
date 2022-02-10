@@ -3,10 +3,8 @@
 
 use PHPUnit\Framework\TestCase;
 use spaf\simputils\models\Box;
-use spaf\simputils\models\InitConfig;
 use spaf\simputils\models\Version;
 use spaf\simputils\PHP;
-use spaf\simputils\special\CodeBlocksCacheIndex;
 use function spaf\simputils\basic\bx;
 
 /**
@@ -33,10 +31,7 @@ class BoxTest extends TestCase {
 		$box_class = PHP::redef(Box::class);
 
 		$b1 = new $box_class();
-		$version_class = CodeBlocksCacheIndex::getRedefinition(
-			InitConfig::REDEF_VERSION,
-			Version::class
-		);
+		$version_class = PHP::redef(Version::class);
 
 		$b1[] = 'one';
 		$b1[] = 'two';

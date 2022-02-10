@@ -12,7 +12,6 @@ use spaf\simputils\models\InitConfig;
 use spaf\simputils\models\PhpInfo;
 use spaf\simputils\models\Version;
 use spaf\simputils\PHP;
-use spaf\simputils\special\CodeBlocksCacheIndex;
 use spaf\simputils\Str;
 use spaf\simputils\traits\MetaMagic;
 use function spaf\simputils\basic\bx;
@@ -258,10 +257,7 @@ class PHPClassTest extends TestCase {
 	 */
 	public function testPhpInfo() {
 		$php_info = PHP::info(true);
-		$phpinfo_class = CodeBlocksCacheIndex::getRedefinition(
-			InitConfig::REDEF_PHP_INFO,
-			PhpInfo::class
-		);
+		$phpinfo_class = PHP::redef(PhpInfo::class);
 		$this->assertInstanceOf($phpinfo_class, $php_info, 'PHP info is the object');
 		$this->assertNotEmpty($php_info, 'PHP info is not empty');
 
@@ -325,14 +321,9 @@ class PHPClassTest extends TestCase {
 	}
 
 	public function dataProviderType(): array {
-		$phpinfo_class = CodeBlocksCacheIndex::getRedefinition(
-			InitConfig::REDEF_PHP_INFO,
-			PhpInfo::class
-		);
-		$version_class = CodeBlocksCacheIndex::getRedefinition(
-			InitConfig::REDEF_VERSION,
-			Version::class
-		);
+		$phpinfo_class = PHP::redef(PhpInfo::class);
+		$version_class = PHP::redef(Version::class);
+
 		return [
 			['this is string', 'string'],
 			['anotherstringishere', 'string'],
@@ -358,10 +349,7 @@ class PHPClassTest extends TestCase {
 	}
 
 	public function testBox() {
-		$box_class = CodeBlocksCacheIndex::getRedefinition(
-			InitConfig::REDEF_BOX,
-			Box::class
-		);
+		$box_class = PHP::redef(Box::class);
 		$box = bx(['My array', 'data' => 'in my array']);
 		$this->assertEquals($box_class, PHP::type($box));
 	}
@@ -372,10 +360,7 @@ class PHPClassTest extends TestCase {
 	 * @return void
 	 */
 	public function testArrayReadOnlyStuff() {
-		$box_class = CodeBlocksCacheIndex::getRedefinition(
-			InitConfig::REDEF_BOX,
-			Box::class
-		);
+		$box_class = PHP::redef(Box::class);
 		$phpi = PHP::info();
 		$this->assertInstanceOf($box_class, $phpi->keys);
 
@@ -391,14 +376,9 @@ class PHPClassTest extends TestCase {
 	 * @uses \spaf\simputils\components\versions\parsers\DefaultVersionParser
 	 */
 	public function testClassRelatedUtils() {
-		$phpinfo_class = CodeBlocksCacheIndex::getRedefinition(
-			InitConfig::REDEF_PHP_INFO,
-			PhpInfo::class
-		);
-		$version_class = CodeBlocksCacheIndex::getRedefinition(
-			InitConfig::REDEF_VERSION,
-			Version::class
-		);
+		$phpinfo_class = PHP::redef(PhpInfo::class);
+		$version_class = PHP::redef(Version::class);
+
 		$this->assertFalse(PHP::isClass('IaMnOtAcLaSs'));
 		$this->assertTrue(PHP::isClass($phpinfo_class));
 

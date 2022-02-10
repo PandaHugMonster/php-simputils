@@ -7,9 +7,7 @@ use spaf\simputils\attributes\Property;
 use spaf\simputils\generic\constants\ConstSystemFingerprint as constants;
 use spaf\simputils\logger\Logger;
 use spaf\simputils\models\Box;
-use spaf\simputils\models\InitConfig;
 use spaf\simputils\PHP;
-use spaf\simputils\special\CodeBlocksCacheIndex;
 use function explode;
 use function is_null;
 use function preg_replace;
@@ -224,10 +222,7 @@ abstract class BasicSystemFingerprint extends SimpleObject {
 			'/'
 		);
 
-		$box_class = CodeBlocksCacheIndex::getRedefinition(
-			InitConfig::REDEF_BOX,
-			Box::class
-		);
+		$box_class = PHP::redef(Box::class);
 		$parts = new $box_class(explode('/', $string));
 
 		$base_parts = $parts->shift(2)->stash;

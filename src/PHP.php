@@ -308,10 +308,7 @@ class PHP {
 	 * @return Version|string
 	 */
 	public static function version(): Version|string {
-		$class = CodeBlocksCacheIndex::getRedefinition(
-			InitConfig::REDEF_VERSION,
-			Version::class
-		);
+		$class = static::redef(Version::class);
 		return new $class(phpversion(), 'PHP');
 	}
 
@@ -331,10 +328,7 @@ class PHP {
 	 */
 	public static function info(bool $use_fresh = false): PhpInfo|array|string {
 		if ($use_fresh || empty(CommonMemoryCacheIndex::$default_phpinfo_object)) {
-			$class = CodeBlocksCacheIndex::getRedefinition(
-				InitConfig::REDEF_PHP_INFO,
-				PhpInfo::class
-			);
+			$class = static::redef(PhpInfo::class);
 			CommonMemoryCacheIndex::$default_phpinfo_object = new $class();
 		}
 		return CommonMemoryCacheIndex::$default_phpinfo_object;

@@ -4,11 +4,9 @@ namespace spaf\simputils\traits;
 
 use Exception;
 use spaf\simputils\attributes\Property;
-use spaf\simputils\models\InitConfig;
 use spaf\simputils\models\SystemFingerprint;
 use spaf\simputils\models\Version;
 use spaf\simputils\PHP;
-use spaf\simputils\special\CodeBlocksCacheIndex;
 use spaf\simputils\Str;
 use spaf\simputils\traits\dsf\DsfVersionsMethodsTrait;
 
@@ -69,10 +67,7 @@ trait DefaultSystemFingerprintTrait {
 	 * @return string
 	 */
 	private static function autoPrepareMethodName(Version|string $version): string {
-		$class = CodeBlocksCacheIndex::getRedefinition(
-			InitConfig::REDEF_VERSION,
-			Version::class
-		);
+		$class = PHP::redef(Version::class);
 
 		if (Str::is($version)) {
 			$version = new $class($version);
@@ -91,10 +86,7 @@ trait DefaultSystemFingerprintTrait {
 	 * @throws \Exception Exception value is wrong
 	 */
 	public function preCheckProperty(string $field, mixed $val): mixed {
-		$version_class = CodeBlocksCacheIndex::getRedefinition(
-			InitConfig::REDEF_VERSION,
-			Version::class
-		);
+		$version_class = PHP::redef(Version::class);
 		if ($field === 'version') {
 			if (empty($val)) {
 				throw new Exception('Version parameter/property must be specified');

@@ -4,10 +4,8 @@ use PHPUnit\Framework\TestCase;
 use spaf\simputils\components\versions\parsers\DefaultVersionParser;
 use spaf\simputils\exceptions\IncorrectVersionFormat;
 use spaf\simputils\generic\BasicVersionParser;
-use spaf\simputils\models\InitConfig;
 use spaf\simputils\models\Version;
 use spaf\simputils\PHP;
-use spaf\simputils\special\CodeBlocksCacheIndex;
 use spaf\simputils\Str;
 
 /**
@@ -205,10 +203,7 @@ class VersionTest extends TestCase {
 	 * @return void
 	 */
 	public function testIncorrectOrEmptyParsingString(): void {
-		$version_class = CodeBlocksCacheIndex::getRedefinition(
-			InitConfig::REDEF_VERSION,
-			Version::class
-		);
+		$version_class = PHP::redef(Version::class);
 		$this->expectException(IncorrectVersionFormat::class);
 		$obj = new $version_class;
 	}
@@ -222,10 +217,7 @@ class VersionTest extends TestCase {
 	 * @return void
 	 */
 	public function testDebugInfo($str_v1): void {
-		$version_class = CodeBlocksCacheIndex::getRedefinition(
-			InitConfig::REDEF_VERSION,
-			Version::class
-		);
+		$version_class = PHP::redef(Version::class);
 
 		$v1 = new $version_class($str_v1, static::APP_NAME);
 		$arr = $v1->__debugInfo();
@@ -252,10 +244,7 @@ class VersionTest extends TestCase {
 	 * @return void
 	 */
 	public function testCustomParserUsage($str_v1) {
-		$version_class = CodeBlocksCacheIndex::getRedefinition(
-			InitConfig::REDEF_VERSION,
-			Version::class
-		);
+		$version_class = PHP::redef(Version::class);
 		$v1 = new $version_class($str_v1, static::APP_NAME, new CustomParserSample());
 		$this->assertInstanceOf(CustomParserSample::class, $v1->parser, 'Checking correct custom parser for an object');
 		$this->assertEquals(100500, $v1->major, 'Checking faked major value by custom parser');
@@ -266,10 +255,7 @@ class VersionTest extends TestCase {
 	}
 
 	public function testBasicVersionParserNormalization() {
-		$version_class = CodeBlocksCacheIndex::getRedefinition(
-			InitConfig::REDEF_VERSION,
-			Version::class
-		);
+		$version_class = PHP::redef(Version::class);
 		$res = BasicVersionParser::normalize(null);
 		$this->assertEmpty($res, 'Normalization of null must return null');
 

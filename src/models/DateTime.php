@@ -60,7 +60,6 @@ class DateTime extends FixUpDateTime {
 
 	/**
 	 * Stores the copy of value before any of "modify", "add" or "sub" performed.
-	 * FIX  Implement!
 	 * @var static $_orig_value
 	 */
 	protected $_orig_value;

@@ -14,6 +14,7 @@ use spaf\simputils\attributes\PropertyBatch;
 use spaf\simputils\exceptions\PropertyAccessError;
 use spaf\simputils\exceptions\PropertyDoesNotExist;
 use spaf\simputils\special\PropertiesCacheIndex;
+use function get_parent_class;
 use function in_array;
 
 /**
@@ -97,15 +98,26 @@ trait PropertiesTrait {
 	}
 
 	public function __isset($name) {
-		return $this->____checkSimpUtilsPropertyAvailability($name);
-	}
-
-	private function ____checkSimpUtilsPropertyAvailability($name, $type = Property::TYPE_GET) {
+		$type = Property::TYPE_GET;
 		$ref = static::class.'#'.$name.'#'.$type;
 		if ($method_name = PropertiesCacheIndex::$index[$ref] ?? false) {
 			return $this->$method_name(null, $type, $name);
 		}
-		return $this->____prepareProperty($name, $type, check_and_do_not_call: true);
+		$res = $this->____prepareProperty($name, $type, check_and_do_not_call: true);
+
+		if (!$res) {
+			try {
+				/** @noinspection PhpUndefinedMethodInspection */
+				if (get_parent_class()) {
+					$res = parent::__isset($name);
+				}
+			} catch (Error $e) {
+				/** @noinspection PhpUnhandledExceptionInspection */
+				throw $e;
+			}
+		}
+
+		return $res;
 	}
 
 	private function ____propertyBatchMethodGet($value, $type, $name): mixed {

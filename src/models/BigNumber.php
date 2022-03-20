@@ -7,10 +7,13 @@ use spaf\simputils\attributes\markers\Shortcut;
 use spaf\simputils\attributes\Property;
 use spaf\simputils\generic\SimpleObject;
 use spaf\simputils\PHP;
+use spaf\simputils\Str;
 use function bcadd;
 use function bccomp;
 use function gmp_add;
 use function gmp_cmp;
+use function intval;
+use function preg_replace;
 
 /**
  * BigNumber representation class
@@ -93,7 +96,7 @@ class BigNumber extends SimpleObject {
 	 * @throws \Exception Exception if no math extension is installed
 	 */
 	public function __construct(
-		int|self|string $val = 0,
+		int|self|float|string $val = 0,
 		bool $mutable = false,
 		?string $extension = null
 	) {
@@ -102,7 +105,9 @@ class BigNumber extends SimpleObject {
 		if ($this->_ext === false) {
 			throw new Exception('No math extension available');
 		}
-
+		if ($this->_ext === static::SUBSYSTEM_GMP) {
+			$val = intval($val);
+		}
 		$this->_value = $val;
 	}
 
@@ -242,14 +247,16 @@ class BigNumber extends SimpleObject {
 	 * @see \bcdiv()
 	 */
 	#[Shortcut('\gmp_div_q()|\bcdiv()')]
-	public function div(self|string|int $b, ?bool $mutable = null): static {
+	public function div(self|string|float|int $b, ?bool $mutable = null): static {
 		$mutable = $mutable ?? $this->_is_mutable;
 
 		$val = null;
 		if ($this->_ext === static::SUBSYSTEM_GMP) {
+			// $b = intval($b);
 			$val = gmp_div_q($this->_value, "$b");
 		} else if ($this->_ext === static::SUBSYSTEM_BCMATH) {
-			$val = bcdiv($this->_value, "$b");
+			$val = bcdiv($this->_value, $b, scale: 2);
+			$val = Str::removeEnding($val, '.00');
 		}
 		if ($mutable) {
 			$this->_value = $val;
@@ -259,6 +266,18 @@ class BigNumber extends SimpleObject {
 		}
 
 		return $val;
+	}
+
+	public function floor() {
+		$mutable = $mutable ?? $this->_is_mutable;
+		$res = preg_replace('/([^.]*)([.]?.*)$/', '$1', "{$this->_value}");
+		if ($mutable) {
+			$this->_value = $res;
+			$res = $this;
+		} else {
+			$res = new static($res, extension: $this->_ext);
+		}
+		return $res;
 	}
 
 	/**
@@ -331,6 +350,11 @@ class BigNumber extends SimpleObject {
 		return $val;
 	}
 
+	public function isZero(): bool {
+		$res = $this->_value === 0 || $this->_value === '0';
+		return $res;
+	}
+
 	/**
 	 * Comparison
 	 *
@@ -346,10 +370,11 @@ class BigNumber extends SimpleObject {
 	 * @see \bccomp()
 	 */
 	#[Shortcut('\gmp_cmp()|\bccomp()')]
-	public function cmp(self|string|int $b): int {
+	public function cmp(self|string|int|float $b): int {
 
 		$val = null;
 		if ($this->_ext === static::SUBSYSTEM_GMP) {
+			$b = intval($b);
 			$val = gmp_cmp($this->_value, "$b");
 		} else if ($this->_ext === static::SUBSYSTEM_BCMATH) {
 			$val = bccomp($this->_value, "$b");

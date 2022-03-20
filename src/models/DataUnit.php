@@ -71,6 +71,16 @@ class DataUnit extends SimpleObject {
 	public static $l10n_translations = null;
 	public static $big_number_extension = null;
 
+	/**
+	 * @var string $output_separator is a separator in between units symbols and digits
+	 */
+	public static $output_separator = ' ';
+
+	/**
+	 * @var bool $long_format is applicable only for `humanReadable()` method (and any user output)
+	 */
+	public static $long_format = false;
+
 	#[DebugHide]
 	protected BigNumber $_value;
 	public string $user_format = self::USER_FORMAT_HR;
@@ -104,10 +114,20 @@ class DataUnit extends SimpleObject {
 	 */
 	public function format(?string $format = null, bool $with_units = true): string {
 		$format = $format ?? $this->user_format;
+
 		if ($format === DataUnit::USER_FORMAT_HR) {
 			return static::humanReadable("{$this->_value}b");
 		}
-		return static::bytesTo($this->_value, $format).($with_units?Str::upper($format):null);
+
+		return static::formattedStr(
+			static::bytesTo($this->_value, $format),
+			$with_units?Str::upper($format):null
+		);
+//		return static::bytesTo($this->_value, $format).($with_units?Str::upper($format):null);
+	}
+
+	protected static function formattedStr($val, ?string $unit_code = null) {
+		return $val.static::$output_separator.static::translator($unit_code, true);
 	}
 
 	/**
@@ -165,7 +185,7 @@ class DataUnit extends SimpleObject {
 	 * @throws \spaf\simputils\exceptions\UnspecifiedDataUnit
 	 */
 	public static function toBytes(string $value): BigNumber|string|int {
-		return static::unitTo($value, DataUnit::BYTE);
+		return static::unitTo($value);
 	}
 
 	/**
@@ -216,8 +236,9 @@ class DataUnit extends SimpleObject {
 		$to_power = $unit_codes[$to_unit];
 
 		$ext = static::$big_number_extension;
-		$value = preg_replace('/[^0-9\-.]/', '', $value);
-		$value = new BigNumber($value, extension: $ext);
+
+		// TODO Should be improved part with in_array()
+		$value = new BigNumber(static::clearNumber($value), extension: $ext);
 		if ($from_power != $to_power) {
 			$diff = (new BigNumber(2, false, extension: $ext))
 				->pow(abs($from_power - $to_power) * 10);
@@ -263,7 +284,13 @@ class DataUnit extends SimpleObject {
 	 */
 	public static function clearUnit(string $unit): string {
 		$unit_codes = Data::unitCodeToPowerArray();
-		$unit = preg_replace('/[^A-Z]/', '', Str::upper($unit));
+
+		$unit = preg_replace('/[\W]/ui', '', Str::upper($unit));
+		$unit = preg_replace('/[\d]/', '', $unit);
+
+		// NOTE Transparently translated if applicable
+		$unit = static::translator($unit);
+
 		if (empty($unit)) {
 			throw new UnspecifiedDataUnit();
 		}
@@ -271,6 +298,13 @@ class DataUnit extends SimpleObject {
 			throw new NonExistingDataUnit("Such data unit as \"{$unit}\" is not known");
 		}
 		return $unit;
+	}
+
+	public static function clearNumber(string|int $value) {
+		preg_replace('/[^0-9\-.]/', '', $value);
+		$is_negative = $value && $value[0] === '-';
+		$value = preg_replace('/[^0-9.]/', '', $value);
+		return $is_negative?"-{$value}":$value;
 	}
 
 	/**
@@ -294,7 +328,7 @@ class DataUnit extends SimpleObject {
 	 * @return float Resulting value of "$to_unit" level as a float number
 	 * @throws \spaf\simputils\exceptions\NonExistingDataUnit
 	 * @throws \spaf\simputils\exceptions\UnspecifiedDataUnit
-	 * @see \spaf\simputils\helpers\Data::unitTo()
+	 * @see \spaf\simputils\Data::unitTo()
 	 */
 	public static function bytesTo(string|int $bytes, string $to_unit): BigNumber {
 		return static::unitTo("{$bytes}b", $to_unit);
@@ -327,25 +361,69 @@ class DataUnit extends SimpleObject {
 	 * In the last example, because extra 1 kb is not affecting first 2 digits after coma - it might
 	 * not be part of the result (**This is why the result is 1MB**)
 	 *
-	 * @param int|string $value Integer value will be considered as "bytes",
-	 *                          in case of string - the abbreviation will be used to determine
-	 *                          the level
+	 * @param BigNumber|int|string $value Integer value will be considered as "bytes",
+	 *                                    in case of string - the abbreviation will be used
+	 *                                    to determine the level
 	 *
-	 * @return string|null String with the resulting measure and correctly abbreviated level
+	 * @return BigNumber|string|null String with the resulting measure and
+	 *                               correctly abbreviated level
+	 *
 	 * @throws \spaf\simputils\exceptions\NonExistingDataUnit
 	 * @throws \spaf\simputils\exceptions\UnspecifiedDataUnit
 	 */
 	public static function humanReadable(BigNumber|int|string $value): null|BigNumber|string {
-		// FIX  Refactor
-		$res = null;
+		$res = '';
 		$value = is_numeric($value)?"{$value}b":$value;
-		foreach (Data::unitCodeToPowerArray() as $unit_code => $power) {
-			$res = static::unitTo($value, $unit_code);
-			if ($res->cmp(1024) < 0) {
-				break;
+
+		foreach (Data::unitCodeToPowerArray()->keys as $unit_code) {
+			$accu = static::unitTo($value, $unit_code);
+			if ($accu->cmp(1024) < 0) {
+				if (static::$long_format) {
+					return static::formattedStrLong($value, $accu, $unit_code);
+				} else {
+					return static::formattedStr($accu, $unit_code);
+				}
 			}
 		}
-		return "{$res}{$unit_code}";
+
+		return static::formattedStr($value, $unit_code);
+	}
+
+	protected static function formattedStrLong($val, $accu, ?string $right_limit): string {
+		$res = '';
+		$total_bytes = static::toBytes($val);
+		$total_bytes->setMutable(false);
+
+		$right_limit = static::clearUnit($right_limit);
+
+		$prev_unit = null;
+		foreach (Data::unitCodeToPowerArray() as $unit => $power) {
+			$t = 1024**$power;
+			$unit = static::clearUnit($unit);
+
+			$left = $total_bytes->div($t)->floor();
+			$right = $total_bytes->mod($t);
+			$is_zero = $right->isZero();
+
+			$right = static::formattedStr($right, DataUnit::BYTE);
+			if ($prev_unit) {
+				$right = static::unitTo($right, $prev_unit)->floor();
+				$is_zero = $right->isZero();
+				$right = static::formattedStr($right, $prev_unit);
+			}
+			if (!$is_zero) {
+				$res = $right.($res?' ':'').$res;
+			}
+
+			if ($unit === $right_limit) {
+				$res = static::formattedStr($left, $unit).($res?' ':'').$res;
+				break;
+			}
+
+			$prev_unit = $unit;
+		}
+
+		return $res;
 	}
 
 	/**
@@ -358,11 +436,17 @@ class DataUnit extends SimpleObject {
 	 *
 	 * @return false|mixed
 	 */
-	public static function translator(string $name) {
+	public static function translator(string $name, bool $reversed = false) {
 		$name = Str::upper($name);
-		$check = new Box(static::$l10n_translations);
-		if ($check->containsKey($name)) {
-			$name = $check[$name];
+		$check = new Box(static::$l10n_translations ?? []);
+		if (!$reversed) {
+			if ($check->containsValue($name)) {
+				return $check->getKeyByValue($name);
+			}
+		} else {
+			if ($check->containsKey($name)) {
+				return $check[$name];
+			}
 		}
 		return $name;
 	}

@@ -185,6 +185,10 @@ class Box extends ArrayObject {
 		return new static(array_flip((array) $this));
 	}
 
+	public function getKeyByValue($value) {
+		return $this->flipped[$value] ?? null;
+	}
+
 	/**
 	 * Slices out the portion of array
 	 *

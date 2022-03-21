@@ -4,21 +4,16 @@ namespace spaf\simputils\generic\fixups;
 
 use DateInterval;
 use DateTimeInterface;
-use spaf\simputils\attributes\Property;
 use spaf\simputils\generic\BasicPrism;
 use spaf\simputils\models\DateTime;
 use spaf\simputils\models\DateTimeZone;
+use spaf\simputils\traits\ForOutputsTrait;
 
 abstract class FixUpDateTimePrism extends BasicPrism {
+	use ForOutputsTrait;
 
 	/** @var DateTime $_object */
 	protected $_object;
-
-	#[Property('for_system')]
-	abstract protected function getForSystem(): string;
-
-	#[Property('for_user')]
-	abstract protected function getForUser(): string;
 
 	public function __construct(DateTime|string $datetime = "now", ?DateTimeZone $timezone = null) {
 		if ($datetime instanceof DateTime) {

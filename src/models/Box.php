@@ -5,6 +5,7 @@ namespace spaf\simputils\models;
 use ArrayObject;
 use Closure;
 use Exception;
+use spaf\simputils\attributes\Extract;
 use spaf\simputils\attributes\markers\Affecting;
 use spaf\simputils\attributes\markers\Shortcut;
 use spaf\simputils\attributes\Property;
@@ -143,11 +144,13 @@ class Box extends ArrayObject {
 	public static bool $to_string_format_json = true;
 	public static bool $is_json_pretty = false;
 
+	#[Extract(false)]
 	protected mixed $_stash = null;
 
 	/**
 	 * @return mixed
 	 */
+	#[Extract(false)]
 	#[Property('stash')]
 	protected function getStashContent(): mixed {
 		return $this->_stash;
@@ -164,6 +167,7 @@ class Box extends ArrayObject {
 	/**
 	 * @return static|Box|array
 	 */
+	#[Extract(false)]
 	#[Property('keys')]
 	protected function getKeys(): static|Box|array {
 		return new static(array_keys((array) $this));
@@ -172,6 +176,7 @@ class Box extends ArrayObject {
 	/**
 	 * @return static|Box|array
 	 */
+	#[Extract(false)]
 	#[Property('values')]
 	protected function getValues(): static|Box|array {
 		return new static(array_values((array) $this));
@@ -180,8 +185,10 @@ class Box extends ArrayObject {
 	/**
 	 * @return static|Box|array
 	 */
+	#[Extract(false)]
 	#[Property('flipped')]
 	protected function getFlipped(): static|Box|array {
+		// TODO Improve flipping so it would hash objects when possible for keys
 		return new static(array_flip((array) $this));
 	}
 
@@ -474,6 +481,14 @@ class Box extends ArrayObject {
 			$this[$key] = $val;
 		}
 		return $this;
+	}
+
+	public function toArray(
+		bool $recursively = false,
+		bool $with_class = false,
+		array $exclude_fields = []
+	): array {
+		return (array) $this;
 	}
 
 	/**

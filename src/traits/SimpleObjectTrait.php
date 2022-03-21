@@ -64,10 +64,8 @@ trait SimpleObjectTrait {
 	 * @return string
 	 */
 	public function __toString(): string {
-		if (static::$to_string_format_json) {
-			return $this->toJson();
-		}
+		return $this->toJson();
 
-		return 'Object <'.static::classShort().'#'.$this->obj_id.'>';
+//		return 'Object <'.static::classShort().'#'.$this->obj_id.'>';
 	}
 }

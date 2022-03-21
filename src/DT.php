@@ -4,11 +4,12 @@
 namespace spaf\simputils;
 
 
-use DateTimeZone;
 use spaf\simputils\attributes\markers\Shortcut;
 use spaf\simputils\interfaces\helpers\DateTimeHelperInterface;
 use spaf\simputils\models\DateInterval;
 use spaf\simputils\models\DateTime;
+use spaf\simputils\models\DateTimeZone;
+use function is_string;
 
 /**
  * General purpose DateTime static helper
@@ -72,11 +73,15 @@ class DT implements DateTimeHelperInterface {
 	 */
 	public static function normalize(
 		DateTime|string|int $dt,
-		DateTimeZone|null $tz = null,
+		null|DateTimeZone|string $tz = null,
 		string $fmt = null,
 		bool $is_clone_allowed = true,
 	): ?DateTime {
 		$class = static::_getClass();
+		if (is_string($tz)) {
+			$tz_class = PHP::redef(DateTimeZone::class);
+			$tz = new $tz_class($tz);
+		}
 
 		if (Str::is($dt)) {
 			$res = !empty($fmt)

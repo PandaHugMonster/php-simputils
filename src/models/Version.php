@@ -10,6 +10,7 @@ use spaf\simputils\components\versions\parsers\DefaultVersionParser;
 use spaf\simputils\generic\SimpleObject;
 use spaf\simputils\interfaces\VersionParserInterface;
 use spaf\simputils\traits\RedefinableComponentTrait;
+use function json_encode;
 
 /**
  * Version object class
@@ -348,6 +349,10 @@ class Version extends SimpleObject {
 	 */
 	public function lte(Version|string $obj): bool {
 		return $this->lessThanEqual($obj);
+	}
+
+	public function toJson(?bool $pretty = null, bool $with_class = false): string {
+		return json_encode("{$this}");
 	}
 
 	/**

@@ -91,7 +91,11 @@ function now(?DateTimeZone $tz = null): ?DateTime {
  * @throws \Exception Parsing error
  */
 #[Shortcut('PHP::ts()')]
-function ts(DateTime|string|int $dt, ?DateTimeZone $tz = null, string $fmt = null): ?DateTime {
+function ts(
+	DateTime|string|int $dt,
+	null|DateTimeZone|string $tz = null,
+	string $fmt = null
+): ?DateTime {
 	return PHP::ts($dt, $tz, $fmt);
 }
 

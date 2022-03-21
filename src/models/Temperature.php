@@ -82,13 +82,11 @@ class Temperature extends SimpleObject {
 			$from === static::UNIT_KELVIN && $to === static::UNIT_CELSIUS
 				=> $value + static::ABS_ZERO_POINT_CELSIUS,
 
-			// NOTE Will cause +273.15
 			$from === static::UNIT_FAHRENHEIT && $to === static::UNIT_KELVIN
 				=> (($value - 32) * 5 / 9) - static::ABS_ZERO_POINT_CELSIUS,
 
-			// NOTE Will cause -273.15
 			$from === static::UNIT_KELVIN && $to === static::UNIT_FAHRENHEIT
-				=> (($value * 9 / 5) + 32) + static::ABS_ZERO_POINT_CELSIUS,
+				=> ((($value + static::ABS_ZERO_POINT_CELSIUS) * 9 / 5) + 32),
 		};
 
 		$res = static::absoluteZeroLimiter($pre_res, $to);
@@ -140,6 +138,6 @@ class Temperature extends SimpleObject {
 	}
 
 	public static function redefComponentName(): string {
-		return InitConfig::REDEF_TEMPERATUR;
+		return InitConfig::REDEF_TEMPERATURE;
 	}
 }

@@ -122,6 +122,7 @@ class Temperature extends SimpleObject {
 
 	#[Property('for_system')]
 	protected function getForSystem(): string {
+		// FIX  Store format is not implemented!
 		return "{$this->_value} {$this->_unit}";
 	}
 

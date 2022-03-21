@@ -454,8 +454,4 @@ class DataUnit extends SimpleObject {
 	public static function redefComponentName(): string {
 		return InitConfig::REDEF_DATA_UNIT;
 	}
-
-	public function __toString(): string {
-		return $this->for_user;
-	}
 }

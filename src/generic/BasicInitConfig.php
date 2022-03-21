@@ -34,6 +34,7 @@ abstract class BasicInitConfig extends SimpleObject {
 	const REDEF_VERSION = 'Version';
 	const REDEF_LOGGER = 'Logger';
 	const REDEF_L10N = 'L10n';
+	const REDEF_TEMPERATUR = 'Temperature';
 
 	public ?string $name = null;
 	public ?string $code_root = null;

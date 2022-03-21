@@ -15,4 +15,8 @@ trait ForOutputsTrait {
 
 	#[Property('for_user')]
 	abstract protected function getForUser(): string;
+
+	public function __toString(): string {
+		return $this->for_user;
+	}
 }

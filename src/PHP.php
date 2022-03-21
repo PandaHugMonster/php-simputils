@@ -674,7 +674,7 @@ class PHP {
 	 */
 	public static function ts(
 		DateTime|string|int $dt,
-		?DateTimeZone $tz = null,
+		null|DateTimeZone|string $tz = null,
 		string $fmt = null
 	): ?DateTime {
 		return DT::normalize($dt, $tz, $fmt);

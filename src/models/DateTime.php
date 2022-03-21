@@ -9,8 +9,10 @@ use spaf\simputils\DT;
 use spaf\simputils\generic\fixups\FixUpDateTime;
 use spaf\simputils\PHP;
 use spaf\simputils\Str;
+use spaf\simputils\traits\ForOutputsTrait;
 use function date_interval_create_from_date_string;
 use function is_null;
+use function json_encode;
 
 /**
  * DateTime model of the framework
@@ -52,6 +54,7 @@ use function is_null;
  *                                     or manually snapshot
  */
 class DateTime extends FixUpDateTime {
+	use ForOutputsTrait;
 
 	public static $l10n_user_date_format = DT::FMT_DATE;
 	public static $l10n_user_time_format = DT::FMT_TIME;
@@ -65,7 +68,7 @@ class DateTime extends FixUpDateTime {
 	protected $_orig_value;
 
 	#[Property('orig_value')]
-	protected function getOrigValue(): static {
+	protected function getOrigValue(): static|null {
 		return $this->_orig_value;
 	}
 
@@ -267,8 +270,10 @@ class DateTime extends FixUpDateTime {
 		return new DatePeriod($this, $step, $to_date);
 	}
 
-	public function __toString(): string {
-		return $this->getForUser();
+	public function toJson(?bool $pretty = null, bool $with_class = false): string {
+//		return json_encode($this->for_user);
+		// TODO Implement optional choice of "for_*"
+		return json_encode($this->for_system);
 	}
 
 	public static function redefComponentName(): string {

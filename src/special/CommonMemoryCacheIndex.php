@@ -18,5 +18,7 @@ class CommonMemoryCacheIndex {
 
 	public static ?PhpInfo $default_phpinfo_object = null;
 	public static ?string $original_phpinfo_string = null;
+	// NOTE ILP - Infinite Loop Prevention
+	public static ?array $to_array_ilp_storage = null;
 
 }

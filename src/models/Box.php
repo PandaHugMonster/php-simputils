@@ -5,14 +5,17 @@ namespace spaf\simputils\models;
 use ArrayObject;
 use Closure;
 use Exception;
+use Generator;
 use spaf\simputils\attributes\Extract;
 use spaf\simputils\attributes\markers\Affecting;
 use spaf\simputils\attributes\markers\Shortcut;
 use spaf\simputils\attributes\Property;
+use spaf\simputils\Math;
 use spaf\simputils\PHP;
 use spaf\simputils\traits\MetaMagic;
 use spaf\simputils\traits\RedefinableComponentTrait;
 use spaf\simputils\traits\SimpleObjectTrait;
+use function array_combine;
 use function array_flip;
 use function array_keys;
 use function array_values;
@@ -22,6 +25,7 @@ use function is_array;
 use function is_null;
 use function is_numeric;
 use function is_object;
+use function is_string;
 
 /**
  * The Array-alike Box
@@ -123,8 +127,6 @@ use function is_object;
  * identical by functionality. `box()` is just a shortcut for {@see PHP::box()}, and `PHP::box()`
  * is a shortcut for `new Box()`.
  *
- * TODO Implement more of array-related functionality from default PHP pool
- *
  * FIX  Implement switchable on/off for silent "null" instead of exception return
  *
  * @package spaf\simputils\generic
@@ -191,6 +193,20 @@ class Box extends ArrayObject {
 		// TODO Improve flipping so it would hash objects when possible for keys
 		return new static(array_flip((array) $this));
 	}
+
+//	/**
+//	 * Determines if the given array is a list
+//	 *
+//	 * An array is considered a list if its keys consist of consecutive
+//	 * numbers from 0 to count($array)-1.
+//	 *
+//	 * @return bool
+//	 */
+//	#[Shortcut('\array_is_list()')]
+//	#[Property('isList')]
+//	protected function getIsList(): bool {
+//		return array_is_list((array) $this);
+//	}
 
 	public function getKeyByValue($value) {
 		return $this->flipped[$value] ?? null;
@@ -470,6 +486,235 @@ class Box extends ArrayObject {
 		return in_array($value, (array) $this);
 	}
 
+	public function toArray(
+		bool $recursively = false,
+		bool $with_class = false,
+		array $exclude_fields = []
+	): array {
+		return (array) $this;
+	}
+
+	/**
+	 * Applies callbacks to keys and values
+	 *
+	 * Keys and values would be modified inside of the box
+	 *
+	 * The callback will received `$k`, `$v` and `$box` params, and
+	 * should return `$k` and `$v` or `null`.
+	 * In case `null` is returned, the element will be removed from the box.
+	 *
+	 * Important: avoid modification of `$box` reference inside the callback,
+	 * in the most cases you would receive unexpected result!
+	 *
+	 * `cb` stands for "callback"
+	 *
+	 * ```php
+	 *  function myCallback($k, $v) {
+	 *      if ($v instanceof Version) {
+	 *          $v = " ! {$v} ! ";
+	 *      }
+	 *      return [$k, $v];
+	 *  }
+	 *
+	 *  $res = bx([
+	 *      'Test 1' => 'aaa',
+	 *      'Test 2' => now(),
+	 *      'Test 3' => new Version('1.2.3'),
+	 *      'Test 4' => 'bbb',
+	 *      'Test 5' => 99,
+	 *      100500 => 'text',
+	 *      'Test 6' => 100,
+	 *  ]);
+	 *
+	 *  $res->cb('myCallback');
+	 *  // From PHP 8.1 you can use shorter callback reference:
+	 *  // $res->cb( myCallback(...) );
+	 *
+	 *  pd("{$res->toJson(true)}");
+	 *
+	 * ```
+	 *
+	 * @param callable|array|string ...$callbacks
+	 *
+	 * @return $this
+	 */
+	#[Affecting]
+	public function cb(callable|array|string ...$callbacks): self {
+		foreach ($callbacks as $callback) {
+			$callback = $this->clearClosure($callback);
+
+			$to_unset = new static;
+			$to_replace = new static;
+			foreach ($this as $k => $v) {
+				$res = $callback($k, $v, $this);
+				if (is_null($res)) {
+					$to_unset[] = $k;
+				} else {
+					$to_replace[$k] = $res;
+				}
+			}
+			foreach ($to_unset as $k) {
+				$this->unsetByKey($k);
+			}
+			foreach ($to_replace as $orig_k => [$k, $v]) {
+				if ($k !== $orig_k) {
+					$this->unsetByKey($orig_k);
+				}
+				$this[$k] = $v;
+			}
+		}
+		return $this;
+	}
+
+	/**
+	 * Applies callbacks to keys
+	 *
+	 * Inside it uses {@see self::cb()}
+	 *
+	 * Example:
+	 * ```php
+	 *  $res = bx([
+	 *      'Test 1' => 'aaa',
+	 *      'Test 2' => now(),
+	 *      'Test 3' => new Version('1.2.3'),
+	 *      'Test 4' => 'bbb',
+	 *      'Test 5' => 99,
+	 *      100500 => 'text',
+	 *      'Test 6' => 100,
+	 *  ]);
+	 *
+	 * 	// Or for PHP 8.1 and above:    `$res->cbKeys(Str::upper(...));`
+	 *  $res->cbKeys([Str::class, 'upper']);
+	 *
+	 * ```
+	 *
+	 *
+	 * @param callable|array|string ...$callbacks
+	 *
+	 * @return $this
+	 */
+	#[Affecting]
+	public function cbKeys(callable|array|string ...$callbacks): self {
+		foreach ($callbacks as $callback) {
+			$callback = $this->clearClosure($callback);
+
+			$this->cb(function ($k, $v) use ($callback) {
+				return [$callback($k), $v];
+			});
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Applies callbacks to values
+	 *
+	 * Inside it uses {@see self::cb()}
+	 *
+	 * Example:
+	 * ```php
+	 *  $res = bx([
+	 *      'Test 1' => 'aaa',
+	 *      'Test 2' => now(),
+	 *      'Test 3' => new Version('1.2.3'),
+	 *      'Test 4' => 'bbb',
+	 *      'Test 5' => 99,
+	 *      100500 => 'text',
+	 *      'Test 6' => 100,
+	 *  ]);
+	 *
+	 * 	// Or for PHP 8.1 and above:    `$res->cbValues(Str::upper(...));`
+	 *  $res->cbValues([Str::class, 'upper']);
+	 *
+	 * ```
+	 *
+	 *
+	 * @param callable|array|string ...$callbacks
+	 *
+	 * @return $this
+	 */
+	#[Affecting]
+	public function cbValues(callable|array|string ...$callbacks): self {
+		foreach ($callbacks as $callback) {
+			$callback = $this->clearClosure($callback);
+
+			$this->cb(function ($k, $v) use ($callback) {
+				return [$k, $callback($v)];
+			});
+		}
+		return $this;
+	}
+
+	protected function clearClosure($callback) {
+		if (is_array($callback) || is_string($callback)) {
+			$callback = Closure::fromCallable($callback);
+		}
+		return $callback;
+	}
+
+	/**
+	 * Combine keys array and values array
+	 *
+	 * Example:
+	 * ```php
+	 *  $res = Box::combine(
+	 *      [ 'Raz', 'Dva', 'Tri'],
+	 *      [  1.1,   2.2,   3.3 ]
+	 *  );
+	 * ```
+	 *
+	 * @param array|Box $keys
+	 * @param array|Box $values
+	 *
+	 * @return static
+	 */
+	#[Shortcut('\array_combine()')]
+	public static function combine(array|Box $keys, array|Box $values): static {
+		return new static(array_combine((array) $keys, (array) $values));
+	}
+
+	public function randKeys(int $num = 1): Generator {
+		$keys = $this->keys;
+
+		$num = $num < 1
+			?1
+			:$num;
+		foreach (Math::range(0, $num - 1) as $i) {
+			yield $keys[Math::rand(0, $keys->size - 1)];
+		}
+	}
+
+	public function randValues(int $num = 1): Generator {
+		$values = $this->values;
+
+		$num = $num < 1
+			?1
+			:$num;
+		foreach (Math::range(0, $num - 1) as $i) {
+			yield $values[Math::rand(0, $values->size - 1)];
+		}
+	}
+
+	public function randKey() {
+		$keys = $this->keys;
+		return $keys[Math::rand(0, $keys->size - 1)];
+	}
+
+	public function randValue(int $num = 1) {
+		$values = $this->values;
+		return $values[Math::rand(0, $values->size - 1)];
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 * @return string
+	 */
+	public static function redefComponentName(): string {
+		return InitConfig::REDEF_BOX;
+	}
+
+	//// Meta-Magic methods
+
 	/**
 	 * @param array $data Data array
 	 *
@@ -483,29 +728,18 @@ class Box extends ArrayObject {
 		return $this;
 	}
 
-	public function toArray(
-		bool $recursively = false,
-		bool $with_class = false,
-		array $exclude_fields = []
-	): array {
-		return (array) $this;
-	}
+	//// Magic methods
 
 	/**
 	 * To debug as a normal array
 	 *
 	 * @codeCoverageIgnore
-	 * @return array|null
+	 * @return array
+	 * @throws \spaf\simputils\exceptions\InfiniteLoopPreventionExceptions
 	 */
 	public function __debugInfo(): array {
 		return $this->toArray();
 	}
 
-	/**
-	 * @codeCoverageIgnore
-	 * @return string
-	 */
-	public static function redefComponentName(): string {
-		return InitConfig::REDEF_BOX;
-	}
 }
+

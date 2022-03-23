@@ -5,9 +5,9 @@ namespace spaf\simputils\generic;
 use Closure;
 use spaf\simputils\attributes\DebugHide;
 use spaf\simputils\attributes\Property;
-use spaf\simputils\Data;
 use spaf\simputils\FS;
 use spaf\simputils\models\Box;
+use spaf\simputils\models\DataUnit;
 use spaf\simputils\models\files\apps\CsvProcessor;
 use spaf\simputils\models\files\apps\DotEnvProcessor;
 use spaf\simputils\models\files\apps\JsonProcessor;
@@ -155,7 +155,7 @@ abstract class BasicResource extends SimpleObject {
 	 */
 	#[Property('size_hr')]
 	protected function getSizeHuman(): ?string {
-		return Data::humanReadable($this->size ?? 0);
+		return DataUnit::humanReadable($this->size ?? 0);
 	}
 
 	#[Property('extension')]

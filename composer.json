@@ -37,7 +37,5 @@
     "test": [
       "phpunit tests"
     ]
-  },
-  "warning": "Make sure you have \"ext-gmp\" installed, otherwise some of the calculations with BigNumbers like DataUnit over PB will cause errors",
-  "warning-versions": ">=0"
+  }
 }

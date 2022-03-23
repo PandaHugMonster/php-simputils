@@ -12,6 +12,7 @@ use spaf\simputils\attributes\markers\Shortcut;
 use spaf\simputils\attributes\Property;
 use spaf\simputils\Math;
 use spaf\simputils\PHP;
+use spaf\simputils\Str;
 use spaf\simputils\traits\MetaMagic;
 use spaf\simputils\traits\RedefinableComponentTrait;
 use spaf\simputils\traits\SimpleObjectTrait;
@@ -19,13 +20,16 @@ use function array_combine;
 use function array_flip;
 use function array_keys;
 use function array_values;
+use function arsort;
 use function count;
 use function in_array;
 use function is_array;
+use function is_int;
 use function is_null;
 use function is_numeric;
 use function is_object;
 use function is_string;
+use function uasort;
 
 /**
  * The Array-alike Box
@@ -218,7 +222,7 @@ class Box extends ArrayObject {
 	 *  1.  If first value is int, then from it's position till the end of th array
 	 *  2.  If first value is array - then it means "extract values by keys", so this array will be
 	 *      considered as keys, values of which should be sliced out.
-	 *      `$stop` is being ignored in this case.
+	 *      `$to` is being ignored in this case.
 	 *
 	 * **Important:** If array is supplied, the order of the result array will depend on the order
 	 * of the supplied array.
@@ -706,6 +710,139 @@ class Box extends ArrayObject {
 	}
 
 	/**
+	 * Returns value or default
+	 *
+	 * Basically equivalent of "$box[$key] ?? $default", but allows to search for key-value
+	 * in case sensitive (on and off) way.
+	 *
+	 * @param string|int $key            Key in the array
+	 * @param mixed      $default        The default value or null is returned if the key
+	 *                                   is not found
+	 * @param bool       $case_sensitive Whether the key should be searched in case-sensitive or
+	 *                                   case-insensitive way. By default true.
+	 *
+	 * @return mixed Found value by key or $default (which is null if not specified)
+	 */
+	public function get(
+		string|int $key,
+		mixed $default = null,
+		bool $case_sensitive = true
+	): mixed {
+		if (!is_int($key) && !$case_sensitive) {
+			$key = Str::lower($key);
+			foreach ($this as $k => $v) {
+				if (Str::lower($k) === $key) {
+					return $v;
+				}
+			}
+			return $default;
+		}
+
+		return $this[$key] ?? $default;
+	}
+
+	public static array|Box|null $default_sorting = [
+		'descending' => false,
+		'by_keys' => false,
+		'by_values' => true,
+		'case_sensitive' => false,
+		'natural' => true,
+	];
+
+	public array|Box|null $custom_sorting = null;
+
+	protected function _getSortConfig(
+		bool $descending = null,
+		bool $by_values = null,
+		bool $case_sensitive = null,
+		bool $natural = null,
+		callable $callback = null
+	) {
+		$default_config = static::$default_sorting;
+		$custom_config = $this->custom_sorting;
+
+		$_n = 'descending';
+		$$_n = $$_n ?? $custom_config[$_n] ?? $default_config[$_n] ?? false;
+		$_n = 'by_values';
+		$$_n = $$_n ?? $custom_config[$_n] ?? $default_config[$_n] ?? true;
+		$_n = 'case_sensitive';
+		$$_n = $$_n ?? $custom_config[$_n] ?? $default_config[$_n] ?? false;
+		$_n = 'natural';
+		$$_n = $$_n ?? $custom_config[$_n] ?? $default_config[$_n] ?? true;
+		$_n = 'callback';
+		$$_n = $$_n ?? $custom_config[$_n] ?? $default_config[$_n] ?? null;
+
+		return [$descending, $by_values, $case_sensitive, $natural, $callback];
+	}
+
+	/**
+	 * Sort of any kind
+	 *
+	 * @param bool|null $descending
+	 * @param bool|null $by_values
+	 * @param bool|null $case_sensitive
+	 * @param bool|null $natural
+	 * @param callable|null $callback
+	 *
+	 * FIX  Make sure all the sortings are tested and documented properly
+	 * @return self
+	 */
+	public function sort(
+		bool $descending = null,
+		bool $by_values = null,
+		bool $case_sensitive = null,
+		bool $natural = null,
+		callable $callback = null
+	): self {
+		[$descending, $by_values, $case_sensitive, $natural, $callback]
+			= $this->_getSortConfig(
+				$descending, $by_values, $case_sensitive, $natural, $callback
+			);
+
+		$res = (array) $this;
+		if ($by_values) {
+			// Only by values
+			if ($callback) {
+				uasort($res, $callback);
+			} else {
+				$flags = $case_sensitive
+					?SORT_FLAG_CASE
+					:0;
+				if ($natural) {
+					if ($case_sensitive) {
+						natsort($res);
+					} else {
+						natcasesort($res);
+					}
+				} else {
+					if ($descending) {
+						arsort($res, $flags);
+					} else {
+						asort($res, $flags);
+					}
+				}
+			}
+		} else {
+			// Only by keys
+			if ($callback) {
+				uksort($res, $callback);
+			} else {
+				$flags = $case_sensitive
+					?SORT_FLAG_CASE
+					:0;
+				if ($descending) {
+					krsort($res, $flags);
+				} else {
+					ksort($res, $flags);
+				}
+			}
+		}
+		$this->exchangeArray($res);
+
+		return $this;
+	}
+
+	/**
 	 * @codeCoverageIgnore
 	 * @return string
 	 */
@@ -740,6 +877,5 @@ class Box extends ArrayObject {
 	public function __debugInfo(): array {
 		return $this->toArray();
 	}
-
 }
 

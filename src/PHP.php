@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection PhpDocMissingThrowsInspection */
 /** @noinspection PhpInconsistentReturnPointsInspection */
 /** @noinspection PhpNeverTypedFunctionReturnViolationInspection */
 
@@ -17,6 +17,8 @@ use spaf\simputils\models\Box;
 use spaf\simputils\models\DateTime;
 use spaf\simputils\models\InitConfig;
 use spaf\simputils\models\PhpInfo;
+use spaf\simputils\models\StackFifo;
+use spaf\simputils\models\StackLifo;
 use spaf\simputils\models\Version;
 use spaf\simputils\special\CodeBlocksCacheIndex;
 use spaf\simputils\special\CommonMemoryCacheIndex;
@@ -641,6 +643,32 @@ class PHP {
 		}
 
 		return $res;
+	}
+
+	const STACK_LIFO = 'lifo';
+	const STACK_FIFO = 'fifo';
+
+	/**
+	 * Create a stack object
+	 *
+	 * @param mixed  ...$items_and_conf All the items that should be pushed into the newly created
+	 *                                  stack object. Must not have "keys"
+	 * @param string $type              This key should be explicitly specified. Should contain
+	 *                                  "fifo" or "lifo", by default is "lifo".
+	 *
+	 * @return \spaf\simputils\models\StackFifo|\spaf\simputils\models\StackLifo
+	 * @noinspection PhpDocSignatureInspection
+	 */
+	public static function stack(mixed ...$items_and_conf): StackFifo|StackLifo {
+		$items_and_conf = static::box($items_and_conf);
+		$type = $items_and_conf->get('type', static::STACK_LIFO);
+		if ($items_and_conf->containsKey('type')) {
+			$items_and_conf = $items_and_conf->unsetByKey('type')->values;
+		}
+		$obj = $type === static::STACK_LIFO
+			?new StackLifo($items_and_conf)
+			:new StackFifo($items_and_conf);
+		return $obj;
 	}
 
 	/**

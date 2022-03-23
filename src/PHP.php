@@ -9,6 +9,7 @@ use ArrayAccess;
 use ArrayObject;
 use DateTimeZone;
 use Exception;
+use Generator;
 use Iterator;
 use ReflectionClass;
 use spaf\simputils\attributes\markers\Shortcut;
@@ -620,6 +621,15 @@ class PHP {
 				$res = $array;
 				if (method_exists($array, 'toBox')) {
 					$res = $res->toBox(false);
+				} else if ($array instanceof Generator) {
+					$res = new $class();
+					foreach ($array as $value) {
+						$res[] = $value;
+					}
+
+				} else {
+					throw new Exception("Not possible to use supplied value as 
+					argument to box");
 				}
 			} else {
 				$res = new $class($array);

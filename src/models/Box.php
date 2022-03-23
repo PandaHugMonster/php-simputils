@@ -24,11 +24,13 @@ use function arsort;
 use function count;
 use function in_array;
 use function is_array;
+use function is_float;
 use function is_int;
 use function is_null;
 use function is_numeric;
 use function is_object;
 use function is_string;
+use function shuffle;
 use function uasort;
 
 /**
@@ -773,6 +775,25 @@ class Box extends ArrayObject {
 		$$_n = $$_n ?? $custom_config[$_n] ?? $default_config[$_n] ?? null;
 
 		return [$descending, $by_values, $case_sensitive, $natural, $callback];
+	}
+
+	public function shuffle(): self {
+		$res = (array) $this;
+		shuffle($res);
+		$this->exchangeArray($res);
+		return $this;
+	}
+
+	public function sum(): int|float {
+		// TODO Consider usage of BigNumber
+		$res = 0;
+		foreach ($this as $value) {
+			if (!is_int($value) && !is_float($value)) {
+				throw new Exception('The value for sum() method neither int, nor float.');
+			}
+			$res += $value;
+		}
+		return $res;
 	}
 
 	/**

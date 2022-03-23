@@ -2,6 +2,7 @@
 
 namespace spaf\simputils;
 
+use Generator;
 use spaf\simputils\attributes\markers\Shortcut;
 
 /**
@@ -983,9 +984,17 @@ class Math {
 		string|int|float $start,
 		string|int|float $end,
 		int|float $step = 1
-	) {
-		for ($i = $start; $i <= $end; $i += $step) {
-			yield $i;
+	): Generator {
+		$step = static::abs($step);
+		if ($start <= $end) {
+			for ($i = $start; $i <= $end; $i += $step) {
+				yield $i;
+			}
+		} else {
+			$step *= -1;
+			for ($i = $start; $i >= $end ; $i += $step) {
+				yield $i;
+			}
 		}
 	}
 }

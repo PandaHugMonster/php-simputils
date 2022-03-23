@@ -117,7 +117,7 @@ class DotEnvProcessor extends TextProcessor {
 				if ($value instanceof BasicDotEnvCommentExt) {
 					$value = "{$value}";
 				} else {
-					$value = "#\t".str_replace("\n", "\n# ", $value);
+					$value = "#\t".str_replace("\n", "\n# ", "{$value}");
 				}
 
 				$lines[] = $value;

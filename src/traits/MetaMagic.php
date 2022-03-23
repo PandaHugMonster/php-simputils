@@ -128,6 +128,7 @@ trait MetaMagic {
 	 * @param bool  $with_class Default to false, whether the additional "#class" value
 	 *                          should be added
 	 *
+	 * FIX  Huge mess, refactor toJson + toArray + toBox to be fully efficient and compatible
 	 * @return string
 	 */
 	public function toJson(?bool $pretty = null, bool $with_class = false): string {
@@ -150,11 +151,15 @@ trait MetaMagic {
 			}
 		}
 
+		if ($with_class) {
+			$res[PHP::$serialized_class_key_name] = static::class;
+		}
+
 		return json_encode($res, $this->_jsonFlags($pretty));
 	}
 
 	protected function _jsonFlags(bool $pretty = null) {
-		$flags = null;
+		$flags = 0;
 		if (is_null($pretty)) {
 			if (isset(static::$is_json_pretty) && static::$is_json_pretty === true) {
 				$flags |= JSON_PRETTY_PRINT;
@@ -262,10 +267,33 @@ trait MetaMagic {
 					$res[$k] = $v;
 				}
 			}
+		} else {
+			$res = static::_iterateObjVars($this, $recursively, $with_class);
 		}
 
 		if ($with_class) {
 			$res[PHP::$serialized_class_key_name] = static::class;
+		}
+
+		return $res;
+	}
+
+	protected static function _iterateObjVars($obj, $recursive, $with_class) {
+		if (is_object($obj)) {
+			$res = [];
+			foreach (get_object_vars($obj) as $k => $v) {
+				if (is_object($v)) {
+					if (method_exists($v, 'toArray')) {
+						$res[$k] = $v->toArray($recursive, $with_class);
+					} else {
+						$res[$k] = static::_iterateObjVars($v, $recursive, $with_class);
+					}
+				} else {
+					$res[$k] = $v;
+				}
+			}
+		} else {
+			$res = $obj;
 		}
 
 		return $res;

@@ -152,7 +152,11 @@ class CsvProcessor extends TextProcessor {
 		foreach ($data as $row) {
 			foreach ($row as $key => $val) {
 				// NOTE Mix up check (In case of mix up, exception is raised here)
-				static::_checkMixUpOfKeys($key, $is_index_used, $is_assoc_used);
+				$exc = static::_checkMixUpOfKeys($key, $is_index_used, $is_assoc_used);
+
+				if ($exc instanceof Exception) {
+					throw $exc;
+				}
 
 				// NOTE Using in such way to simulate "sets" behaviour
 				if ($is_assoc_used) {
@@ -182,7 +186,7 @@ class CsvProcessor extends TextProcessor {
 			$is_assoc_used = true;
 		}
 		if ($is_assoc_used && $is_index_used) {
-			throw new Exception(
+			return new Exception(
 				'Both assoc and indices are used. '.
 				'Please use just one option, do not mix up.'
 			);

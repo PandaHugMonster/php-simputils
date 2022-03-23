@@ -5,6 +5,7 @@ namespace spaf\simputils\models;
 use Closure;
 use Exception;
 use spaf\simputils\attributes\DebugHide;
+use spaf\simputils\attributes\Extract;
 use spaf\simputils\attributes\Property;
 use spaf\simputils\FS;
 use spaf\simputils\generic\BasicResource;
@@ -470,6 +471,7 @@ class File extends BasicResource {
 	 * @codeCoverageIgnore
 	 * @return string|null
 	 */
+	#[Extract(false)]
 	#[Property('backup_location')]
 	protected function getBackupLocation(): ?string {
 		return $this->_backup_file;
@@ -480,6 +482,7 @@ class File extends BasicResource {
 	 * @return string|null
 	 * @throws \Exception
 	 */
+	#[Extract(false)]
 	#[DebugHide(false)]
 	#[Property('backup_content')]
 	protected function getBackupContent(): ?string {

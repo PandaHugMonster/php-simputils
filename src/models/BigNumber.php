@@ -4,12 +4,16 @@ namespace spaf\simputils\models;
 
 use Exception;
 use spaf\simputils\attributes\markers\Shortcut;
+use spaf\simputils\attributes\Property;
 use spaf\simputils\generic\SimpleObject;
 use spaf\simputils\PHP;
+use spaf\simputils\Str;
 use function bcadd;
 use function bccomp;
 use function gmp_add;
 use function gmp_cmp;
+use function intval;
+use function preg_replace;
 
 /**
  * BigNumber representation class
@@ -60,15 +64,24 @@ use function gmp_cmp;
  *
  * TODO Implemented only limited amount of common functionality between gmp and bcmath.
  *      Should be implemented all the GMP similar functionality.
+ * FIX  Consider implementing "Decimal" extension support https://github.com/php-decimal
+ * FIX  Possibly implement hacks for "floated point numbers" for GMP
  *
  * @see https://www.php.net/manual/en/intro.gmp.php
  * @see https://www.php.net/manual/en/intro.bc.php
+ * @see https://github.com/php-decimal
+ *
+ * @property bool $mutable
  */
 class BigNumber extends SimpleObject {
 
 	const SUBSYSTEM_GMP = 'gmp';
 	const SUBSYSTEM_BCMATH = 'bcmath';
+	// const SUBSYSTEM_DECIMAL = 'decimal';
 
+	public static $default_extension = self::SUBSYSTEM_GMP;
+
+	protected $_is_mutable;
 	protected $_ext;
 	protected $_value;
 
@@ -76,17 +89,36 @@ class BigNumber extends SimpleObject {
 	 * Create BigNumber object
 	 *
 	 * @param int|static|string $val       String or integer value representing number or big-number
+	 * @param bool              $mutable   If set to true, then all the operations will be changing
+	 *                                     value of this object
 	 * @param ?string           $extension Enforcing usage of particular extension for this number
 	 *
 	 * @throws \Exception Exception if no math extension is installed
 	 */
-	public function __construct(int|self|string $val = 0, ?string $extension = null) {
+	public function __construct(
+		int|self|float|string $val = 0,
+		bool $mutable = false,
+		?string $extension = null
+	) {
+		$this->_is_mutable = $mutable;
 		$this->_ext = static::checkExtensionAvailability($extension);
 		if ($this->_ext === false) {
 			throw new Exception('No math extension available');
 		}
-
+		if ($this->_ext === static::SUBSYSTEM_GMP) {
+			$val = intval($val);
+		}
 		$this->_value = $val;
+	}
+
+	#[Property('mutable')]
+	public function getMutable(): bool {
+		return $this->_is_mutable;
+	}
+
+	#[Property('mutable')]
+	public function setMutable(bool $val) {
+		$this->_is_mutable = $val;
 	}
 
 	/**
@@ -133,20 +165,33 @@ class BigNumber extends SimpleObject {
 	 * `$a + $b`
 	 *
 	 * @param self|string|int $b
+	 * @param bool|null       $mutable If set to true of false, then overrides
+	 *                                 the default "is mutable" flag of the object
+	 *                                 for this operation
 	 *
 	 * @return static
 	 * @throws \Exception
-	 *
 	 * @see \gmp_add()
 	 * @see \bcadd()
 	 */
 	#[Shortcut('\gmp_add()|\bcadd()')]
-	public function add(self|string|int $b): static {
+	public function add(self|string|int $b, ?bool $mutable = null): static {
+		$mutable = $mutable ?? $this->_is_mutable;
+
+		$val = null;
 		if ($this->_ext === static::SUBSYSTEM_GMP) {
-			return new static(gmp_add($this->_value, "$b"));
+			$val = gmp_add($this->_value, "$b");
 		} else if ($this->_ext === static::SUBSYSTEM_BCMATH) {
-			return new static(bcadd($this->_value, "$b"));
+			$val = bcadd($this->_value, "$b");
 		}
+		if ($mutable) {
+			$this->_value = $val;
+			$val = $this;
+		} else {
+			$val = new static($val, extension: $this->_ext);
+		}
+
+		return $val;
 	}
 
 	/**
@@ -155,6 +200,9 @@ class BigNumber extends SimpleObject {
 	 * `$a - $b`
 	 *
 	 * @param self|string|int $b
+	 * @param bool|null       $mutable If set to true of false, then overrides
+	 *                                 the default "is mutable" flag of the object
+	 *                                 for this operation
 	 *
 	 * @return static
 	 * @throws \Exception
@@ -163,12 +211,23 @@ class BigNumber extends SimpleObject {
 	 * @see \bcsub()
 	 */
 	#[Shortcut('\gmp_sub()|\bcsub()')]
-	public function sub(self|string|int $b): self {
+	public function sub(self|string|int $b, ?bool $mutable = null): self {
+		$mutable = $mutable ?? $this->_is_mutable;
+
+		$val = null;
 		if ($this->_ext === static::SUBSYSTEM_GMP) {
-			return new static(gmp_sub($this->_value, "$b"));
+			$val = gmp_sub($this->_value, "$b");
 		} else if ($this->_ext === static::SUBSYSTEM_BCMATH) {
-			return new static(bcsub($this->_value, "$b"));
+			$val = bcsub($this->_value, "$b");
 		}
+		if ($mutable) {
+			$this->_value = $val;
+			$val = $this;
+		} else {
+			$val = new static($val, extension: $this->_ext);
+		}
+
+		return $val;
 	}
 
 	/**
@@ -177,6 +236,9 @@ class BigNumber extends SimpleObject {
 	 * `$a / $b`
 	 *
 	 * @param self|string|int $b
+	 * @param bool|null       $mutable If set to true of false, then overrides
+	 *                                 the default "is mutable" flag of the object
+	 *                                 for this operation
 	 *
 	 * @return static
 	 * @throws \Exception
@@ -185,12 +247,37 @@ class BigNumber extends SimpleObject {
 	 * @see \bcdiv()
 	 */
 	#[Shortcut('\gmp_div_q()|\bcdiv()')]
-	public function div(self|string|int $b): static {
+	public function div(self|string|float|int $b, ?bool $mutable = null): static {
+		$mutable = $mutable ?? $this->_is_mutable;
+
+		$val = null;
 		if ($this->_ext === static::SUBSYSTEM_GMP) {
-			return new static(gmp_div_q($this->_value, "$b"));
+			// $b = intval($b);
+			$val = gmp_div_q($this->_value, "$b");
 		} else if ($this->_ext === static::SUBSYSTEM_BCMATH) {
-			return new static(bcdiv($this->_value, "$b"));
+			$val = bcdiv($this->_value, $b, scale: 2);
+			$val = Str::removeEnding($val, '.00');
 		}
+		if ($mutable) {
+			$this->_value = $val;
+			$val = $this;
+		} else {
+			$val = new static($val, extension: $this->_ext);
+		}
+
+		return $val;
+	}
+
+	public function floor() {
+		$mutable = $mutable ?? $this->_is_mutable;
+		$res = preg_replace('/([^.]*)([.]?.*)$/', '$1', "{$this->_value}");
+		if ($mutable) {
+			$this->_value = $res;
+			$res = $this;
+		} else {
+			$res = new static($res, extension: $this->_ext);
+		}
+		return $res;
 	}
 
 	/**
@@ -199,6 +286,9 @@ class BigNumber extends SimpleObject {
 	 * `$a * $b`
 	 *
 	 * @param self|string|int $b
+	 * @param bool|null       $mutable If set to true of false, then overrides
+	 *                                 the default "is mutable" flag of the object
+	 *                                 for this operation
 	 *
 	 * @return static
 	 * @throws \Exception
@@ -207,18 +297,32 @@ class BigNumber extends SimpleObject {
 	 * @see \bcmul()
 	 */
 	#[Shortcut('\gmp_mul()|\bcmul()')]
-	public function mul(self|string|int $b): self {
+	public function mul(self|string|int $b, ?bool $mutable = null): self {
+		$mutable = $mutable ?? $this->_is_mutable;
+
+		$val = null;
 		if ($this->_ext === static::SUBSYSTEM_GMP) {
-			return new static(gmp_mul($this->_value, "$b"));
+			$val = gmp_mul($this->_value, "$b");
 		} else if ($this->_ext === static::SUBSYSTEM_BCMATH) {
-			return new static(bcmul($this->_value, "$b"));
+			$val = bcmul($this->_value, "$b");
 		}
+		if ($mutable) {
+			$this->_value = $val;
+			$val = $this;
+		} else {
+			$val = new static($val, extension: $this->_ext);
+		}
+
+		return $val;
 	}
 
 	/**
 	 * Modulo operation
 	 *
 	 * @param self|string|int $modulo
+	 * @param bool|null       $mutable If set to true of false, then overrides
+	 *                                 the default "is mutable" flag of the object
+	 *                                 for this operation
 	 *
 	 * @return static
 	 * @throws \Exception
@@ -227,18 +331,37 @@ class BigNumber extends SimpleObject {
 	 * @see \bcmod()
 	 */
 	#[Shortcut('\gmp_mod()|\bcmod()')]
-	public function mod(self|string|int $modulo): self {
+	public function mod(self|string|int $modulo, ?bool $mutable = null): self {
+		$mutable = $mutable ?? $this->_is_mutable;
+
+		$val = null;
 		if ($this->_ext === static::SUBSYSTEM_GMP) {
-			return new static(gmp_mod($this->_value, "$modulo"));
+			$val = gmp_mod($this->_value, "$modulo");
 		} else if ($this->_ext === static::SUBSYSTEM_BCMATH) {
-			return new static(bcmod($this->_value, "$modulo"));
+			$val = bcmod($this->_value, "$modulo");
 		}
+		if ($mutable) {
+			$this->_value = $val;
+			$val = $this;
+		} else {
+			$val = new static($val, extension: $this->_ext);
+		}
+
+		return $val;
+	}
+
+	public function isZero(): bool {
+		$res = $this->_value === 0 || $this->_value === '0';
+		return $res;
 	}
 
 	/**
 	 * Comparison
 	 *
 	 * @param self|string|int $b
+	 * @param bool|null       $mutable If set to true of false, then overrides
+	 *                                 the default "is mutable" flag of the object
+	 *                                 for this operation
 	 *
 	 * @return static
 	 * @throws \Exception
@@ -247,18 +370,26 @@ class BigNumber extends SimpleObject {
 	 * @see \bccomp()
 	 */
 	#[Shortcut('\gmp_cmp()|\bccomp()')]
-	public function cmp(self|string|int $b): static {
+	public function cmp(self|string|int|float $b): int {
+
+		$val = null;
 		if ($this->_ext === static::SUBSYSTEM_GMP) {
-			return new static(gmp_cmp($this->_value, "$b"));
+			$b = intval($b);
+			$val = gmp_cmp($this->_value, "$b");
 		} else if ($this->_ext === static::SUBSYSTEM_BCMATH) {
-			return new static(bccomp($this->_value, "$b"));
+			$val = bccomp($this->_value, "$b");
 		}
+
+		return $val;
 	}
 
 	/**
 	 * Power
 	 *
 	 * @param self|string|int $exponent
+	 * @param bool|null       $mutable If set to true of false, then overrides
+	 *                                 the default "is mutable" flag of the object
+	 *                                 for this operation
 	 *
 	 * @return static
 	 * @throws \Exception
@@ -267,12 +398,23 @@ class BigNumber extends SimpleObject {
 	 * @see \bcpow()
 	 */
 	#[Shortcut('\gmp_pow()|\bcpow()')]
-	public function pow(self|string|int $exponent): static {
+	public function pow(self|string|int $exponent, ?bool $mutable = null): static {
+		$mutable = $mutable ?? $this->_is_mutable;
+
+		$val = null;
 		if ($this->_ext === static::SUBSYSTEM_GMP) {
-			return new static(gmp_pow($this->_value, "$exponent"));
+			$val = gmp_pow($this->_value, "$exponent");
 		} else if ($this->_ext === static::SUBSYSTEM_BCMATH) {
-			return new static(bcpow($this->_value, "$exponent"));
+			$val = bcpow($this->_value, "$exponent");
 		}
+		if ($mutable) {
+			$this->_value = $val;
+			$val = $this;
+		} else {
+			$val = new static($val, extension: $this->_ext);
+		}
+
+		return $val;
 	}
 
 	/**
@@ -280,6 +422,9 @@ class BigNumber extends SimpleObject {
 	 *
 	 * @param self|string|int $exponent
 	 * @param self|string|int $modulo
+	 * @param bool|null       $mutable If set to true of false, then overrides
+	 *                                 the default "is mutable" flag of the object
+	 *                                 for this operation
 	 *
 	 * @return static
 	 * @throws \Exception
@@ -288,16 +433,35 @@ class BigNumber extends SimpleObject {
 	 * @see \bcpowmod()
 	 */
 	#[Shortcut('\gmp_powm()|\bcpowmod()')]
-	public function powMod(self|string|int $exponent, self|string|int $modulo): static {
+	public function powMod(
+		self|string|int $exponent,
+		self|string|int $modulo,
+		?bool $mutable = null
+	): static {
+		$mutable = $mutable ?? $this->_is_mutable;
+
+		$val = null;
 		if ($this->_ext === static::SUBSYSTEM_GMP) {
-			return new static(gmp_powm($this->_value, "$exponent", "$modulo"));
+			$val = gmp_powm($this->_value, "$exponent", "$modulo");
 		} else if ($this->_ext === static::SUBSYSTEM_BCMATH) {
-			return new static(bcpowmod($this->_value, "$exponent", "$modulo"));
+			$val = bcpowmod($this->_value, "$exponent", "$modulo");
 		}
+		if ($mutable) {
+			$this->_value = $val;
+			$val = $this;
+		} else {
+			$val = new static($val, extension: $this->_ext);
+		}
+
+		return $val;
 	}
 
 	/**
 	 * Square Root
+	 *
+	 * @param bool|null       $mutable If set to true of false, then overrides
+	 *                                 the default "is mutable" flag of the object
+	 *                                 for this operation
 	 *
 	 * @return static
 	 * @throws \Exception
@@ -306,12 +470,23 @@ class BigNumber extends SimpleObject {
 	 * @see \bcsqrt()
 	 */
 	#[Shortcut('\gmp_sqrt()|\bcsqrt()')]
-	public function sqrt(): static {
+	public function sqrt(?bool $mutable = null): static {
+		$mutable = $mutable ?? $this->_is_mutable;
+
+		$val = null;
 		if ($this->_ext === static::SUBSYSTEM_GMP) {
-			return new static(gmp_sqrt($this->_value));
+			$val = gmp_sqrt($this->_value);
 		} else if ($this->_ext === static::SUBSYSTEM_BCMATH) {
-			return new static(bcsqrt($this->_value));
+			$val = bcsqrt($this->_value);
 		}
+		if ($mutable) {
+			$this->_value = $val;
+			$val = $this;
+		} else {
+			$val = new static($val, extension: $this->_ext);
+		}
+
+		return $val;
 	}
 
 	public function __toString(): string {

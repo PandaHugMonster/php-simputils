@@ -3,11 +3,12 @@
 namespace spaf\simputils;
 
 use spaf\simputils\attributes\markers\Shortcut;
+use function is_integer;
 use function is_null;
 use function is_string;
-use function strlen;
-use function strtolower;
-use function strtoupper;
+use function mb_strlen;
+use function str_ends_with;
+use function substr;
 
 /**
  *
@@ -65,8 +66,9 @@ class Str {
 	 * @param mixed $value Value to convert
 	 *
 	 * TODO Improve further...
+	 * TODO Add optional translations
 	 * @return string|null
-	 *@see \spaf\simputils\Boolean::from()
+	 * @see \spaf\simputils\Boolean::from()
 	 */
 	public static function from(mixed $value): ?string {
 		if ($value === true || $value === false) {
@@ -83,7 +85,7 @@ class Str {
 	 */
 	#[Shortcut('\strlen()')]
 	public static function len(string $var) {
-		return strlen($var);
+		return mb_strlen($var);
 	}
 
 	/**
@@ -121,7 +123,7 @@ class Str {
 	 */
 	#[Shortcut('\strtoupper()')]
 	public static function upper(null|string $string): string {
-		return is_null($string)?'':strtoupper($string);
+		return is_null($string)?'':mb_strtoupper($string);
 	}
 
 	/**
@@ -133,7 +135,7 @@ class Str {
 	 */
 	#[Shortcut('\strtolower()')]
 	public static function lower(null|string $string): string {
-		return is_null($string)?'':strtolower($string);
+		return is_null($string)?'':mb_strtolower($string);
 	}
 
 	/**
@@ -146,5 +148,50 @@ class Str {
 	#[Shortcut('\is_string()')]
 	public static function is(mixed $val): bool {
 		return is_string($val);
+	}
+
+	#[Shortcut('\str_ends_with()')]
+	public static function endsWith(
+		string $str,
+		string $expected_ending,
+		bool $is_case_sensitive = true
+	): bool {
+		if (!$is_case_sensitive) {
+			$str = static::upper($str);
+			$expected_ending = static::upper($expected_ending);
+		}
+		return str_ends_with($str, $expected_ending);
+	}
+
+	/**
+	 * Remove ending of the string
+	 *
+	 * A few cases:
+	 *  1.  Ending is a string - In this case it is being removed from the target
+	 *      string if matches, otherwise ignoring
+	 *  2.  Ending is an integer greater than 0 - then removes the amount of last symbols
+	 *  3.  Any other cases suppose to be ignored
+	 *
+	 * @param string     $target The target string from which the second parameter could be removed
+	 * @param string|int $ending The second parameter that specifies exact string to remove or
+	 *                           amount of symbols to remove
+	 *
+	 * FIX  Implement urgently removeStarting in the same way
+	 * @return string
+	 */
+	public static function removeEnding(string $target, string|int $ending): string {
+		if (is_integer($ending)) {
+			if ($ending < 1) {
+				return $target;
+			}
+			return substr($target, 0, -$ending);
+		}
+
+		$len = static::len($ending);
+		if ($len > 0 && static::endsWith($target, $ending)) {
+			return substr($target, 0, -$len);
+		}
+
+		return $target;
 	}
 }

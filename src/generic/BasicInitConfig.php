@@ -27,12 +27,14 @@ abstract class BasicInitConfig extends SimpleObject {
 	const REDEF_DATE_TIME_ZONE = 'DateTimeZone';
 	const REDEF_DATE_INTERVAL = 'DateInterval';
 	const REDEF_DATE_PERIOD = 'DatePeriod';
+	const REDEF_DATA_UNIT = 'DataUnit';
 	const REDEF_FILE = 'File';
 	const REDEF_DIR = 'Dir';
 	const REDEF_PHP_INFO = 'PhpInfo';
 	const REDEF_VERSION = 'Version';
 	const REDEF_LOGGER = 'Logger';
 	const REDEF_L10N = 'L10n';
+	const REDEF_TEMPERATURE = 'Temperature';
 
 	public ?string $name = null;
 	public ?string $code_root = null;

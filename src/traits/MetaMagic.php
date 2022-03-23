@@ -3,17 +3,25 @@
 namespace spaf\simputils\traits;
 
 use Exception;
+use JsonException;
+use spaf\simputils\exceptions\InfiniteLoopPreventionExceptions;
 use spaf\simputils\FS;
+use spaf\simputils\generic\BasicPrism;
 use spaf\simputils\models\Box;
 use spaf\simputils\models\File;
 use spaf\simputils\PHP;
+use spaf\simputils\special\CommonMemoryCacheIndex;
 use function get_object_vars;
+use function in_array;
 use function is_array;
 use function is_null;
 use function is_object;
 use function json_decode;
 use function json_encode;
+use function json_last_error;
+use function json_last_error_msg;
 use function method_exists;
+use function spl_object_id;
 use const JSON_PRETTY_PRINT;
 
 /**
@@ -34,6 +42,8 @@ use const JSON_PRETTY_PRINT;
  * @package spaf\simputils\traits
  */
 trait MetaMagic {
+
+	public static $ilp_limit = 10;
 
 	/**
 	 * Converts object to JSON string
@@ -118,11 +128,38 @@ trait MetaMagic {
 	 * @param bool  $with_class Default to false, whether the additional "#class" value
 	 *                          should be added
 	 *
+	 * FIX  Huge mess, refactor toJson + toArray + toBox to be fully efficient and compatible
 	 * @return string
 	 */
 	public function toJson(?bool $pretty = null, bool $with_class = false): string {
-		$data = $this->toArray(true, $with_class);
-		$flags = null;
+		$res = [];
+		$box_class = PHP::redef(Box::class);
+		foreach ($this->toArray() as $k => $v) {
+			if (is_array($v)) {
+				$v = new $box_class($v);
+			}
+			if (is_object($v) && method_exists($v, 'toJson')) {
+				// TODO Hack to convert it back
+				$res[$k] = json_decode($_orig_json_str = $v->toJson($pretty, $with_class), true);
+				if (json_last_error()) {
+					throw new JsonException(json_last_error_msg()." \"{$_orig_json_str}\".");
+				}
+			} elseif (is_object($v) && method_exists($v, 'toArray')) {
+				$res[$k] = $v->toArray();
+			} else {
+				$res[$k] = "{$v}";
+			}
+		}
+
+		if ($with_class) {
+			$res[PHP::$serialized_class_key_name] = static::class;
+		}
+
+		return json_encode($res, $this->_jsonFlags($pretty));
+	}
+
+	protected function _jsonFlags(bool $pretty = null) {
+		$flags = 0;
 		if (is_null($pretty)) {
 			if (isset(static::$is_json_pretty) && static::$is_json_pretty === true) {
 				$flags |= JSON_PRETTY_PRINT;
@@ -130,7 +167,7 @@ trait MetaMagic {
 		} else if ($pretty) {
 			$flags |= JSON_PRETTY_PRINT;
 		}
-		return json_encode($data, $flags);
+		return $flags;
 	}
 
 	/**
@@ -150,6 +187,20 @@ trait MetaMagic {
 		return static::fromArray($data);
 	}
 
+	protected static function _ilpRegisterObjIdUsage($obj) {
+		if (method_exists($obj, 'getObjId')) {
+			$obj_id = $obj->getObjId();
+		} else {
+			// TODO Maybe using hash? but maybe not
+			$obj_id = spl_object_id($obj);
+		}
+		if (!isset(CommonMemoryCacheIndex::$to_array_ilp_storage[$obj_id])) {
+			CommonMemoryCacheIndex::$to_array_ilp_storage[$obj_id] = 0;
+		}
+		CommonMemoryCacheIndex::$to_array_ilp_storage[$obj_id]++;
+		return $obj_id;
+	}
+
 	/**
 	 * Represents object as an array (not Box)
 	 *
@@ -164,32 +215,85 @@ trait MetaMagic {
 	 * If you want to convert to Json string, use {@see \spaf\simputils\traits\MetaMagic::toJson()}
 	 *
 	 * @param bool $recursively Do the conversion recursively
-	 * @param bool $with_class  Result will contain full class name
+	 * @param bool $with_class Result will contain full class name
+	 * @param array $exclude_fields
 	 *
 	 * @return array
+	 * @throws \spaf\simputils\exceptions\InfiniteLoopPreventionExceptions
 	 */
-	public function toArray(bool $recursively = false, bool $with_class = false): array {
+	public function toArray(
+		bool $recursively = false,
+		bool $with_class = false,
+		array $exclude_fields = []
+	): array {
+		return $this->_toArray($recursively, $with_class, $exclude_fields);
+	}
+
+	protected function _toArray(
+		bool $recursively = false,
+		bool $with_class = false,
+		array $exclude_fields = []
+	): array {
 		$res = [];
 
-		if ($this instanceof Box) {
-			if ($recursively) {
-				$res = $this->_iterateConvertObjectsAndArrays(
-					(array) $this, $recursively, $with_class, false
-				);
-			} else {
-				return (array) $this;
+		$ilp_check = false;
+		if (static::$ilp_limit > 0) {
+			$obj_id = static::_ilpRegisterObjIdUsage($this);
+			$ilp_check = !empty(CommonMemoryCacheIndex::$to_array_ilp_storage[$obj_id]) &&
+				CommonMemoryCacheIndex::$to_array_ilp_storage[$obj_id] > static::$ilp_limit;
+		}
+
+		if ($ilp_check) {
+			throw new InfiniteLoopPreventionExceptions('toArray() method noticed');
+		}
+
+		$exclude_fields[] = '____property_batch_storage';
+
+		if (method_exists($this, '___extractFields')) {
+			$sub = $this->___extractFields(true, false);
+			foreach ($sub as $k => $v) {
+				// TODO Re-evaluate the exclusion mechanism
+				if (in_array($k, $exclude_fields) || $v instanceof BasicPrism) {
+					continue;
+				}
+
+				$is_object = $recursively && is_object($v);
+				if ($is_object && static::$ilp_limit > 0) {
+					static::_ilpRegisterObjIdUsage($v);
+				}
+				if ($is_object && method_exists($v, 'toArray')) {
+					$res[$k] = $v->toArray();
+				} else {
+					$res[$k] = $v;
+				}
 			}
-		} else if (method_exists($this, '___extractFields')) {
-			$fields = $this->___extractFields(true, false);
-			$res = $recursively
-				?$this->_iterateConvertObjectsAndArrays($fields, $recursively, $with_class, false)
-				:$fields;
 		} else {
-			$res = json_decode(json_encode($this), true);
+			$res = static::_iterateObjVars($this, $recursively, $with_class);
 		}
 
 		if ($with_class) {
 			$res[PHP::$serialized_class_key_name] = static::class;
+		}
+
+		return $res;
+	}
+
+	protected static function _iterateObjVars($obj, $recursive, $with_class) {
+		if (is_object($obj)) {
+			$res = [];
+			foreach (get_object_vars($obj) as $k => $v) {
+				if (is_object($v)) {
+					if (method_exists($v, 'toArray')) {
+						$res[$k] = $v->toArray($recursive, $with_class);
+					} else {
+						$res[$k] = static::_iterateObjVars($v, $recursive, $with_class);
+					}
+				} else {
+					$res[$k] = $v;
+				}
+			}
+		} else {
+			$res = $obj;
 		}
 
 		return $res;
@@ -223,7 +327,8 @@ trait MetaMagic {
 	 * @return \spaf\simputils\models\Box
 	 * @throws \Exception Exception
 	 */
-	public function toBox(bool $recursively = false, bool $with_class = false): Box {
+	public function toBox(bool $recursively = false, bool $with_class = false) {
+
 		$box_class = PHP::redef(Box::class);
 
 		$sub = [];
@@ -245,6 +350,8 @@ trait MetaMagic {
 			} else {
 				return $this;
 			}
+//		} else if (PHP::classUsesTrait($this, ForOutputsTrait::class)) {
+//			$sub = $this->for_system;
 		} else if (method_exists($this, '___extractFields')) {
 			$fields = $this->___extractFields(true, false);
 			$sub = $recursively
@@ -259,7 +366,9 @@ trait MetaMagic {
 			$sub[PHP::$serialized_class_key_name] = static::class;
 		}
 
-		return $res->load($sub);
+		return $sub instanceof $box_class
+			?$res->load($sub)
+			:$sub;
 	}
 
 	private function _iterateConvertObjectsAndArrays(
@@ -274,9 +383,10 @@ trait MetaMagic {
 			:[];
 		foreach ($fields as $k => $v) {
 			if (is_object($v) && method_exists($v, 'toBox')) {
-				$sub = $v->toBox($recursively, $with_class);
-				$res[$k] = $sub;
-			} else if ($wut = is_array($v)) {
+				$res[$k] = $v->toBox($recursively, $with_class);
+			} else if (is_object($v) && method_exists($v, 'toJson')) {
+				$res[$k] = $v->toJson();
+			} else if (is_array($v)) {
 				$res[$k] = $this->_iterateConvertObjectsAndArrays($v, $recursively, false);
 			} else {
 				$res[$k] = $v;

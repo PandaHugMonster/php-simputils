@@ -7,11 +7,15 @@ namespace spaf\simputils\basic;
 
 use DateTimeZone;
 use spaf\simputils\attributes\markers\Shortcut;
+use spaf\simputils\Data;
 use spaf\simputils\FS;
 use spaf\simputils\models\Box;
+use spaf\simputils\models\DataUnit;
 use spaf\simputils\models\DateTime;
 use spaf\simputils\models\Dir;
 use spaf\simputils\models\File;
+use spaf\simputils\models\StackFifo;
+use spaf\simputils\models\StackLifo;
 use spaf\simputils\PHP;
 use spaf\simputils\Str;
 
@@ -53,13 +57,33 @@ function pd(...$args) {
 }
 
 /**
+ * Create Box array-like object
+ *
  * @param null|Box|array $array Array that should be wrapped into a box
+ * @param mixed ...$merger
  *
  * @return Box|array
+ * @throws \Exception
  */
 #[Shortcut('PHP::box()')]
 function bx(mixed $array = null, mixed ...$merger): Box|array {
 	return PHP::box($array, ...$merger);
+}
+
+/**
+ * Create a stack object
+ *
+ * @param mixed  ...$items_and_conf All the items that should be pushed into the newly created
+ *                                  stack object. Must not have "keys"
+ * @param string $type              This key should be explicitly specified. Should contain
+ *                                  "fifo" or "lifo", by default is "lifo".
+ *
+ * @return \spaf\simputils\models\StackFifo|\spaf\simputils\models\StackLifo
+ * @noinspection PhpDocSignatureInspection
+ */
+#[Shortcut('PHP::stack()')]
+function stack(mixed ...$items_and_conf): StackFifo|StackLifo {
+	return PHP::stack(...$items_and_conf);
 }
 
 /**
@@ -89,7 +113,11 @@ function now(?DateTimeZone $tz = null): ?DateTime {
  * @throws \Exception Parsing error
  */
 #[Shortcut('PHP::ts()')]
-function ts(DateTime|string|int $dt, ?DateTimeZone $tz = null, string $fmt = null): ?DateTime {
+function ts(
+	DateTime|string|int $dt,
+	null|DateTimeZone|string $tz = null,
+	string $fmt = null
+): ?DateTime {
 	return PHP::ts($dt, $tz, $fmt);
 }
 
@@ -143,4 +171,17 @@ function path(?string ...$args): ?string {
 #[Shortcut('Str::uuid()')]
 function uuid(): string {
 	return Str::uuid();
+}
+
+/**
+ * DataUnit shortcut
+ *
+ * @param int|string|\spaf\simputils\models\DataUnit|null $value
+ *
+ * @return \spaf\simputils\models\DataUnit
+ * @throws \Exception
+ */
+#[Shortcut('Data::du()')]
+function du(null|int|string|DataUnit $value = null, ?string $format = null): DataUnit {
+	return Data::du($value, $format);
 }

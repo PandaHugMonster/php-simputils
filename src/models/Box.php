@@ -5,20 +5,33 @@ namespace spaf\simputils\models;
 use ArrayObject;
 use Closure;
 use Exception;
+use Generator;
+use spaf\simputils\attributes\Extract;
 use spaf\simputils\attributes\markers\Affecting;
+use spaf\simputils\attributes\markers\Shortcut;
 use spaf\simputils\attributes\Property;
+use spaf\simputils\Math;
 use spaf\simputils\PHP;
+use spaf\simputils\Str;
 use spaf\simputils\traits\MetaMagic;
 use spaf\simputils\traits\RedefinableComponentTrait;
 use spaf\simputils\traits\SimpleObjectTrait;
+use function array_combine;
 use function array_flip;
 use function array_keys;
 use function array_values;
+use function arsort;
 use function count;
+use function in_array;
 use function is_array;
+use function is_float;
+use function is_int;
 use function is_null;
 use function is_numeric;
 use function is_object;
+use function is_string;
+use function shuffle;
+use function uasort;
 
 /**
  * The Array-alike Box
@@ -120,8 +133,6 @@ use function is_object;
  * identical by functionality. `box()` is just a shortcut for {@see PHP::box()}, and `PHP::box()`
  * is a shortcut for `new Box()`.
  *
- * TODO Implement more of array-related functionality from default PHP pool
- *
  * FIX  Implement switchable on/off for silent "null" instead of exception return
  *
  * @package spaf\simputils\generic
@@ -141,11 +152,13 @@ class Box extends ArrayObject {
 	public static bool $to_string_format_json = true;
 	public static bool $is_json_pretty = false;
 
+	#[Extract(false)]
 	protected mixed $_stash = null;
 
 	/**
 	 * @return mixed
 	 */
+	#[Extract(false)]
 	#[Property('stash')]
 	protected function getStashContent(): mixed {
 		return $this->_stash;
@@ -162,6 +175,7 @@ class Box extends ArrayObject {
 	/**
 	 * @return static|Box|array
 	 */
+	#[Extract(false)]
 	#[Property('keys')]
 	protected function getKeys(): static|Box|array {
 		return new static(array_keys((array) $this));
@@ -170,6 +184,7 @@ class Box extends ArrayObject {
 	/**
 	 * @return static|Box|array
 	 */
+	#[Extract(false)]
 	#[Property('values')]
 	protected function getValues(): static|Box|array {
 		return new static(array_values((array) $this));
@@ -178,9 +193,29 @@ class Box extends ArrayObject {
 	/**
 	 * @return static|Box|array
 	 */
+	#[Extract(false)]
 	#[Property('flipped')]
 	protected function getFlipped(): static|Box|array {
+		// TODO Improve flipping so it would hash objects when possible for keys
 		return new static(array_flip((array) $this));
+	}
+
+//	/**
+//	 * Determines if the given array is a list
+//	 *
+//	 * An array is considered a list if its keys consist of consecutive
+//	 * numbers from 0 to count($array)-1.
+//	 *
+//	 * @return bool
+//	 */
+//	#[Shortcut('\array_is_list()')]
+//	#[Property('isList')]
+//	protected function getIsList(): bool {
+//		return array_is_list((array) $this);
+//	}
+
+	public function getKeyByValue($value) {
+		return $this->flipped[$value] ?? null;
 	}
 
 	/**
@@ -189,7 +224,7 @@ class Box extends ArrayObject {
 	 *  1.  If first value is int, then from it's position till the end of th array
 	 *  2.  If first value is array - then it means "extract values by keys", so this array will be
 	 *      considered as keys, values of which should be sliced out.
-	 *      `$stop` is being ignored in this case.
+	 *      `$to` is being ignored in this case.
 	 *
 	 * **Important:** If array is supplied, the order of the result array will depend on the order
 	 * of the supplied array.
@@ -440,6 +475,405 @@ class Box extends ArrayObject {
 	}
 
 	/**
+	 *
+	 * TODO Add a flag for case-independent check
+	 *
+	 * @param string $key
+	 *
+	 * @return bool
+	 */
+	#[Shortcut('\in_array(key)')]
+	public function containsKey(string $key): bool {
+		return in_array($key, (array) $this->keys);
+	}
+
+	#[Shortcut('\in_array(value)')]
+	public function containsValue(mixed $value): bool {
+		return in_array($value, (array) $this);
+	}
+
+	public function toArray(
+		bool $recursively = false,
+		bool $with_class = false,
+		array $exclude_fields = []
+	): array {
+		return (array) $this;
+	}
+
+	/**
+	 * Applies callbacks to keys and values
+	 *
+	 * Keys and values would be modified inside of the box
+	 *
+	 * The callback will received `$k`, `$v` and `$box` params, and
+	 * should return `$k` and `$v` or `null`.
+	 * In case `null` is returned, the element will be removed from the box.
+	 *
+	 * Important: avoid modification of `$box` reference inside the callback,
+	 * in the most cases you would receive unexpected result!
+	 *
+	 * `cb` stands for "callback"
+	 *
+	 * ```php
+	 *  function myCallback($k, $v) {
+	 *      if ($v instanceof Version) {
+	 *          $v = " ! {$v} ! ";
+	 *      }
+	 *      return [$k, $v];
+	 *  }
+	 *
+	 *  $res = bx([
+	 *      'Test 1' => 'aaa',
+	 *      'Test 2' => now(),
+	 *      'Test 3' => new Version('1.2.3'),
+	 *      'Test 4' => 'bbb',
+	 *      'Test 5' => 99,
+	 *      100500 => 'text',
+	 *      'Test 6' => 100,
+	 *  ]);
+	 *
+	 *  $res->cb('myCallback');
+	 *  // From PHP 8.1 you can use shorter callback reference:
+	 *  // $res->cb( myCallback(...) );
+	 *
+	 *  pd("{$res->toJson(true)}");
+	 *
+	 * ```
+	 *
+	 * @param callable|array|string ...$callbacks
+	 *
+	 * @return $this
+	 */
+	#[Affecting]
+	public function cb(callable|array|string ...$callbacks): self {
+		foreach ($callbacks as $callback) {
+			$callback = $this->clearClosure($callback);
+
+			$to_unset = new static;
+			$to_replace = new static;
+			foreach ($this as $k => $v) {
+				$res = $callback($k, $v, $this);
+				if (is_null($res)) {
+					$to_unset[] = $k;
+				} else {
+					$to_replace[$k] = $res;
+				}
+			}
+			foreach ($to_unset as $k) {
+				$this->unsetByKey($k);
+			}
+			foreach ($to_replace as $orig_k => [$k, $v]) {
+				if ($k !== $orig_k) {
+					$this->unsetByKey($orig_k);
+				}
+				$this[$k] = $v;
+			}
+		}
+		return $this;
+	}
+
+	/**
+	 * Applies callbacks to keys
+	 *
+	 * Inside it uses {@see self::cb()}
+	 *
+	 * Example:
+	 * ```php
+	 *  $res = bx([
+	 *      'Test 1' => 'aaa',
+	 *      'Test 2' => now(),
+	 *      'Test 3' => new Version('1.2.3'),
+	 *      'Test 4' => 'bbb',
+	 *      'Test 5' => 99,
+	 *      100500 => 'text',
+	 *      'Test 6' => 100,
+	 *  ]);
+	 *
+	 * 	// Or for PHP 8.1 and above:    `$res->cbKeys(Str::upper(...));`
+	 *  $res->cbKeys([Str::class, 'upper']);
+	 *
+	 * ```
+	 *
+	 *
+	 * @param callable|array|string ...$callbacks
+	 *
+	 * @return $this
+	 */
+	#[Affecting]
+	public function cbKeys(callable|array|string ...$callbacks): self {
+		foreach ($callbacks as $callback) {
+			$callback = $this->clearClosure($callback);
+
+			$this->cb(function ($k, $v) use ($callback) {
+				return [$callback($k), $v];
+			});
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Applies callbacks to values
+	 *
+	 * Inside it uses {@see self::cb()}
+	 *
+	 * Example:
+	 * ```php
+	 *  $res = bx([
+	 *      'Test 1' => 'aaa',
+	 *      'Test 2' => now(),
+	 *      'Test 3' => new Version('1.2.3'),
+	 *      'Test 4' => 'bbb',
+	 *      'Test 5' => 99,
+	 *      100500 => 'text',
+	 *      'Test 6' => 100,
+	 *  ]);
+	 *
+	 * 	// Or for PHP 8.1 and above:    `$res->cbValues(Str::upper(...));`
+	 *  $res->cbValues([Str::class, 'upper']);
+	 *
+	 * ```
+	 *
+	 *
+	 * @param callable|array|string ...$callbacks
+	 *
+	 * @return $this
+	 */
+	#[Affecting]
+	public function cbValues(callable|array|string ...$callbacks): self {
+		foreach ($callbacks as $callback) {
+			$callback = $this->clearClosure($callback);
+
+			$this->cb(function ($k, $v) use ($callback) {
+				return [$k, $callback($v)];
+			});
+		}
+		return $this;
+	}
+
+	protected function clearClosure($callback) {
+		if (is_array($callback) || is_string($callback)) {
+			$callback = Closure::fromCallable($callback);
+		}
+		return $callback;
+	}
+
+	/**
+	 * Combine keys array and values array
+	 *
+	 * Example:
+	 * ```php
+	 *  $res = Box::combine(
+	 *      [ 'Raz', 'Dva', 'Tri'],
+	 *      [  1.1,   2.2,   3.3 ]
+	 *  );
+	 * ```
+	 *
+	 * @param array|Box $keys
+	 * @param array|Box $values
+	 *
+	 * @return static
+	 */
+	#[Shortcut('\array_combine()')]
+	public static function combine(array|Box $keys, array|Box $values): static {
+		return new static(array_combine((array) $keys, (array) $values));
+	}
+
+	public function randKeys(int $num = 1): Generator {
+		$keys = $this->keys;
+
+		$num = $num < 1
+			?1
+			:$num;
+		foreach (Math::range(0, $num - 1) as $i) {
+			yield $keys[Math::rand(0, $keys->size - 1)];
+		}
+	}
+
+	public function randValues(int $num = 1): Generator {
+		$values = $this->values;
+
+		$num = $num < 1
+			?1
+			:$num;
+		foreach (Math::range(0, $num - 1) as $i) {
+			yield $values[Math::rand(0, $values->size - 1)];
+		}
+	}
+
+	public function randKey() {
+		$keys = $this->keys;
+		return $keys[Math::rand(0, $keys->size - 1)];
+	}
+
+	public function randValue(int $num = 1) {
+		$values = $this->values;
+		return $values[Math::rand(0, $values->size - 1)];
+	}
+
+	/**
+	 * Returns value or default
+	 *
+	 * Basically equivalent of "$box[$key] ?? $default", but allows to search for key-value
+	 * in case sensitive (on and off) way.
+	 *
+	 * @param string|int $key            Key in the array
+	 * @param mixed      $default        The default value or null is returned if the key
+	 *                                   is not found
+	 * @param bool       $case_sensitive Whether the key should be searched in case-sensitive or
+	 *                                   case-insensitive way. By default true.
+	 *
+	 * @return mixed Found value by key or $default (which is null if not specified)
+	 */
+	public function get(
+		string|int $key,
+		mixed $default = null,
+		bool $case_sensitive = true
+	): mixed {
+		if (!is_int($key) && !$case_sensitive) {
+			$key = Str::lower($key);
+			foreach ($this as $k => $v) {
+				if (Str::lower($k) === $key) {
+					return $v;
+				}
+			}
+			return $default;
+		}
+
+		return $this[$key] ?? $default;
+	}
+
+	public static array|Box|null $default_sorting = [
+		'descending' => false,
+		'by_keys' => false,
+		'by_values' => true,
+		'case_sensitive' => false,
+		'natural' => true,
+	];
+
+	public array|Box|null $custom_sorting = null;
+
+	protected function _getSortConfig(
+		bool $descending = null,
+		bool $by_values = null,
+		bool $case_sensitive = null,
+		bool $natural = null,
+		callable $callback = null
+	) {
+		$default_config = static::$default_sorting;
+		$custom_config = $this->custom_sorting;
+
+		$_n = 'descending';
+		$$_n = $$_n ?? $custom_config[$_n] ?? $default_config[$_n] ?? false;
+		$_n = 'by_values';
+		$$_n = $$_n ?? $custom_config[$_n] ?? $default_config[$_n] ?? true;
+		$_n = 'case_sensitive';
+		$$_n = $$_n ?? $custom_config[$_n] ?? $default_config[$_n] ?? false;
+		$_n = 'natural';
+		$$_n = $$_n ?? $custom_config[$_n] ?? $default_config[$_n] ?? true;
+		$_n = 'callback';
+		$$_n = $$_n ?? $custom_config[$_n] ?? $default_config[$_n] ?? null;
+
+		return [$descending, $by_values, $case_sensitive, $natural, $callback];
+	}
+
+	public function shuffle(): self {
+		$res = (array) $this;
+		shuffle($res);
+		$this->exchangeArray($res);
+		return $this;
+	}
+
+	public function sum(): int|float {
+		// TODO Consider usage of BigNumber
+		$res = 0;
+		foreach ($this as $value) {
+			if (!is_int($value) && !is_float($value)) {
+				throw new Exception('The value for sum() method neither int, nor float.');
+			}
+			$res += $value;
+		}
+		return $res;
+	}
+
+	/**
+	 * Sort of any kind
+	 *
+	 * @param bool|null $descending
+	 * @param bool|null $by_values
+	 * @param bool|null $case_sensitive
+	 * @param bool|null $natural
+	 * @param callable|null $callback
+	 *
+	 * FIX  Make sure all the sortings are tested and documented properly
+	 * @return self
+	 */
+	public function sort(
+		bool $descending = null,
+		bool $by_values = null,
+		bool $case_sensitive = null,
+		bool $natural = null,
+		callable $callback = null
+	): self {
+		[$descending, $by_values, $case_sensitive, $natural, $callback]
+			= $this->_getSortConfig(
+				$descending, $by_values, $case_sensitive, $natural, $callback
+			);
+
+		$res = (array) $this;
+		if ($by_values) {
+			// Only by values
+			if ($callback) {
+				uasort($res, $callback);
+			} else {
+				$flags = $case_sensitive
+					?SORT_FLAG_CASE
+					:0;
+				if ($natural) {
+					if ($case_sensitive) {
+						natsort($res);
+					} else {
+						natcasesort($res);
+					}
+				} else {
+					if ($descending) {
+						arsort($res, $flags);
+					} else {
+						asort($res, $flags);
+					}
+				}
+			}
+		} else {
+			// Only by keys
+			if ($callback) {
+				uksort($res, $callback);
+			} else {
+				$flags = $case_sensitive
+					?SORT_FLAG_CASE
+					:0;
+				if ($descending) {
+					krsort($res, $flags);
+				} else {
+					ksort($res, $flags);
+				}
+			}
+		}
+		$this->exchangeArray($res);
+
+		return $this;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 * @return string
+	 */
+	public static function redefComponentName(): string {
+		return InitConfig::REDEF_BOX;
+	}
+
+	//// Meta-Magic methods
+
+	/**
 	 * @param array $data Data array
 	 *
 	 * @codeCoverageIgnore
@@ -452,21 +886,17 @@ class Box extends ArrayObject {
 		return $this;
 	}
 
+	//// Magic methods
+
 	/**
 	 * To debug as a normal array
 	 *
 	 * @codeCoverageIgnore
-	 * @return array|null
+	 * @return array
+	 * @throws \spaf\simputils\exceptions\InfiniteLoopPreventionExceptions
 	 */
 	public function __debugInfo(): array {
 		return $this->toArray();
 	}
-
-	/**
-	 * @codeCoverageIgnore
-	 * @return string
-	 */
-	public static function redefComponentName(): string {
-		return InitConfig::REDEF_BOX;
-	}
 }
+

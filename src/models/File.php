@@ -5,6 +5,7 @@ namespace spaf\simputils\models;
 use Closure;
 use Exception;
 use spaf\simputils\attributes\DebugHide;
+use spaf\simputils\attributes\Extract;
 use spaf\simputils\attributes\Property;
 use spaf\simputils\FS;
 use spaf\simputils\generic\BasicResource;
@@ -19,6 +20,7 @@ use function file_exists;
 use function file_put_contents;
 use function fopen;
 use function fstat;
+use function is_null;
 use function rewind;
 use function stat;
 use function stream_get_contents;
@@ -52,6 +54,13 @@ use function stream_get_contents;
  * @property-read mixed $backup_content
  * @property-read Box $stat
  * @property-read string $type
+ * @property-read ?DateTime $access_time
+ * @property-read ?DateTime $mod_time
+ * @property-read ?DateTime $inode_change_time
+ * @property-read ?int $user_id
+ * @property-read ?int $group_id
+ * @property-read ?int $file_mode
+ * @property-read ?int $links_number
  */
 class File extends BasicResource {
 	use RedefinableComponentTrait;
@@ -325,6 +334,53 @@ class File extends BasicResource {
 		$this->copy($dir, $name, $ext,true);
 	}
 
+	#[Property('links_number')]
+	protected function getLinksNumber(): ?int {
+		return $this->stat->get('nlink');
+	}
+
+	#[Property('file_mode')]
+	protected function getFileMode(): ?int {
+		return $this->stat->get('mode');
+	}
+
+	#[Property('user_id')]
+	protected function getUserId(): ?int {
+		return $this->stat->get('uid');
+	}
+
+	#[Property('group_id')]
+	protected function getGroupId(): ?int {
+		return $this->stat->get('gid');
+	}
+
+	#[Property('inode_change_time')]
+	protected function getInodeChangeTime(): ?DateTime {
+		$val = $this->stat->get('ctime');
+		if (!is_null($val)) {
+			return PHP::ts($val);
+		}
+		return null;
+	}
+
+	#[Property('mod_time')]
+	protected function getModTime(): ?DateTime {
+		$val = $this->stat->get('mtime');
+		if (!is_null($val)) {
+			return PHP::ts($val);
+		}
+		return null;
+	}
+
+	#[Property('access_time')]
+	protected function getAccessTime(): ?DateTime {
+		$val = $this->stat->get('atime');
+		if (!is_null($val)) {
+			return PHP::ts($val);
+		}
+		return null;
+	}
+
 	#[Property('stat')]
 	protected function getStat(): ?Box {
 		if (!empty($this->_fd)) {
@@ -415,6 +471,7 @@ class File extends BasicResource {
 	 * @codeCoverageIgnore
 	 * @return string|null
 	 */
+	#[Extract(false)]
 	#[Property('backup_location')]
 	protected function getBackupLocation(): ?string {
 		return $this->_backup_file;
@@ -425,6 +482,7 @@ class File extends BasicResource {
 	 * @return string|null
 	 * @throws \Exception
 	 */
+	#[Extract(false)]
 	#[DebugHide(false)]
 	#[Property('backup_content')]
 	protected function getBackupContent(): ?string {

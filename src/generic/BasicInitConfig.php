@@ -30,6 +30,10 @@ abstract class BasicInitConfig extends SimpleObject {
 	const REDEF_DATA_UNIT = 'DataUnit';
 	const REDEF_FILE = 'File';
 	const REDEF_DIR = 'Dir';
+	const REDEF_STACK_FIFO = 'StackFifo';
+	const REDEF_STACK_LIFO = 'StackLifo';
+	const REDEF_GIT_REPO = 'GitRepo';
+	const REDEF_BIG_NUMBER = 'BigNumber';
 	const REDEF_PHP_INFO = 'PhpInfo';
 	const REDEF_VERSION = 'Version';
 	const REDEF_LOGGER = 'Logger';
@@ -80,7 +84,8 @@ abstract class BasicInitConfig extends SimpleObject {
 	 */
 	#[Property('successful_init_blocks')]
 	protected function getSuccessfulInitBlocks(): Box|array {
-		return new Box($this->_successful_init_blocks);
+		$class_box = PHP::redef(Box::class);
+		return new $class_box($this->_successful_init_blocks);
 	}
 
 	/**

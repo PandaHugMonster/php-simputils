@@ -140,6 +140,8 @@ class CsvProcessor extends TextProcessor {
 	 * Picks up all the keys of the array/matrix for CSV
 	 */
 	public static function prepareHeader(array|Box $data): null|Box {
+		$class_box = PHP::redef(Box::class);
+
 		$is_box_used = $data instanceof Box && PHP::$use_box_instead_of_array;
 		$is_assoc_used = false;
 		$is_index_used = false;
@@ -172,7 +174,7 @@ class CsvProcessor extends TextProcessor {
 			?null
 			:($res instanceof Box
 				?$res->values
-				:new Box(array_values($res)));
+				:new $class_box(array_values($res)));
 	}
 
 	protected static function _checkMixUpOfKeys($key, &$is_index_used, &$is_assoc_used) {

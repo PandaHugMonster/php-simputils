@@ -7,6 +7,7 @@ use DateTimeInterface;
 use spaf\simputils\generic\BasicPrism;
 use spaf\simputils\models\DateTime;
 use spaf\simputils\models\DateTimeZone;
+use spaf\simputils\PHP;
 use spaf\simputils\traits\ForOutputsTrait;
 
 abstract class FixUpDateTimePrism extends BasicPrism {
@@ -16,10 +17,11 @@ abstract class FixUpDateTimePrism extends BasicPrism {
 	protected $_object;
 
 	public function __construct(DateTime|string $datetime = "now", ?DateTimeZone $timezone = null) {
+		$class_dt = PHP::redef(DateTime::class);
 		if ($datetime instanceof DateTime) {
 			$this->init($datetime);
 		} else {
-			$this->init(new DateTime($datetime, $timezone));
+			$this->init(new $class_dt($datetime, $timezone));
 		}
 	}
 

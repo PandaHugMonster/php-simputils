@@ -7,6 +7,7 @@ use spaf\simputils\attributes\DebugHide;
 use spaf\simputils\attributes\Property;
 use spaf\simputils\FS;
 use spaf\simputils\interfaces\WalkThroughFilterInterface;
+use spaf\simputils\PHP;
 use spaf\simputils\traits\FilesDirsTrait;
 use spaf\simputils\traits\RedefinableComponentTrait;
 use function basename;
@@ -127,7 +128,11 @@ class Dir extends Box {
 		bool $recursively = false,
 		null|string|WalkThroughFilterInterface ...$filters,
 	): Box|array {
-		$res = new Box();
+		$class_box = PHP::redef(Box::class);
+		$class_file = PHP::redef(File::class);
+		$class_dir = PHP::redef(Dir::class);
+
+		$res = new $class_box();
 		if ($dir = scandir($this->name_full)) {
 			foreach ($dir as $item) {
 				if ($item === '.' || $item === '..') {
@@ -137,8 +142,8 @@ class Dir extends Box {
 				$full_path = "{$this->name_full}/{$item}";
 
 				$obj = is_dir($full_path)
-					?new Dir($full_path)
-					:new File($full_path);
+					?new $class_dir($full_path)
+					:new $class_file($full_path);
 
 
 				$include = true;

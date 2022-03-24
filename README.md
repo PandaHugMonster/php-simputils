@@ -35,7 +35,7 @@ Feel free to propose updates and creating issues, bugfixes and stuff!
 
 ## Installation
 
-Current framework version: **0.3.1**
+Current framework version: **0.3.3**
 
 Minimal PHP version: **8.0**
 

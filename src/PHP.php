@@ -670,14 +670,17 @@ class PHP {
 	 * @noinspection PhpDocSignatureInspection
 	 */
 	public static function stack(mixed ...$items_and_conf): StackFifo|StackLifo {
+		$class_stack_lifo = static::redef(StackLifo::class);
+		$class_stack_fifo = static::redef(StackFifo::class);
+
 		$items_and_conf = static::box($items_and_conf);
 		$type = $items_and_conf->get('type', static::STACK_LIFO);
 		if ($items_and_conf->containsKey('type')) {
 			$items_and_conf = $items_and_conf->unsetByKey('type')->values;
 		}
 		$obj = $type === static::STACK_LIFO
-			?new StackLifo($items_and_conf)
-			:new StackFifo($items_and_conf);
+			?new $class_stack_lifo($items_and_conf)
+			:new $class_stack_fifo($items_and_conf);
 		return $obj;
 	}
 
@@ -730,7 +733,8 @@ class PHP {
 	 */
 	#[Shortcut('\$_ENV')]
 	public static function allEnvs(): array|Box {
-		return new Box($_ENV ?? CommonMemoryCacheIndex::$initial_get_env_state ?? []);
+		$class_box = static::redef(Box::class);
+		return new $class_box($_ENV ?? CommonMemoryCacheIndex::$initial_get_env_state ?? []);
 	}
 
 	/**

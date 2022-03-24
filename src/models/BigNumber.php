@@ -8,6 +8,7 @@ use spaf\simputils\attributes\Property;
 use spaf\simputils\generic\SimpleObject;
 use spaf\simputils\PHP;
 use spaf\simputils\Str;
+use spaf\simputils\traits\RedefinableComponentTrait;
 use function bcadd;
 use function bccomp;
 use function gmp_add;
@@ -74,6 +75,7 @@ use function preg_replace;
  * @property bool $mutable
  */
 class BigNumber extends SimpleObject {
+	use RedefinableComponentTrait;
 
 	const SUBSYSTEM_GMP = 'gmp';
 	const SUBSYSTEM_BCMATH = 'bcmath';
@@ -491,5 +493,9 @@ class BigNumber extends SimpleObject {
 
 	public function __toString(): string {
 		return "{$this->_value}";
+	}
+
+	public static function redefComponentName(): string {
+		return InitConfig::REDEF_BIG_NUMBER;
 	}
 }

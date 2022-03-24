@@ -36,9 +36,10 @@ class DotEnvInitBlock extends SimpleObject implements InitBlockInterface {
 	 * @return bool
 	 */
 	public function initBlock(BasicInitConfig $config): bool {
+		$class_file = PHP::redef(File::class);
 		$res = true;
 
-		$file = new File(static::DEFAULT_FILE_NAME);
+		$file = new $class_file(static::DEFAULT_FILE_NAME);
 		$this->_default_file = $file->exists
 			?$file
 			:null; // @codeCoverageIgnore

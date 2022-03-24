@@ -383,12 +383,13 @@ class File extends BasicResource {
 
 	#[Property('stat')]
 	protected function getStat(): ?Box {
+		$class_box = PHP::redef(Box::class);
 		if (!empty($this->_fd)) {
-			return new Box(fstat($this->_fd));
+			return new $class_box(fstat($this->_fd));
 		}
 
 		if ($this->exists) {
-			return new Box(stat($this->name_full));
+			return new $class_box(stat($this->name_full));
 		}
 
 		return null;

@@ -8,6 +8,7 @@ use spaf\simputils\Data;
 use spaf\simputils\exceptions\NonExistingDataUnit;
 use spaf\simputils\exceptions\UnspecifiedDataUnit;
 use spaf\simputils\generic\SimpleObject;
+use spaf\simputils\PHP;
 use spaf\simputils\Str;
 use spaf\simputils\traits\ForOutputsTrait;
 use spaf\simputils\traits\RedefinableComponentTrait;
@@ -238,9 +239,10 @@ class DataUnit extends SimpleObject {
 		$ext = static::$big_number_extension;
 
 		// TODO Should be improved part with in_array()
-		$value = new BigNumber(static::clearNumber($value), extension: $ext);
+		$class_bn = PHP::redef(BigNumber::class);
+		$value = new $class_bn(static::clearNumber($value), extension: $ext);
 		if ($from_power != $to_power) {
-			$diff = (new BigNumber(2, false, extension: $ext))
+			$diff = (new $class_bn(2, false, extension: $ext))
 				->pow(abs($from_power - $to_power) * 10);
 
 			$value = $from_power > $to_power
@@ -437,8 +439,10 @@ class DataUnit extends SimpleObject {
 	 * @return false|mixed
 	 */
 	public static function translator(string $name, bool $reversed = false) {
+		$class_box = PHP::redef(Box::class);
+
 		$name = Str::upper($name);
-		$check = new Box(static::$l10n_translations ?? []);
+		$check = new $class_box(static::$l10n_translations ?? []);
 		if (!$reversed) {
 			if ($check->containsValue($name)) {
 				return $check->getKeyByValue($name);

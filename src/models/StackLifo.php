@@ -4,6 +4,7 @@ namespace spaf\simputils\models;
 
 use Generator;
 use spaf\simputils\Math;
+use spaf\simputils\traits\RedefinableComponentTrait;
 
 /**
  * Stack LIFO
@@ -15,6 +16,7 @@ use spaf\simputils\Math;
  * FIX  Block sorting functionalities
  */
 class StackLifo extends Box {
+	use RedefinableComponentTrait;
 
 	public function push(mixed ...$in): void {
 		$res = (array) $this->values;
@@ -44,5 +46,9 @@ class StackLifo extends Box {
 		foreach (Math::range(0, $this->size - 1) as $i) {
 			yield $this->pop();
 		}
+	}
+
+	public static function redefComponentName(): string {
+		return InitConfig::REDEF_STACK_LIFO;
 	}
 }

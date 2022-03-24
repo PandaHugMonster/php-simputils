@@ -256,20 +256,22 @@ class DateTime extends FixUpDateTime {
 		DateTimeInterface|DateTime|string|int|null $targetObject = null,
 		bool $absolute = false
 	) {
+		$class_date_i = PHP::redef(DateInterval::class);
 		if (is_null($targetObject)) {
 			$targetObject = $this->_orig_value ?? clone $this;
 		}
 		$res = parent::diff(DT::normalize($targetObject), $absolute);
-		return DateInterval::expandFrom($res, new DateInterval('P1D'));
+		return DateInterval::expandFrom($res, new $class_date_i('P1D'));
 	}
 
 	public function walk(string|DateTime|int $to_date, string|DateInterval $step) {
+		$class_date_p = PHP::redef(DatePeriod::class);
 		$step = Str::is($step)
 			?DateInterval::createFromDateString($step)
 			:$step;
 		$to_date = DT::normalize($to_date);
 
-		return new DatePeriod($this, $step, $to_date);
+		return new $class_date_p($this, $step, $to_date);
 	}
 
 	public function toJson(?bool $pretty = null, bool $with_class = false): string {

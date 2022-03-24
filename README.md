@@ -1,5 +1,13 @@
 # SimpUtils
 
+:ukraine: #StandWithUkraine
+
+This is the official Bank of Ukraine link for donations for Ukraine:
+
+https://bank.gov.ua/en/news/all/natsionalniy-bank-vidkriv-spetsrahunok-dlya-zboru-koshtiv-na-potrebi-armiyi
+
+-----
+
 **SimpUtils** is a micro-framework that provides interconnected, consistent utilities 
 to improve code maintenance, code quality, development speed. 
 Basically it should help you to make your code more "elegant",
@@ -23,12 +31,19 @@ Feel free to propose updates and creating issues, bugfixes and stuff!
 
 ## Index
 
- 1. [Installation]()
- 2. [Highlights]()
- 3. [Glossary](docs/glossary.md)
- 4. [Ground Reasons and Design Decisions](docs/reasoning-and-design.md)
- 5. [Main components overview](docs/main-components-overview.md)
- 6. [Date and Time](docs/date-and-time.md)
+1. [Architecture and Structure](docs/structure.md)
+
+[//]: # ( 1. [Installation]&#40;&#41;)
+
+[//]: # ( 2. [Highlights]&#40;&#41;)
+
+[//]: # ( 3. [Glossary]&#40;docs/glossary.md&#41;)
+
+[//]: # ( 4. [Ground Reasons and Design Decisions]&#40;docs/reasoning-and-design.md&#41;)
+
+[//]: # ( 5. [Main components overview]&#40;docs/main-components-overview.md&#41;)
+
+[//]: # ( 6. [Date and Time]&#40;docs/date-and-time.md&#41;)
 
 ----
 

@@ -1,5 +1,3 @@
-# SimpUtils
-
 :ukraine: #StandWithUkraine
 
 This is the official Bank of Ukraine link for donations for Ukraine:
@@ -7,6 +5,10 @@ This is the official Bank of Ukraine link for donations for Ukraine:
 https://bank.gov.ua/en/news/all/natsionalniy-bank-vidkriv-spetsrahunok-dlya-zboru-koshtiv-na-potrebi-armiyi
 
 -----
+-----
+
+# SimpUtils
+
 
 **SimpUtils** is a micro-framework that provides interconnected, consistent utilities 
 to improve code maintenance, code quality, development speed. 

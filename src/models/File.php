@@ -154,6 +154,8 @@ class File extends BasicResource {
 			if (!empty($app)) {
 				$this->_is_default_app = false; // @codeCoverageIgnore
 			}
+			$name = $this->name;
+			$name2 = $this->name_full;
 			$app = static::getCorrespondingProcessor($this->name_full, $this->mime_type, $app);
 		}
 
@@ -382,7 +384,7 @@ class File extends BasicResource {
 	}
 
 	#[Property('stat')]
-	protected function getStat(): ?Box {
+	protected function getStat(): Box {
 		$class_box = PHP::redef(Box::class);
 		if (!empty($this->_fd)) {
 			return new $class_box(fstat($this->_fd));
@@ -392,7 +394,7 @@ class File extends BasicResource {
 			return new $class_box(stat($this->name_full));
 		}
 
-		return null;
+		return new $class_box();
 	}
 
 	#[Property('size')]

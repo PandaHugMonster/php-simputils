@@ -18,7 +18,7 @@ general purpose meaning.
     <dt id="term-prism">Prism</dt>
     <dd>
         Special type of classes that do not provide logical meaning by themselves,
-        but rather exposes/modifies some portion of functionality from the target class.
+        but rather expose/modify some portion of functionality from the target class.
     </dd>
     <dd>
         A good example would be "Date" class that is being a prism for "DateTime" class.

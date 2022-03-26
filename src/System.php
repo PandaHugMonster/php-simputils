@@ -74,7 +74,8 @@ class System {
 
 	public static function systemFingerprint(Version|string $version = null)
 	: BasicSystemFingerprint|string {
+		$class = PHP::redef(SystemFingerprint::class);
 		$version = $version ?? PHP::simpUtilsVersion();
-		return new SystemFingerprint($version);
+		return new $class($version);
 	}
 }

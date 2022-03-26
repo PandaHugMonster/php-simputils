@@ -5,6 +5,7 @@ namespace spaf\simputils\models;
 
 use spaf\simputils\generic\BasicSystemFingerprint;
 use spaf\simputils\traits\DefaultSystemFingerprintTrait;
+use spaf\simputils\traits\RedefinableComponentTrait;
 
 /**
  * Component for system fingerprint collection, storage and comparison
@@ -103,7 +104,11 @@ use spaf\simputils\traits\DefaultSystemFingerprintTrait;
  */
 class SystemFingerprint extends BasicSystemFingerprint {
 	use DefaultSystemFingerprintTrait;
+	use RedefinableComponentTrait;
 
 	const NAME = 'DSF';
 
+	public static function redefComponentName(): string {
+		return InitConfig::REDEF_SYSTEM_FINGERPRINT;
+	}
 }

@@ -16,6 +16,7 @@ use spaf\simputils\models\Dir;
 use spaf\simputils\models\File;
 use spaf\simputils\models\StackFifo;
 use spaf\simputils\models\StackLifo;
+use spaf\simputils\models\StrObj;
 use spaf\simputils\PHP;
 use spaf\simputils\Str;
 
@@ -184,4 +185,8 @@ function uuid(): string {
 #[Shortcut('Data::du()')]
 function du(null|int|string|DataUnit $value = null, ?string $format = null): DataUnit {
 	return Data::du($value, $format);
+}
+
+function str(string ...$strings): StrObj|string {
+	return Str::obj(...$strings);
 }

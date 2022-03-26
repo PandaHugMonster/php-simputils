@@ -4,14 +4,50 @@
 
 # Structure
 
+## Legend
+* Grey squares - Static classes
+* Blue squares - Model classes
+* Green squares - [Prism](glossary.md#term-prism) classes
+* Yellow square - different ungrouped classes
+* Violet lines with a single arrow - class inheritance, **arrow points to a parent**
+* Bright red lines with double arrows - means bidirectional co-operation, they might not
+  be related in matter of OOP relations
+* Sketched squares - not implemented yet, but most likely will be implemented
 
-![Structure Schema](images/Structure%20Scheme%20v1.png)
+![Structure Schema](images/Structure%20Scheme%20v2.png)
 
-**Legend**
- * Grey squares - Static classes
- * Blue squares - Model classes
- * Green squares - Prism classes
- * Yellow square - different ungrouped classes
+## Recommended usage structure
+
+![Structure Schema](images/Usage%20structure%20of%20classes%20groups%20v1.png)
+
+General suggestion is to use shortcut methods from "basic.php" first (like `fl()`, `bx()`, 
+`ts()`, `now()`, etc.) to use models' related functionality (like `File`, `Box`, `DateTime`, etc.)
+
+Those shortcuts should be really comfortable to use together with IDEs, but in case if it troubles
+you that IDE does not recognize properly those shortcuts for some reason - you could use 
+Static Classes of the correspondent functionality. Almost all the "basic" functions are using
+relevant methods from static classes. So you can use those static class methods directly. 
+This for sure will not mess with your IDEs auto-completion functionality, because those are
+normal classes.
+
+### Current basic functions and their static class equivalents
+ 1. `bx()` - `PHP::box()`
+ 2. `dr()` - `FS::dir()`
+ 3. `du()` - `Data::du()` "du" in this context stands for "Data Unit" and **not** "Disk Usage"
+ 4. `env()` - `PHP::env()`
+ 5. `fl()` - `FS::file()`
+ 6. `now()` - `` ???? PHP::now
+ 7. `path()` - `` ???? PHP::path
+ 8. `pd()` - `PHP::pd()`
+ 9. `pr()` - `PHP::pr()`
+ 10. `prstr()` - `PHP::prstr()`
+ 11. `stack()` - `PHP::stack()`
+ 12. `str()` - not implemented
+ 13. `ts()` - `` ???? PHP::ts
+ 14. `uuid()` - not implemented
+
+
+![Structure Schema](images/Static%20classes%20relation%20with%20models.png)
  
 ## Overview
 Overall there are 6 logical groups of functionality, at least major ones.
@@ -88,6 +124,7 @@ to obtain info about the system/platform
 4. [BigNumber](#BigNumber) (code [\spaf\simputils\models\BigNumber](https://github.com/PandaHugMonster/php-simputils/blob/main/src/models/BigNumber.php))
 5. [L10n](#L10n) (code [\spaf\simputils\models\L10n](https://github.com/PandaHugMonster/php-simputils/blob/main/src/models/L10n.php))
 6. [SystemFingerprint](#SystemFingerprint) (code [\spaf\simputils\models\SystemFingerprint](https://github.com/PandaHugMonster/php-simputils/blob/main/src/models/SystemFingerprint.php))
+7. ? StrObj - not a finished idea
 
 #### Version
 

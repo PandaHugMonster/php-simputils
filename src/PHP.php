@@ -1,4 +1,6 @@
-<?php /** @noinspection PhpDocMissingThrowsInspection */
+<?php
+/** @noinspection PhpDocSignatureInspection */
+/** @noinspection PhpDocMissingThrowsInspection */
 /** @noinspection PhpInconsistentReturnPointsInspection */
 /** @noinspection PhpNeverTypedFunctionReturnViolationInspection */
 
@@ -59,8 +61,6 @@ use const JSON_ERROR_NONE;
  * should not compromise your performance. THOUGH keep in mind, Box is not as efficient as arrays.
  * Especially if you will be implementing your own Box class and overriding some of it's methods.
  *
- * TODO Checkout and make sure all works efficiently enough etc.
- *
  * @see Box
  * @package spaf\simputils
  */
@@ -68,6 +68,9 @@ class PHP {
 
 	const SERIALIZATION_TYPE_JSON = 0;
 	const SERIALIZATION_TYPE_PHP = 1;
+
+	const STACK_LIFO = 'lifo';
+	const STACK_FIFO = 'fifo';
 
 	private static $framework_location = null;
 
@@ -103,7 +106,7 @@ class PHP {
 	 */
 	public static function simpUtilsVersion(): Version|string {
 		$class = static::redef(Version::class);
-		return new $class('0.3.3', 'SimpUtils');
+		return new $class('0.3.4', 'SimpUtils');
 	}
 
 	/**
@@ -166,7 +169,7 @@ class PHP {
 	 *
 	 * @return ?string
 	 *
-	 * TODO Unrelated: Implement recursive toJson control to objects (So object can decide,
+	 * FIX  Implement recursive toJson control to objects (So object can decide,
 	 *      whether it wants to be a string, an array or a number).
 	 *
 	 * @throws \Exception Runtime resources can't be serialized
@@ -655,9 +658,6 @@ class PHP {
 		return $res;
 	}
 
-	const STACK_LIFO = 'lifo';
-	const STACK_FIFO = 'fifo';
-
 	/**
 	 * Create a stack object
 	 *
@@ -667,7 +667,6 @@ class PHP {
 	 *                                  "fifo" or "lifo", by default is "lifo".
 	 *
 	 * @return \spaf\simputils\models\StackFifo|\spaf\simputils\models\StackLifo
-	 * @noinspection PhpDocSignatureInspection
 	 */
 	public static function stack(mixed ...$items_and_conf): StackFifo|StackLifo {
 		$class_stack_lifo = static::redef(StackLifo::class);
@@ -819,10 +818,6 @@ class PHP {
 		return $res
 			?realpath($res)
 			:null;
-	}
-
-	public static function extractFields() {
-
 	}
 
 	/**

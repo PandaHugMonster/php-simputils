@@ -46,6 +46,7 @@ normal classes.
  13. `ts()` - `` ???? PHP::ts
  14. `uuid()` - not implemented
 
+### Relation between static classes and models
 
 ![Structure Schema](images/Static%20classes%20relation%20with%20models.png)
  

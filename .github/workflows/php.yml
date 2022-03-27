@@ -4,7 +4,8 @@ on:
   push:
     branches: [ main ]
   pull_request:
-    branches: [ main ]
+    types:
+      - opened
 
 jobs:
   build:
@@ -39,6 +40,9 @@ jobs:
 
     - name: Run test suite
       run: composer run-script test
+
+    - name: Send to codecov
+      run: curl -Os https://uploader.codecov.io/latest/linux/codecov chmod && +x codecov && ./codecov
 
     - name: Uploading artifacts
     - uses: actions/upload-artifact@v3

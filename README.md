@@ -9,6 +9,7 @@ https://bank.gov.ua/en/news/all/natsionalniy-bank-vidkriv-spetsrahunok-dlya-zbor
 
 # SimpUtils
 
+[![Build Status](https://app.travis-ci.com/PandaHugMonster/php-simputils.svg?branch=main)](https://app.travis-ci.com/PandaHugMonster/php-simputils)
 
 **SimpUtils** is a micro-framework that provides interconnected, consistent utilities 
 to improve code maintenance, code quality, development speed. 

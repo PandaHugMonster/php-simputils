@@ -3,6 +3,11 @@ php:
   - '8.0'
   - '8.1'
 
+branches:
+  only:
+    - master
+    - main
+
 cache:
   directories:
     - $HOME/.composer/cache

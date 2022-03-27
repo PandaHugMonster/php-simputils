@@ -25,10 +25,6 @@ use function is_string;
  */
 class DT implements DateTimeHelperInterface {
 
-	private static function _getClass() {
-		return PHP::redef(DateTime::class);
-	}
-
 	public static ?string $now_string = null;
 
 	/**
@@ -99,7 +95,7 @@ class DT implements DateTimeHelperInterface {
 		string $fmt = null,
 		bool $is_clone_allowed = true,
 	): ?DateTime {
-		$class = static::_getClass();
+		$class = PHP::redef(DateTime::class);
 		if (is_string($tz)) {
 			$tz_class = PHP::redef(DateTimeZone::class);
 			$tz = new $tz_class($tz);

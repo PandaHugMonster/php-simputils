@@ -3,6 +3,9 @@ php:
   - '8.0'
   - '8.1'
 
+env:
+  - XDEBUG_MODE=coverage
+
 before_script:
   - composer self-update
   - composer install --prefer-source --no-interaction --dev

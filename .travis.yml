@@ -1,14 +1,17 @@
 language: php
 php:
-  - '8.0'
+#  - '8.0'
   - '8.1'
+
+cache:
+  directories:
+    - $HOME/.composer/cache
 
 env:
   - XDEBUG_MODE=coverage
 
 before_script:
-  - composer self-update
-  - composer install --prefer-source --no-interaction
+  - composer install --prefer-dist --no-interaction
 
 script:
   - phpunit

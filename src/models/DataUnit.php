@@ -4,7 +4,6 @@ namespace spaf\simputils\models;
 
 use spaf\simputils\attributes\DebugHide;
 use spaf\simputils\attributes\Property;
-use spaf\simputils\Data;
 use spaf\simputils\exceptions\NonExistingDataUnit;
 use spaf\simputils\exceptions\UnspecifiedDataUnit;
 use spaf\simputils\generic\SimpleObject;
@@ -12,10 +11,13 @@ use spaf\simputils\PHP;
 use spaf\simputils\Str;
 use spaf\simputils\traits\ForOutputsTrait;
 use spaf\simputils\traits\RedefinableComponentTrait;
+use function is_numeric;
+use function json_encode;
 
 /**
  *
- * FIX  Add functionality for fractions
+ * @property-read bool $fractions_supported Whether fractions (float) supported
+ *                                          by the big number extension
  */
 class DataUnit extends SimpleObject {
 	use RedefinableComponentTrait;
@@ -86,6 +88,11 @@ class DataUnit extends SimpleObject {
 	protected BigNumber $_value;
 	public string $user_format = self::USER_FORMAT_HR;
 
+	#[Property('fractions_supported')]
+	protected function getFractionsSupported(): bool {
+		return $this->_value->fractions_supported;
+	}
+
 	public function __construct(string|int $value = 0) {
 		$this->_value = static::toBytes($value);
 		$this->_value->mutable = true;
@@ -99,6 +106,32 @@ class DataUnit extends SimpleObject {
 	#[Property('for_user')]
 	protected function getForUser(): string {
 		return $this->format();
+	}
+
+	/**
+	 * Returns assoc-array of the powers
+	 *
+	 * Keys - are the abbreviation from the constants of the class
+	 * Values - are the powers of tens of 2 (so value 3 means **pow(2, 30)** ,
+	 * value 7 means **pow(2, 70)** )
+	 *
+	 * @return array|Box Array with keys representing the abbreviations of units and the
+	 *                   values representing powers
+	 * @throws \Exception
+	 */
+	protected static function unitToPowerMap(): array|Box {
+		$class = PHP::redef(Box::class);
+		return new $class([
+			DataUnit::BYTE => 0,
+			DataUnit::KILOBYTE => 1,
+			DataUnit::MEGABYTE => 2,
+			DataUnit::GIGABYTE => 3,
+			DataUnit::TERABYTE => 4,
+			DataUnit::PETABYTE => 5,
+			DataUnit::EXABYTE => 6,
+			DataUnit::ZETTABYTE => 7,
+			DataUnit::YOTTABYTE => 8,
+		]);
 	}
 
 	/**
@@ -185,7 +218,7 @@ class DataUnit extends SimpleObject {
 	 * @throws \spaf\simputils\exceptions\NonExistingDataUnit
 	 * @throws \spaf\simputils\exceptions\UnspecifiedDataUnit
 	 */
-	public static function toBytes(string $value): BigNumber|string|int {
+	protected static function toBytes(string $value): BigNumber|string|int {
 		return static::unitTo($value);
 	}
 
@@ -229,8 +262,8 @@ class DataUnit extends SimpleObject {
 	 * @throws \spaf\simputils\exceptions\NonExistingDataUnit
 	 * @throws \spaf\simputils\exceptions\UnspecifiedDataUnit
 	 */
-	public static function unitTo(string $value, string $to_unit = DataUnit::BYTE): BigNumber {
-		$unit_codes = Data::unitCodeToPowerArray();
+	protected static function unitTo(string $value, string $to_unit = DataUnit::BYTE): BigNumber {
+		$unit_codes = static::unitToPowerMap();
 		$from_unit = static::clearUnit($value);
 		$to_unit = static::clearUnit($to_unit);
 		$from_power = $unit_codes[$from_unit];
@@ -285,7 +318,7 @@ class DataUnit extends SimpleObject {
 	 * @see static::unitCodeToPowerArray()
 	 */
 	public static function clearUnit(string $unit): string {
-		$unit_codes = Data::unitCodeToPowerArray();
+		$unit_codes = static::unitToPowerMap();
 
 		$unit = preg_replace('/[\W]/ui', '', Str::upper($unit));
 		$unit = preg_replace('/[\d]/', '', $unit);
@@ -332,7 +365,7 @@ class DataUnit extends SimpleObject {
 	 * @throws \spaf\simputils\exceptions\UnspecifiedDataUnit
 	 * @see \spaf\simputils\Data::unitTo()
 	 */
-	public static function bytesTo(string|int $bytes, string $to_unit): BigNumber {
+	protected static function bytesTo(string|int $bytes, string $to_unit): BigNumber {
 		return static::unitTo("{$bytes}b", $to_unit);
 	}
 
@@ -373,12 +406,16 @@ class DataUnit extends SimpleObject {
 	 * @throws \spaf\simputils\exceptions\NonExistingDataUnit
 	 * @throws \spaf\simputils\exceptions\UnspecifiedDataUnit
 	 */
-	public static function humanReadable(BigNumber|int|string $value): null|BigNumber|string {
+	protected static function humanReadable(BigNumber|int|string $value): null|BigNumber|string {
 		$res = '';
-		$value = is_numeric($value)?"{$value}b":$value;
-
-		foreach (Data::unitCodeToPowerArray()->keys as $unit_code) {
-			$accu = static::unitTo($value, $unit_code);
+		$dctp = static::unitToPowerMap();
+		foreach ($dctp->keys as $unit_code) {
+			// NOTE Careful, do not optimize this without correct solution. Will cause issues.
+			$accu = static::unitTo(is_numeric($value) || $value instanceof BigNumber
+				?"{$value}b"
+				:$value,
+				$unit_code
+			);
 			if ($accu->cmp(1024) < 0) {
 				if (static::$long_format) {
 					return static::formattedStrLong($value, $accu, $unit_code);
@@ -388,7 +425,7 @@ class DataUnit extends SimpleObject {
 			}
 		}
 
-		return static::formattedStr($value, $unit_code);
+		return static::formattedStr($accu, $unit_code);
 	}
 
 	protected static function formattedStrLong($val, $accu, ?string $right_limit): string {
@@ -399,7 +436,7 @@ class DataUnit extends SimpleObject {
 		$right_limit = static::clearUnit($right_limit);
 
 		$prev_unit = null;
-		foreach (Data::unitCodeToPowerArray() as $unit => $power) {
+		foreach (static::unitToPowerMap() as $unit => $power) {
 			$t = 1024**$power;
 			$unit = static::clearUnit($unit);
 
@@ -438,7 +475,7 @@ class DataUnit extends SimpleObject {
 	 *
 	 * @return false|mixed
 	 */
-	public static function translator(string $name, bool $reversed = false) {
+	protected static function translator(string $name, bool $reversed = false) {
 		$class_box = PHP::redef(Box::class);
 
 		$name = Str::upper($name);
@@ -453,6 +490,26 @@ class DataUnit extends SimpleObject {
 			}
 		}
 		return $name;
+	}
+
+	/**
+	 * Json formatted
+	 *
+	 * The result is numeric without the unit, though it's always in bytes.
+	 *
+	 * @inheritdoc
+	 * @return string Numeric value in bytes
+	 */
+	public function toJson(?bool $pretty = null, bool $with_class = false): string {
+		return json_encode($this->for_system);
+	}
+
+	public static function fromJson(string $json): static {
+		$res = json_decode($json, true);
+		if (is_numeric($res)) {
+			$res = "{$res}b";
+		}
+		return new static($res);
 	}
 
 	public static function redefComponentName(): string {

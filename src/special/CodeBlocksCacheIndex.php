@@ -21,6 +21,8 @@ use spaf\simputils\models\L10n;
 use spaf\simputils\models\PhpInfo;
 use spaf\simputils\models\StackFifo;
 use spaf\simputils\models\StackLifo;
+use spaf\simputils\models\StrObj;
+use spaf\simputils\models\SystemFingerprint;
 use spaf\simputils\models\Temperature;
 use spaf\simputils\models\Version;
 
@@ -57,6 +59,8 @@ class CodeBlocksCacheIndex {
 			InitConfig::REDEF_BIG_NUMBER => BigNumber::class,
 			InitConfig::REDEF_L10N => L10n::class,
 			InitConfig::REDEF_TEMPERATURE => Temperature::class,
+			InitConfig::REDEF_SYSTEM_FINGERPRINT => SystemFingerprint::class,
+			InitConfig::REDEF_STR_OBJ => StrObj::class,
 		]);
 	}
 

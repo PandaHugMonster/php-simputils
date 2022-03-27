@@ -243,7 +243,10 @@ class Version extends SimpleObject {
 	 * @return string
 	 */
 	public function __toString(): string {
-		return $this->parser->toString($this);
+		// IMP FIX  There is a problem here if "parser" property is used
+		return $this->getParser()
+			?$this->getParser()->toString($this)
+			:'';
 	}
 
 	/**
@@ -360,7 +363,7 @@ class Version extends SimpleObject {
 	 *
 	 * @return array|null
 	 */
-	public function __debugInfo(): ?array {
+	public function __debugInfo(): array {
 		$res = [
 			'software_name' => $this->software_name,
 			'parsed_version' => strval($this),

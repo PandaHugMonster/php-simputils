@@ -4,6 +4,7 @@ namespace spaf\simputils\generic;
 
 use Exception;
 use spaf\simputils\attributes\Property;
+use spaf\simputils\FS;
 use spaf\simputils\interfaces\InitBlockInterface;
 use spaf\simputils\models\Box;
 use spaf\simputils\models\L10n;
@@ -39,6 +40,8 @@ abstract class BasicInitConfig extends SimpleObject {
 	const REDEF_LOGGER = 'Logger';
 	const REDEF_L10N = 'L10n';
 	const REDEF_TEMPERATURE = 'Temperature';
+	const REDEF_SYSTEM_FINGERPRINT = 'SystemFingerprint';
+	const REDEF_STR_OBJ = 'StrObj';
 
 	public ?string $name = null;
 	public ?string $code_root = null;
@@ -68,7 +71,7 @@ abstract class BasicInitConfig extends SimpleObject {
 
 			$class = PHP::redef(L10n::class);
 			$l10n_name = Str::upper($val);
-			$path = PHP::path(PHP::frameworkDir(), 'data', 'l10n', "{$l10n_name}.json");
+			$path = FS::path(PHP::frameworkDir(), 'data', 'l10n', "{$l10n_name}.json");
 			$val = $class::createFrom($path);
 		}
 

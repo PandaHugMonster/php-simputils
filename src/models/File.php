@@ -7,6 +7,7 @@ use Exception;
 use spaf\simputils\attributes\DebugHide;
 use spaf\simputils\attributes\Extract;
 use spaf\simputils\attributes\Property;
+use spaf\simputils\DT;
 use spaf\simputils\FS;
 use spaf\simputils\generic\BasicResource;
 use spaf\simputils\generic\BasicResourceApp;
@@ -154,6 +155,8 @@ class File extends BasicResource {
 			if (!empty($app)) {
 				$this->_is_default_app = false; // @codeCoverageIgnore
 			}
+			$name = $this->name;
+			$name2 = $this->name_full;
 			$app = static::getCorrespondingProcessor($this->name_full, $this->mime_type, $app);
 		}
 
@@ -358,7 +361,7 @@ class File extends BasicResource {
 	protected function getInodeChangeTime(): ?DateTime {
 		$val = $this->stat->get('ctime');
 		if (!is_null($val)) {
-			return PHP::ts($val);
+			return DT::ts($val);
 		}
 		return null;
 	}
@@ -367,7 +370,7 @@ class File extends BasicResource {
 	protected function getModTime(): ?DateTime {
 		$val = $this->stat->get('mtime');
 		if (!is_null($val)) {
-			return PHP::ts($val);
+			return DT::ts($val);
 		}
 		return null;
 	}
@@ -376,13 +379,13 @@ class File extends BasicResource {
 	protected function getAccessTime(): ?DateTime {
 		$val = $this->stat->get('atime');
 		if (!is_null($val)) {
-			return PHP::ts($val);
+			return DT::ts($val);
 		}
 		return null;
 	}
 
 	#[Property('stat')]
-	protected function getStat(): ?Box {
+	protected function getStat(): Box {
 		$class_box = PHP::redef(Box::class);
 		if (!empty($this->_fd)) {
 			return new $class_box(fstat($this->_fd));
@@ -392,7 +395,7 @@ class File extends BasicResource {
 			return new $class_box(stat($this->name_full));
 		}
 
-		return null;
+		return new $class_box();
 	}
 
 	#[Property('size')]

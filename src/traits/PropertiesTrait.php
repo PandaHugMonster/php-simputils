@@ -357,9 +357,10 @@ trait PropertiesTrait {
 					$method_type = Property::methodAccessType($item, $attr);
 
 					if (in_array($method_type, $property_array_of_prop_types)) {
+//						echo "({$expected_name} / {$value})";
 						$res["{$expected_name}"] = $is_show_instead_set
 							?$value
-							:$this->{$expected_name};
+							:$this->$expected_name;
 					}
 				} else if (!empty($ta) && $ta->getName() === PropertyBatch::class) {
 					[$expected_names, $_] = PropertyBatch::expectedNamesAndDefaultValues(
@@ -385,8 +386,10 @@ trait PropertiesTrait {
 	 *
 	 * @return array|null
 	 */
-	public function __debugInfo(): ?array {
+	public function __debugInfo(): array {
 		// FIX  Recursive unwrapping shows "Array" instead of "Box". Really bad!
-		return $this->___extractFields(false, true);
+		// $this->___extractFields(false, true)
+		// FIX  Broken! Segfaults because of ___extractFields() Really weird
+		return [];
 	}
 }

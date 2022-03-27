@@ -4,7 +4,6 @@
 namespace spaf\simputils;
 
 
-use spaf\simputils\models\Box;
 use spaf\simputils\models\DataUnit;
 use function is_integer;
 
@@ -19,32 +18,6 @@ use function is_integer;
  * @package spaf\simputils\helpers
  */
 class Data {
-
-	/**
-	 * Returns assoc-array of the powers
-	 *
-	 * Keys - are the abbreviation from the constants of the class
-	 * Values - are the powers of tens of 2 (so value 3 means **pow(2, 30)** ,
-	 * value 7 means **pow(2, 70)** )
-	 *
-	 * @return array|Box Array with keys representing the abbreviations of units and the
-	 *                   values representing powers
-	 * @throws \Exception
-	 */
-	public static function unitCodeToPowerArray(): array|Box {
-		$class = PHP::redef(Box::class);
-		return new $class([
-			DataUnit::BYTE => 0,
-			DataUnit::KILOBYTE => 1,
-			DataUnit::MEGABYTE => 2,
-			DataUnit::GIGABYTE => 3,
-			DataUnit::TERABYTE => 4,
-			DataUnit::PETABYTE => 5,
-			DataUnit::EXABYTE => 6,
-			DataUnit::ZETTABYTE => 7,
-			DataUnit::YOTTABYTE => 8,
-		]);
-	}
 
 	/**
 	 * Shortcut for creation of DataUnit object

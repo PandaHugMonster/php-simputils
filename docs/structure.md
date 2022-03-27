@@ -4,14 +4,57 @@
 
 # Structure
 
+## Legend
+* Grey squares - Static classes
+* Blue squares - Model classes
+* Green squares - [Prism](glossary.md#term-prism) classes
+* Yellow square - different ungrouped classes
+* Violet lines with a single arrow - class inheritance, **arrow points to a parent**
+* Bright red lines with double arrows - means bidirectional co-operation, they might not
+  be related in matter of OOP relations
+* Sketched squares - not implemented yet, but most likely will be implemented
 
-![Structure Schema](images/Structure%20Scheme%20v1.png)
+![Structure Schema](images/Structure%20Scheme%20v2.png)
 
-**Legend**
- * Grey squares - Static classes
- * Blue squares - Model classes
- * Green squares - Prism classes
- * Yellow square - different ungrouped classes
+## Recommended usage structure
+
+![Structure Schema](images/Usage%20structure%20of%20classes%20groups%20v1.png)
+
+General suggestion is to use shortcut methods from "basic.php" first (like `fl()`, `bx()`, 
+`ts()`, `now()`, etc.) to use models' related functionality (like `File`, `Box`, `DateTime`, etc.)
+
+Those shortcuts should be really comfortable to use together with IDEs, but in case if it troubles
+you that IDE does not recognize properly those shortcuts for some reason - you could use 
+Static Classes of the correspondent functionality. Almost all the "basic" functions are using
+relevant methods from static classes. So you can use those static class methods directly. 
+This for sure will not mess with your IDEs auto-completion functionality, because those are
+normal classes.
+
+### Current basic functions and their static class equivalents
+
+ 1. `PHP` Static Class
+    * `bx()` - `PHP::box()`
+    * `env()` - `PHP::env()`
+    * `pd()` - `PHP::pd()`
+    * `pr()` - `PHP::pr()`
+    * `prstr()` - `PHP::prstr()`
+    * `stack()` - `PHP::stack()`
+ 2. `FS` Static Class (file-system)
+    * `dr()` - `FS::dir()`
+    * `fl()` - `FS::file()`
+    * `path()` - `FS::path()`
+ 3. `Data` Static Class
+    * `du()` - `Data::du()` "du" in this context stands for "Data Unit" and **not** "Disk Usage"
+ 4. `DT` Static Class (date-time) 
+    * `now()` - `DT::now()`
+    * `ts()` - `DT::ts()`
+ 5. `Str` Static Class
+    * `str()` - not implemented
+    * `uuid()` - not implemented
+
+### Relation between static classes and models
+
+![Structure Schema](images/Static%20classes%20relation%20with%20models.png)
  
 ## Overview
 Overall there are 6 logical groups of functionality, at least major ones.
@@ -27,7 +70,22 @@ Overall there are 6 logical groups of functionality, at least major ones.
 
 ### Static classes group
 
-More about static classes: [Static Classes](static-classes-group.md)
+**Static Classes** or **Helpers** both stands for the classes that are not supposed 
+to be instantiated. They might be used as "Single Static Instance" when they store some
+data inside of them, but their main functionality is to provide common methods.
+
+Static Classes are not redefinable as a part of the framework. 
+If for some reasons you would want to extend them - please create your own custom 
+classes and inherit from those. This should not limit you in any sense.
+
+Functionality in those classes is redistributed mostly in an intuitive way, so
+`Math` helper would refer to mathematical functionality, and `FS` helper refers to
+file-system functionality, and so on.
+
+The only special case is `PHP` helper. It has some functionality that suppose to fix
+flaws of PHP Engine, for example "serialization" and "deserialization" mechanics or
+`PHP::type()` method that comfortably identifies the variable type.
+
 
  1. [Boolean](#boolean) (code [\spaf\simputils\Boolean](https://github.com/PandaHugMonster/php-simputils/blob/main/src/Boolean.php))
  2. [Data](#data) (code [\spaf\simputils\Data](https://github.com/PandaHugMonster/php-simputils/blob/main/src/Data.php))
@@ -42,6 +100,22 @@ More about static classes: [Static Classes](static-classes-group.md)
 
 Static class `\spaf\simputils\Boolean` provides functions 
 to work with boolean values (and theirs' variations)
+
+For now it's not very developed, but it contains useful functionality (`Boolean::from()`) 
+to convert other types and particular strings into boolean type value.
+For example:
+
+```php
+use spaf\simputils\Boolean;
+
+$bool_val = Boolean::from('yes');
+// Would return TRUE value (of type boolean)
+
+$bool_val = Boolean::from('NO');
+// Would return FALSE value (of type boolean).
+// The letter-case is irrelevant
+```
+
 
 #### Data
 
@@ -88,6 +162,7 @@ to obtain info about the system/platform
 4. [BigNumber](#BigNumber) (code [\spaf\simputils\models\BigNumber](https://github.com/PandaHugMonster/php-simputils/blob/main/src/models/BigNumber.php))
 5. [L10n](#L10n) (code [\spaf\simputils\models\L10n](https://github.com/PandaHugMonster/php-simputils/blob/main/src/models/L10n.php))
 6. [SystemFingerprint](#SystemFingerprint) (code [\spaf\simputils\models\SystemFingerprint](https://github.com/PandaHugMonster/php-simputils/blob/main/src/models/SystemFingerprint.php))
+7. ? StrObj - not a finished idea
 
 #### Version
 

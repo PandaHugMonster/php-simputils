@@ -13,6 +13,7 @@ use function bcadd;
 use function bccomp;
 use function gmp_add;
 use function gmp_cmp;
+use function in_array;
 use function intval;
 use function preg_replace;
 
@@ -73,6 +74,7 @@ use function preg_replace;
  * @see https://github.com/php-decimal
  *
  * @property bool $mutable
+ * @property bool $fractions_supported Whether fractions (float) supported by this extension
  */
 class BigNumber extends SimpleObject {
 	use RedefinableComponentTrait;
@@ -86,6 +88,14 @@ class BigNumber extends SimpleObject {
 	protected $_is_mutable;
 	protected $_ext;
 	protected $_value;
+
+	#[Property('fractions_supported')]
+	protected function getFractionsSupported(): bool {
+		$supported = [
+			static::SUBSYSTEM_BCMATH,
+		];
+		return in_array($this->_ext, $supported);
+	}
 
 	/**
 	 * Create BigNumber object
@@ -108,7 +118,7 @@ class BigNumber extends SimpleObject {
 			throw new Exception('No math extension available');
 		}
 		if ($this->_ext === static::SUBSYSTEM_GMP) {
-			$val = intval($val);
+			$val = preg_replace('/[^0-9]/', '', $val);
 		}
 		$this->_value = $val;
 	}

@@ -358,4 +358,18 @@ class FS {
 		$class = PHP::redef(Dir::class);
 		return new $class($dir);
 	}
+
+	public static function path(?string ...$parts): ?string {
+		$res = '';
+		$sep = '/';
+		if ($parts) {
+			$i = 0;
+			foreach ($parts as $part) {
+				$res .= ($i++ == 0?'':$sep).$part;
+			}
+		}
+		return $res
+			?realpath($res)
+			:null;
+	}
 }

@@ -59,7 +59,7 @@ class ShortcutsTest extends TestCase {
 	/**
 	 *
 	 * @covers \spaf\simputils\basic\now
-	 * @covers \spaf\simputils\PHP::now
+	 * @covers \spaf\simputils\DT::now
 	 * @uses \spaf\simputils\DT
 	 *
 	 * @return void
@@ -75,7 +75,7 @@ class ShortcutsTest extends TestCase {
 	/**
 	 *
 	 * @covers \spaf\simputils\basic\ts
-	 * @covers \spaf\simputils\PHP::ts
+	 * @covers \spaf\simputils\DT::ts
 	 *
 	 * @uses \spaf\simputils\DT
 	 *

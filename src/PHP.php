@@ -9,7 +9,6 @@ namespace spaf\simputils;
 
 use ArrayAccess;
 use ArrayObject;
-use DateTimeZone;
 use Exception;
 use Generator;
 use Iterator;
@@ -17,7 +16,6 @@ use ReflectionClass;
 use spaf\simputils\attributes\markers\Shortcut;
 use spaf\simputils\generic\BasicInitConfig;
 use spaf\simputils\models\Box;
-use spaf\simputils\models\DateTime;
 use spaf\simputils\models\InitConfig;
 use spaf\simputils\models\PhpInfo;
 use spaf\simputils\models\StackFifo;
@@ -42,7 +40,6 @@ use function method_exists;
 use function ob_get_clean;
 use function ob_start;
 use function print_r;
-use function realpath;
 use function serialize;
 use function str_contains;
 use function unserialize;
@@ -72,12 +69,6 @@ class PHP {
 	const STACK_LIFO = 'lifo';
 	const STACK_FIFO = 'fifo';
 
-	private static $framework_location = null;
-
-	public static function frameworkDir() {
-		return static::$framework_location;
-	}
-
 	public static string $serialized_class_key_name = '#class';
 	public static string|int $serialization_mechanism = self::SERIALIZATION_TYPE_JSON;
 
@@ -97,6 +88,10 @@ class PHP {
 	 *                                      `env_set()`
 	 */
 	public static bool $refresh_php_info_env_vars = true;
+
+	public static function frameworkDir() {
+		return __DIR__;
+	}
 
 	/**
 	 * Framework/lib version
@@ -126,7 +121,6 @@ class PHP {
 	 *
 	 */
 	public static function init(null|array|Box|BasicInitConfig $args = null): BasicInitConfig {
-		static::$framework_location = __DIR__;
 
 		$config = null;
 		if ($args instanceof BasicInitConfig) {
@@ -684,43 +678,6 @@ class PHP {
 	}
 
 	/**
-	 * Just a shortcut for `DateTimeHelper::now`
-	 *
-	 * @param \DateTimeZone|null $tz TimeZone
-	 *
-	 * @return DateTime|null
-	 *
-	 * FIX  Must be from DT::, not PHP::
-	 *
-	 * @throws \Exception Parsing error
-	 */
-	public static function now(?DateTimeZone $tz = null): ?DateTime {
-		return DT::now($tz);
-	}
-
-	/**
-	 * Just a simplified shortcut for `DateTimeHelper::normalize`
-	 *
-	 * @param DateTime|string|int $dt  Any date-time representation (DateTime object, string, int)
-	 * @param \DateTimeZone|null  $tz  TimeZone
-	 * @param string|null         $fmt FROM Format, usually not needed, just if you are using
-	 *                                 a special date-time format to parse
-	 *
-	 * @return DateTime|null
-	 *
-	 * FIX  Must be from DT::, not PHP::
-	 *
-	 * @throws \Exception Parsing error
-	 */
-	public static function ts(
-		DateTime|string|int $dt,
-		null|DateTimeZone|string $tz = null,
-		string $fmt = null
-	): ?DateTime {
-		return DT::normalize($dt, $tz, $fmt);
-	}
-
-	/**
 	 * Just a "shortcut" to $_ENV
 	 *
 	 * You would think why it's done like this, but situation in PHP is so weird in matter of
@@ -804,20 +761,6 @@ class PHP {
 	#[Shortcut('PHP::isConsole()')]
 	public static function isCLI(): bool {
 		return static::isConsole();
-	}
-
-	public static function path(?string ...$parts): ?string {
-		$res = '';
-		$sep = '/';
-		if ($parts) {
-			$i = 0;
-			foreach ($parts as $part) {
-				$res .= ($i++ == 0?'':$sep).$part;
-			}
-		}
-		return $res
-			?realpath($res)
-			:null;
 	}
 
 	/**

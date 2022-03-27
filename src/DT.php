@@ -48,6 +48,28 @@ class DT implements DateTimeHelperInterface {
 	}
 
 	/**
+	 * Just a simplified shortcut for `DateTimeHelper::normalize`
+	 *
+	 * @param DateTime|string|int      $dt  Any date-time representation (DateTime object, string,
+	 *                                      int)
+	 * @param null|DateTimeZone|string $tz  TimeZone
+	 * @param string|null              $fmt FROM Format, usually not needed, just if you are using
+	 *                                      a special date-time format to parse
+	 *
+	 * @return DateTime|null
+	 *
+	 * @throws \Exception Parsing error
+	 */
+	#[Shortcut('DT::normalize()')]
+	public static function ts(
+		DateTime|string|int $dt,
+		null|DateTimeZone|string $tz = null,
+		string $fmt = null
+	): ?DateTime {
+		return DT::normalize($dt, $tz, $fmt);
+	}
+
+	/**
 	 * Normalization of date and time
 	 *
 	 * Will always return DateTime or null, You can provide any datetime type, like int or DateTime

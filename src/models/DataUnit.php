@@ -12,10 +12,12 @@ use spaf\simputils\PHP;
 use spaf\simputils\Str;
 use spaf\simputils\traits\ForOutputsTrait;
 use spaf\simputils\traits\RedefinableComponentTrait;
+use function json_encode;
 
 /**
  *
- * FIX  Add functionality for fractions
+ * @property-read bool $fractions_supported Whether fractions (float) supported
+ *                                          by the big number extension
  */
 class DataUnit extends SimpleObject {
 	use RedefinableComponentTrait;
@@ -85,6 +87,11 @@ class DataUnit extends SimpleObject {
 	#[DebugHide]
 	protected BigNumber $_value;
 	public string $user_format = self::USER_FORMAT_HR;
+
+	#[Property('fractions_supported')]
+	public function getFractionsSupported(): bool {
+		return $this->_value->fractions_supported;
+	}
 
 	public function __construct(string|int $value = 0) {
 		$this->_value = static::toBytes($value);
@@ -375,10 +382,14 @@ class DataUnit extends SimpleObject {
 	 */
 	public static function humanReadable(BigNumber|int|string $value): null|BigNumber|string {
 		$res = '';
-		$value = is_numeric($value)?"{$value}b":$value;
-
-		foreach (Data::unitCodeToPowerArray()->keys as $unit_code) {
-			$accu = static::unitTo($value, $unit_code);
+		$dctp = Data::unitCodeToPowerArray();
+		foreach ($dctp->keys as $unit_code) {
+			// NOTE Careful, do not optimize this without correct solution. Will cause issues.
+			$accu = static::unitTo(is_numeric($value) || $value instanceof BigNumber
+				?"{$value}b"
+				:$value,
+				$unit_code
+			);
 			if ($accu->cmp(1024) < 0) {
 				if (static::$long_format) {
 					return static::formattedStrLong($value, $accu, $unit_code);
@@ -388,7 +399,7 @@ class DataUnit extends SimpleObject {
 			}
 		}
 
-		return static::formattedStr($value, $unit_code);
+		return static::formattedStr($accu, $unit_code);
 	}
 
 	protected static function formattedStrLong($val, $accu, ?string $right_limit): string {
@@ -438,7 +449,7 @@ class DataUnit extends SimpleObject {
 	 *
 	 * @return false|mixed
 	 */
-	public static function translator(string $name, bool $reversed = false) {
+	protected static function translator(string $name, bool $reversed = false) {
 		$class_box = PHP::redef(Box::class);
 
 		$name = Str::upper($name);
@@ -453,6 +464,18 @@ class DataUnit extends SimpleObject {
 			}
 		}
 		return $name;
+	}
+
+	/**
+	 * Json formatted
+	 *
+	 * The result is numeric without the unit, though it's always in bytes.
+	 *
+	 * @inheritdoc
+	 * @return string Numeric value in bytes
+	 */
+	public function toJson(?bool $pretty = null, bool $with_class = false): string {
+		return json_encode($this->for_system);
 	}
 
 	public static function redefComponentName(): string {

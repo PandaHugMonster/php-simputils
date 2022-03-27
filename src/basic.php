@@ -8,6 +8,7 @@ namespace spaf\simputils\basic;
 use DateTimeZone;
 use spaf\simputils\attributes\markers\Shortcut;
 use spaf\simputils\Data;
+use spaf\simputils\DT;
 use spaf\simputils\FS;
 use spaf\simputils\models\Box;
 use spaf\simputils\models\DataUnit;
@@ -96,9 +97,9 @@ function stack(mixed ...$items_and_conf): StackFifo|StackLifo {
  *
  * @throws \Exception Parsing error
  */
-#[Shortcut('PHP::now()')]
+#[Shortcut('DT::now()')]
 function now(?DateTimeZone $tz = null): ?DateTime {
-	return PHP::now($tz);
+	return DT::now($tz);
 }
 
 /**
@@ -113,13 +114,13 @@ function now(?DateTimeZone $tz = null): ?DateTime {
  *
  * @throws \Exception Parsing error
  */
-#[Shortcut('PHP::ts()')]
+#[Shortcut('DT::ts()')]
 function ts(
 	DateTime|string|int $dt,
 	null|DateTimeZone|string $tz = null,
 	string $fmt = null
 ): ?DateTime {
-	return PHP::ts($dt, $tz, $fmt);
+	return DT::ts($dt, $tz, $fmt);
 }
 
 #[Shortcut('FS::file()')]
@@ -162,7 +163,7 @@ function prstr(...$args): ?string {
 
 #[Shortcut('PHP::path()')]
 function path(?string ...$args): ?string {
-	return PHP::path(...$args);
+	return FS::path(...$args);
 }
 
 /**

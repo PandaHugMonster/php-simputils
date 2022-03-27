@@ -11,16 +11,22 @@ use function spaf\simputils\basic\ts;
  *
  * @covers \spaf\simputils\DT
  * @covers \spaf\simputils\models\DateTime
+ * @covers \spaf\simputils\generic\fixups\FixUpDateTimeZone
+ * @covers \spaf\simputils\generic\fixups\FixUpDateTime
+ * @covers \spaf\simputils\generic\fixups\FixUpDateTimePrism
+ * @covers \spaf\simputils\models\Date
+ * @covers \spaf\simputils\models\Time
  *
  * @uses \spaf\simputils\interfaces\helpers\DateTimeHelperInterface
  * @uses \spaf\simputils\PHP
  * @uses \spaf\simputils\special\CodeBlocksCacheIndex
- * @uses \spaf\simputils\generic\fixups\FixUpDateTime::redefComponentName
  * @uses \spaf\simputils\attributes\Property
  * @uses \spaf\simputils\traits\SimpleObjectTrait
  * @uses \spaf\simputils\traits\SimpleObjectTrait::____prepareProperty
  * @uses \spaf\simputils\traits\SimpleObjectTrait::__get
  * @uses \spaf\simputils\traits\SimpleObjectTrait::getAllTheLastMethodsAndProperties
+ * @uses \spaf\simputils\Str
+ * @uses \spaf\simputils\generic\BasicPrism
  */
 class DateTimeTest extends TestCase {
 

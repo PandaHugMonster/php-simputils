@@ -1,5 +1,6 @@
 run.php
 
+clover.xml
 .env
 .idea
 vendor

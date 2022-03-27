@@ -39,3 +39,9 @@ jobs:
 
     - name: Run test suite
       run: composer run-script test
+
+    - name: Uploading artifacts
+    - uses: actions/upload-artifact@v3
+      with:
+        name: my-artifact-experiment
+        path: ${{ github.workspace }}

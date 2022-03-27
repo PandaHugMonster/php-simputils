@@ -10,8 +10,10 @@ use spaf\simputils\System;
 /**
  *
  * @covers \spaf\simputils\System
+ *
  * @uses spaf\simputils\attributes\Property
  * @uses spaf\simputils\special\CodeBlocksCacheIndex
+ * @uses \spaf\simputils\Str
  */
 class SystemHelperTest extends TestCase {
 

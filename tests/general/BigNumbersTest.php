@@ -7,7 +7,25 @@ use spaf\simputils\models\BigNumber;
 use function spaf\simputils\basic\env;
 
 /**
- * @covers \spaf\simputils\Data
+ * @covers \spaf\simputils\models\BigNumber
+ *
+ * @uses \spaf\simputils\Boolean::from
+ * @uses \spaf\simputils\PHP
+ * @uses \spaf\simputils\Str
+ * @uses \spaf\simputils\System
+ * @uses \spaf\simputils\attributes\Property
+ * @uses \spaf\simputils\attributes\PropertyBatch
+ * @uses \spaf\simputils\attributes\PropertyBatch
+ * @uses \spaf\simputils\basic\env
+ * @uses \spaf\simputils\components\versions\parsers\DefaultVersionParser
+ * @uses \spaf\simputils\models\Box
+ * @uses \spaf\simputils\models\PhpInfo
+ * @uses \spaf\simputils\models\Version
+ * @uses \spaf\simputils\special\CodeBlocksCacheIndex
+ * @uses \spaf\simputils\traits\SimpleObjectTrait::____prepareProperty
+ * @uses \spaf\simputils\traits\SimpleObjectTrait::____propertyBatchMethodGet
+ * @uses \spaf\simputils\traits\SimpleObjectTrait::__get
+ * @uses \spaf\simputils\traits\SimpleObjectTrait::getAllTheLastMethodsAndProperties
  */
 class BigNumbersTest extends TestCase {
 

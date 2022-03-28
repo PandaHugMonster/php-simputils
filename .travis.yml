@@ -11,12 +11,16 @@ before_script:
   - composer install --prefer-dist --no-interaction
 
 stages:
-  - name: testing
-  script:
-    - phpunit
+  - name: test
+  - name: codecov
 
-  - name: codecov upload
-  script:
-    - curl -Os https://uploader.codecov.io/latest/linux/codecov
-    - chmod +x codecov
-    - ./codecov
+jobs:
+  include:
+    - stage: test
+      script:
+        - phpunit
+    - stage: codecov
+      script:
+        - curl -Os https://uploader.codecov.io/latest/linux/codecov
+        - chmod +x codecov
+        - ./codecov

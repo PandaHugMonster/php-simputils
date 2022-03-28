@@ -25,10 +25,6 @@ use function is_string;
  */
 class DT implements DateTimeHelperInterface {
 
-	private static function _getClass() {
-		return PHP::redef(DateTime::class);
-	}
-
 	public static ?string $now_string = null;
 
 	/**
@@ -45,6 +41,28 @@ class DT implements DateTimeHelperInterface {
 	 */
 	public static function now(DateTimeZone|null $tz = null): ?DateTime {
 		return static::normalize(static::$now_string ?? 'now');
+	}
+
+	/**
+	 * Just a simplified shortcut for `DateTimeHelper::normalize`
+	 *
+	 * @param DateTime|string|int      $dt  Any date-time representation (DateTime object, string,
+	 *                                      int)
+	 * @param null|DateTimeZone|string $tz  TimeZone
+	 * @param string|null              $fmt FROM Format, usually not needed, just if you are using
+	 *                                      a special date-time format to parse
+	 *
+	 * @return DateTime|null
+	 *
+	 * @throws \Exception Parsing error
+	 */
+	#[Shortcut('DT::normalize()')]
+	public static function ts(
+		DateTime|string|int $dt,
+		null|DateTimeZone|string $tz = null,
+		string $fmt = null
+	): ?DateTime {
+		return DT::normalize($dt, $tz, $fmt);
 	}
 
 	/**
@@ -77,7 +95,7 @@ class DT implements DateTimeHelperInterface {
 		string $fmt = null,
 		bool $is_clone_allowed = true,
 	): ?DateTime {
-		$class = static::_getClass();
+		$class = PHP::redef(DateTime::class);
 		if (is_string($tz)) {
 			$tz_class = PHP::redef(DateTimeZone::class);
 			$tz = new $tz_class($tz);

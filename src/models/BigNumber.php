@@ -8,10 +8,12 @@ use spaf\simputils\attributes\Property;
 use spaf\simputils\generic\SimpleObject;
 use spaf\simputils\PHP;
 use spaf\simputils\Str;
+use spaf\simputils\traits\RedefinableComponentTrait;
 use function bcadd;
 use function bccomp;
 use function gmp_add;
 use function gmp_cmp;
+use function in_array;
 use function intval;
 use function preg_replace;
 
@@ -72,8 +74,10 @@ use function preg_replace;
  * @see https://github.com/php-decimal
  *
  * @property bool $mutable
+ * @property bool $fractions_supported Whether fractions (float) supported by this extension
  */
 class BigNumber extends SimpleObject {
+	use RedefinableComponentTrait;
 
 	const SUBSYSTEM_GMP = 'gmp';
 	const SUBSYSTEM_BCMATH = 'bcmath';
@@ -84,6 +88,14 @@ class BigNumber extends SimpleObject {
 	protected $_is_mutable;
 	protected $_ext;
 	protected $_value;
+
+	#[Property('fractions_supported')]
+	protected function getFractionsSupported(): bool {
+		$supported = [
+			static::SUBSYSTEM_BCMATH,
+		];
+		return in_array($this->_ext, $supported);
+	}
 
 	/**
 	 * Create BigNumber object
@@ -106,7 +118,7 @@ class BigNumber extends SimpleObject {
 			throw new Exception('No math extension available');
 		}
 		if ($this->_ext === static::SUBSYSTEM_GMP) {
-			$val = intval($val);
+			$val = preg_replace('/[^0-9]/', '', $val);
 		}
 		$this->_value = $val;
 	}
@@ -491,5 +503,9 @@ class BigNumber extends SimpleObject {
 
 	public function __toString(): string {
 		return "{$this->_value}";
+	}
+
+	public static function redefComponentName(): string {
+		return InitConfig::REDEF_BIG_NUMBER;
 	}
 }

@@ -4,6 +4,7 @@ namespace spaf\simputils\generic;
 
 use Exception;
 use spaf\simputils\attributes\Property;
+use spaf\simputils\FS;
 use spaf\simputils\interfaces\InitBlockInterface;
 use spaf\simputils\models\Box;
 use spaf\simputils\models\L10n;
@@ -30,11 +31,17 @@ abstract class BasicInitConfig extends SimpleObject {
 	const REDEF_DATA_UNIT = 'DataUnit';
 	const REDEF_FILE = 'File';
 	const REDEF_DIR = 'Dir';
+	const REDEF_STACK_FIFO = 'StackFifo';
+	const REDEF_STACK_LIFO = 'StackLifo';
+	const REDEF_GIT_REPO = 'GitRepo';
+	const REDEF_BIG_NUMBER = 'BigNumber';
 	const REDEF_PHP_INFO = 'PhpInfo';
 	const REDEF_VERSION = 'Version';
 	const REDEF_LOGGER = 'Logger';
 	const REDEF_L10N = 'L10n';
 	const REDEF_TEMPERATURE = 'Temperature';
+	const REDEF_SYSTEM_FINGERPRINT = 'SystemFingerprint';
+	const REDEF_STR_OBJ = 'StrObj';
 
 	public ?string $name = null;
 	public ?string $code_root = null;
@@ -64,7 +71,7 @@ abstract class BasicInitConfig extends SimpleObject {
 
 			$class = PHP::redef(L10n::class);
 			$l10n_name = Str::upper($val);
-			$path = PHP::path(PHP::frameworkDir(), 'data', 'l10n', "{$l10n_name}.json");
+			$path = FS::path(PHP::frameworkDir(), 'data', 'l10n', "{$l10n_name}.json");
 			$val = $class::createFrom($path);
 		}
 
@@ -80,7 +87,8 @@ abstract class BasicInitConfig extends SimpleObject {
 	 */
 	#[Property('successful_init_blocks')]
 	protected function getSuccessfulInitBlocks(): Box|array {
-		return new Box($this->_successful_init_blocks);
+		$class_box = PHP::redef(Box::class);
+		return new $class_box($this->_successful_init_blocks);
 	}
 
 	/**

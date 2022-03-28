@@ -3,11 +3,13 @@
 namespace spaf\simputils;
 
 use spaf\simputils\attributes\markers\Shortcut;
+use spaf\simputils\models\StrObj;
 use function is_integer;
 use function is_null;
 use function is_string;
 use function mb_strlen;
 use function str_ends_with;
+use function str_starts_with;
 use function substr;
 
 /**
@@ -15,6 +17,7 @@ use function substr;
  * Due to some significantly outdated limitations of PHP, it's too overcomplicated to have a native
  * String class. So this class will remain static as `Math` and `PHP`
  *
+ * FIX  Implement StrObj wrapper for the string, so the operations could be done in chain
  */
 class Str {
 
@@ -117,24 +120,24 @@ class Str {
 	/**
 	 * Change all the letters to upper-case letters
 	 *
-	 * @param string $string Target string
+	 * @param ?string $string $string Target string
 	 *
 	 * @return string
 	 */
 	#[Shortcut('\strtoupper()')]
-	public static function upper(null|string $string): string {
+	public static function upper(?string $string): string {
 		return is_null($string)?'':mb_strtoupper($string);
 	}
 
 	/**
 	 * Change all the letters to lower-case letters
 	 *
-	 * @param string $string Target string
+	 * @param ?string $string Target string
 	 *
 	 * @return string
 	 */
 	#[Shortcut('\strtolower()')]
-	public static function lower(null|string $string): string {
+	public static function lower(?string $string): string {
 		return is_null($string)?'':mb_strtolower($string);
 	}
 
@@ -161,6 +164,19 @@ class Str {
 			$expected_ending = static::upper($expected_ending);
 		}
 		return str_ends_with($str, $expected_ending);
+	}
+
+	#[Shortcut('\str_starts_with()')]
+	public static function startsWith(
+		string $str,
+		string $expected_starting,
+		bool   $is_case_sensitive = true
+	): bool {
+		if (!$is_case_sensitive) {
+			$str = static::upper($str);
+			$expected_starting = static::upper($expected_starting);
+		}
+		return str_starts_with($str, $expected_starting);
 	}
 
 	/**
@@ -193,5 +209,10 @@ class Str {
 		}
 
 		return $target;
+	}
+
+	public static function obj(string ...$strings): StrObj|string {
+		$class_strobj = PHP::redef(StrObj::class);
+		return new $class_strobj(...$strings);
 	}
 }

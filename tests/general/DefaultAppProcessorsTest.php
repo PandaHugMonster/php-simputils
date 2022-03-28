@@ -44,6 +44,7 @@ use function spaf\simputils\basic\fl;
  * @uses \spaf\simputils\traits\SimpleObjectTrait::____prepareProperty
  * @uses \spaf\simputils\basic\fl
  * @uses \spaf\simputils\traits\SimpleObjectTrait::getAllTheLastMethodsAndProperties
+ * @uses \spaf\simputils\Str
  */
 class DefaultAppProcessorsTest extends TestCase {
 

@@ -9,6 +9,7 @@ use spaf\simputils\PHP;
 /**
  * @covers \spaf\simputils\generic\SimpleObject
  * @covers \spaf\simputils\traits\SimpleObjectTrait
+ *
  * @uses \spaf\simputils\traits\PropertiesTrait
  * @uses \spaf\simputils\attributes\Property
  * @uses \spaf\simputils\PHP

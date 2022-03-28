@@ -40,6 +40,7 @@ class MyDT2 {
  * @covers \spaf\simputils\basic\bx
  * @covers \spaf\simputils\models\PhpInfo
  * @covers \spaf\simputils\generic\BasicInitConfig
+ *
  * @uses \spaf\simputils\models\Version
  * @uses \spaf\simputils\traits\SimpleObjectTrait
  * @uses \spaf\simputils\traits\MetaMagic
@@ -55,6 +56,7 @@ class MyDT2 {
  * @uses \spaf\simputils\models\files\apps\DotEnvProcessor
  * @uses \spaf\simputils\models\files\apps\TextProcessor
  * @uses \spaf\simputils\models\files\apps\settings\DotEnvSettings
+ * @uses \spaf\simputils\Str
  */
 class PHPClassTest extends TestCase {
 

@@ -30,6 +30,10 @@ use function spaf\simputils\basic\ts;
  * @uses \spaf\simputils\PHP::isClass
  * @uses \spaf\simputils\PHP::redef
  * @uses \spaf\simputils\generic\fixups\FixUpDateTime
+ * @uses \spaf\simputils\generic\BasicPrism
+ * @uses \spaf\simputils\generic\fixups\FixUpDateTimePrism
+ * @uses \spaf\simputils\models\Date
+ * @uses \spaf\simputils\models\Time
  */
 class ShortcutsTest extends TestCase {
 
@@ -59,7 +63,7 @@ class ShortcutsTest extends TestCase {
 	/**
 	 *
 	 * @covers \spaf\simputils\basic\now
-	 * @covers \spaf\simputils\PHP::now
+	 * @covers \spaf\simputils\DT::now
 	 * @uses \spaf\simputils\DT
 	 *
 	 * @return void
@@ -75,7 +79,7 @@ class ShortcutsTest extends TestCase {
 	/**
 	 *
 	 * @covers \spaf\simputils\basic\ts
-	 * @covers \spaf\simputils\PHP::ts
+	 * @covers \spaf\simputils\DT::ts
 	 *
 	 * @uses \spaf\simputils\DT
 	 *

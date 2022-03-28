@@ -8,13 +8,19 @@ use spaf\simputils\PHP;
 use function spaf\simputils\basic\bx;
 
 /**
- *
  * @covers \spaf\simputils\models\Box
- * @uses \spaf\simputils\traits\PropertiesTrait
- * @uses \spaf\simputils\PHP::box
+ * @covers \spaf\simputils\PHP::box
+ * @covers \spaf\simputils\basic\bx
+ *
+ * @uses \spaf\simputils\PHP::isClass
+ * @uses \spaf\simputils\PHP::redef
+ * @uses \spaf\simputils\PHP::type
+ * @uses \spaf\simputils\Str::is
  * @uses \spaf\simputils\attributes\Property
- * @uses \spaf\simputils\basic\bx
  * @uses \spaf\simputils\special\CodeBlocksCacheIndex
+ * @uses \spaf\simputils\traits\SimpleObjectTrait::____prepareProperty
+ * @uses \spaf\simputils\traits\SimpleObjectTrait::__get
+ * @uses \spaf\simputils\traits\SimpleObjectTrait::getAllTheLastMethodsAndProperties
  */
 class BoxTest extends TestCase {
 
@@ -22,8 +28,6 @@ class BoxTest extends TestCase {
 	 *
 	 * @return void
 	 * @throws \Exception
-	 *@uses \spaf\simputils\models\Version
-	 * @uses \spaf\simputils\components\versions\parsers\DefaultVersionParser
 	 *
 	 * @runInSeparateProcess
 	 */
@@ -61,9 +65,8 @@ class BoxTest extends TestCase {
 	}
 
 	/**
-	 * @covers \spaf\simputils\models\Box::getFlipped
-	 * @uses \spaf\simputils\PHP::type
 	 * @return void
+	 * @throws \Exception
 	 */
 	function testAdditionalStuff() {
 		$data = bx([

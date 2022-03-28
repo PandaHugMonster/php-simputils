@@ -25,4 +25,8 @@ class StackFifo extends StackLifo {
 		}
 		return $res->values;
 	}
+
+	public static function redefComponentName(): string {
+		return InitConfig::REDEF_STACK_FIFO;
+	}
 }

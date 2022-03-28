@@ -18,6 +18,10 @@ use spaf\simputils\FS;
  * @uses \spaf\simputils\traits\SimpleObjectTrait::__isset
  * @uses \spaf\simputils\generic\BasicResourceApp
  * @uses \spaf\simputils\models\files\apps\CsvProcessor
+ * @uses \spaf\simputils\Str
+ * @uses \spaf\simputils\attributes\Property
+ * @uses \spaf\simputils\traits\SimpleObjectTrait::____prepareProperty
+ * @uses \spaf\simputils\traits\SimpleObjectTrait::getAllTheLastMethodsAndProperties
  */
 class FSTest extends TestCase {
 

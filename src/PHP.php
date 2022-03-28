@@ -1,4 +1,6 @@
-<?php /** @noinspection PhpDocMissingThrowsInspection */
+<?php
+/** @noinspection PhpDocSignatureInspection */
+/** @noinspection PhpDocMissingThrowsInspection */
 /** @noinspection PhpInconsistentReturnPointsInspection */
 /** @noinspection PhpNeverTypedFunctionReturnViolationInspection */
 
@@ -7,7 +9,6 @@ namespace spaf\simputils;
 
 use ArrayAccess;
 use ArrayObject;
-use DateTimeZone;
 use Exception;
 use Generator;
 use Iterator;
@@ -15,7 +16,6 @@ use ReflectionClass;
 use spaf\simputils\attributes\markers\Shortcut;
 use spaf\simputils\generic\BasicInitConfig;
 use spaf\simputils\models\Box;
-use spaf\simputils\models\DateTime;
 use spaf\simputils\models\InitConfig;
 use spaf\simputils\models\PhpInfo;
 use spaf\simputils\models\StackFifo;
@@ -40,7 +40,6 @@ use function method_exists;
 use function ob_get_clean;
 use function ob_start;
 use function print_r;
-use function realpath;
 use function serialize;
 use function str_contains;
 use function unserialize;
@@ -59,8 +58,6 @@ use const JSON_ERROR_NONE;
  * should not compromise your performance. THOUGH keep in mind, Box is not as efficient as arrays.
  * Especially if you will be implementing your own Box class and overriding some of it's methods.
  *
- * TODO Checkout and make sure all works efficiently enough etc.
- *
  * @see Box
  * @package spaf\simputils
  */
@@ -69,11 +66,8 @@ class PHP {
 	const SERIALIZATION_TYPE_JSON = 0;
 	const SERIALIZATION_TYPE_PHP = 1;
 
-	private static $framework_location = null;
-
-	public static function frameworkDir() {
-		return static::$framework_location;
-	}
+	const STACK_LIFO = 'lifo';
+	const STACK_FIFO = 'fifo';
 
 	public static string $serialized_class_key_name = '#class';
 	public static string|int $serialization_mechanism = self::SERIALIZATION_TYPE_JSON;
@@ -95,6 +89,10 @@ class PHP {
 	 */
 	public static bool $refresh_php_info_env_vars = true;
 
+	public static function frameworkDir() {
+		return __DIR__;
+	}
+
 	/**
 	 * Framework/lib version
 	 *
@@ -103,7 +101,7 @@ class PHP {
 	 */
 	public static function simpUtilsVersion(): Version|string {
 		$class = static::redef(Version::class);
-		return new $class('0.3.3', 'SimpUtils');
+		return new $class('0.3.4', 'SimpUtils');
 	}
 
 	/**
@@ -123,7 +121,6 @@ class PHP {
 	 *
 	 */
 	public static function init(null|array|Box|BasicInitConfig $args = null): BasicInitConfig {
-		static::$framework_location = __DIR__;
 
 		$config = null;
 		if ($args instanceof BasicInitConfig) {
@@ -166,7 +163,7 @@ class PHP {
 	 *
 	 * @return ?string
 	 *
-	 * TODO Unrelated: Implement recursive toJson control to objects (So object can decide,
+	 * FIX  Implement recursive toJson control to objects (So object can decide,
 	 *      whether it wants to be a string, an array or a number).
 	 *
 	 * @throws \Exception Runtime resources can't be serialized
@@ -655,9 +652,6 @@ class PHP {
 		return $res;
 	}
 
-	const STACK_LIFO = 'lifo';
-	const STACK_FIFO = 'fifo';
-
 	/**
 	 * Create a stack object
 	 *
@@ -667,55 +661,20 @@ class PHP {
 	 *                                  "fifo" or "lifo", by default is "lifo".
 	 *
 	 * @return \spaf\simputils\models\StackFifo|\spaf\simputils\models\StackLifo
-	 * @noinspection PhpDocSignatureInspection
 	 */
 	public static function stack(mixed ...$items_and_conf): StackFifo|StackLifo {
+		$class_stack_lifo = static::redef(StackLifo::class);
+		$class_stack_fifo = static::redef(StackFifo::class);
+
 		$items_and_conf = static::box($items_and_conf);
 		$type = $items_and_conf->get('type', static::STACK_LIFO);
 		if ($items_and_conf->containsKey('type')) {
 			$items_and_conf = $items_and_conf->unsetByKey('type')->values;
 		}
 		$obj = $type === static::STACK_LIFO
-			?new StackLifo($items_and_conf)
-			:new StackFifo($items_and_conf);
+			?new $class_stack_lifo($items_and_conf)
+			:new $class_stack_fifo($items_and_conf);
 		return $obj;
-	}
-
-	/**
-	 * Just a shortcut for `DateTimeHelper::now`
-	 *
-	 * @param \DateTimeZone|null $tz TimeZone
-	 *
-	 * @return DateTime|null
-	 *
-	 * FIX  Must be from DT::, not PHP::
-	 *
-	 * @throws \Exception Parsing error
-	 */
-	public static function now(?DateTimeZone $tz = null): ?DateTime {
-		return DT::now($tz);
-	}
-
-	/**
-	 * Just a simplified shortcut for `DateTimeHelper::normalize`
-	 *
-	 * @param DateTime|string|int $dt  Any date-time representation (DateTime object, string, int)
-	 * @param \DateTimeZone|null  $tz  TimeZone
-	 * @param string|null         $fmt FROM Format, usually not needed, just if you are using
-	 *                                 a special date-time format to parse
-	 *
-	 * @return DateTime|null
-	 *
-	 * FIX  Must be from DT::, not PHP::
-	 *
-	 * @throws \Exception Parsing error
-	 */
-	public static function ts(
-		DateTime|string|int $dt,
-		null|DateTimeZone|string $tz = null,
-		string $fmt = null
-	): ?DateTime {
-		return DT::normalize($dt, $tz, $fmt);
 	}
 
 	/**
@@ -730,7 +689,8 @@ class PHP {
 	 */
 	#[Shortcut('\$_ENV')]
 	public static function allEnvs(): array|Box {
-		return new Box($_ENV ?? CommonMemoryCacheIndex::$initial_get_env_state ?? []);
+		$class_box = static::redef(Box::class);
+		return new $class_box($_ENV ?? CommonMemoryCacheIndex::$initial_get_env_state ?? []);
 	}
 
 	/**
@@ -801,24 +761,6 @@ class PHP {
 	#[Shortcut('PHP::isConsole()')]
 	public static function isCLI(): bool {
 		return static::isConsole();
-	}
-
-	public static function path(?string ...$parts): ?string {
-		$res = '';
-		$sep = '/';
-		if ($parts) {
-			$i = 0;
-			foreach ($parts as $part) {
-				$res .= ($i++ == 0?'':$sep).$part;
-			}
-		}
-		return $res
-			?realpath($res)
-			:null;
-	}
-
-	public static function extractFields() {
-
 	}
 
 	/**

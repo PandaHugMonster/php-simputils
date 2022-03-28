@@ -10,15 +10,13 @@ cache:
 before_script:
   - composer install --prefer-dist --no-interaction
 
-jobs:
-  include:
-    - stage: testing
-    script:
-      - phpunit
+stages:
+  - name: testing
+  script:
+    - phpunit
 
-    - stage: codecov upload
-    if: branch = master
-    script:
-      - curl -Os https://uploader.codecov.io/latest/linux/codecov
-      - chmod +x codecov
-      - ./codecov
+  - name: codecov upload
+  script:
+    - curl -Os https://uploader.codecov.io/latest/linux/codecov
+    - chmod +x codecov
+    - ./codecov

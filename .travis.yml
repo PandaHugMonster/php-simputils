@@ -12,7 +12,7 @@ stages:
   - name: test
     if: type = pull_request
   - name: codecov
-    if: head_branch = main
+    if: branch = master and type = push
 
 jobs:
   include:

@@ -1,7 +1,4 @@
 language: php
-php:
-  - '8.0'
-  - '8.1'
 
 cache:
   directories:
@@ -10,8 +7,21 @@ cache:
 before_script:
   - composer install --prefer-dist --no-interaction
 
-script:
-  - phpunit
-  - curl -Os https://uploader.codecov.io/latest/linux/codecov
-  - chmod +x codecov
-  - ./codecov
+stages:
+  - name: test
+  - name: codecov
+    if: branch = master
+
+jobs:
+  include:
+    - stage: test
+      php:
+        - '8.0'
+        - '8.1'
+      script:
+        - phpunit
+    - stage: codecov
+      script:
+        - curl -Os https://uploader.codecov.io/latest/linux/codecov
+        - chmod +x codecov
+        - ./codecov

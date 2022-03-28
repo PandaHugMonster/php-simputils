@@ -16,7 +16,6 @@
 			<property name="absoluteLineLimit" value="100" />
 		</properties>
 	</rule>
-
 	<rule ref="Generic.Formatting.SpaceAfterCast">
 		<properties>
 			<property name="spacing" value="1" />

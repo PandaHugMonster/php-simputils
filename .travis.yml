@@ -8,14 +8,18 @@ cache:
 before_script:
   - composer install --prefer-dist --no-interaction
 
+stages:
+  - name: test
+    if: type = pull_request
+  - name: codecov
+    if: branch = main
+
 jobs:
   include:
-    - name: "Testing"
-      if: type = pull_request
+    - stage: test
       script:
         - phpunit
-    - name: "Uploading to Codecov"
-      if: branch = main
+    - stage: codecov
       script:
         - curl -Os https://uploader.codecov.io/latest/linux/codecov
         - chmod +x codecov

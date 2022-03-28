@@ -10,7 +10,7 @@ before_script:
 
 stages:
   - name: test
-    if: type = pull_request
+    if: type = pull_request or (branch = main and type = push)
   - name: codecov
     if: branch = main and type = push
 

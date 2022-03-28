@@ -10,16 +10,16 @@ before_script:
 
 stages:
   - name: test
-    if: type = pull_request
   - name: codecov
-    if: branch = main
 
 jobs:
   include:
     - stage: test
+      if: type = pull_request
       script:
         - phpunit
     - stage: codecov
+      if: branch = main
       script:
         - curl -Os https://uploader.codecov.io/latest/linux/codecov
         - chmod +x codecov

@@ -12,13 +12,13 @@ before_script:
 
 jobs:
   include:
-      - stage: testing
-      script:
-        - phpunit
+    - stage: testing
+    script:
+      - phpunit
 
-      - stage: codecov upload
-      if: branch = master
-      script:
-        - curl -Os https://uploader.codecov.io/latest/linux/codecov
-        - chmod +x codecov
-        - ./codecov
+    - stage: codecov upload
+    if: branch = master
+    script:
+      - curl -Os https://uploader.codecov.io/latest/linux/codecov
+      - chmod +x codecov
+      - ./codecov

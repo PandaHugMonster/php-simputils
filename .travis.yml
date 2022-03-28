@@ -9,8 +9,9 @@ before_script:
 
 stages:
   - name: test
+    if: type = pull_request
   - name: codecov
-    if: branch = master
+    if: branch = main
 
 jobs:
   include:

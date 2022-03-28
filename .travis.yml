@@ -20,6 +20,7 @@ jobs:
   include:
     - stage: test
       php:
+        - '8.0'
         - '8.1'
       script:
         - phpunit

@@ -1,7 +1,4 @@
 language: php
-php:
-  - '8.0'
-  - '8.1'
 
 cache:
   directories:
@@ -13,10 +10,14 @@ before_script:
 stages:
   - name: test
   - name: codecov
+    if: branch = master
 
 jobs:
   include:
     - stage: test
+      php:
+        - '8.0'
+        - '8.1'
       script:
         - phpunit
     - stage: codecov

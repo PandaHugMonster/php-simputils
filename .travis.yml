@@ -1,7 +1,5 @@
 language: php
-php:
-  - '8.0'
-  - '8.1'
+php: '8.0'
 
 cache:
   directories:
@@ -13,14 +11,10 @@ before_script:
 jobs:
   include:
     - name: "Testing"
-      php:
-        - '8.0'
-        - '8.1'
       if: type = pull_request
       script:
         - phpunit
     - name: "Uploading to Codecov"
-      php: '8.0'
       if: branch = main
       script:
         - curl -Os https://uploader.codecov.io/latest/linux/codecov

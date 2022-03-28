@@ -2,7 +2,6 @@ language: php
 
 php:
   - '8.0'
-  - '8.1'
 
 cache:
   directories:
@@ -21,7 +20,6 @@ jobs:
   include:
     - stage: test
       php:
-        - '8.0'
         - '8.1'
       script:
         - phpunit

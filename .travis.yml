@@ -7,10 +7,6 @@ cache:
   directories:
     - $HOME/.composer/cache
 
-env:
-  - XDEBUG_MODE=coverage
-  - CODECOV_TOKEN='392b929c-1acc-4796-a1a5-10a393703825'
-
 before_script:
   - composer install --prefer-dist --no-interaction
 

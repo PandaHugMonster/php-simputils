@@ -32,13 +32,15 @@ class CustomParserSample extends DefaultVersionParser {
  * @covers \spaf\simputils\components\versions\parsers\DefaultVersionParser
  * @covers \spaf\simputils\exceptions\IncorrectVersionFormat
  * @covers \spaf\simputils\generic\BasicVersionParser
+ *
  * @uses \spaf\simputils\PHP
  * @uses \spaf\simputils\traits\MetaMagic
  * @uses \spaf\simputils\interfaces\VersionParserInterface
  * @uses \spaf\simputils\traits\PropertiesTrait
  * @uses \spaf\simputils\special\CodeBlocksCacheIndex
  * @uses \spaf\simputils\Str::from
- * @uses spaf\simputils\attributes\Property
+ * @uses \spaf\simputils\attributes\Property
+ * @uses \spaf\simputils\Str
  */
 class VersionTest extends TestCase {
 

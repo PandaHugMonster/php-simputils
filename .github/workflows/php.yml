@@ -4,7 +4,8 @@ on:
   push:
     branches: [ main ]
   pull_request:
-    branches: [ main ]
+    types:
+      - opened
 
 jobs:
   build:
@@ -32,10 +33,22 @@ jobs:
           ${{ runner.os }}-php-
 
     - name: Install dependencies
-      run: composer install --prefer-dist --no-progress
+      run: composer install --prefer-dist --no-interaction
 
     # Add a test script to composer.json, for instance: "test": "vendor/bin/phpunit"
     # Docs: https://getcomposer.org/doc/articles/scripts.md
 
     - name: Run test suite
       run: composer run-script test
+
+#    - name: Uploading artifacts
+#    - uses: actions/upload-artifact@v3
+#      with:
+#        name: my-artifact-experiment
+#        path: ${{ github.workspace }}
+
+#    - name: Send to codecov
+#      run: |
+#          curl -Os https://uploader.codecov.io/latest/linux/codecov
+#          chmod +x codecov
+#          ./codecov

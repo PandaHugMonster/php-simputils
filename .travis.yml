@@ -1,7 +1,5 @@
 language: php
-php:
-  - '8.0'
-  - '8.1'
+php: '8.0'
 
 cache:
   directories:
@@ -19,10 +17,12 @@ stages:
 jobs:
   include:
     - stage: test
+      php:
+        - '8.0'
+        - '8.1'
       script:
         - phpunit
     - stage: codecov
-      php: '8.0'
       script:
         - curl -Os https://uploader.codecov.io/latest/linux/codecov
         - chmod +x codecov

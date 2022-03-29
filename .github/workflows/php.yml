@@ -39,7 +39,7 @@ jobs:
     # Docs: https://getcomposer.org/doc/articles/scripts.md
 
     - name: Run test suite
-      run: composer run-script test
+      run: composer run-script tests
 
 #    - name: Uploading artifacts
 #    - uses: actions/upload-artifact@v3

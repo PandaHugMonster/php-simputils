@@ -193,6 +193,7 @@ class Dir extends Box {
 		$this->_name = basename($rp);
 	}
 
+	#[\ReturnTypeWillChange]
 	public function getIterator() {
 		return new ArrayIterator($this->walk(false));
 	}

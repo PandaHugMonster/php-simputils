@@ -368,8 +368,6 @@ class FS {
 				$res .= ($i++ == 0?'':$sep).$part;
 			}
 		}
-		return $res
-			?realpath($res)
-			:null;
+		return $res ?? null;
 	}
 }

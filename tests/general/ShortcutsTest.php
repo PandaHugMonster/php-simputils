@@ -1,18 +1,27 @@
-<?php
+<?php /** @noinspection ALL */
 
 namespace general;
 
 use PHPUnit\Framework\TestCase;
 use spaf\simputils\models\Box;
 use spaf\simputils\models\DateTime;
+use spaf\simputils\models\Dir;
 use spaf\simputils\models\File;
+use spaf\simputils\models\StackFifo;
+use spaf\simputils\models\StackLifo;
 use spaf\simputils\PHP;
 use spaf\simputils\Str;
+use function implode;
 use function spaf\simputils\basic\bx;
+use function spaf\simputils\basic\dr;
 use function spaf\simputils\basic\env;
 use function spaf\simputils\basic\fl;
 use function spaf\simputils\basic\now;
+use function spaf\simputils\basic\path;
 use function spaf\simputils\basic\pd;
+use function spaf\simputils\basic\pr;
+use function spaf\simputils\basic\prstr;
+use function spaf\simputils\basic\stack;
 use function spaf\simputils\basic\ts;
 
 /**
@@ -39,7 +48,9 @@ class ShortcutsTest extends TestCase {
 
 	/**
 	 * @covers \spaf\simputils\basic\bx
-	 * @covers \spaf\simputils\PHP::box
+	 *
+	 * @uses   \spaf\simputils\PHP::box
+	 *
 	 * @return void
 	 */
 	function testBox() {
@@ -63,7 +74,6 @@ class ShortcutsTest extends TestCase {
 	/**
 	 *
 	 * @covers \spaf\simputils\basic\now
-	 * @covers \spaf\simputils\DT::now
 	 * @uses \spaf\simputils\DT
 	 *
 	 * @return void
@@ -79,7 +89,6 @@ class ShortcutsTest extends TestCase {
 	/**
 	 *
 	 * @covers \spaf\simputils\basic\ts
-	 * @covers \spaf\simputils\DT::ts
 	 *
 	 * @uses \spaf\simputils\DT
 	 *
@@ -101,7 +110,7 @@ class ShortcutsTest extends TestCase {
 	/**
 	 *
 	 * @covers \spaf\simputils\basic\fl
-	 * @covers \spaf\simputils\FS::file
+	 * @uses \spaf\simputils\FS::file
 	 * @return void
 	 */
 	function testFl() {
@@ -121,8 +130,8 @@ class ShortcutsTest extends TestCase {
 
 	/**
 	 * @covers \spaf\simputils\basic\env
-	 * @covers \spaf\simputils\PHP::env
-	 * @covers \spaf\simputils\PHP::allEnvs
+	 * @uses \spaf\simputils\PHP::env
+	 * @uses \spaf\simputils\PHP::allEnvs
 	 * @return void
 	 */
 	function testEnv() {
@@ -135,8 +144,8 @@ class ShortcutsTest extends TestCase {
 
 	/**
 	 * @covers \spaf\simputils\basic\pd
-	 * @covers \spaf\simputils\PHP::pd
-	 * @covers \spaf\simputils\PHP::pr
+	 * @uses \spaf\simputils\PHP::pd
+	 * @uses \spaf\simputils\PHP::pr
 	 * @return void
 	 */
 	function testPd() {
@@ -147,5 +156,90 @@ class ShortcutsTest extends TestCase {
 		pd($str);
 		$this->expectOutputString("$str\n$str\n");
 		PHP::$allow_dying = true;
+	}
+
+	/**
+	 * @covers \spaf\simputils\basic\stack
+	 *
+	 * @uses \spaf\simputils\PHP
+	 * @uses \spaf\simputils\models\StackFifo
+	 * @uses \spaf\simputils\models\StackLifo
+	 *
+	 * @return void
+	 */
+	function testStacks() {
+
+		$stack = stack(1, 2, 3, 4);
+		$this->assertInstanceOf(StackLifo::class, $stack);
+
+		$stack = stack(1, 2, 3, 4, type: PHP::STACK_FIFO);
+		$this->assertInstanceOf(StackFifo::class, $stack);
+
+	}
+
+	/**
+	 * @covers \spaf\simputils\basic\dr
+	 *
+	 * @uses \spaf\simputils\PHP
+	 * @uses \spaf\simputils\FS
+	 * @uses \spaf\simputils\models\Dir
+	 *
+	 * @return void
+	 */
+	function testDr() {
+
+		$dir = dr('/tmp');
+		$this->assertInstanceOf(Dir::class, $dir);
+
+	}
+
+	/**
+	 * @covers \spaf\simputils\basic\pr
+	 *
+	 * @uses \spaf\simputils\PHP
+	 *
+	 * @return void
+	 */
+	function testPr() {
+
+		$test_str = 'Stand With Ukraine!';
+		$this->expectOutputString("{$test_str}\n");
+
+		pr($test_str);
+
+	}
+
+	/**
+	 * @covers \spaf\simputils\basic\prstr
+	 *
+	 * @uses \spaf\simputils\PHP
+	 *
+	 * @return void
+	 */
+	function testPrStr() {
+
+		$test_str = 'My life was fine, until the war has come! :( ';
+
+		$res = prstr($test_str);
+
+		$this->assertIsString($res);
+		$this->assertNotEmpty($res);
+		$this->assertEquals("{$test_str}\n", $res);
+
+	}
+
+	/**
+	 * @covers \spaf\simputils\basic\path
+	 *
+	 * @uses \spaf\simputils\FS
+	 *
+	 * @return void
+	 */
+	function testPath() {
+		$lines = ['path1', 'path2', 'path3'];
+		$expected = implode('/', $lines);
+
+		$res = path(...$lines);
+		$this->assertEquals($expected, $res);
 	}
 }

@@ -188,6 +188,13 @@ function du(null|int|string|DataUnit $value = null, ?string $format = null): Dat
 	return Data::du($value, $format);
 }
 
+/**
+ * @param string ...$strings
+ * @codeCoverageIgnore
+ *
+ * @return \spaf\simputils\models\StrObj|string
+ */
+#[Shortcut('Str::obj()')]
 function str(string ...$strings): StrObj|string {
 	return Str::obj(...$strings);
 }

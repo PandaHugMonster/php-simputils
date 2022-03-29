@@ -34,8 +34,8 @@
     "files": ["src/basic.php"]
   },
   "scripts": {
-    "test": [
-      "phpunit tests"
+    "tests": [
+      "phpunit tests --coverage-clover clover.xml"
     ]
   }
 }

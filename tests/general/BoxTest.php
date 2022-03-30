@@ -9,7 +9,6 @@ use function spaf\simputils\basic\bx;
 
 /**
  * @covers \spaf\simputils\models\Box
- * @covers \spaf\simputils\PHP::box
  * @covers \spaf\simputils\basic\bx
  *
  * @uses \spaf\simputils\PHP::isClass
@@ -65,6 +64,7 @@ class BoxTest extends TestCase {
 	}
 
 	/**
+	 * @uses \spaf\simputils\PHP::box
 	 * @return void
 	 * @throws \Exception
 	 */
@@ -95,6 +95,5 @@ class BoxTest extends TestCase {
 
 		$this->assertEquals(1, $data->size);
 		$this->assertEquals(bx(['key2' => 'val2']), $data);
-
 	}
 }

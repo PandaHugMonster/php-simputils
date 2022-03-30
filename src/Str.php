@@ -195,22 +195,35 @@ class Str {
 	 * FIX  Implement urgently removeStarting in the same way
 	 * @return string
 	 */
-	public static function removeEnding(string $target, string|int $ending): string {
+	public static function removeEnding(
+		string $target,
+		string|int $ending,
+		bool   $is_case_sensitive = true
+	): string {
 		if (is_integer($ending)) {
 			if ($ending < 1) {
 				return $target;
 			}
 			return substr($target, 0, -$ending);
+		} else if (!$is_case_sensitive) {
+			$ending = Str::upper($ending);
 		}
 
 		$len = static::len($ending);
-		if ($len > 0 && static::endsWith($target, $ending)) {
+		if ($len > 0 && static::endsWith($target, $ending, $is_case_sensitive)) {
 			return substr($target, 0, -$len);
 		}
 
 		return $target;
 	}
 
+	/**
+	 * @param string ...$strings
+	 *
+	 * @codeCoverageIgnore
+	 * @return \spaf\simputils\models\StrObj|string
+	 * @throws \Exception
+	 */
 	public static function obj(string ...$strings): StrObj|string {
 		$class_strobj = PHP::redef(StrObj::class);
 		return new $class_strobj(...$strings);

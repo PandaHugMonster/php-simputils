@@ -22,6 +22,7 @@ use function array_keys;
 use function array_values;
 use function arsort;
 use function count;
+use function implode;
 use function in_array;
 use function is_array;
 use function is_float;
@@ -861,6 +862,15 @@ class Box extends ArrayObject {
 		$this->exchangeArray($res);
 
 		return $this;
+	}
+
+	public function implode($sep = ', ') {
+		return implode($sep, (array) $this);
+	}
+
+	#[Shortcut('\implode()')]
+	public function join($sep = ', ') {
+		return $this->implode($sep);
 	}
 
 	/**

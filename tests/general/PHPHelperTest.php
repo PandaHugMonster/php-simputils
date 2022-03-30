@@ -5,11 +5,14 @@ use spaf\simputils\attributes\Property;
 use spaf\simputils\Boolean;
 use spaf\simputils\FS;
 use spaf\simputils\generic\SimpleObject;
+use spaf\simputils\Math;
 use spaf\simputils\models\Box;
 use spaf\simputils\models\DateTime;
 use spaf\simputils\models\File;
 use spaf\simputils\models\InitConfig;
 use spaf\simputils\models\PhpInfo;
+use spaf\simputils\models\StackFifo;
+use spaf\simputils\models\StackLifo;
 use spaf\simputils\models\Version;
 use spaf\simputils\PHP;
 use spaf\simputils\Str;
@@ -17,6 +20,8 @@ use spaf\simputils\traits\MetaMagic;
 use function spaf\simputils\basic\bx;
 use function spaf\simputils\basic\now;
 use function spaf\simputils\basic\pd;
+use function spaf\simputils\basic\pr;
+use function spaf\simputils\basic\prstr;
 
 class MyObjectExample {
 	use MetaMagic;
@@ -31,6 +36,37 @@ class MyDT extends DateTime {
 }
 
 class MyDT2 {
+
+}
+
+class MyBoxConvertable extends SimpleObject {
+
+	public $EVEN_some_MORE = null;
+
+	public function toBox(bool $recursively = false, bool $with_class = false) {
+		return new Box(['some' => 'stuff']);
+	}
+
+	public function toArray(
+		bool $recursively = false,
+		bool $with_class = false,
+		array $exclude_fields = []
+	): array {
+		$res = [
+			'EVEN_some_MORE' => 'EVEN stuff MORE',
+		];
+
+		if ($with_class) {
+			$res[PHP::$serialized_class_key_name] = static::class;
+		}
+
+		return $res;
+	}
+}
+
+class MyBoxConvertable2 extends SimpleObject {
+
+	public $my_field = 'test';
 
 }
 
@@ -58,7 +94,7 @@ class MyDT2 {
  * @uses \spaf\simputils\models\files\apps\settings\DotEnvSettings
  * @uses \spaf\simputils\Str
  */
-class PHPClassTest extends TestCase {
+class PHPHelperTest extends TestCase {
 
 	const THE_CAP = 'This is replacement for "die", so it could be tested and covered properly';
 
@@ -85,39 +121,12 @@ class PHPClassTest extends TestCase {
 //		PHP::$allow_dying = true;
 //	}
 
-	/**
-	 * @return void
-	 * @runInSeparateProcess
-	 */
-	public function testBoolStr(): void {
-		$true = Str::from(true);
-		$false = Str::from(false);
-		$this->assertEquals('true', $true, 'Check if true is true');
-		$this->assertEquals('false', $false, 'Check if false is false');
-	}
-
-	/**
-	 * @return void
-	 * @runInSeparateProcess
-	 */
-	public function testIsJsonString(): void {
-		$json = json_encode([
-			'my_field' => 'Some Value',
-			'int_value' => 12,
-			'boolval' => false,
-		]);
-		$true = Str::isJson($json);
-		$false = Str::isJson($json.'TTTT');
-		$this->assertTrue($true, 'Check if json is correct');
-		$this->assertFalse($false, 'Check if json is incorrect');
-	}
 
 	/**
 	 *
-	 * @depends testIsJsonString
 	 * @return void
 	 * @throws \Exception
-	 *@uses \spaf\simputils\traits\SimpleObjectTrait
+	 * @uses \spaf\simputils\traits\SimpleObjectTrait
 	 * @uses \spaf\simputils\components\versions\parsers\DefaultVersionParser::parse()
 	 * @runInSeparateProcess
 	 * @uses \spaf\simputils\models\Version
@@ -203,6 +212,12 @@ class PHPClassTest extends TestCase {
 		$this->assertNull($res, 'Incorrect deserialization');
 
 		PHP::$serialization_mechanism = PHP::SERIALIZATION_TYPE_JSON;
+
+		$res = PHP::serialize(new MyBoxConvertable());
+//		pd('HERE ', $res);
+		$res = PHP::deserialize($res);
+
+		$this->assertEquals('EVEN stuff MORE', $res->EVEN_some_MORE);
 	}
 
 	/**
@@ -302,6 +317,7 @@ class PHPClassTest extends TestCase {
 	 * @dataProvider dataProviderToBool
 	 * @covers \spaf\simputils\Boolean::from
 	 * @return void
+	 * FIX  Should be moved out
 	 */
 	public function testAsBool(mixed $mixed_val, ?bool $expected_val) {
 		$sub_res = Boolean::from($mixed_val);
@@ -322,6 +338,7 @@ class PHPClassTest extends TestCase {
 	 *
 	 * @dataProvider dataProviderToBool
 	 * @covers \spaf\simputils\Boolean::from
+	 * FIX  Should be moved out
 	 * @return void
 	 */
 	public function testAsBoolStrict(mixed $mixed_val, ?bool $expected_val) {
@@ -557,6 +574,104 @@ class PHPClassTest extends TestCase {
 		$this->expectOutputString('my custom dying method.');
 
 		pd('Some text that will be ignored');
+
+	}
+
+	/**
+	 * @runInSeparateProcess
+	 * @return void
+	 */
+	function testPrPd() {
+		$str1 = 'text that will be printed out, but not dying';
+		$str2 = 'TEST|-|TEST1|-|TEST2';
+		$this->expectOutputString("{$str1}\n||HELLO {$str2} WORLD||\n");
+
+		PHP::$allow_dying = false;
+
+		pd($str1);
+
+		PHP::init(new InitConfig([
+			'redefinitions' => [
+				InitConfig::REDEF_PR => function (...$args) {
+					$args = new Box($args);
+					echo "||HELLO {$args->join('|-|')} WORLD||\n";
+				}
+			]
+		]));
+
+		pr('TEST', 'TEST1', 'TEST2');
+
+		$this->assertEquals("||HELLO te|-|st|-|wut WORLD||\n", prstr('te', 'st', 'wut'));
+		$this->assertNull(prstr());
+	}
+
+	/**
+	 * @uses \spaf\simputils\Boolean
+	 * @uses \spaf\simputils\System
+	 * @uses \spaf\simputils\attributes\PropertyBatch
+	 * @uses \spaf\simputils\components\versions\parsers\DefaultVersionParser
+	 * @uses \spaf\simputils\Math
+	 * @uses \spaf\simputils\attributes\Extract::__construct
+	 * @uses \spaf\simputils\models\StackLifo
+	 * @uses \spaf\simputils\models\StackFifo
+	 *
+	 * @return void
+	 */
+	function testCommonalities() {
+		$reflection = new ReflectionClass(PHP::class);
+		$path = dirname($reflection->getFileName());
+
+		$this->assertIsString(PHP::frameworkDir());
+		$this->assertEquals($path, PHP::frameworkDir());
+
+		$is_cli = Str::lower(PHP_SAPI) === 'cli';
+
+		if ($is_cli) {
+			$this->assertTrue(PHP::isCLI());
+			$this->assertTrue(PHP::isConsole());
+		} else {
+			$this->assertFalse(PHP::isCLI());
+			$this->assertFalse(PHP::isConsole());
+		}
+
+		// Converting to box object that does support custom toBox conversion
+		$boxed_obj = PHP::box(new MyBoxConvertable());
+		$this->assertInstanceOf(Box::class, $boxed_obj);
+		$this->assertEquals(PHP::box(['some' => 'stuff']), $boxed_obj);
+
+		// Generators to boxes
+		$boxed_gen = PHP::box(Math::range(0, 9));
+		$this->assertInstanceOf(Box::class, $boxed_gen);
+		$this->assertEquals(PHP::box([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]), $boxed_gen);
+
+		// Test Merger of box instance
+		$merger = PHP::box([], $boxed_obj, $boxed_gen);
+		$this->assertEquals(PHP::box([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 'some' => 'stuff']), $merger);
+
+		// Test Merger of mix instance
+		$merger = PHP::box([], $boxed_obj, new MyBoxConvertable(), new MyBoxConvertable2());
+		$this->assertEquals(PHP::box(['some' => 'stuff', 'my_field' => 'test']), $merger);
+		$this->assertEmpty(PHP::env('TEST_VAR_IS_OK'));
+
+		PHP::envSet('TEST_VAR_IS_OK', 'TrUe It iS');
+
+		$this->assertNotEmpty(PHP::env('TEST_VAR_IS_OK'));
+		$this->assertEquals('TrUe It iS', PHP::env('TEST_VAR_IS_OK'));
+
+		$stack = PHP::stack(1, 2, 3, 4);
+		$this->assertInstanceOf(StackLifo::class, $stack);
+
+		$this->assertEquals(
+			(array) PHP::box([1, 2, 3, 4]),
+			(array) $stack
+		);
+
+		$this->assertEquals(4, $stack->pop());
+		$this->assertEquals(3, $stack->pop());
+		$this->assertEquals(2, $stack->size);
+
+		$stack = PHP::stack(1, 2, 3, 4, type: 'fifo');
+		$this->assertInstanceOf(StackFifo::class, $stack);
 
 	}
 }

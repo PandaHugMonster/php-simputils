@@ -705,10 +705,7 @@ class PHP {
 	 *
 	 * @return mixed Returns value, or null if does not exist
 	 */
-	public static function env(?string $name = null, bool $strict = true): mixed {
-		if (empty($name)) {
-			return static::allEnvs();
-		}
+	public static function env(?string $name = null): mixed {
 		return $_ENV[$name] ?? null;
 	}
 

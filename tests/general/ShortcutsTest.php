@@ -138,7 +138,6 @@ class ShortcutsTest extends TestCase {
 		$key = 'TP_TP';
 		$_ENV[$key] = 'TOOT';
 
-		$this->assertEquals($_ENV, (array) env());
 		$this->assertEquals($_ENV[$key], env($key));
 	}
 

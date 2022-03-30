@@ -18,10 +18,12 @@ jobs:
   include:
     - stage: test
       script:
-        - composer run-script tests
+        - composer run-script tests-clover
+        - ls -lah
 
     - stage: codecov
       script:
+        - ls -lah
         - curl -Os https://uploader.codecov.io/latest/linux/codecov
         - chmod +x codecov
         - ./codecov

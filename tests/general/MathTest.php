@@ -1,9 +1,11 @@
-<?php
+<?php /** @noinspection ALL */
 
 namespace general;
 
+use Generator;
 use PHPUnit\Framework\TestCase;
 use spaf\simputils\Math;
+use spaf\simputils\PHP;
 use function abs;
 use function bindec;
 use function decbin;
@@ -16,6 +18,11 @@ use function round;
 /**
  * Absolutely redundant and unnecessary most likely!
  * @covers \spaf\simputils\Math
+ * @uses \spaf\simputils\PHP
+ * @uses \spaf\simputils\Str
+ * @uses \spaf\simputils\models\Box
+ * @uses \spaf\simputils\special\CodeBlocksCacheIndex
+ * @uses \spaf\simputils\traits\SimpleObjectTrait::__get
  */
 class MathTest extends TestCase {
 
@@ -76,5 +83,53 @@ class MathTest extends TestCase {
 		[$a, $b] = Math::divmod(19, 5);
 		$this->assertEquals(3, $a, 'quotient check');
 		$this->assertEquals(4, $b, 'remainder check');
+	}
+
+	function testRangeObject() {
+		$gen = Math::range(1, 4);
+		$this->assertInstanceOf(Generator::class, $gen);
+	}
+
+	public function rangeGroupsDataProvider() {
+		return [
+			[   // Normal positive increasing range
+				[1, 2, 3, 4],
+				Math::range(1, 4)
+			],
+			[   // Normal positive decreasing range
+				[10, 9, 8, 7, 6, 5],
+				Math::range(10, 5)
+			],
+			[   // Normal cross increasing range
+				[-3, -2, -1, 0, 1, 2, 3],
+				Math::range(-3, 3)
+			],
+			[   // Normal cross decreasing range
+				[3, 2, 1, 0, -1, -2, -3],
+				Math::range(3, -3)
+			],
+			[   // Normal negative increasing range
+				[-10, -9, -8, -7, -6],
+				Math::range(-10, -6)
+			],
+			[   // Normal negative decreasing range
+				[-5, -6, -7],
+				Math::range(-5, -7)
+			],
+		];
+	}
+
+	/**
+	 * @dataProvider rangeGroupsDataProvider
+	 *
+	 * @return void
+	 * @throws \Exception
+	 */
+	function testRange($expected, $range) {
+		$res = PHP::box($range);
+		$expected = PHP::box($expected);
+
+		$this->assertEquals($expected->size, $res->size);
+		$this->assertEquals($expected, $res);
 	}
 }

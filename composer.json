@@ -35,7 +35,13 @@
   },
   "scripts": {
     "tests": [
-      "phpunit tests --coverage-clover clover.xml"
+      "phpunit tests"
+    ],
+    "tests-clover": [
+      "XDEBUG_MODE=coverage phpunit tests --coverage-clover clover.xml"
+    ],
+    "tests-html": [
+      "XDEBUG_MODE=coverage phpunit tests --coverage-html html-coverage/"
     ]
   }
 }

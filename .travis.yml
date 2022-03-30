@@ -20,8 +20,15 @@ jobs:
       script:
         - composer run-script tests-clover
         - ls -lah
+      workspaces:
+        create:
+          name: ws1
+          paths:
+            - clover.xml
 
     - stage: codecov
+      workspaces:
+        use: ws1
       script:
         - ls -lah
         - curl -Os https://uploader.codecov.io/latest/linux/codecov

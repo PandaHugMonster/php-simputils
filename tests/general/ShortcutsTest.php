@@ -36,8 +36,7 @@ use function spaf\simputils\basic\ts;
  * @uses \spaf\simputils\generic\BasicResourceApp
  * @uses \spaf\simputils\models\files\apps\TextProcessor
  * @uses \spaf\simputils\Str
- * @uses \spaf\simputils\PHP::isClass
- * @uses \spaf\simputils\PHP::redef
+ * @uses \spaf\simputils\PHP
  * @uses \spaf\simputils\generic\fixups\FixUpDateTime
  * @uses \spaf\simputils\generic\BasicPrism
  * @uses \spaf\simputils\generic\fixups\FixUpDateTimePrism

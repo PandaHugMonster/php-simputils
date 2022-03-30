@@ -11,7 +11,7 @@ use function implode;
  * String object
  *
  * IMP  Unfinished concept
- *
+ * @codeCoverageIgnore
  */
 class StrObj extends SimpleObject {
 	use RedefinableComponentTrait;

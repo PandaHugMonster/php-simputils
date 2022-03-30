@@ -47,6 +47,11 @@ class DataUnitsTest extends TestCase {
 
 	public function getNormalTestData() {
 		return [
+			['0 B', null],
+			['0 B', ''],
+			['30 KB', new DataUnit('30KB')],
+			['26 B', 26],
+
 			['1 KB', '1024b'],
 			['1 MB', '1024kb'],
 			['1 GB', '1024mb'],

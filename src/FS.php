@@ -7,6 +7,7 @@ use finfo;
 use spaf\simputils\generic\BasicResourceApp;
 use spaf\simputils\models\Dir;
 use spaf\simputils\models\File;
+use const DIRECTORY_SEPARATOR;
 
 /**
  * FileSystem class
@@ -359,14 +360,17 @@ class FS {
 		return new $class($dir);
 	}
 
+	/**
+	 * @param string|null ...$parts
+	 *
+	 * TODO Implement root part somehow
+	 * @return string|null
+	 * @throws \Exception
+	 */
 	public static function path(?string ...$parts): ?string {
-		$res = '';
-		$sep = '/';
+		$sep = DIRECTORY_SEPARATOR;
 		if ($parts) {
-			$i = 0;
-			foreach ($parts as $part) {
-				$res .= ($i++ == 0?'':$sep).$part;
-			}
+			$res = PHP::box($parts)->join($sep);
 		}
 		return $res ?? null;
 	}

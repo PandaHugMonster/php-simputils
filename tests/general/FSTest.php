@@ -1,12 +1,15 @@
-<?php
+<?php /** @noinspection ALL */
 
 use PHPUnit\Framework\TestCase;
 use spaf\simputils\FS;
+use spaf\simputils\models\Dir;
+use spaf\simputils\models\File;
 
 
 /**
  * @covers \spaf\simputils\FS
  * @covers \spaf\simputils\models\File
+ * @covers \spaf\simputils\models\Dir
  *
  * @uses \spaf\simputils\PHP
  * @uses \spaf\simputils\generic\BasicResource
@@ -19,6 +22,7 @@ use spaf\simputils\FS;
  * @uses \spaf\simputils\generic\BasicResourceApp
  * @uses \spaf\simputils\models\files\apps\CsvProcessor
  * @uses \spaf\simputils\Str
+ * @uses \spaf\simputils\models\Box
  * @uses \spaf\simputils\attributes\Property
  * @uses \spaf\simputils\traits\SimpleObjectTrait::____prepareProperty
  * @uses \spaf\simputils\traits\SimpleObjectTrait::getAllTheLastMethodsAndProperties
@@ -102,6 +106,31 @@ class FSTest extends TestCase {
 		$this->assertFileExists($file->name_full);
 		FS::rmFile($file);
 		$this->assertFileDoesNotExist($file->name_full);
+	}
+
+	/**
+	 * @covers \spaf\simputils\FS::getFileMimeType
+	 *
+	 * @return void
+	 * @throws \Exception
+	 */
+	function testOther() {
+		$path = FS::path('path1', 'path2', 'path3');
+		$this->assertIsString($path);
+		// TODO Windows should be supported too?
+		$this->assertEquals('path1/path2/path3', $path);
+
+
+		$orig_dir = new Dir('/tmp');
+
+		$this->assertEquals($orig_dir, FS::dir($orig_dir));
+		$this->assertInstanceOf(Dir::class, FS::dir('/tmp/new-temp-folder'));
+
+		$orig = new File('/tmp/my-text-file.txt');
+
+		$this->assertEquals($orig, FS::file($orig));
+		$this->assertInstanceOf(File::class, FS::file('/tmp/new-temp-file.csv'));
+		$this->assertEquals($orig->mime_type, FS::getFileMimeType($orig));
 	}
 
 //	function testMimeTypeCheck() {

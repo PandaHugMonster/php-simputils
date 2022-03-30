@@ -19,7 +19,6 @@ jobs:
     - stage: test
       script:
         - composer run-script tests-clover
-        - ls -lah
       workspaces:
         create:
           name: ws1
@@ -30,7 +29,6 @@ jobs:
       workspaces:
         use: ws1
       script:
-        - ls -lah
         - curl -Os https://uploader.codecov.io/latest/linux/codecov
         - chmod +x codecov
         - ./codecov

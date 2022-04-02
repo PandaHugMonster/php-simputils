@@ -2,6 +2,7 @@
 
 namespace spaf\simputils\traits;
 
+use ArrayObject;
 use Error;
 use ReflectionClass;
 use ReflectionMethod;
@@ -108,8 +109,11 @@ trait PropertiesTrait {
 		if (!$res) {
 			try {
 				/** @noinspection PhpUndefinedMethodInspection */
+//				if (get_parent_class() && method_exists(parent::class, '__isset')) {
 				if (get_parent_class()) {
-					$res = parent::__isset($name);
+					if (get_parent_class() !== ArrayObject::class) {
+						$res = parent::__isset($name);
+					}
 				}
 			} catch (Error $e) {
 				/** @noinspection PhpUnhandledExceptionInspection */

@@ -15,7 +15,6 @@ use function dirname;
 use function file_exists;
 use function is_dir;
 use function preg_match;
-use function realpath;
 use function scandir;
 
 /**
@@ -185,12 +184,12 @@ class Dir extends Box {
 	 * @param string|null $dir Directory, if file provided, will be used it's folder
 	 */
 	public function __construct(null|string $dir = '.') {
-		$rp = realpath($dir);
-		if (!is_dir($rp)) {
+		$rp = $dir;
+		if (file_exists($rp) && !is_dir($rp)) {
 			$rp = dirname($rp);
 		}
-		$this->_path = dirname($rp);
-		$this->_name = basename($rp);
+		$this->_path = $path = dirname($rp);
+		$this->_name = $name = basename($rp);
 	}
 
 	#[\ReturnTypeWillChange]

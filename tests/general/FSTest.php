@@ -131,6 +131,57 @@ class FSTest extends TestCase {
 		$this->assertEquals($orig, FS::file($orig));
 		$this->assertInstanceOf(File::class, FS::file('/tmp/new-temp-file.csv'));
 		$this->assertEquals($orig->mime_type, FS::getFileMimeType($orig));
+
+		$file = FS::file('/tmp/test1/test2/test3/what/is-that.question-mark');
+
+		// $file->format('') what/is-that.question-mark
+		// $file->format('') what/is-that.question-mark
+		// $file->format('') what/is-that.question-mark
+
+		$this->assertEquals(
+			'test2/test3/what/is-that.question-mark',
+			$file->format(2)
+		);
+		$this->assertEquals(
+			'test3/what/is-that.question-mark',
+			$file->format(-2)
+		);
+		$this->assertEquals(
+			'what/is-that.question-mark',
+			$file->format('tmp/test1/test2/test3')
+		);
+		$this->assertEquals(
+			'what/is-that.question-mark',
+			$file->format('/tmp/test1/test2/test3')
+		);
+		$this->assertEquals(
+			'what/is-that.question-mark',
+			$file->format('tmp/test1/test2/test3/')
+		);
+		$this->assertEquals(
+			'what/is-that.question-mark',
+			$file->format('/tmp/test1/test2/test3/')
+		);
+		$this->assertNotEquals(
+			'what/is-that.question-mark',
+			$file->format('/non-matching-string')
+		);
+		$this->assertEquals(
+			'is-that.question-mark',
+			$file->format('/non-matching-string')
+		);
+		$this->assertEquals('is-that.question-mark', $file->format());
+
+		$dir = FS::dir('/tmp/test1/test2/test3/what/test-more/extra-more/target-dir');
+		$this->assertEquals(
+			'test2/test3/what/test-more/extra-more/target-dir',
+			$dir->format(2)
+		);
+		$this->assertEquals(
+			'test-more/extra-more/target-dir',
+			$dir->format(-2)
+		);
+		$this->assertEmpty(FS::dir('')->format(-2));
 	}
 
 //	function testMimeTypeCheck() {

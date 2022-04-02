@@ -27,6 +27,7 @@ class L10n extends SimpleObject {
 	 * Apply those settings to other classes
 	 *
 	 * @return void
+	 * @throws \Exception
 	 */
 	public function doSetUp() {
 		$class = PHP::redef(DateTime::class);
@@ -40,6 +41,6 @@ class L10n extends SimpleObject {
 	}
 
 	public static function redefComponentName(): string {
-		return InitConfig::REDEF_L10N;
+		return InitConfig::REDEF_L10N; // @codeCoverageIgnore
 	}
 }

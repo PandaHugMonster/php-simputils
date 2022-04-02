@@ -13,7 +13,6 @@ use function bcadd;
 use function bccomp;
 use function gmp_add;
 use function gmp_cmp;
-use function in_array;
 use function intval;
 use function preg_replace;
 
@@ -75,6 +74,7 @@ use function preg_replace;
  *
  * @property bool $mutable
  * @property bool $fractions_supported Whether fractions (float) supported by this extension
+ * @property string $extension What extension is being used in this object
  */
 class BigNumber extends SimpleObject {
 	use RedefinableComponentTrait;
@@ -89,12 +89,20 @@ class BigNumber extends SimpleObject {
 	protected $_ext;
 	protected $_value;
 
+	/**
+	 * @return string
+	 */
+	#[Property('extension')]
+	protected function getExtension(): string {
+		return $this->_ext;
+	}
+
 	#[Property('fractions_supported')]
 	protected function getFractionsSupported(): bool {
-		$supported = [
+		$supported = PHP::box([
 			static::SUBSYSTEM_BCMATH,
-		];
-		return in_array($this->_ext, $supported);
+		]);
+		return $supported->containsValue($this->_ext);
 	}
 
 	/**
@@ -115,7 +123,7 @@ class BigNumber extends SimpleObject {
 		$this->_is_mutable = $mutable;
 		$this->_ext = static::checkExtensionAvailability($extension);
 		if ($this->_ext === false) {
-			throw new Exception('No math extension available');
+			throw new Exception('No math extension available'); // @codeCoverageIgnore
 		}
 		if ($this->_ext === static::SUBSYSTEM_GMP) {
 			$val = preg_replace('/[^0-9]/', '', $val);
@@ -143,6 +151,7 @@ class BigNumber extends SimpleObject {
 	 *
 	 * @return string|false Returns name of the available extension or false if no available
 	 *                      extension
+	 * @codeCoverageIgnore
 	 */
 	public static function checkExtensionAvailability(?string $extension = null): string|false {
 		$php_info = PHP::info();
@@ -267,7 +276,7 @@ class BigNumber extends SimpleObject {
 			// $b = intval($b);
 			$val = gmp_div_q($this->_value, "$b");
 		} else if ($this->_ext === static::SUBSYSTEM_BCMATH) {
-			$val = bcdiv($this->_value, $b, scale: 2);
+			$val = bcdiv($this->_value, "{$b}", scale: 2);
 			$val = Str::removeEnding($val, '.00');
 		}
 		if ($mutable) {
@@ -363,7 +372,9 @@ class BigNumber extends SimpleObject {
 	}
 
 	public function isZero(): bool {
-		$res = $this->_value === 0 || $this->_value === '0';
+		$res = $this->_value === 0 ||
+			$this->_value === '0' ||
+			"{$this->_value}" === '0';
 		return $res;
 	}
 
@@ -506,6 +517,6 @@ class BigNumber extends SimpleObject {
 	}
 
 	public static function redefComponentName(): string {
-		return InitConfig::REDEF_BIG_NUMBER;
+		return InitConfig::REDEF_BIG_NUMBER; // @codeCoverageIgnore
 	}
 }

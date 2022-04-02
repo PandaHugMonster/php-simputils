@@ -40,6 +40,7 @@ use function spaf\simputils\basic\ts;
  * @uses \spaf\simputils\generic\fixups\FixUpDateTime
  * @uses \spaf\simputils\generic\BasicPrism
  * @uses \spaf\simputils\generic\fixups\FixUpDateTimePrism
+ * @uses \spaf\simputils\generic\fixups\FixUpDateTimeZone
  * @uses \spaf\simputils\models\Date
  * @uses \spaf\simputils\models\Time
  */
@@ -100,7 +101,7 @@ class ShortcutsTest extends TestCase {
 		$fmt_time = '12:13:16';
 
 		$format1 = "{$fmt_date} {$fmt_time}";
-		$dt = ts($format1);
+		$dt = ts($format1, 'UTC');
 
 		$this->assertInstanceOf($dt_class, $dt);
 		$this->assertEquals("{$fmt_time} {$fmt_date}", "{$dt->time} {$dt->date}");

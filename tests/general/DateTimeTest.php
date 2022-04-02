@@ -21,6 +21,7 @@ use function spaf\simputils\basic\ts;
  * @covers \spaf\simputils\models\Time
  * @covers \spaf\simputils\models\DateInterval
  * @covers \spaf\simputils\models\DatePeriod
+ * @covers \spaf\simputils\models\DatePeriod
  *
  * @uses \spaf\simputils\interfaces\helpers\DateTimeHelperInterface
  * @uses \spaf\simputils\PHP
@@ -48,6 +49,11 @@ use function spaf\simputils\basic\ts;
  */
 class DateTimeTest extends TestCase {
 
+	/**
+	 * @runInSeparateProcess
+	 * @return void
+	 * @throws \Exception
+	 */
 	public function testHelperTransparentParsing(): void {
 		$dt_class = PHP::redef(DateTime::class);
 
@@ -63,10 +69,13 @@ class DateTimeTest extends TestCase {
 		$this->assertInstanceOf($dt_class, $dt, 'Object type check');
 		$this->assertEquals(02, $dt->format('m'), 'Month check');
 
-		$dt = DT::normalize(123);
+		$dt = DT::normalize(123, 'UTC');
 		$this->assertInstanceOf($dt_class, $dt, 'Object type check');
-		$this->assertEquals('1970-01-01 00:02:03.000000', $dt->format(DT::FMT_DATETIME_FULL),
-			'Comparing datetime from int');
+		$this->assertEquals(
+			'1970-01-01 00:02:03.000000',
+			$dt->format(DT::FMT_DATETIME_FULL),
+			'Comparing datetime from int'
+		);
 
 		$dt_cloned = DT::normalize($dt);
 		$this->assertInstanceOf($dt_class, $dt_cloned, 'Object type check');
@@ -74,7 +83,11 @@ class DateTimeTest extends TestCase {
 
 		$dt_str = DT::stringify('1970-12-31');
 		$this->assertIsString($dt_str, 'Check if it is a string');
-		$this->assertEquals('1970-12-31 00:00:00.000000', $dt_str, 'Comparing datetime objects');
+		$this->assertEquals(
+			'1970-12-31 00:00:00.000000',
+			$dt_str,
+			'Comparing datetime objects'
+		);
 
 		$dt_expected = [
 			'2022-02-24', '2022-02-25', '2022-02-26', '2022-02-27', '2022-02-28',
@@ -112,7 +125,7 @@ class DateTimeTest extends TestCase {
 
 	public function testTransparentStringifyingDateTimeObject() {
 		$dt_class = PHP::redef(DateTime::class);
-		$now = DT::now();
+		$now = DT::now('UTC');
 		$this->assertInstanceOf($dt_class, $now, 'Is a date-time object');
 		$this->assertEquals(
 			DT::stringify($now),
@@ -126,7 +139,7 @@ class DateTimeTest extends TestCase {
 	 * @return void
 	 */
 	function testDateAndTimeProperties() {
-		$dt = ts('2022-01-03 22:00:15');
+		$dt = ts('2022-01-03 22:00:15', 'UTC');
 		$this->assertEquals('2022-01-03', $dt->date);
 		$this->assertEquals('22:00:15', $dt->time);
 	}
@@ -171,8 +184,8 @@ class DateTimeTest extends TestCase {
 		$dt->micro = 234567;
 		$this->assertEquals(234567, $dt->micro);
 
-		// Keep in mind, that all of the above now having different from the original date-time
-		// string, because those were redefined in the previous tests.
+		// Keep in mind, that all of the above now having different from the original
+		// date-time string, because those were redefined in the previous tests.
 		$this->assertEquals(234, $dt->milli);
 		$this->assertEquals(20, $dt->week);
 		$this->assertEquals(1, $dt->dow);
@@ -196,12 +209,12 @@ class DateTimeTest extends TestCase {
 		);
 
 		$this->assertEquals(
-			'24.05.3000 02:03 - 01.01.3001 00:00',
+			'24.05.3000 02:03 - 01.01.3001 03:00',
 			"{$dt->walk('3001-01-01', '1 month')}"
 		);
 
 		$this->assertEquals(
-			'24.05.3000 02:03 - 01.01.3001 00:00',
+			'24.05.3000 02:03 - 01.01.3001 03:00',
 			"{$dt->walk('3001-01-01', new DateInterval('P1M'))}"
 		);
 
@@ -223,5 +236,31 @@ class DateTimeTest extends TestCase {
 		$dt->add('-200 minutes');
 		$this->assertEquals('2022-03-30', $dt->date->for_system);
 		$this->assertEquals('21:27:58', $dt->time->for_system);
+	}
+
+	function testOther() {
+		$tz_default = DT::getDefaultTimeZone();
+
+		$dt = DT::ts('2022-12-25 05:04:03');
+		$this->assertEquals($tz_default, $dt->tz);
+
+		DT::setDefaultTimeZone('Asia/Novosibirsk');
+
+		$this->assertNotEquals($dt->tz, DT::getDefaultTimeZone());
+
+		$dt = DT::ts('2022-12-25 05:04:03');
+		$this->assertEquals($dt->tz, DT::getDefaultTimeZone());
+
+		$dt = DT::ts('2022-12-25 05:04:03', 'UTC');
+		$this->assertEquals(
+			$dt->for_user,
+			$dt->getForSystemObj()->format(DateTime::$l10n_user_datetime_format)
+		);
+
+		$dt = DT::ts('2022-12-25 05:04:03', true);
+		$this->assertNotEquals(
+			$dt->for_user,
+			$dt->getForSystemObj()->format(DateTime::$l10n_user_datetime_format)
+		);
 	}
 }

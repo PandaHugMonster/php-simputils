@@ -673,5 +673,7 @@ class PHPHelperTest extends TestCase {
 		$stack = PHP::stack(1, 2, 3, 4, type: 'fifo');
 		$this->assertInstanceOf(StackFifo::class, $stack);
 
+		$this->assertIsBool(PHP::info()->hasExtension('Core'));
+		$this->assertFalse(PHP::info()->hasExtension('NonExistentExtension_blalbalba_lbalbbla'));
 	}
 }

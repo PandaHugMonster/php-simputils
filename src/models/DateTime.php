@@ -59,6 +59,8 @@ class DateTime extends FixUpDateTime {
 	public static $l10n_user_date_format = DT::FMT_DATE;
 	public static $l10n_user_time_format = DT::FMT_TIME;
 	public static $l10n_user_datetime_format = DT::FMT_DATETIME;
+
+	// NOTE Is not used anywhere, just a reference for the JSON files
 	public static $l10n_user_default_tz = 'UTC';
 
 	/**

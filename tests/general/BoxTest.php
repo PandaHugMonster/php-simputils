@@ -5,21 +5,20 @@ use PHPUnit\Framework\TestCase;
 use spaf\simputils\models\Box;
 use spaf\simputils\models\Version;
 use spaf\simputils\PHP;
-use function spaf\simputils\basic\bx;
 
 /**
  * @covers \spaf\simputils\models\Box
- * @covers \spaf\simputils\basic\bx
+ * @covers \spaf\simputils\models\StackFifo
+ * @covers \spaf\simputils\models\StackLifo
  *
- * @uses \spaf\simputils\PHP::isClass
- * @uses \spaf\simputils\PHP::redef
- * @uses \spaf\simputils\PHP::type
+ * @uses \spaf\simputils\PHP
  * @uses \spaf\simputils\Str::is
  * @uses \spaf\simputils\attributes\Property
  * @uses \spaf\simputils\special\CodeBlocksCacheIndex
  * @uses \spaf\simputils\traits\SimpleObjectTrait::____prepareProperty
  * @uses \spaf\simputils\traits\SimpleObjectTrait::__get
  * @uses \spaf\simputils\traits\SimpleObjectTrait::getAllTheLastMethodsAndProperties
+ * @uses \spaf\simputils\Math
  */
 class BoxTest extends TestCase {
 
@@ -69,7 +68,7 @@ class BoxTest extends TestCase {
 	 * @throws \Exception
 	 */
 	function testAdditionalStuff() {
-		$data = bx([
+		$data = PHP::box([
 			'key1' => 'val1',
 			'key2' => 'val2',
 			'key3' => 'val3',
@@ -90,10 +89,58 @@ class BoxTest extends TestCase {
 
 		$this->assertEquals(3, $data->size);
 		$this->assertEquals(2, $data->shift()->size);
-		$this->assertEquals(bx(['key1' => 'val1']), $data->stash);
-		$this->assertEquals(bx(['key3' => 'val3']), $data->shift(from_start: false)->stash);
+		$this->assertEquals(PHP::box(['key1' => 'val1']), $data->stash);
+		$this->assertEquals(PHP::box(['key3' => 'val3']), $data->shift(from_start: false)->stash);
 
 		$this->assertEquals(1, $data->size);
-		$this->assertEquals(bx(['key2' => 'val2']), $data);
+		$this->assertEquals(PHP::box(['key2' => 'val2']), $data);
+	}
+
+	function testStacks() {
+		$stack_l = PHP::stack(1, 2, 3, 4, type: 'lifo');
+		$stack_f = PHP::stack(1, 2, 3, 4, type: 'fifo');
+
+		// Yes, the string/content representation is no different
+		$this->assertEquals("{$stack_l}", "{$stack_f}");
+
+		$stack_f->push('test');
+		$stack_l->push('test');
+
+		// Yes again, the string/content representation is no different
+		$this->assertEquals("{$stack_l}", "{$stack_f}");
+
+		$l = $stack_l->pop();
+		$f = $stack_f->pop();
+
+		$this->assertNotEquals($l, $f);
+
+		$this->assertEquals('test', $l);
+		$this->assertEquals(1, $f);
+
+		$this->assertEquals(4, $stack_l->size);
+		$this->assertEquals(4, $stack_f->size);
+
+		$l = $stack_l->pop(2);
+		$f = $stack_f->pop(2);
+
+		$this->assertEquals(2, $stack_l->size);
+		$this->assertEquals(2, $stack_f->size);
+
+		$this->assertEquals('["3","4"]', "{$l}");
+		$this->assertEquals('["2","3"]', "{$f}");
+
+		$this->assertEquals('["1","2"]', "{$stack_l}");
+		$this->assertEquals('{"2":"4","3":"test"}', "{$stack_f}");
+
+		foreach ($stack_l->walk() as $item) {
+			$this->assertNotEmpty($item);
+		}
+
+		foreach ($stack_f->walk() as $item) {
+			$this->assertNotEmpty($item);
+		}
+
+		$this->assertEquals(0, $stack_l->size);
+		$this->assertEquals(0, $stack_f->size);
 	}
 }

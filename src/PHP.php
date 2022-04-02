@@ -701,12 +701,13 @@ class PHP {
 	 * `\spaf\simputils\basic\env()` and `PHP::envSet()` or `\spaf\simputils\basic\env_set()`.
 	 *
 	 *
-	 * @param string $name Env variable name
+	 * @param string|null $name    Env variable name
+	 * @param mixed|null  $default Default value
 	 *
 	 * @return mixed Returns value, or null if does not exist
 	 */
-	public static function env(?string $name = null): mixed {
-		return $_ENV[$name] ?? null;
+	public static function env(?string $name = null, mixed $default = null): mixed {
+		return $_ENV[$name] ?? $default;
 	}
 
 	/**

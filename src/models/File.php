@@ -69,7 +69,7 @@ class File extends BasicResource {
 
 	#[Property('type')]
 	protected function getType() {
-		return $this->mime_type;
+		return $this->mime_type; // @codeCoverageIgnore
 	}
 
 	/**
@@ -339,24 +339,29 @@ class File extends BasicResource {
 
 	#[Property('links_number')]
 	protected function getLinksNumber(): ?int {
-		return $this->stat->get('nlink');
+		return $this->stat->get('nlink'); // @codeCoverageIgnore
 	}
 
 	#[Property('file_mode')]
 	protected function getFileMode(): ?int {
-		return $this->stat->get('mode');
+		return $this->stat->get('mode'); // @codeCoverageIgnore
 	}
 
 	#[Property('user_id')]
 	protected function getUserId(): ?int {
-		return $this->stat->get('uid');
+		return $this->stat->get('uid'); // @codeCoverageIgnore
 	}
 
 	#[Property('group_id')]
 	protected function getGroupId(): ?int {
-		return $this->stat->get('gid');
+		return $this->stat->get('gid'); // @codeCoverageIgnore
 	}
 
+	/**
+	 * @return \spaf\simputils\models\DateTime|null
+	 * @throws \Exception
+	 * @codeCoverageIgnore
+	 */
 	#[Property('inode_change_time')]
 	protected function getInodeChangeTime(): ?DateTime {
 		$val = $this->stat->get('ctime');
@@ -366,6 +371,11 @@ class File extends BasicResource {
 		return null;
 	}
 
+	/**
+	 * @return \spaf\simputils\models\DateTime|null
+	 * @throws \Exception
+	 * @codeCoverageIgnore
+	 */
 	#[Property('mod_time')]
 	protected function getModTime(): ?DateTime {
 		$val = $this->stat->get('mtime');
@@ -375,6 +385,11 @@ class File extends BasicResource {
 		return null;
 	}
 
+	/**
+	 * @return \spaf\simputils\models\DateTime|null
+	 * @throws \Exception
+	 * @codeCoverageIgnore
+	 */
 	#[Property('access_time')]
 	protected function getAccessTime(): ?DateTime {
 		$val = $this->stat->get('atime');
@@ -395,7 +410,7 @@ class File extends BasicResource {
 			return new $class_box(stat($this->name_full));
 		}
 
-		return new $class_box();
+		return new $class_box(); // @codeCoverageIgnore
 	}
 
 	#[Property('size')]

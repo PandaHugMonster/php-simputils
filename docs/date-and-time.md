@@ -383,3 +383,79 @@ print_r($dt);
 //  )
 
 ```
+
+
+Example of setting up locale and timezones:
+
+```php
+
+use spaf\simputils\generic\BasicInitConfig;
+use spaf\simputils\generic\SimpleObject;
+use spaf\simputils\interfaces\InitBlockInterface;
+use spaf\simputils\PHP;
+
+class SpecInitBlock extends SimpleObject implements InitBlockInterface {
+
+	public function initBlock(BasicInitConfig $config): bool {
+		$config->l10n = 'RU';
+		// $config->default_tz = 'Asia/Novosibirsk';
+
+		return true;
+	}
+}
+
+PHP::init([ new SpecInitBlock() ]);
+
+$d = ts('2022-05-05 12:44');
+//$d = now();
+
+pd("USER:\t{$d->for_user} ({$d->tz})", "SYSTEM:\t{$d->for_system} (UTC)");
+
+// Would output something like:
+//  USER:	05.05.2022 15:44 (Europe/Moscow)
+//  SYSTEM:	2022-05-05 12:44:00.000000 (UTC)
+
+// If you uncomment "$config->default_tz = 'Asia/Novosibirsk'"
+// Then output would be something like:
+//  USER:	05.05.2022 19:44 (Asia/Novosibirsk)
+//  SYSTEM:	2022-05-05 12:44:00.000000 (UTC)
+
+```
+
+Very cool and reasonable part that you can specify any locale + any timezone, 
+because users of their own country can travel to other timezones without loosing their 
+locale to a local one.
+
+```php
+
+use spaf\simputils\generic\BasicInitConfig;
+use spaf\simputils\generic\SimpleObject;
+use spaf\simputils\interfaces\InitBlockInterface;
+use spaf\simputils\PHP;
+
+class SpecInitBlock extends SimpleObject implements InitBlockInterface {
+
+	public function initBlock(BasicInitConfig $config): bool {
+		$config->l10n = 'AT';
+		$config->default_tz = 'America/New_York';
+
+		return true;
+	}
+}
+
+PHP::init([ new SpecInitBlock() ]);
+
+$d = ts('2022-02-13 12:44');
+//$d = now();
+
+pd("USER:\t{$d->for_user} ({$d->tz})", "SYSTEM:\t{$d->for_system} (UTC)");
+
+// Would output something like:
+//  USER:	13.02.2022 08:44 (America/New_York)
+//  SYSTEM:	2022-02-13 12:44:00.000000 (UTC)
+
+// When you would use l10n = "US" would output something like this:
+//  USER:	02/13/2022 07:44 AM (America/New_York)
+//  SYSTEM:	2022-02-13 12:44:00.000000 (UTC)
+
+```

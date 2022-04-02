@@ -98,7 +98,7 @@ function stack(mixed ...$items_and_conf): StackFifo|StackLifo {
  * @throws \Exception Parsing error
  */
 #[Shortcut('DT::now()')]
-function now(?DateTimeZone $tz = null): ?DateTime {
+function now(null|bool|DateTimeZone $tz = null): ?DateTime {
 	return DT::now($tz);
 }
 
@@ -117,7 +117,7 @@ function now(?DateTimeZone $tz = null): ?DateTime {
 #[Shortcut('DT::ts()')]
 function ts(
 	DateTime|string|int $dt,
-	null|DateTimeZone|string $tz = null,
+	null|bool|DateTimeZone|string $tz = null,
 	string $fmt = null
 ): ?DateTime {
 	return DT::ts($dt, $tz, $fmt);
@@ -147,8 +147,8 @@ function dr(null|string $path = null): ?Dir {
  * @see PHP::envSet()
  */
 #[Shortcut('PHP::env()')]
-function env(?string $name = null, bool $strict = true): mixed {
-	return PHP::env($name, $strict);
+function env(?string $name = null, mixed $default = null): mixed {
+	return PHP::env($name, $default);
 }
 
 #[Shortcut('PHP::pr()')]

@@ -179,7 +179,7 @@ class PhpInfo extends Box {
 
 		/** @noinspection PhpComposerExtensionStubsInspection */
 		$data[constants::KEY_OPCACHE] = extension_loaded('Zend OPcache')
-			?opcache_get_status()
+			?opcache_get_status() //@codeCoverageIgnore
 			:null; //@codeCoverageIgnore
 		$data[constants::KEY_SYSTEM_OS] = System::os();
 		$data[constants::KEY_KERNEL_NAME] = System::kernelName();

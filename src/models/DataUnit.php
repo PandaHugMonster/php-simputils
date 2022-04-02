@@ -18,6 +18,7 @@ use function json_encode;
  *
  * @property-read bool $fractions_supported Whether fractions (float) supported
  *                                          by the big number extension
+ * @property-read string $big_number_extension
  */
 class DataUnit extends SimpleObject {
 	use RedefinableComponentTrait;
@@ -82,11 +83,16 @@ class DataUnit extends SimpleObject {
 	/**
 	 * @var bool $long_format is applicable only for `humanReadable()` method (and any user output)
 	 */
-	public static $long_format = false;
+	public static bool $long_format = false;
 
 	#[DebugHide]
 	protected BigNumber $_value;
 	public string $user_format = self::USER_FORMAT_HR;
+
+	#[Property('big_number_extension')]
+	protected function getBigNumberExtension(): string {
+		return $this->_value->extension;
+	}
 
 	#[Property('fractions_supported')]
 	protected function getFractionsSupported(): bool {
@@ -269,7 +275,7 @@ class DataUnit extends SimpleObject {
 		$from_power = $unit_codes[$from_unit];
 		$to_power = $unit_codes[$to_unit];
 
-		$ext = static::$big_number_extension;
+		$ext = static::$big_number_extension ?? BigNumber::$default_extension;
 
 		// TODO Should be improved part with in_array()
 		$class_bn = PHP::redef(BigNumber::class);
@@ -323,12 +329,14 @@ class DataUnit extends SimpleObject {
 		$unit = preg_replace('/[\W]/ui', '', Str::upper($unit));
 		$unit = preg_replace('/[\d]/', '', $unit);
 
+		if (empty($unit)) {
+			$unit = 'B'; // @codeCoverageIgnore
+			// throw new UnspecifiedDataUnit();
+		}
+
 		// NOTE Transparently translated if applicable
 		$unit = static::translator($unit);
 
-		if (empty($unit)) {
-			throw new UnspecifiedDataUnit();
-		}
 		if (!$unit_codes->containsKey($unit)) {
 			throw new NonExistingDataUnit("Such data unit as \"{$unit}\" is not known");
 		}
@@ -406,16 +414,14 @@ class DataUnit extends SimpleObject {
 	 * @throws \spaf\simputils\exceptions\NonExistingDataUnit
 	 * @throws \spaf\simputils\exceptions\UnspecifiedDataUnit
 	 */
-	protected static function humanReadable(BigNumber|int|string $value): null|BigNumber|string {
+	public static function humanReadable(BigNumber|int|string $value): null|BigNumber|string {
 		$res = '';
 		$dctp = static::unitToPowerMap();
 		foreach ($dctp->keys as $unit_code) {
 			// NOTE Careful, do not optimize this without correct solution. Will cause issues.
-			$accu = static::unitTo(is_numeric($value) || $value instanceof BigNumber
-				?"{$value}b"
-				:$value,
-				$unit_code
-			);
+
+			$y = is_numeric($value) || $value instanceof BigNumber;
+			$accu = static::unitTo($y?"{$value}b":$value, $unit_code);
 			if ($accu->cmp(1024) < 0) {
 				if (static::$long_format) {
 					return static::formattedStrLong($value, $accu, $unit_code);
@@ -423,6 +429,10 @@ class DataUnit extends SimpleObject {
 					return static::formattedStr($accu, $unit_code);
 				}
 			}
+		}
+
+		if (static::$long_format) {
+			return static::formattedStrLong($value, $accu, $unit_code);
 		}
 
 		return static::formattedStr($accu, $unit_code);
@@ -437,7 +447,7 @@ class DataUnit extends SimpleObject {
 
 		$prev_unit = null;
 		foreach (static::unitToPowerMap() as $unit => $power) {
-			$t = 1024**$power;
+			$t = (new BigNumber(1024))->pow($power);
 			$unit = static::clearUnit($unit);
 
 			$left = $total_bytes->div($t)->floor();
@@ -512,6 +522,10 @@ class DataUnit extends SimpleObject {
 		return new static($res);
 	}
 
+	/**
+	 * @return string
+	 * @codeCoverageIgnore
+	 */
 	public static function redefComponentName(): string {
 		return InitConfig::REDEF_DATA_UNIT;
 	}

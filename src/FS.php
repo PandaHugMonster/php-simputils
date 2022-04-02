@@ -7,12 +7,15 @@ use finfo;
 use spaf\simputils\generic\BasicResourceApp;
 use spaf\simputils\models\Dir;
 use spaf\simputils\models\File;
+use function file_exists;
+use function is_dir;
 use const DIRECTORY_SEPARATOR;
 
 /**
  * FileSystem class
  *
  * TODO Add fileExists method
+ * TODO Add real-path property and check if realpath is the same as specified.
  */
 class FS {
 
@@ -373,5 +376,29 @@ class FS {
 			$res = PHP::box($parts)->join($sep);
 		}
 		return $res ?? null;
+	}
+
+	/**
+	 * Returns file obj or path to the file relative to work-dir
+	 *
+	 *
+	 * @param string|null ...$parts
+	 *
+	 * FIX  implement different plugins/modules/extensions support
+	 *
+	 * @return string|\spaf\simputils\models\File|\spaf\simputils\models\Dir|null
+	 * @throws \Exception
+	 */
+	public static function locate(?string ...$parts): File|Dir {
+		$work_dir = PHP::getInitConfig()->working_dir;
+
+		$path = static::path($work_dir, ...$parts);
+		if (file_exists($path)) {
+			if (is_dir($path)) {
+				return static::dir($path);
+			}
+		}
+
+		return static::file($path);
 	}
 }

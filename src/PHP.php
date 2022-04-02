@@ -205,6 +205,7 @@ class PHP {
 	 * @param ?int    $enforced_type Enforced serialization type (per function call
 	 *                               overrides the default serialization type)
 	 *
+	 * FIX  Deserialization does not recursively uses boxes instead of arrays. Should be fixed!!
 	 * @return mixed
 	 * @throws \ReflectionException Reflection related exceptions
 	 */

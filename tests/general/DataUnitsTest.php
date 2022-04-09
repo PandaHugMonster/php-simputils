@@ -30,11 +30,12 @@ use function spaf\simputils\basic\env;
  * @uses \spaf\simputils\models\PhpInfo
  * @uses \spaf\simputils\models\Version
  * @uses \spaf\simputils\special\CodeBlocksCacheIndex
- * @uses \spaf\simputils\traits\SimpleObjectTrait::____prepareProperty
- * @uses \spaf\simputils\traits\SimpleObjectTrait::____propertyBatchMethodGet
+ * @uses \spaf\simputils\traits\SimpleObjectTrait::____PrepareProperty
+ * @uses \spaf\simputils\traits\SimpleObjectTrait::____PropertyBatchMethodGet
  * @uses \spaf\simputils\traits\SimpleObjectTrait::__get
  * @uses \spaf\simputils\traits\SimpleObjectTrait::__set
  * @uses \spaf\simputils\traits\SimpleObjectTrait::getAllTheLastMethodsAndProperties
+ * @uses \spaf\simputils\traits\SimpleObjectTrait::simpUtilsGetValidator
  */
 class DataUnitsTest extends TestCase {
 

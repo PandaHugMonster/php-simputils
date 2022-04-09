@@ -217,6 +217,28 @@ class Str {
 		return $target;
 	}
 
+	public static function removeStarting(
+		string $target,
+		string|int $starting,
+		bool   $is_case_sensitive = true
+	): string {
+		if (is_integer($starting)) {
+			if ($starting < 1) {
+				return $target;
+			}
+			return substr($target, $starting);
+		} else if (!$is_case_sensitive) {
+			$starting = Str::upper($starting);
+		}
+
+		$len = static::len($starting);
+		if ($len > 0 && static::startsWith($target, $starting, $is_case_sensitive)) {
+			return substr($target, $len);
+		}
+
+		return $target;
+	}
+
 	/**
 	 * @param string ...$strings
 	 *

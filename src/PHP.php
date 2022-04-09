@@ -803,4 +803,9 @@ class PHP {
 
 		return CodeBlocksCacheIndex::getRedefinition($hint, $target_class);
 	}
+
+	public static function classShortName(string $val): string {
+		$class_reflection = new ReflectionClass($val);
+		return $class_reflection->getShortName();
+	}
 }

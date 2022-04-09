@@ -24,8 +24,9 @@ use spaf\simputils\models\File;
  * @uses \spaf\simputils\Str
  * @uses \spaf\simputils\models\Box
  * @uses \spaf\simputils\attributes\Property
- * @uses \spaf\simputils\traits\SimpleObjectTrait::____prepareProperty
+ * @uses \spaf\simputils\traits\SimpleObjectTrait::____PrepareProperty
  * @uses \spaf\simputils\traits\SimpleObjectTrait::getAllTheLastMethodsAndProperties
+ * @uses \spaf\simputils\traits\SimpleObjectTrait::simpUtilsGetValidator
  */
 class FSTest extends TestCase {
 

@@ -27,6 +27,7 @@ class PropertyBatch extends Property {
 	public function __construct(
 		public ?string $type = null,
 		public ?string $storage = null,
+		public bool|string $valid = true,
 	) {}
 
 	public static function valueStoreRef(
@@ -43,7 +44,6 @@ class PropertyBatch extends Property {
 			if ($value_store_ref === PropertyBatch::STORAGE_SELF) {
 				$value_store = &$obj;
 			} else {
-//				$value_store_ref
 				$value_store = &$obj->$value_store_ref;
 			}
 

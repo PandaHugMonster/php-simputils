@@ -29,7 +29,7 @@ use spaf\simputils\Str;
  *
  * @package spaf\simputils\attributes
  */
-#[Attribute(Attribute::TARGET_METHOD)]
+#[Attribute(Attribute::TARGET_PROPERTY | Attribute::TARGET_METHOD)]
 class Property extends BasicAttribute {
 
 	const TYPE_SET = 'set';
@@ -41,14 +41,16 @@ class Property extends BasicAttribute {
 	const MODIFIER_PRIVATE = 'private';
 
 	/**
-	 * @param string|null $name         Property name
-	 * @param string|null $type         Enforced property type (get, set, both)
+	 * @param string|null $name  Property name
+	 * @param string|null $type  Enforced property type (get, set, both)
+	 * @param string|bool $valid Normalizer/Validator/Filter
 	 *
 	 * @codeCoverageIgnore
 	 */
 	public function __construct(
 		public ?string $name = null,
-		public ?string $type = null
+		public ?string $type = null,
+		public bool|string $valid = true
 	) {}
 
 	public static function subProcess(

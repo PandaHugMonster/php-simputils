@@ -217,7 +217,6 @@ trait PropertiesTrait {
 						}
 						$already_defined[] = $name;
 
-//						if ($check_and_do_not_call && $call_type !== Property::TYPE_SET) {
 						if ($check_and_do_not_call) {
 							// NOTE Relevant for `isset()`
 							return true;
@@ -243,6 +242,43 @@ trait PropertiesTrait {
 		}
 
 		throw new PropertyDoesNotExist('No such property '.$name);
+	}
+
+	private function simpUtilsGetValidator($item, $attr, $call_type): ?string {
+		$validators_enabled = CommonMemoryCacheIndex::$property_validators_enabled;
+		$validators = CommonMemoryCacheIndex::$property_validators;
+
+		if ($validators_enabled && $call_type === Property::TYPE_SET) {
+			$attr_instance = $attr->newInstance();
+			$valid = $attr_instance?->valid ?? false;
+
+			if ($valid === true) {
+				if ($item instanceof ReflectionProperty) {
+					$t = $item->getType();
+					if ($t instanceof ReflectionUnionType) {
+						// NOTE Union-Types are not supported due to unpredictable nature
+						return null;
+					} else if ($t instanceof ReflectionNamedType) {
+						$class = $t->getName();
+						if (empty($validators[$class])) {
+							$class = PHP::classShortName($class);
+							if (empty($validators[$class])) {
+								return null;
+							}
+						}
+						if (!empty($validators[$class]) && PHP::isClass($validators[$class])) {
+							return $validators[$class];
+						}
+					}
+				}
+			} else if (is_string($valid)) {
+				if (PHP::isClass($valid)) {
+					return $valid;
+				}
+			}
+		}
+
+		return null;
 	}
 
 	/**

@@ -9,4 +9,6 @@ namespace spaf\simputils\special;
 class PropertiesCacheIndex {
 	public static $index = [];
 	public static $property_settings = [];
+	public static $property_validation = [];
+	public static $property_impl_type = [];
 }

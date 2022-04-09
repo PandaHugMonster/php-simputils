@@ -28,7 +28,7 @@ use function spaf\simputils\basic\ts;
  * @uses \spaf\simputils\special\CodeBlocksCacheIndex
  * @uses \spaf\simputils\attributes\Property
  * @uses \spaf\simputils\traits\SimpleObjectTrait
- * @uses \spaf\simputils\traits\SimpleObjectTrait::____prepareProperty
+ * @uses \spaf\simputils\traits\SimpleObjectTrait::____PrepareProperty
  * @uses \spaf\simputils\traits\SimpleObjectTrait::__get
  * @uses \spaf\simputils\traits\SimpleObjectTrait::getAllTheLastMethodsAndProperties
  * @uses \spaf\simputils\Str

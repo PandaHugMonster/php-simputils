@@ -15,10 +15,11 @@ use spaf\simputils\PHP;
  * @uses \spaf\simputils\Str::is
  * @uses \spaf\simputils\attributes\Property
  * @uses \spaf\simputils\special\CodeBlocksCacheIndex
- * @uses \spaf\simputils\traits\SimpleObjectTrait::____prepareProperty
+ * @uses \spaf\simputils\traits\SimpleObjectTrait::____PrepareProperty
  * @uses \spaf\simputils\traits\SimpleObjectTrait::__get
  * @uses \spaf\simputils\traits\SimpleObjectTrait::getAllTheLastMethodsAndProperties
  * @uses \spaf\simputils\Math
+ * @uses \spaf\simputils\traits\SimpleObjectTrait::simpUtilsGetValidator
  */
 class BoxTest extends TestCase {
 

@@ -343,6 +343,7 @@ class PHP {
 	 * @return string
 	 */
 	public static function type(mixed $var): string {
+		// FIX  Unify aliases with the same name. For example "double" and "float"
 		return is_object($var)?get_class($var):gettype($var);
 	}
 

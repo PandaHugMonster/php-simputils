@@ -3,17 +3,22 @@
 namespace spaf\simputils\traits;
 
 use ArrayObject;
+use Closure;
 use Error;
 use ReflectionClass;
 use ReflectionMethod;
+use ReflectionNamedType;
 use ReflectionObject;
 use ReflectionProperty;
+use ReflectionUnionType;
 use spaf\simputils\attributes\DebugHide;
 use spaf\simputils\attributes\Extract;
 use spaf\simputils\attributes\Property;
 use spaf\simputils\attributes\PropertyBatch;
 use spaf\simputils\exceptions\PropertyAccessError;
 use spaf\simputils\exceptions\PropertyDoesNotExist;
+use spaf\simputils\PHP;
+use spaf\simputils\special\CommonMemoryCacheIndex;
 use spaf\simputils\special\PropertiesCacheIndex;
 use function get_parent_class;
 use function in_array;
@@ -203,7 +208,7 @@ trait PropertiesTrait {
 
 				$attr_class = $attr->getName();
 				if (in_array($attr_class, $applicable_attribute_classes)) {
-					[$func_ref, $status] = call_user_func(
+					[$func_ref, $status, $name] = call_user_func(
 						[$attr_class, 'subProcess'],
 						$this, $item, $attr, $name, $call_type
 					);
@@ -221,6 +226,15 @@ trait PropertiesTrait {
 							// NOTE Relevant for `isset()`
 							return true;
 						}
+
+						if ($call_type === Property::TYPE_SET) {
+							// NOTE Validation
+							$validator = $this->simpUtilsGetValidator($item, $attr, $call_type);
+							if ($validator) {
+								$value = $validator($value);
+							}
+						}
+
 						return $this->$func_ref($value, $call_type, $name);
 					} else if ($status !== false && empty($sub)) {
 						$sub = $status;
@@ -244,7 +258,7 @@ trait PropertiesTrait {
 		throw new PropertyDoesNotExist('No such property '.$name);
 	}
 
-	private function simpUtilsGetValidator($item, $attr, $call_type): ?string {
+	private function simpUtilsGetValidator($item, $attr, $call_type): ?Closure {
 		$validators_enabled = CommonMemoryCacheIndex::$property_validators_enabled;
 		$validators = CommonMemoryCacheIndex::$property_validators;
 
@@ -267,13 +281,18 @@ trait PropertiesTrait {
 							}
 						}
 						if (!empty($validators[$class]) && PHP::isClass($validators[$class])) {
-							return $validators[$class];
+							$closure = Closure::fromCallable([$validators[$class], 'processSet']);
+							return $closure;
 						}
 					}
 				}
 			} else if (is_string($valid)) {
-				if (PHP::isClass($valid)) {
-					return $valid;
+				if (!empty($validators[$valid])) {
+					$closure = Closure::fromCallable([$validators[$valid], 'processSet']);
+					return $closure;
+				} else if (PHP::isClass($valid)) {
+					$closure = Closure::fromCallable([$valid, 'processSet']);
+					return $closure;
 				}
 			}
 		}
@@ -420,6 +439,14 @@ trait PropertiesTrait {
 			}
 		}
 		return $res;
+	}
+
+	private function ____propertyFieldMethodSet($value, $type, $name) {
+		$this->$name = $value;
+	}
+
+	private function ____propertyFieldMethodGet($value, $type, $name) {
+		return $this->$name;
 	}
 
 	/**

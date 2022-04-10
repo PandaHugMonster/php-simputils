@@ -27,7 +27,7 @@ class PropertyBatch extends Property {
 	public function __construct(
 		public ?string $type = null,
 		public ?string $storage = null,
-		public bool|string $valid = true,
+		public null|bool|string $valid = true,
 	) {}
 
 	public static function valueStoreRef(
@@ -116,7 +116,7 @@ class PropertyBatch extends Property {
 					$index[$key.'#'.PropertyBatch::TYPE_GET] = $func_ref_prefix.'Get';
 					$index[$key.'#'.PropertyBatch::TYPE_SET] = $func_ref_prefix.'Set';
 				}
-				return [$func_ref, true];
+				return [$func_ref, true, $name];
 			} else if ($access_type === $call_type) {
 
 				foreach ($expected_names as $exp_name) {
@@ -126,13 +126,13 @@ class PropertyBatch extends Property {
 					$index[$key.'#'.$call_type] = $func_ref;
 				}
 
-				return [$func_ref, true];
+				return [$func_ref, true, $name];
 			}
 
-			return [$func_ref, $access_type === static::TYPE_GET?'read-only':'write-only'];
+			return [$func_ref, $access_type === static::TYPE_GET?'read-only':'write-only', $name];
 		}
 
-		return [$func_ref, false];
+		return [$func_ref, false, $name];
 	}
 
 	public static function expectedNamesAndDefaultValues(

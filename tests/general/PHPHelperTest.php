@@ -675,5 +675,8 @@ class PHPHelperTest extends TestCase {
 
 		$this->assertIsBool(PHP::info()->hasExtension('Core'));
 		$this->assertFalse(PHP::info()->hasExtension('NonExistentExtension_blalbalba_lbalbbla'));
+
+		$this->assertEquals('DateTime', PHP::classShortName(DateTime::class));
+		$this->assertEquals('Str', PHP::classShortName(Str::class));
 	}
 }

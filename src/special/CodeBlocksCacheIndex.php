@@ -19,6 +19,7 @@ use spaf\simputils\models\GitRepo;
 use spaf\simputils\models\InitConfig;
 use spaf\simputils\models\L10n;
 use spaf\simputils\models\PhpInfo;
+use spaf\simputils\models\Set;
 use spaf\simputils\models\StackFifo;
 use spaf\simputils\models\StackLifo;
 use spaf\simputils\models\StrObj;
@@ -61,6 +62,7 @@ class CodeBlocksCacheIndex {
 			InitConfig::REDEF_TEMPERATURE => Temperature::class,
 			InitConfig::REDEF_SYSTEM_FINGERPRINT => SystemFingerprint::class,
 			InitConfig::REDEF_STR_OBJ => StrObj::class,
+			InitConfig::REDEF_SET => Set::class,
 		]);
 	}
 

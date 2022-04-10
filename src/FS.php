@@ -393,10 +393,8 @@ class FS {
 		$work_dir = PHP::getInitConfig()->working_dir;
 
 		$path = static::path($work_dir, ...$parts);
-		if (file_exists($path)) {
-			if (is_dir($path)) {
-				return static::dir($path);
-			}
+		if (is_dir($path)) {
+			return static::dir($path);
 		}
 
 		return static::file($path);

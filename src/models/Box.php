@@ -393,7 +393,7 @@ class Box extends ArrayObject {
 		}
 		$res = new static;
 		foreach ($this as $key => $val) {
-			$sub_res = $callback($val, $key, $this);
+			$sub_res = $callback($key, $val, $this);
 			if (!empty($sub_res)) {
 				[$key, $val] = $sub_res;
 				$res[$key] = $val;
@@ -491,6 +491,11 @@ class Box extends ArrayObject {
 	#[Shortcut('\in_array(value)')]
 	public function containsValue(mixed $value): bool {
 		return in_array($value, (array) $this);
+	}
+
+	public function toSet(): Set {
+		$class = PHP::redef(Set::class);
+		return new $class($this);
 	}
 
 	public function toArray(

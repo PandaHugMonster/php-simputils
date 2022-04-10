@@ -209,6 +209,39 @@ class StrTest extends TestCase {
 			)
 		);
 
+		// Str::removeStarting
+
+		$str = "TesT LinE With SOmE teXt";
+		$this->assertEquals(
+			'With SOmE teXt',
+			Str::removeStarting(
+				$str,
+				'test line ',
+				false
+			)
+		);
+		$this->assertEquals(
+			'With SOmE teXt',
+			Str::removeStarting(
+				$str,
+				10
+			)
+		);
+		$this->assertEquals(
+			'TesT LinE With SOmE teXt',
+			Str::removeStarting(
+				$str,
+				-5
+			)
+		);
+		$this->assertEquals(
+			'TesT LinE With SOmE teXt',
+			Str::removeStarting(
+				$str,
+				''
+			)
+		);
+
 	}
 
 	/**

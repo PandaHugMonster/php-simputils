@@ -4,6 +4,8 @@ use PHPUnit\Framework\TestCase;
 use spaf\simputils\FS;
 use spaf\simputils\models\Dir;
 use spaf\simputils\models\File;
+use spaf\simputils\PHP;
+use spaf\simputils\Str;
 
 
 /**
@@ -112,6 +114,7 @@ class FSTest extends TestCase {
 	/**
 	 * @covers \spaf\simputils\FS::getFileMimeType
 	 *
+	 * @runInSeparateProcess
 	 * @return void
 	 * @throws \Exception
 	 */
@@ -183,6 +186,23 @@ class FSTest extends TestCase {
 			$dir->format(-2)
 		);
 		$this->assertEmpty(FS::dir('')->format(-2));
+
+		$sep = DIRECTORY_SEPARATOR;
+		$r_p = realpath(__DIR__."{$sep}..{$sep}..");
+		PHP::init(['working_dir' => $r_p]);
+
+		$this->assertInstanceOf(
+			File::class,
+			FS::locate('tests', 'general', 'FSTest.php')
+		);
+		$this->assertInstanceOf(
+			Dir::class,
+			FS::locate('tests', 'general')
+		);
+		$this->assertEquals(
+			"{$r_p}{$sep}tests{$sep}general",
+			Str::ing(FS::locate('tests', 'general'))
+		);
 	}
 
 //	function testMimeTypeCheck() {

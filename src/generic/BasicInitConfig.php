@@ -46,6 +46,7 @@ abstract class BasicInitConfig extends SimpleObject {
 	const REDEF_TEMPERATURE = 'Temperature';
 	const REDEF_SYSTEM_FINGERPRINT = 'SystemFingerprint';
 	const REDEF_STR_OBJ = 'StrObj';
+	const REDEF_SET = 'Set';
 
 	public ?string $name = null;
 	public ?string $code_root = null;

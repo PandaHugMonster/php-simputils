@@ -214,11 +214,13 @@ class PHP {
 		?string $class = null,
 		?int $enforced_type = null
 	): mixed {
-		if (empty($str))
+		if (empty($str)) {
 			return null;
+		}
 
-		if (empty($class))
+		if (empty($class)) {
 			$class = static::determineSerializedClass($str);
+		}
 
 //		if (empty($class))
 //			// TODO Fix this exception to a more appropriate one

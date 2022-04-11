@@ -143,7 +143,6 @@ use function uasort;
  * @property-read int $size
  * @property-read Box|array $keys
  * @property-read Box|array $values
- * @property-read Box|array $flipped
  */
 class Box extends ArrayObject {
 	use SimpleObjectTrait;
@@ -195,8 +194,7 @@ class Box extends ArrayObject {
 	 * @return static|Box|array
 	 */
 	#[Extract(false)]
-	#[Property('flipped')]
-	protected function getFlipped(): static|Box|array {
+	public function flipped(): static|Box|array {
 		// TODO Improve flipping so it would hash objects when possible for keys
 		return new static(array_flip((array) $this));
 	}
@@ -215,8 +213,15 @@ class Box extends ArrayObject {
 //		return array_is_list((array) $this);
 //	}
 
-	public function getKeyByValue($value) {
-		return $this->flipped[$value] ?? null;
+	/**
+	 * Returns key by the specified value
+	 *
+	 * @param mixed $value Value
+	 *
+	 * @return string|null
+	 */
+	public function getKeyByValue(mixed $value): ?string {
+		return $this->flipped()[$value] ?? null;
 	}
 
 	/**
@@ -685,6 +690,12 @@ class Box extends ArrayObject {
 		return new static(array_combine((array) $keys, (array) $values));
 	}
 
+	/**
+	 * @param int $num
+	 *
+	 * @return \Generator
+	 * @codeCoverageIgnore
+	 */
 	public function randKeys(int $num = 1): Generator {
 		$keys = $this->keys;
 
@@ -696,6 +707,12 @@ class Box extends ArrayObject {
 		}
 	}
 
+	/**
+	 * @param int $num
+	 *
+	 * @return \Generator
+	 * @codeCoverageIgnore
+	 */
 	public function randValues(int $num = 1): Generator {
 		$values = $this->values;
 
@@ -707,11 +724,21 @@ class Box extends ArrayObject {
 		}
 	}
 
+	/**
+	 * @return false|mixed
+	 * @codeCoverageIgnore
+	 */
 	public function randKey() {
 		$keys = $this->keys;
 		return $keys[Math::rand(0, $keys->size - 1)];
 	}
 
+	/**
+	 * @param int $num
+	 *
+	 * @return false|mixed
+	 * @codeCoverageIgnore
+	 */
 	public function randValue(int $num = 1) {
 		$values = $this->values;
 		return $values[Math::rand(0, $values->size - 1)];
@@ -783,6 +810,10 @@ class Box extends ArrayObject {
 		return [$descending, $by_values, $case_sensitive, $natural, $callback];
 	}
 
+	/**
+	 * @return $this
+	 * @codeCoverageIgnore
+	 */
 	public function shuffle(): self {
 		$res = (array) $this;
 		shuffle($res);

@@ -240,6 +240,9 @@ class FSTest extends TestCase {
 		$res = $dd->walk(true, new DirExtFilter('general', 'php'));
 		$this->assertInstanceOf(Box::class, $res);
 		$this->assertGreaterThan(0, $res->size);
+
+		$res = $dd->walk(true, '#bebeebbebeb#');
+		$this->assertEquals(0, $res->size);
 	}
 
 //	function testMimeTypeCheck() {

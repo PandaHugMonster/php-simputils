@@ -18,6 +18,7 @@ use spaf\simputils\generic\BasicInitConfig;
 use spaf\simputils\models\Box;
 use spaf\simputils\models\InitConfig;
 use spaf\simputils\models\PhpInfo;
+use spaf\simputils\models\Set;
 use spaf\simputils\models\StackFifo;
 use spaf\simputils\models\StackLifo;
 use spaf\simputils\models\Version;
@@ -679,6 +680,17 @@ class PHP {
 			?new $class_stack_lifo($items_and_conf)
 			:new $class_stack_fifo($items_and_conf);
 		return $obj;
+	}
+
+	/**
+	 * Creating "Set"
+	 *
+	 * @param mixed ...$data
+	 *
+	 */
+	public static function set(mixed ...$data): Set {
+		$class = static::redef(Set::class);
+		return new $class($data);
 	}
 
 	/**

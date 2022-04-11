@@ -3,6 +3,7 @@
 
 use PHPUnit\Framework\TestCase;
 use spaf\simputils\models\Box;
+use spaf\simputils\models\Set;
 use spaf\simputils\models\Version;
 use spaf\simputils\PHP;
 
@@ -65,6 +66,8 @@ class BoxTest extends TestCase {
 
 	/**
 	 * @uses \spaf\simputils\PHP::box
+	 * @uses \spaf\simputils\Str
+	 *
 	 * @return void
 	 * @throws \Exception
 	 */
@@ -74,7 +77,7 @@ class BoxTest extends TestCase {
 			'key2' => 'val2',
 			'key3' => 'val3',
 		]);
-		$flipped = $data->flipped;
+		$flipped = $data->flipped();
 
 		$this->assertArrayHasKey('val2', $flipped);
 		$this->assertArrayNotHasKey('key1', $flipped);
@@ -95,6 +98,44 @@ class BoxTest extends TestCase {
 
 		$this->assertEquals(1, $data->size);
 		$this->assertEquals(PHP::box(['key2' => 'val2']), $data);
+
+		$this->assertEquals('key2', $data->getKeyByValue('val2'));
+		$this->assertEquals('val2', $data->get('key2'));
+		$this->assertEquals('val2', $data->get('KEY2', case_sensitive: false));
+		$this->assertEquals(
+			'default text',
+			$data->get('test', 'default text', case_sensitive: false)
+		);
+
+		$bx = PHP::box(['b_abc_123', 'a_abc_123', 'c_abc_123', 'd_abc_123', 'y_abc_123']);
+
+		// FIX  Improve these tests
+		$this->assertEquals(
+			PHP::box(['b_abc_123', 'a_abc_123', 'c_abc_123', 'd_abc_123', 'y_abc_123']),
+			$bx->sort()
+		);
+		$this->assertEquals(
+			PHP::box(['b_abc_123', 'a_abc_123', 'c_abc_123', 'd_abc_123', 'y_abc_123']),
+			$bx->sort(true, false, false, false)
+		);
+		$this->assertEquals(
+			PHP::box(['b_abc_123', 'a_abc_123', 'c_abc_123', 'd_abc_123', 'y_abc_123']),
+			$bx->sort(true, true, false, false)
+		);
+		$this->assertEquals(
+			PHP::box(['b_abc_123', 'a_abc_123', 'c_abc_123', 'd_abc_123', 'y_abc_123']),
+			$bx->sort(true, true, true, false)
+		);
+		$this->assertEquals(
+			PHP::box(['b_abc_123', 'a_abc_123', 'c_abc_123', 'd_abc_123', 'y_abc_123']),
+			$bx->sort(true, true, true, true)
+		);
+		$this->assertEquals(
+			PHP::box(['b_abc_123', 'a_abc_123', 'c_abc_123', 'd_abc_123', 'y_abc_123']),
+			$bx->sort(true, true, true, true, function () {
+				return 0;
+			})
+		);
 	}
 
 	function testStacks() {
@@ -143,5 +184,29 @@ class BoxTest extends TestCase {
 
 		$this->assertEquals(0, $stack_l->size);
 		$this->assertEquals(0, $stack_f->size);
+	}
+
+	/**
+	 * @covers \spaf\simputils\models\Set
+	 * @return void
+	 */
+	function testSets() {
+		$set = PHP::set('test', 'test', 'test', 'test2', 'test2', 'test3');
+
+		$this->assertInstanceOf(Set::class, $set);
+		$this->assertEquals(3, $set->size);
+
+		$set->exchangeArray(['tree', 'three', 'tree', 'three']);
+		$this->assertEquals(2, $set->size);
+		$this->assertEquals(['tree', 'three'], $set->toArray());
+
+		$set[] = 'bear';
+		$set[] = 'where';
+		$set[] = 'where';
+		$set[] = 'Bears';
+		$set[] = 'Bears';
+
+		$this->assertEquals(5, $set->size);
+		$this->assertEquals(['tree', 'three', 'bear', 'where', 'Bears'], $set->toArray());
 	}
 }

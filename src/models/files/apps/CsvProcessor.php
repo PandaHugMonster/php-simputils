@@ -109,7 +109,7 @@ class CsvProcessor extends TextProcessor {
 		$header = static::prepareHeader($data);
 		$header_flipped = null;
 		if (!empty($header)) {
-			$header_flipped = $header->flipped;
+			$header_flipped = $header->flipped();
 		}
 
 		$is_header_one_set = false;

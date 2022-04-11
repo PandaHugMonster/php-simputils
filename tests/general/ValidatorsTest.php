@@ -18,7 +18,7 @@ use spaf\simputils\models\DateTime;
  */
 class ValidatorsTest extends TestCase {
 
-	protected function booleanNormalizerData() {
+	public function booleanNormalizerData() {
 		return [
 			// True
 			[true, true],
@@ -43,7 +43,7 @@ class ValidatorsTest extends TestCase {
 		];
 	}
 
-	protected function floatNormalizerData() {
+	public function floatNormalizerData() {
 		return [
 			[99.92, '99.92'],
 			[0.0, 'test'],
@@ -54,7 +54,7 @@ class ValidatorsTest extends TestCase {
 		];
 	}
 
-	protected function integerNormalizerData() {
+	public function integerNormalizerData() {
 		return [
 			[99, '99.92'],
 			[12, '012'],
@@ -66,7 +66,7 @@ class ValidatorsTest extends TestCase {
 		];
 	}
 
-	protected function stringNormalizerData() {
+	public function stringNormalizerData() {
 		return [
 			['100500', 100500],
 			['500.009', 500.009],

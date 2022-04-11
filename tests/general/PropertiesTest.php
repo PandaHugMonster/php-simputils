@@ -7,6 +7,7 @@ use spaf\simputils\exceptions\PropertyAccessError;
 use spaf\simputils\exceptions\PropertyDoesNotExist;
 use spaf\simputils\generic\SimpleObject;
 use spaf\simputils\models\Box;
+use spaf\simputils\models\DateTime;
 use spaf\simputils\traits\ArrayReadOnlyAccessTrait;
 
 /**
@@ -193,6 +194,20 @@ class C extends B {
 }
 
 /**
+ *
+ * @property mixed $simple_one
+ * @property ?\spaf\simputils\models\DateTime $simple_two
+ */
+class D extends SimpleObject {
+
+	#[Property]
+	protected $_simple_one = null;
+
+	#[Property('simple_two')]
+	protected ?DateTime $_simple_two = null;
+}
+
+/**
  * Properties test class
  *
  * @covers \spaf\simputils\attributes\PropertyBatch
@@ -311,6 +326,17 @@ class PropertiesTest extends TestCase {
 		$b->var0011 = 'toot';
 		$this->assertEquals('toot', $b->_var0011);
 
+		$dd = new D();
+		$this->assertNull($dd->simple_one);
+		$this->assertNull($dd->simple_two);
+
+		$dd->simple_one = 'just a text data';
+		$this->assertIsString($dd->simple_one);
+		$this->assertEquals('just a text data', $dd->simple_one);
+
+		$dd->simple_two = '2020-02-05';
+		$this->assertInstanceOf(DateTime::class, $dd->simple_two);
+		$this->assertEquals('2020#02', $dd->simple_two->format('Y#m'));
 	}
 
 	/**

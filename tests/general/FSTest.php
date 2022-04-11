@@ -1,7 +1,11 @@
 <?php /** @noinspection ALL */
 
 use PHPUnit\Framework\TestCase;
+use spaf\simputils\components\filters\DirExtFilter;
+use spaf\simputils\components\filters\OnlyDirsFilter;
+use spaf\simputils\components\filters\OnlyFilesFilter;
 use spaf\simputils\FS;
+use spaf\simputils\models\Box;
 use spaf\simputils\models\Dir;
 use spaf\simputils\models\File;
 use spaf\simputils\PHP;
@@ -203,6 +207,39 @@ class FSTest extends TestCase {
 			"{$r_p}{$sep}tests{$sep}general",
 			Str::ing(FS::locate('tests', 'general'))
 		);
+	}
+
+	/**
+	 * @covers \spaf\simputils\models\Dir
+	 * @covers \spaf\simputils\components\filters\DirExtFilter
+	 * @covers \spaf\simputils\components\filters\OnlyFilesFilter
+	 * @covers \spaf\simputils\components\filters\OnlyDirsFilter
+	 *
+	 * @runInSeparateProcess
+	 * @return void
+	 * @throws \Exception
+	 */
+	function testDirs() {
+		$wd = realpath(__DIR__.'/../..');
+		PHP::init(['working_dir' => $wd]);
+		$dd = FS::locate('tests');
+		$this->assertInstanceOf(Dir::class, $dd);
+
+		$res = $dd->walk(false, new OnlyFilesFilter);
+		$this->assertInstanceOf(Box::class, $res);
+		$this->assertEquals(0, $res->size);
+
+		$res = $dd->walk(true, new OnlyDirsFilter());
+		$this->assertInstanceOf(Box::class, $res);
+		$this->assertEquals(1, $res->size);
+
+		$res = $dd->walk(true, new OnlyFilesFilter);
+		$this->assertInstanceOf(Box::class, $res);
+		$this->assertGreaterThan(0, $res->size);
+
+		$res = $dd->walk(true, new DirExtFilter('general', 'php'));
+		$this->assertInstanceOf(Box::class, $res);
+		$this->assertGreaterThan(0, $res->size);
 	}
 
 //	function testMimeTypeCheck() {

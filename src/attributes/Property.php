@@ -135,7 +135,7 @@ class Property extends BasicAttribute {
 		$args = $args ?? $attr->getArguments();
 		$res = $args[0] ?? $args['name'] ?? $func_ref;
 		if ($res instanceof ReflectionMethod) {
-			$res = $res->getName();
+			$res = $res->getName(); // @codeCoverageIgnore
 		}
 		return $res;
 	}

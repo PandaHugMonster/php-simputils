@@ -2,11 +2,11 @@
 
 namespace spaf\simputils\special;
 
-use spaf\simputils\components\validators\BooleanValidator;
-use spaf\simputils\components\validators\DateTimeValidator;
-use spaf\simputils\components\validators\FloatValidator;
-use spaf\simputils\components\validators\IntegerValidator;
-use spaf\simputils\components\validators\StringValidator;
+use spaf\simputils\components\normalizers\BooleanNormalizer;
+use spaf\simputils\components\normalizers\DateTimeNormalizer;
+use spaf\simputils\components\normalizers\FloatNormalizer;
+use spaf\simputils\components\normalizers\IntegerNormalizer;
+use spaf\simputils\components\normalizers\StringNormalizer;
 use spaf\simputils\models\Box;
 use spaf\simputils\models\PhpInfo;
 
@@ -28,10 +28,10 @@ class CommonMemoryCacheIndex {
 
 	public static int $property_validators_enabled = 2;
 	public static ?array $property_validators = [
-		'string' => StringValidator::class,
-		'bool' => BooleanValidator::class,
-		'int' => IntegerValidator::class,
-		'float' => FloatValidator::class,
-		'DateTime' => DateTimeValidator::class,
+		'string' => StringNormalizer::class,
+		'bool' => BooleanNormalizer::class,
+		'int' => IntegerNormalizer::class,
+		'float' => FloatNormalizer::class,
+		'DateTime' => DateTimeNormalizer::class,
 	];
 }

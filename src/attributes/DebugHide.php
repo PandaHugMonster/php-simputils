@@ -31,6 +31,7 @@ use Attribute;
  * FIX  I don't know hide to fix it, but for now you can't hide "PropertyBatch" target
  *      fields-values.
  *
+ * @codeCoverageIgnore
  */
 #[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_CLASS | Attribute::TARGET_PROPERTY)]
 class DebugHide {

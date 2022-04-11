@@ -281,17 +281,17 @@ trait PropertiesTrait {
 							}
 						}
 						if (!empty($validators[$class]) && PHP::isClass($validators[$class])) {
-							$closure = Closure::fromCallable([$validators[$class], 'processSet']);
+							$closure = Closure::fromCallable([$validators[$class], 'process']);
 							return $closure;
 						}
 					}
 				}
 			} else if (is_string($valid)) {
 				if (!empty($validators[$valid])) {
-					$closure = Closure::fromCallable([$validators[$valid], 'processSet']);
+					$closure = Closure::fromCallable([$validators[$valid], 'process']);
 					return $closure;
 				} else if (PHP::isClass($valid)) {
-					$closure = Closure::fromCallable([$valid, 'processSet']);
+					$closure = Closure::fromCallable([$valid, 'process']);
 					return $closure;
 				}
 			}

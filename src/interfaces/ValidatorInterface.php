@@ -18,5 +18,5 @@ interface ValidatorInterface {
 	 *
 	 * @return mixed
 	 */
-	public static function processSet(mixed $value): mixed;
+	public static function process(mixed $value): mixed;
 }

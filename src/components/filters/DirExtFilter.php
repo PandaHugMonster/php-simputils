@@ -17,9 +17,7 @@ class DirExtFilter implements WalkThroughFilterInterface {
 	) {}
 
 	public function check(File|Dir $obj): bool {
-		$dirs = !is_array($this->dirs)
-			?[$this->dirs]
-			:$this->dirs;
+		$dirs = !is_array($this->dirs)?[$this->dirs]:$this->dirs;
 		$res = empty($dirs);
 		foreach ($dirs as $dir) {
 			$name = $obj->name_full;
@@ -30,9 +28,7 @@ class DirExtFilter implements WalkThroughFilterInterface {
 
 		$res2 = true;
 		if ($obj->type !== Dir::FILE_TYPE) {
-			$extensions = !is_array($this->exts)
-				?[$this->exts]
-				:$this->exts;
+			$extensions = !is_array($this->exts)?[$this->exts]:$this->exts;
 			$res2 = empty($extensions);
 			foreach ($extensions as $ext) {
 				if ($obj?->extension === $ext) {

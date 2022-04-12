@@ -27,7 +27,6 @@ class BoxTest extends TestCase {
 	/**
 	 *
 	 * @return void
-	 * @throws \Exception
 	 *
 	 * @runInSeparateProcess
 	 */
@@ -60,7 +59,7 @@ class BoxTest extends TestCase {
 		$this->assertEquals(2, $b2->slice(-2)->size);
 		$this->assertEquals(2, $b2->slice(1, -1)->size);
 
-		$this->expectException(Exception::class);
+		$this->expectException(ValueError::class);
 		$this->assertEquals(2, $b2->slice(10)->size);
 	}
 
@@ -70,7 +69,6 @@ class BoxTest extends TestCase {
 	 * @uses \spaf\simputils\models\Set
 	 *
 	 * @return void
-	 * @throws \Exception
 	 */
 	function testAdditionalStuff() {
 		$data = PHP::box([
@@ -246,10 +244,9 @@ class BoxTest extends TestCase {
 	/**
 	 * @runInSeparateProcess
 	 * @return void
-	 * @throws \Exception
 	 */
 	function testBoxSumException() {
-		$this->expectException(Exception::class);
+		$this->expectException(ValueError::class);
 		$bx = PHP::box([-2, -2, -2, -3, 'my text that will lead to failure', 6.6, 7.7, 8.8]);
 		$this->assertEquals(99, $bx->sum());
 	}

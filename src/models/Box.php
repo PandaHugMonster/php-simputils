@@ -4,7 +4,6 @@ namespace spaf\simputils\models;
 
 use ArrayObject;
 use Closure;
-use Exception;
 use Generator;
 use spaf\simputils\attributes\Extract;
 use spaf\simputils\attributes\markers\Affecting;
@@ -16,6 +15,7 @@ use spaf\simputils\Str;
 use spaf\simputils\traits\MetaMagic;
 use spaf\simputils\traits\RedefinableComponentTrait;
 use spaf\simputils\traits\SimpleObjectTrait;
+use ValueError;
 use function array_combine;
 use function array_flip;
 use function array_keys;
@@ -239,7 +239,6 @@ class Box extends ArrayObject {
 	 * @param int|null  $to   The ending index, ignored if the array provided to the first argument
 	 *
 	 * @return Box|array
-	 * @throws \Exception Exception if the `$from` number is bigger than `$to` number
 	 */
 	public function slice(int|array $from = 0, ?int $to = null): Box|array {
 		$size = $this->size;
@@ -266,7 +265,7 @@ class Box extends ArrayObject {
 				$from = $size + $from; // considered "- $from"
 			}
 			if ($from > $to) {
-				throw new Exception('$from value cannot be bigger than $to value');
+				throw new ValueError('$from value cannot be bigger than $to value');
 			}
 
 			foreach ($this->keys as $key) {
@@ -829,7 +828,7 @@ class Box extends ArrayObject {
 		$res = 0;
 		foreach ($this as $value) {
 			if (!is_int($value) && !is_float($value)) {
-				throw new Exception('The value for sum() method neither int, nor float.');
+				throw new ValueError('The value for sum() method neither int, nor float.');
 			}
 			$res += $value;
 		}

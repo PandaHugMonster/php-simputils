@@ -52,7 +52,6 @@ class DateTimeTest extends TestCase {
 	/**
 	 * @runInSeparateProcess
 	 * @return void
-	 * @throws \Exception
 	 */
 	public function testHelperTransparentParsing(): void {
 		$dt_class = PHP::redef(DateTime::class);
@@ -147,7 +146,6 @@ class DateTimeTest extends TestCase {
 	/**
 	 *
 	 * @return void
-	 * @throws \Exception
 	 * @runInSeparateProcess
 	 */
 	function testOverallDateTimeObject() {

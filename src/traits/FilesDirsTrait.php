@@ -44,7 +44,6 @@ trait FilesDirsTrait {
 	 * @param bool       $include_ext
 	 *
 	 * @return string
-	 * @throws \Exception
 	 */
 	public function format(int|string $relativity = 0, bool $include_ext = true): ?string {
 		$sep = '/';

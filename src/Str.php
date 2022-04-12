@@ -244,7 +244,6 @@ class Str {
 	 *
 	 * @codeCoverageIgnore
 	 * @return \spaf\simputils\models\StrObj|string
-	 * @throws \Exception
 	 */
 	public static function obj(string ...$strings): StrObj|string {
 		$class_strobj = PHP::redef(StrObj::class);

@@ -3,6 +3,7 @@
 use PHPUnit\Framework\TestCase;
 use spaf\simputils\attributes\Property;
 use spaf\simputils\Boolean;
+use spaf\simputils\exceptions\RedefWrongReference;
 use spaf\simputils\FS;
 use spaf\simputils\generic\SimpleObject;
 use spaf\simputils\Math;
@@ -125,7 +126,6 @@ class PHPHelperTest extends TestCase {
 	/**
 	 *
 	 * @return void
-	 * @throws \Exception
 	 * @uses \spaf\simputils\traits\SimpleObjectTrait
 	 * @uses \spaf\simputils\components\versions\parsers\DefaultVersionParser::parse()
 	 * @runInSeparateProcess
@@ -223,7 +223,6 @@ class PHPHelperTest extends TestCase {
 	/**
 	 * @return void
 	 * @runInSeparateProcess
-	 * @throws \Exception
 	 */
 	public function testSerializationException() {
 		$fd_resource = tmpfile();
@@ -245,7 +244,6 @@ class PHPHelperTest extends TestCase {
 	 * @covers spaf\simputils\FS::mkFile
 	 * @covers spaf\simputils\FS::rmDir
 	 * @covers spaf\simputils\FS::rmFile
-	 * @throws \Exception
 	 */
 	public function testFilesRelatedFunctionality() {
 		$dir = '/tmp/simputils/tests/test-files-related-functionality';
@@ -513,7 +511,7 @@ class PHPHelperTest extends TestCase {
 	 * @return void
 	 */
 	function testRedefException1() {
-		$this->expectException(Exception::class);
+		$this->expectException(RedefWrongReference::class);
 		$this->assertEquals(MyDT::class, PHP::redef('just a nonsense string'));
 	}
 

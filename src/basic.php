@@ -65,7 +65,6 @@ function pd(...$args) {
  * @param mixed ...$merger
  *
  * @return Box|array
- * @throws \Exception
  */
 #[Shortcut('PHP::box()')]
 function bx(mixed $array = null, mixed ...$merger): Box|array {
@@ -95,7 +94,6 @@ function stack(mixed ...$items_and_conf): StackFifo|StackLifo {
  *
  * @return \spaf\simputils\models\DateTime|null
  *
- * @throws \Exception Parsing error
  */
 #[Shortcut('DT::now()')]
 function now(null|bool|DateTimeZone $tz = null): ?DateTime {
@@ -112,7 +110,6 @@ function now(null|bool|DateTimeZone $tz = null): ?DateTime {
  *
  * @return DateTime|null
  *
- * @throws \Exception Parsing error
  */
 #[Shortcut('DT::ts()')]
 function ts(
@@ -181,7 +178,6 @@ function uuid(): string {
  * @param int|string|\spaf\simputils\models\DataUnit|null $value
  *
  * @return \spaf\simputils\models\DataUnit
- * @throws \Exception
  */
 #[Shortcut('Data::du()')]
 function du(null|int|string|DataUnit $value = null, ?string $format = null): DataUnit {

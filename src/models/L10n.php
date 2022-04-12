@@ -27,7 +27,6 @@ class L10n extends SimpleObject {
 	 * Apply those settings to other classes
 	 *
 	 * @return void
-	 * @throws \Exception
 	 */
 	public function doSetUp() {
 		$class = PHP::redef(DateTime::class);

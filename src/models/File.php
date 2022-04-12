@@ -8,6 +8,8 @@ use spaf\simputils\attributes\DebugHide;
 use spaf\simputils\attributes\Extract;
 use spaf\simputils\attributes\Property;
 use spaf\simputils\DT;
+use spaf\simputils\exceptions\IOProblem;
+use spaf\simputils\exceptions\PathProblem;
 use spaf\simputils\FS;
 use spaf\simputils\generic\BasicResource;
 use spaf\simputils\generic\BasicResourceApp;
@@ -114,7 +116,6 @@ class File extends BasicResource {
 	 *                                                 supply it always when file descriptor
 	 *                                                 or null is supplied to `$file` argument)
 	 *
-	 * @throws \Exception Wrong argument type
 	 */
 	public function __construct(
 		mixed $file = null,
@@ -169,7 +170,6 @@ class File extends BasicResource {
 	 * @param bool $i_am_sure Without this parameter set to true, file will not be deleted!
 	 *
 	 * @return bool
-	 * @throws \Exception Problems with deleting
 	 */
 	public function delete(bool $i_am_sure = false): bool {
 		if ($i_am_sure) {
@@ -209,7 +209,7 @@ class File extends BasicResource {
 
 	private function _prepareCopyMoveDest($dir, $name, $ext): string {
 		if (empty($dir) && empty($name) && empty($ext)) {
-			throw new Exception(
+			throw new PathProblem(
 				'File destination does not differ from the source destination'
 			);
 		}
@@ -243,7 +243,6 @@ class File extends BasicResource {
 	 * @param bool    $overwrite        Is allowed the existing file to be overwritten
 	 *
 	 * @return $this
-	 * @throws \Exception Problems with moving
 	 */
 	public function move(
 		?string $new_location_dir = null,
@@ -328,7 +327,7 @@ class File extends BasicResource {
 		if (empty($this->_backup_file)) {
 			$this->_backup_file = tempnam('/tmp', 'simp-utils-');
 			if ($this->_backup_file === false) {
-				throw new Exception('Could not create a temporary file. Preserving failed');
+				throw new IOProblem('Could not create a temporary file. Preserving failed');
 			}
 		}
 
@@ -359,7 +358,6 @@ class File extends BasicResource {
 
 	/**
 	 * @return \spaf\simputils\models\DateTime|null
-	 * @throws \Exception
 	 * @codeCoverageIgnore
 	 */
 	#[Property('inode_change_time')]
@@ -373,7 +371,6 @@ class File extends BasicResource {
 
 	/**
 	 * @return \spaf\simputils\models\DateTime|null
-	 * @throws \Exception
 	 * @codeCoverageIgnore
 	 */
 	#[Property('mod_time')]
@@ -387,7 +384,6 @@ class File extends BasicResource {
 
 	/**
 	 * @return \spaf\simputils\models\DateTime|null
-	 * @throws \Exception
 	 * @codeCoverageIgnore
 	 */
 	#[Property('access_time')]
@@ -499,7 +495,6 @@ class File extends BasicResource {
 	/**
 	 * @codeCoverageIgnore
 	 * @return string|null
-	 * @throws \Exception
 	 */
 	#[Extract(false)]
 	#[DebugHide(false)]

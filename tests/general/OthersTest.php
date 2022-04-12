@@ -14,7 +14,6 @@ class OthersTest extends TestCase {
 	/**
 	 * @covers \spaf\simputils\models\L10n
 	 * @return void
-	 * @throws \Exception
 	 */
 	function testL10n() {
 		$config = PHP::init();

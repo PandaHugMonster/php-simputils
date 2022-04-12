@@ -3,8 +3,8 @@
 use PHPUnit\Framework\TestCase;
 use spaf\simputils\attributes\Property;
 use spaf\simputils\attributes\PropertyBatch;
-use spaf\simputils\exceptions\PropertyAccessError;
 use spaf\simputils\exceptions\PropertyDoesNotExist;
+use spaf\simputils\exceptions\PropertyIsWriteOnly;
 use spaf\simputils\generic\SimpleObject;
 use spaf\simputils\models\Box;
 use spaf\simputils\models\DateTime;
@@ -357,7 +357,7 @@ class PropertiesTest extends TestCase {
 	public function testExceptionOnReadOnlyField() {
 		$b0 = new B();
 
-		$this->expectException(PropertyAccessError::class);
+		$this->expectException(PropertyIsWriteOnly::class);
 		$this->assertEquals('get 300', $b0->var2000);
 	}
 
@@ -379,7 +379,7 @@ class PropertiesTest extends TestCase {
 	public function testExceptionOnPropertyOnlySet() {
 		$b0 = new B();
 
-		$this->expectException(PropertyAccessError::class);
+		$this->expectException(PropertyIsWriteOnly::class);
 		$this->assertEquals(null, $b0->prop1);
 	}
 }

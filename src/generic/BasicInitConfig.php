@@ -2,10 +2,10 @@
 
 namespace spaf\simputils\generic;
 
-use Exception;
 use spaf\simputils\attributes\markers\Shortcut;
 use spaf\simputils\attributes\Property;
 use spaf\simputils\DT;
+use spaf\simputils\exceptions\InitConfigAlreadyInitialized;
 use spaf\simputils\FS;
 use spaf\simputils\interfaces\InitBlockInterface;
 use spaf\simputils\models\Box;
@@ -193,9 +193,9 @@ abstract class BasicInitConfig extends SimpleObject {
 				}
 			}
 		} else {
-			throw new Exception(
+			throw new InitConfigAlreadyInitialized(
 				'The InitConfig object is already setup and initialized.' .
-				'It\'s no longer possible to change the setup.'
+				'It\'s not possible to initialize it more than once.'
 			);
 		}
 		return $this;

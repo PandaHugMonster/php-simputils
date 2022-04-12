@@ -39,7 +39,6 @@ class DT implements DateTimeHelperInterface {
 	 * @param DateTimeZone|string|null $tz
 	 *
 	 * @return DateTime|null
-	 * @throws \Exception
 	 */
 	public static function now(DateTimeZone|bool|string|null $tz = null): ?DateTime {
 		return static::normalize(static::$now_string ?? 'now', $tz);
@@ -56,7 +55,6 @@ class DT implements DateTimeHelperInterface {
 	 *
 	 * @return DateTime|null
 	 *
-	 * @throws \Exception Parsing error
 	 */
 	#[Shortcut('DT::normalize()')]
 	public static function ts(
@@ -89,7 +87,6 @@ class DT implements DateTimeHelperInterface {
 	 *                                  Default is true.
 	 *
 	 * @return DateTime|null
-	 * @throws \Exception
 	 */
 	public static function normalize(
 		DateTime|string|int $dt,
@@ -146,7 +143,6 @@ class DT implements DateTimeHelperInterface {
 	 * @param string|null $parsing_fmt
 	 *
 	 * @return string|null
-	 * @throws \Exception
 	 */
 	public static function stringify(
 		DateTime|string|int $dt,
@@ -186,7 +182,6 @@ class DT implements DateTimeHelperInterface {
 	 * @param string|\spaf\simputils\models\DateInterval $step
 	 *
 	 * @return \spaf\simputils\models\DatePeriod
-	 * @throws \Exception
 	 */
 	#[Shortcut('\spaf\simputils\models\DateTime::walk()')]
 	public static function walk(

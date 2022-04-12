@@ -94,7 +94,6 @@ class LoggerTest extends TestCase {
 	 *
 	 * @runInSeparateProcess
 	 * @return void
-	 * @throws \Exception
 	 */
 	public function testFileOutput() {
 		$dir = '/tmp/simputils/tests/logs';
@@ -135,7 +134,6 @@ class LoggerTest extends TestCase {
 	 * @runInSeparateProcess
 	 *
 	 * @return void
-	 * @throws \Exception
 	 */
 	public function testFileContent() {
 		$file_path = '/tmp/simputils/tests/__just-a-file.txt';

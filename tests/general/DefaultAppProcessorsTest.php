@@ -4,6 +4,7 @@ namespace general;
 
 use Exception;
 use PHPUnit\Framework\TestCase;
+use spaf\simputils\exceptions\Inconsistent;
 use spaf\simputils\FS;
 use spaf\simputils\models\Box;
 use spaf\simputils\models\files\apps\CsvProcessor;
@@ -238,7 +239,7 @@ class DefaultAppProcessorsTest extends TestCase {
 	function testCsvProcessorExceptionKeysMix() {
 		$file = FS::file('/tmp/csv-test-file-example-bla-bla-bla.csv');
 
-		$this->expectException(Exception::class);
+		$this->expectException(Inconsistent::class);
 
 		$file->content = [
 			['dver' => 'Value1', 'Value2', 'Value3', 'Value4'],

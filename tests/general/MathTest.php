@@ -123,7 +123,6 @@ class MathTest extends TestCase {
 	 * @dataProvider rangeGroupsDataProvider
 	 *
 	 * @return void
-	 * @throws \Exception
 	 */
 	function testRange($expected, $range) {
 		$res = PHP::box($range);

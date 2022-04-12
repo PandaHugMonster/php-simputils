@@ -121,7 +121,6 @@ class Dir extends Box {
 	 * @see \spaf\simputils\interfaces\WalkThroughFilterInterface
 	 * @see \scandir()
 	 * @return \spaf\simputils\models\File[]|\spaf\simputils\models\Dir[]
-	 * @throws \Exception \Exception
 	 *
 	 * MARK Maybe generator is better?
 	 */

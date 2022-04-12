@@ -2,7 +2,7 @@
 
 namespace spaf\simputils\traits;
 
-use Exception;
+use spaf\simputils\exceptions\ReadOnlyProblem;
 
 /**
  * ArrayAccess additional trait for read only functionality
@@ -70,7 +70,6 @@ trait ArrayReadOnlyAccessTrait {
 	 * @param mixed $value  A value
 	 *
 	 * @return void
-	 * @throws \Exception It's not allowed to change the value of read-only object
 	 */
 	final public function offsetSet(mixed $offset, mixed $value): void {
 		if ($this->_simpUtilsIsReadOnly()) {
@@ -84,7 +83,6 @@ trait ArrayReadOnlyAccessTrait {
 	 * @param mixed $offset Offset
 	 *
 	 * @return void
-	 * @throws \Exception Modification of the object through the array interface is not allowed
 	 */
 	public function offsetUnset(mixed $offset): void {
 		if ($this->_simpUtilsIsReadOnly()) {
@@ -96,9 +94,8 @@ trait ArrayReadOnlyAccessTrait {
 
 	/**
 	 * @return void
-	 * @throws \Exception Modification of the object through the array interface is not allowed
 	 */
 	private function cannotUseIt(): void {
-		throw new Exception('Modification (setting) of this object/array is not allowed');
+		throw new ReadOnlyProblem('Modification (setting) of this object/array is not allowed');
 	}
 }

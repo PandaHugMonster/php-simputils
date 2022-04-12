@@ -15,8 +15,9 @@ use spaf\simputils\attributes\DebugHide;
 use spaf\simputils\attributes\Extract;
 use spaf\simputils\attributes\Property;
 use spaf\simputils\attributes\PropertyBatch;
-use spaf\simputils\exceptions\PropertyAccessError;
 use spaf\simputils\exceptions\PropertyDoesNotExist;
+use spaf\simputils\exceptions\PropertyIsReadOnly;
+use spaf\simputils\exceptions\PropertyIsWriteOnly;
 use spaf\simputils\PHP;
 use spaf\simputils\special\CommonMemoryCacheIndex;
 use spaf\simputils\special\PropertiesCacheIndex;
@@ -73,7 +74,7 @@ trait PropertiesTrait {
 		}
 		try {
 			return $this->_simpUtilsPrepareProperty($name, Property::TYPE_GET);
-		} catch (PropertyAccessError | PropertyDoesNotExist $e) {
+		} catch (PropertyIsReadOnly | PropertyDoesNotExist $e) {
 			try {
 				/** @noinspection PhpUndefinedMethodInspection */
 				return parent::__get($name);
@@ -91,7 +92,7 @@ trait PropertiesTrait {
 		} else {
 			try {
 				$this->_simpUtilsPrepareProperty($name, Property::TYPE_SET, $value);
-			} catch (PropertyAccessError | PropertyDoesNotExist $e) {
+			} catch (PropertyIsReadOnly | PropertyDoesNotExist $e) {
 				try {
 					/** @noinspection PhpUndefinedMethodInspection */
 					parent::__set($name, $value); // @codeCoverageIgnore
@@ -182,7 +183,7 @@ trait PropertiesTrait {
 	 * @param bool $check_and_do_not_call
 	 *
 	 * @return bool
-	 * @throws PropertyAccessError
+	 * @throws PropertyIsReadOnly
 	 * @throws PropertyDoesNotExist
 	 */
 	private function _simpUtilsPrepareProperty(
@@ -250,9 +251,16 @@ trait PropertiesTrait {
 		}
 
 		if (!empty($sub)) {
-			throw new PropertyAccessError(
-				'Property '.$name.' of "'.$sub.'" access'
-			);
+			if ($sub === 'read-only') {
+				throw new PropertyIsReadOnly(
+					'Property '.$name.' of "'.$sub.'" access'
+				);
+			} else if ($sub === 'write-only') {
+				throw new PropertyIsWriteOnly(
+					'Property '.$name.' of "'.$sub.'" access'
+				);
+			}
+
 		}
 
 		throw new PropertyDoesNotExist('No such property '.$name);

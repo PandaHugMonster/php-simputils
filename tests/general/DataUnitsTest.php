@@ -98,7 +98,6 @@ class DataUnitsTest extends TestCase {
 	 * @param string $val
 	 *
 	 * @return void
-	 * @throws \Exception
 	 */
 	public function testBcmathConversion() {
 		$this->_extensionWiseTests(
@@ -120,7 +119,6 @@ class DataUnitsTest extends TestCase {
 	 * @param string $val
 	 *
 	 * @return void
-	 * @throws \Exception
 	 */
 	public function testGmpConversion() {
 		$this->_extensionWiseTests(
@@ -205,7 +203,6 @@ class DataUnitsTest extends TestCase {
 
 	/**
 	 * @return void
-	 * @throws \Exception
 	 * @runInSeparateProcess
 	 */
 	function testNonExistingUnitException() {

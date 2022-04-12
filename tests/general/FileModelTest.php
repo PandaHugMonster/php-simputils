@@ -3,8 +3,8 @@
 namespace general;
 
 use Closure;
-use Exception;
 use PHPUnit\Framework\TestCase;
+use spaf\simputils\exceptions\PathProblem;
 use spaf\simputils\FS;
 use spaf\simputils\models\File;
 use spaf\simputils\PHP;
@@ -111,7 +111,7 @@ class FileModelTest extends TestCase {
 		$new_file_obj->delete(true);
 		$this->assertFileDoesNotExist($new_file_obj->name_full);
 
-		$this->expectException(Exception::class);
+		$this->expectException(PathProblem::class);
 		$file->copy($file->name_full);
 	}
 

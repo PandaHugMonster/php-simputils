@@ -3,7 +3,8 @@
 namespace spaf\simputils\special;
 
 use Closure;
-use Exception;
+use spaf\simputils\exceptions\InitConfigException;
+use spaf\simputils\exceptions\InitConfigNonUniqueCodeBlock;
 use spaf\simputils\generic\BasicInitConfig;
 use spaf\simputils\logger\Logger;
 use spaf\simputils\models\BigNumber;
@@ -70,7 +71,7 @@ class CodeBlocksCacheIndex {
 		$name = empty($config->name)?'app':$config->name;
 
 		if (static::hasInitBlock($name)) {
-			throw new Exception(
+			throw new InitConfigNonUniqueCodeBlock(
 				'Code block can be registered just once with a unique name. '.
 				"Name \"{$config->name}\" is not unique. Config: {$config}"
 			);
@@ -83,7 +84,7 @@ class CodeBlocksCacheIndex {
 			if (!empty($config->redefinitions)) {
 				foreach ($config->redefinitions as $key => $redef) {
 					if (empty($list[$key])) {
-						throw new Exception('');
+						throw new InitConfigException('Init Config Redefinitions Problem');
 					}
 					static::$redefinitions[$key] = $redef;
 				}

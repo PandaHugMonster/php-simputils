@@ -2,9 +2,9 @@
 
 namespace spaf\simputils\models;
 
-use Exception;
 use spaf\simputils\attributes\markers\Shortcut;
 use spaf\simputils\attributes\Property;
+use spaf\simputils\exceptions\NoExtensionFound;
 use spaf\simputils\generic\SimpleObject;
 use spaf\simputils\PHP;
 use spaf\simputils\Str;
@@ -113,7 +113,6 @@ class BigNumber extends SimpleObject {
 	 *                                     value of this object
 	 * @param ?string           $extension Enforcing usage of particular extension for this number
 	 *
-	 * @throws \Exception Exception if no math extension is installed
 	 */
 	public function __construct(
 		int|self|float|string $val = 0,
@@ -123,7 +122,7 @@ class BigNumber extends SimpleObject {
 		$this->_is_mutable = $mutable;
 		$this->_ext = static::checkExtensionAvailability($extension);
 		if ($this->_ext === false) {
-			throw new Exception('No math extension available'); // @codeCoverageIgnore
+			throw new NoExtensionFound('No math extension available'); // @codeCoverageIgnore
 		}
 		if ($this->_ext === static::SUBSYSTEM_GMP) {
 			$val = preg_replace('/[^0-9]/', '', $val);
@@ -191,7 +190,6 @@ class BigNumber extends SimpleObject {
 	 *                                 for this operation
 	 *
 	 * @return static
-	 * @throws \Exception
 	 * @see \gmp_add()
 	 * @see \bcadd()
 	 */
@@ -226,7 +224,6 @@ class BigNumber extends SimpleObject {
 	 *                                 for this operation
 	 *
 	 * @return static
-	 * @throws \Exception
 	 *
 	 * @see \gmp_sub()
 	 * @see \bcsub()
@@ -262,7 +259,6 @@ class BigNumber extends SimpleObject {
 	 *                                 for this operation
 	 *
 	 * @return static
-	 * @throws \Exception
 	 *
 	 * @see \gmp_div_q()
 	 * @see \bcdiv()
@@ -312,7 +308,6 @@ class BigNumber extends SimpleObject {
 	 *                                 for this operation
 	 *
 	 * @return static
-	 * @throws \Exception
 	 *
 	 * @see \gmp_mul()
 	 * @see \bcmul()
@@ -346,7 +341,6 @@ class BigNumber extends SimpleObject {
 	 *                                 for this operation
 	 *
 	 * @return static
-	 * @throws \Exception
 	 *
 	 * @see \gmp_mod()
 	 * @see \bcmod()
@@ -387,7 +381,6 @@ class BigNumber extends SimpleObject {
 	 *                                 for this operation
 	 *
 	 * @return static
-	 * @throws \Exception
 	 *
 	 * @see \gmp_cmp()
 	 * @see \bccomp()
@@ -415,7 +408,6 @@ class BigNumber extends SimpleObject {
 	 *                                 for this operation
 	 *
 	 * @return static
-	 * @throws \Exception
 	 *
 	 * @see \gmp_pow()
 	 * @see \bcpow()
@@ -450,7 +442,6 @@ class BigNumber extends SimpleObject {
 	 *                                 for this operation
 	 *
 	 * @return static
-	 * @throws \Exception
 	 *
 	 * @see \gmp_powm()
 	 * @see \bcpowmod()
@@ -487,7 +478,6 @@ class BigNumber extends SimpleObject {
 	 *                                 for this operation
 	 *
 	 * @return static
-	 * @throws \Exception
 	 *
 	 * @see \gmp_sqrt()
 	 * @see \bcsqrt()

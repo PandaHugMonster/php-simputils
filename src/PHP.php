@@ -14,6 +14,10 @@ use Generator;
 use Iterator;
 use ReflectionClass;
 use spaf\simputils\attributes\markers\Shortcut;
+use spaf\simputils\exceptions\RedefUnimplemented;
+use spaf\simputils\exceptions\RedefWrongReference;
+use spaf\simputils\exceptions\SerializationProblem;
+use spaf\simputils\exceptions\UnBoxable;
 use spaf\simputils\generic\BasicInitConfig;
 use spaf\simputils\models\Box;
 use spaf\simputils\models\InitConfig;
@@ -167,11 +171,10 @@ class PHP {
 	 * FIX  Implement recursive toJson control to objects (So object can decide,
 	 *      whether it wants to be a string, an array or a number).
 	 *
-	 * @throws \Exception Runtime resources can't be serialized
 	 */
 	public static function serialize(mixed $data, ?int $enforced_type = null): ?string {
 		if (is_resource($data))
-			throw new Exception(
+			throw new SerializationProblem(
 				'Resources cannot be serialized through PHP default mechanisms'
 			);
 
@@ -609,7 +612,6 @@ class PHP {
 	 *                                  the resulting Box
 	 *
 	 * @return Box|array
-	 * @throws \Exception \Exception
 	 */
 	public static function box(mixed $array = null, mixed ...$merger): Box|array {
 		$class = static::redef(Box::class);
@@ -630,7 +632,7 @@ class PHP {
 					}
 
 				} else {
-					throw new Exception("Not possible to use supplied value as 
+					throw new UnBoxable("Not possible to use supplied value as 
 					argument to box");
 				}
 			} else {
@@ -798,17 +800,18 @@ class PHP {
 	 *
 	 * @return ?string Returns the final class name string that could be used for creation
 	 *                 of objects, and usage of static methods.
-	 * @throws \Exception If arguments are not provided correctly
 	 */
 	public static function redef(string $target_class, string $hint = null): ?string {
 		if (!static::isClass($target_class)) {
-			throw new Exception("String \"{$target_class}\" is not a valid class reference");
+			throw new RedefWrongReference(
+				"String \"{$target_class}\" is not a valid class reference"
+			);
 		}
 
 		if (empty($hint)) {
 			if (!method_exists($target_class, 'redefComponentName')) {
 				// TODO Maybe default behaviour instead of Exception
-				throw new Exception(
+				throw new RedefUnimplemented(
 					"Class \"{$target_class}\" does not have " .
 					"\"redefComponentName\" method, and \$hint argument was not provided"
 				);

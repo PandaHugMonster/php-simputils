@@ -123,7 +123,6 @@ class DataUnit extends SimpleObject {
 	 *
 	 * @return array|Box Array with keys representing the abbreviations of units and the
 	 *                   values representing powers
-	 * @throws \Exception
 	 */
 	protected static function unitToPowerMap(): array|Box {
 		$class = PHP::redef(Box::class);

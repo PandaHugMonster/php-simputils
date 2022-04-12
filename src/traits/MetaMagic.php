@@ -2,9 +2,9 @@
 
 namespace spaf\simputils\traits;
 
-use Exception;
 use JsonException;
 use spaf\simputils\exceptions\InfiniteLoopPreventionExceptions;
+use spaf\simputils\exceptions\MetaMagicStrictInheritanceProblem;
 use spaf\simputils\FS;
 use spaf\simputils\generic\BasicPrism;
 use spaf\simputils\models\Box;
@@ -325,7 +325,6 @@ trait MetaMagic {
 	 * @param bool $with_class  Include class "key" => "value" reference
 	 *
 	 * @return \spaf\simputils\models\Box
-	 * @throws \Exception Exception
 	 */
 	public function toBox(bool $recursively = false, bool $with_class = false) {
 
@@ -408,28 +407,7 @@ trait MetaMagic {
 	 *                                                By default is true
 	 *
 	 * @return object Always returns a new object of type provided as a first argument
-	 * @throws \Exception
 	 */
-//	public function expandTo(
-//		string|object $class_or_object,
-//		bool $strict_inheritance_check = true
-//	): object {
-//		if (Str::is($class_or_object)) {
-//			$obj = new $class_or_object();
-//		} else {
-//			$obj = $class_or_object;
-//		}
-//		if ($strict_inheritance_check) {
-//			if (!PHP::isClassIn($obj, $this)) {
-//				throw new Exception('Expanding object strict inheritance check failed');
-//			}
-//		}
-//
-//		static::_metaMagic($obj, '___setup', $this->toArray());
-//
-//		return $obj;
-//	}
-
 	public static function expandFrom(
 		object $parent,
 		?object $child = null,
@@ -438,7 +416,9 @@ trait MetaMagic {
 		$obj = $child ?? static::createDummy();
 		if ($strict_inheritance_check) {
 			if (!PHP::isClassIn($parent, $obj)) {
-				throw new Exception('Expanding object strict inheritance check failed');
+				throw new MetaMagicStrictInheritanceProblem(
+					'Expanding object strict inheritance check failed'
+				);
 			}
 		}
 

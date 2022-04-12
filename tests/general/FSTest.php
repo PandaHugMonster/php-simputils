@@ -120,7 +120,6 @@ class FSTest extends TestCase {
 	 *
 	 * @runInSeparateProcess
 	 * @return void
-	 * @throws \Exception
 	 */
 	function testOther() {
 		$path = FS::path('path1', 'path2', 'path3');
@@ -217,7 +216,6 @@ class FSTest extends TestCase {
 	 *
 	 * @runInSeparateProcess
 	 * @return void
-	 * @throws \Exception
 	 */
 	function testDirs() {
 		$wd = realpath(__DIR__.'/../..');

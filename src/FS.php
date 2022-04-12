@@ -2,8 +2,8 @@
 
 namespace spaf\simputils;
 
-use Exception;
 use finfo;
+use spaf\simputils\exceptions\CannotDeleteDirectory;
 use spaf\simputils\generic\BasicResourceApp;
 use spaf\simputils\models\Dir;
 use spaf\simputils\models\File;
@@ -144,13 +144,12 @@ class FS {
 	 * @param bool        $recursively    Recursively deletes directories (required if not empty)
 	 *
 	 * @return bool|null
-	 * @throws \Exception Exception if regular file path is supplied, and not a directory path
 	 * @todo Add root dir protection
 	 */
 	public static function rmDir(?string $directory_path, bool $recursively = false): ?bool {
 		if (!is_dir($directory_path)) {
 			// TODO Fix exception
-			throw new Exception("{$directory_path} is not a directory");
+			throw new CannotDeleteDirectory("{$directory_path} is not a directory");
 		}
 		if ($recursively) {
 			$res = false;
@@ -180,7 +179,6 @@ class FS {
 	 *                                      directory path supplied instead of a regular file path.
 	 *
 	 * @return bool|null
-	 * @throws \Exception Exception if `$strict` param is true and the file path provided is
 	 *                    a directory.
 	 */
 	public static function rmFile(
@@ -203,7 +201,7 @@ class FS {
 		if (is_dir($file)) {
 			if ($strict) {
 				// TODO Fix exception
-				throw new Exception("{$file} is a directory, and a strict mode is on");
+				throw new CannotDeleteDirectory("{$file} is a directory, and a strict mode is on");
 			} else {
 				return static::rmDir($file, $recursively);
 			}
@@ -335,7 +333,6 @@ class FS {
 	 * @param mixed|null       $app  Read/Write processor
 	 *
 	 * @return \spaf\simputils\models\File|null
-	 * @throws \Exception
 	 */
 	public static function file(
 		mixed $file = null,
@@ -353,7 +350,6 @@ class FS {
 	 *
 	 * FIX  Improve supported params (Directory, Files that are directories, etc. Regexp strings)
 	 * @return Dir|null
-	 * @throws \Exception
 	 */
 	public static function dir(null|string|Dir $dir = null): ?Dir {
 		if ($dir instanceof Dir) {
@@ -368,7 +364,6 @@ class FS {
 	 *
 	 * TODO Implement root part somehow
 	 * @return string|null
-	 * @throws \Exception
 	 */
 	public static function path(?string ...$parts): ?string {
 		$sep = DIRECTORY_SEPARATOR;
@@ -387,7 +382,6 @@ class FS {
 	 * FIX  implement different plugins/modules/extensions support
 	 *
 	 * @return string|\spaf\simputils\models\File|\spaf\simputils\models\Dir|null
-	 * @throws \Exception
 	 */
 	public static function locate(?string ...$parts): File|Dir {
 		$work_dir = PHP::getInitConfig()->working_dir;

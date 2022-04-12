@@ -4,7 +4,6 @@ namespace spaf\simputils\models;
 
 use ArrayObject;
 use Closure;
-use Exception;
 use Generator;
 use spaf\simputils\attributes\Extract;
 use spaf\simputils\attributes\markers\Affecting;
@@ -16,12 +15,14 @@ use spaf\simputils\Str;
 use spaf\simputils\traits\MetaMagic;
 use spaf\simputils\traits\RedefinableComponentTrait;
 use spaf\simputils\traits\SimpleObjectTrait;
+use ValueError;
 use function array_combine;
 use function array_flip;
 use function array_keys;
 use function array_values;
 use function arsort;
 use function count;
+use function implode;
 use function in_array;
 use function is_array;
 use function is_float;
@@ -142,7 +143,6 @@ use function uasort;
  * @property-read int $size
  * @property-read Box|array $keys
  * @property-read Box|array $values
- * @property-read Box|array $flipped
  */
 class Box extends ArrayObject {
 	use SimpleObjectTrait;
@@ -194,8 +194,7 @@ class Box extends ArrayObject {
 	 * @return static|Box|array
 	 */
 	#[Extract(false)]
-	#[Property('flipped')]
-	protected function getFlipped(): static|Box|array {
+	public function flipped(): static|Box|array {
 		// TODO Improve flipping so it would hash objects when possible for keys
 		return new static(array_flip((array) $this));
 	}
@@ -214,8 +213,15 @@ class Box extends ArrayObject {
 //		return array_is_list((array) $this);
 //	}
 
-	public function getKeyByValue($value) {
-		return $this->flipped[$value] ?? null;
+	/**
+	 * Returns key by the specified value
+	 *
+	 * @param mixed $value Value
+	 *
+	 * @return string|null
+	 */
+	public function getKeyByValue(mixed $value): ?string {
+		return $this->flipped()[$value] ?? null;
 	}
 
 	/**
@@ -233,7 +239,6 @@ class Box extends ArrayObject {
 	 * @param int|null  $to   The ending index, ignored if the array provided to the first argument
 	 *
 	 * @return Box|array
-	 * @throws \Exception Exception if the `$from` number is bigger than `$to` number
 	 */
 	public function slice(int|array $from = 0, ?int $to = null): Box|array {
 		$size = $this->size;
@@ -260,7 +265,7 @@ class Box extends ArrayObject {
 				$from = $size + $from; // considered "- $from"
 			}
 			if ($from > $to) {
-				throw new Exception('$from value cannot be bigger than $to value');
+				throw new ValueError('$from value cannot be bigger than $to value');
 			}
 
 			foreach ($this->keys as $key) {
@@ -358,6 +363,8 @@ class Box extends ArrayObject {
 	 *                                         otherwise
 	 *
 	 * @return static A new box instance with filtered elements
+	 * @codeCoverageIgnore
+	 * FIX  Subject to elimination, or significant modification
 	 */
 	public function filter(null|Closure|callable $callback = null): static {
 		if (is_null($callback)) {
@@ -492,6 +499,11 @@ class Box extends ArrayObject {
 		return in_array($value, (array) $this);
 	}
 
+	public function toSet(): Set {
+		$class = PHP::redef(Set::class);
+		return new $class($this);
+	}
+
 	public function toArray(
 		bool $recursively = false,
 		bool $with_class = false,
@@ -552,7 +564,7 @@ class Box extends ArrayObject {
 			$to_unset = new static;
 			$to_replace = new static;
 			foreach ($this as $k => $v) {
-				$res = $callback($k, $v, $this);
+				$res = $callback($v, $k, $this);
 				if (is_null($res)) {
 					$to_unset[] = $k;
 				} else {
@@ -604,7 +616,8 @@ class Box extends ArrayObject {
 		foreach ($callbacks as $callback) {
 			$callback = $this->clearClosure($callback);
 
-			$this->cb(function ($k, $v) use ($callback) {
+			// FIX  Issue, it does add new keys, and not modifying those
+			$this->cb(function ($v, $k) use ($callback) {
 				return [$callback($k), $v];
 			});
 		}
@@ -644,7 +657,7 @@ class Box extends ArrayObject {
 		foreach ($callbacks as $callback) {
 			$callback = $this->clearClosure($callback);
 
-			$this->cb(function ($k, $v) use ($callback) {
+			$this->cb(function ($v, $k) use ($callback) {
 				return [$k, $callback($v)];
 			});
 		}
@@ -653,7 +666,7 @@ class Box extends ArrayObject {
 
 	protected function clearClosure($callback) {
 		if (is_array($callback) || is_string($callback)) {
-			$callback = Closure::fromCallable($callback);
+			$callback = Closure::fromCallable($callback); // @codeCoverageIgnore
 		}
 		return $callback;
 	}
@@ -679,6 +692,12 @@ class Box extends ArrayObject {
 		return new static(array_combine((array) $keys, (array) $values));
 	}
 
+	/**
+	 * @param int $num
+	 *
+	 * @return \Generator
+	 * @codeCoverageIgnore
+	 */
 	public function randKeys(int $num = 1): Generator {
 		$keys = $this->keys;
 
@@ -690,6 +709,12 @@ class Box extends ArrayObject {
 		}
 	}
 
+	/**
+	 * @param int $num
+	 *
+	 * @return \Generator
+	 * @codeCoverageIgnore
+	 */
 	public function randValues(int $num = 1): Generator {
 		$values = $this->values;
 
@@ -701,11 +726,21 @@ class Box extends ArrayObject {
 		}
 	}
 
+	/**
+	 * @return false|mixed
+	 * @codeCoverageIgnore
+	 */
 	public function randKey() {
 		$keys = $this->keys;
 		return $keys[Math::rand(0, $keys->size - 1)];
 	}
 
+	/**
+	 * @param int $num
+	 *
+	 * @return false|mixed
+	 * @codeCoverageIgnore
+	 */
 	public function randValue(int $num = 1) {
 		$values = $this->values;
 		return $values[Math::rand(0, $values->size - 1)];
@@ -777,6 +812,10 @@ class Box extends ArrayObject {
 		return [$descending, $by_values, $case_sensitive, $natural, $callback];
 	}
 
+	/**
+	 * @return $this
+	 * @codeCoverageIgnore
+	 */
 	public function shuffle(): self {
 		$res = (array) $this;
 		shuffle($res);
@@ -789,7 +828,7 @@ class Box extends ArrayObject {
 		$res = 0;
 		foreach ($this as $value) {
 			if (!is_int($value) && !is_float($value)) {
-				throw new Exception('The value for sum() method neither int, nor float.');
+				throw new ValueError('The value for sum() method neither int, nor float.');
 			}
 			$res += $value;
 		}
@@ -848,9 +887,7 @@ class Box extends ArrayObject {
 			if ($callback) {
 				uksort($res, $callback);
 			} else {
-				$flags = $case_sensitive
-					?SORT_FLAG_CASE
-					:0;
+				$flags = $case_sensitive?SORT_FLAG_CASE:0;
 				if ($descending) {
 					krsort($res, $flags);
 				} else {
@@ -861,6 +898,15 @@ class Box extends ArrayObject {
 		$this->exchangeArray($res);
 
 		return $this;
+	}
+
+	public function implode($sep = ', ') {
+		return implode($sep, (array) $this);
+	}
+
+	#[Shortcut('\implode()')]
+	public function join($sep = ', ') {
+		return $this->implode($sep);
 	}
 
 	/**

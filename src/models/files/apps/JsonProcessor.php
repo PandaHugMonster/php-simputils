@@ -11,10 +11,11 @@ use spaf\simputils\PHP;
 class JsonProcessor extends TextProcessor {
 
 	public function getContent(mixed $fd, ?BasicResource $file = null): mixed {
-		return PHP::deserialize(
+		$res = PHP::deserialize(
 			parent::getContent($fd, $file),
 			enforced_type: PHP::SERIALIZATION_TYPE_JSON
 		);
+		return $res;
 	}
 
 	public function setContent(mixed $fd, $data, ?BasicResource $file = null): void {

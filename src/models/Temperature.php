@@ -38,6 +38,12 @@ class Temperature extends SimpleObject {
 	protected float $_value = 0;
 	protected ?string $_unit = null;
 
+	/**
+	 * FIX  Implement proper parsing, and no separate unit
+	 *
+	 * @param float $value
+	 * @param string|null $unit
+	 */
 	public function __construct(float $value = 0, ?string $unit = null) {
 		$this->_unit = $unit ?? static::$default_unit;
 		$this->_value = static::absoluteZeroLimiter($value, $this->_unit);
@@ -129,15 +135,19 @@ class Temperature extends SimpleObject {
 	#[Property('for_user')]
 	protected function getForUser(): string {
 		$symbol = !static::$disable_degree_symbol
-			?$this->symbol()
+			?" {$this->symbol()}"
 			:'';
 
 		if (static::$auto_round !== false) {
 			$val = round($this->_value, static::$auto_round);
 		}
-		return "{$val} {$symbol}";
+		return "{$val}{$symbol}";
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 * @return string
+	 */
 	public static function redefComponentName(): string {
 		return InitConfig::REDEF_TEMPERATURE;
 	}

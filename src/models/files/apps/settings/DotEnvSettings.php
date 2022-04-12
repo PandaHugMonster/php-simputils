@@ -2,9 +2,9 @@
 
 namespace spaf\simputils\models\files\apps\settings;
 
-use Exception;
 use spaf\simputils\generic\SimpleObject;
 use spaf\simputils\Str;
+use ValueError;
 
 /**
  *
@@ -106,7 +106,6 @@ class DotEnvSettings extends SimpleObject {
 	 *
 	 * @return ?string
 	 *
-	 * @throws \Exception Unsupported Letter Case setting
 	 */
 	public function normalizeName(string $name): ?string {
 		$name = trim($name);
@@ -114,7 +113,7 @@ class DotEnvSettings extends SimpleObject {
 			static::LETTER_CASE_UPPER => Str::upper($name),
 			static::LETTER_CASE_LOWER => Str::lower($name),
 			static::LETTER_CASE_NONE => $name,
-			default => throw new Exception(
+			default => throw new ValueError(
 				"Letter Case \"{$this->enforce_letter_case}\" is not supported"
 			)
 		};

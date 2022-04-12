@@ -14,10 +14,15 @@ use Generator;
 use Iterator;
 use ReflectionClass;
 use spaf\simputils\attributes\markers\Shortcut;
+use spaf\simputils\exceptions\RedefUnimplemented;
+use spaf\simputils\exceptions\RedefWrongReference;
+use spaf\simputils\exceptions\SerializationProblem;
+use spaf\simputils\exceptions\UnBoxable;
 use spaf\simputils\generic\BasicInitConfig;
 use spaf\simputils\models\Box;
 use spaf\simputils\models\InitConfig;
 use spaf\simputils\models\PhpInfo;
+use spaf\simputils\models\Set;
 use spaf\simputils\models\StackFifo;
 use spaf\simputils\models\StackLifo;
 use spaf\simputils\models\Version;
@@ -166,11 +171,10 @@ class PHP {
 	 * FIX  Implement recursive toJson control to objects (So object can decide,
 	 *      whether it wants to be a string, an array or a number).
 	 *
-	 * @throws \Exception Runtime resources can't be serialized
 	 */
 	public static function serialize(mixed $data, ?int $enforced_type = null): ?string {
 		if (is_resource($data))
-			throw new Exception(
+			throw new SerializationProblem(
 				'Resources cannot be serialized through PHP default mechanisms'
 			);
 
@@ -205,6 +209,7 @@ class PHP {
 	 * @param ?int    $enforced_type Enforced serialization type (per function call
 	 *                               overrides the default serialization type)
 	 *
+	 * FIX  Deserialization does not recursively uses boxes instead of arrays. Should be fixed!!
 	 * @return mixed
 	 * @throws \ReflectionException Reflection related exceptions
 	 */
@@ -213,11 +218,13 @@ class PHP {
 		?string $class = null,
 		?int $enforced_type = null
 	): mixed {
-		if (empty($str))
+		if (empty($str)) {
 			return null;
+		}
 
-		if (empty($class))
+		if (empty($class)) {
 			$class = static::determineSerializedClass($str);
+		}
 
 //		if (empty($class))
 //			// TODO Fix this exception to a more appropriate one
@@ -342,6 +349,7 @@ class PHP {
 	 * @return string
 	 */
 	public static function type(mixed $var): string {
+		// FIX  Unify aliases with the same name. For example "double" and "float"
 		return is_object($var)?get_class($var):gettype($var);
 	}
 
@@ -604,7 +612,6 @@ class PHP {
 	 *                                  the resulting Box
 	 *
 	 * @return Box|array
-	 * @throws \Exception \Exception
 	 */
 	public static function box(mixed $array = null, mixed ...$merger): Box|array {
 		$class = static::redef(Box::class);
@@ -625,7 +632,7 @@ class PHP {
 					}
 
 				} else {
-					throw new Exception("Not possible to use supplied value as 
+					throw new UnBoxable("Not possible to use supplied value as 
 					argument to box");
 				}
 			} else {
@@ -678,6 +685,17 @@ class PHP {
 	}
 
 	/**
+	 * Creating "Set"
+	 *
+	 * @param mixed ...$data
+	 *
+	 */
+	public static function set(mixed ...$data): Set {
+		$class = static::redef(Set::class);
+		return new $class($data);
+	}
+
+	/**
 	 * Just a "shortcut" to $_ENV
 	 *
 	 * You would think why it's done like this, but situation in PHP is so weird in matter of
@@ -701,15 +719,13 @@ class PHP {
 	 * `\spaf\simputils\basic\env()` and `PHP::envSet()` or `\spaf\simputils\basic\env_set()`.
 	 *
 	 *
-	 * @param string $name Env variable name
+	 * @param string|null $name    Env variable name
+	 * @param mixed|null  $default Default value
 	 *
 	 * @return mixed Returns value, or null if does not exist
 	 */
-	public static function env(?string $name = null, bool $strict = true): mixed {
-		if (empty($name)) {
-			return static::allEnvs();
-		}
-		return $_ENV[$name] ?? null;
+	public static function env(?string $name = null, mixed $default = null): mixed {
+		return $_ENV[$name] ?? $default;
 	}
 
 	/**
@@ -784,17 +800,18 @@ class PHP {
 	 *
 	 * @return ?string Returns the final class name string that could be used for creation
 	 *                 of objects, and usage of static methods.
-	 * @throws \Exception If arguments are not provided correctly
 	 */
 	public static function redef(string $target_class, string $hint = null): ?string {
 		if (!static::isClass($target_class)) {
-			throw new Exception("String \"{$target_class}\" is not a valid class reference");
+			throw new RedefWrongReference(
+				"String \"{$target_class}\" is not a valid class reference"
+			);
 		}
 
 		if (empty($hint)) {
 			if (!method_exists($target_class, 'redefComponentName')) {
 				// TODO Maybe default behaviour instead of Exception
-				throw new Exception(
+				throw new RedefUnimplemented(
 					"Class \"{$target_class}\" does not have " .
 					"\"redefComponentName\" method, and \$hint argument was not provided"
 				);
@@ -803,5 +820,10 @@ class PHP {
 		}
 
 		return CodeBlocksCacheIndex::getRedefinition($hint, $target_class);
+	}
+
+	public static function classShortName(string $val): string {
+		$class_reflection = new ReflectionClass($val);
+		return $class_reflection->getShortName();
 	}
 }

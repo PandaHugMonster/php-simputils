@@ -26,7 +26,6 @@ class Data {
 	 * @param string|null $format
 	 *
 	 * @return \spaf\simputils\models\DataUnit
-	 * @throws \Exception
 	 */
 	public static function du(
 		null|int|string|DataUnit $value = null,

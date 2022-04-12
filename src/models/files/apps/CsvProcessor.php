@@ -3,7 +3,8 @@
 namespace spaf\simputils\models\files\apps;
 
 use Closure;
-use Exception;
+use spaf\simputils\exceptions\Inconsistent;
+use spaf\simputils\exceptions\ParsingProblem;
 use spaf\simputils\generic\BasicResource;
 use spaf\simputils\models\Box;
 use spaf\simputils\models\files\apps\settings\CsvSettings;
@@ -90,7 +91,6 @@ class CsvProcessor extends TextProcessor {
 	 * @param mixed          $data
 	 * @param ?BasicResource $file
 	 *
-	 * @throws \Exception
 	 */
 	public function setContent(mixed $fd, $data, ?BasicResource $file = null): void {
 		/** @var CsvSettings $s */
@@ -102,14 +102,14 @@ class CsvProcessor extends TextProcessor {
 				parent::setContent($fd, $data, $file);
 				return;
 			} else {
-				throw new Exception('Data format is not correct. Data must be array/matrix');
+				throw new ParsingProblem('Data format is not correct. Data must be array/matrix');
 			}
 		}
 
 		$header = static::prepareHeader($data);
 		$header_flipped = null;
 		if (!empty($header)) {
-			$header_flipped = $header->flipped;
+			$header_flipped = $header->flipped();
 		}
 
 		$is_header_one_set = false;
@@ -154,11 +154,11 @@ class CsvProcessor extends TextProcessor {
 		foreach ($data as $row) {
 			foreach ($row as $key => $val) {
 				// NOTE Mix up check (In case of mix up, exception is raised here)
-				$exc = static::_checkMixUpOfKeys($key, $is_index_used, $is_assoc_used);
+				static::_checkMixUpOfKeys($key, $is_index_used, $is_assoc_used);
 
-				if ($exc instanceof Exception) {
-					throw $exc;
-				}
+//				if ($exc instanceof Inconsistent) {
+//					throw $exc;
+//				}
 
 				// NOTE Using in such way to simulate "sets" behaviour
 				if ($is_assoc_used) {
@@ -188,7 +188,7 @@ class CsvProcessor extends TextProcessor {
 			$is_assoc_used = true;
 		}
 		if ($is_assoc_used && $is_index_used) {
-			return new Exception(
+			throw new Inconsistent(
 				'Both assoc and indices are used. '.
 				'Please use just one option, do not mix up.'
 			);

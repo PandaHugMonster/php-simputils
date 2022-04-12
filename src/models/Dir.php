@@ -15,7 +15,6 @@ use function dirname;
 use function file_exists;
 use function is_dir;
 use function preg_match;
-use function realpath;
 use function scandir;
 
 /**
@@ -45,24 +44,24 @@ class Dir extends Box {
 	#[Property('name_full')]
 	protected function getNameFull(): ?string {
 		if (empty($this->_path) && empty($this->_name)) {
-			return null;
+			return null; // @codeCoverageIgnore
 		}
 		return FS::glueFullFilePath($this->_path, $this->_name);
 	}
 
 	#[Property('path')]
 	protected function getPath(): ?string {
-		return $this->_path;
+		return $this->_path; // @codeCoverageIgnore
 	}
 
 	#[Property('exists')]
 	protected function getExists() {
-		return file_exists($this->name_full);
+		return file_exists($this->name_full);  // @codeCoverageIgnore
 	}
 
 	#[Property('type')]
 	protected function getType() {
-		return static::FILE_TYPE;
+		return static::FILE_TYPE;  // @codeCoverageIgnore
 	}
 
 	/**
@@ -122,7 +121,8 @@ class Dir extends Box {
 	 * @see \spaf\simputils\interfaces\WalkThroughFilterInterface
 	 * @see \scandir()
 	 * @return \spaf\simputils\models\File[]|\spaf\simputils\models\Dir[]
-	 * @throws \Exception \Exception
+	 *
+	 * MARK Maybe generator is better?
 	 */
 	public function walk(
 		bool $recursively = false,
@@ -150,7 +150,7 @@ class Dir extends Box {
 				$do_subs = true;
 				foreach ($filters as $filter) {
 					if (empty($filter)) {
-						continue;
+						continue; // @codeCoverageIgnore
 					} else if ($filter instanceof WalkThroughFilterInterface) {
 						if (!$filter->check($obj)) {
 							$include = false;
@@ -185,23 +185,24 @@ class Dir extends Box {
 	 * @param string|null $dir Directory, if file provided, will be used it's folder
 	 */
 	public function __construct(null|string $dir = '.') {
-		$rp = realpath($dir);
-		if (!is_dir($rp)) {
-			$rp = dirname($rp);
+		$rp = $dir;
+		if (file_exists($rp) && !is_dir($rp)) {
+			$rp = dirname($rp); // @codeCoverageIgnore
 		}
-		$this->_path = dirname($rp);
-		$this->_name = basename($rp);
+		$this->_path = $path = dirname($rp);
+		$this->_name = $name = basename($rp);
 	}
 
+	#[\ReturnTypeWillChange]
 	public function getIterator() {
-		return new ArrayIterator($this->walk(false));
+		return new ArrayIterator($this->walk(false));  // @codeCoverageIgnore
 	}
 
 	public function __toString(): string {
-		return $this->name_full;
+		return $this->name_full;  // @codeCoverageIgnore
 	}
 
 	public static function redefComponentName(): string {
-		return InitConfig::REDEF_DIR;
+		return InitConfig::REDEF_DIR;  // @codeCoverageIgnore
 	}
 }

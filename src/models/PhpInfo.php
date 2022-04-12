@@ -2,7 +2,6 @@
 
 namespace spaf\simputils\models;
 
-use Exception;
 use spaf\simputils\attributes\PropertyBatch;
 use spaf\simputils\Boolean;
 use spaf\simputils\generic\constants\ConstPHPInfo as constants;
@@ -12,6 +11,7 @@ use spaf\simputils\Str;
 use spaf\simputils\System;
 use spaf\simputils\traits\ArrayReadOnlyAccessTrait;
 use spaf\simputils\traits\RedefinableComponentTrait;
+use ValueError;
 use function in_array;
 
 /**
@@ -179,7 +179,7 @@ class PhpInfo extends Box {
 
 		/** @noinspection PhpComposerExtensionStubsInspection */
 		$data[constants::KEY_OPCACHE] = extension_loaded('Zend OPcache')
-			?opcache_get_status()
+			?opcache_get_status() //@codeCoverageIgnore
 			:null; //@codeCoverageIgnore
 		$data[constants::KEY_SYSTEM_OS] = System::os();
 		$data[constants::KEY_KERNEL_NAME] = System::kernelName();
@@ -252,12 +252,11 @@ class PhpInfo extends Box {
 	 * @codeCoverageIgnore
 	 * @todo relocate to Lib engine Settings
 	 * @return void
-	 * @throws \Exception If a key is not a valid name
 	 */
 	public static function replacePhpInfoRegExp(string $key, ?string $val) {
 		$keys_list = static::listOfRegExpKeys();
 		if (!in_array($key, $keys_list))
-			throw new Exception('Key '.$key.' is not a valid name');
+			throw new ValueError('Key '.$key.' is not a valid name');
 
 		static::$replace_php_info_reg_exp_array[$key] = $val;
 	}

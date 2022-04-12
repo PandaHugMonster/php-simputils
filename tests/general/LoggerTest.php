@@ -22,6 +22,7 @@ use spaf\simputils\logger\outputs\TextFileOutput;
  * @uses \spaf\simputils\attributes\Property
  * @uses \spaf\simputils\special\CodeBlocksCacheIndex
  * @uses \spaf\simputils\generic\fixups\FixUpDateTime
+ * @uses \spaf\simputils\generic\fixups\FixUpDateTimeZone
  * @uses \spaf\simputils\Str
  *
  */
@@ -93,7 +94,6 @@ class LoggerTest extends TestCase {
 	 *
 	 * @runInSeparateProcess
 	 * @return void
-	 * @throws \Exception
 	 */
 	public function testFileOutput() {
 		$dir = '/tmp/simputils/tests/logs';
@@ -134,7 +134,6 @@ class LoggerTest extends TestCase {
 	 * @runInSeparateProcess
 	 *
 	 * @return void
-	 * @throws \Exception
 	 */
 	public function testFileContent() {
 		$file_path = '/tmp/simputils/tests/__just-a-file.txt';

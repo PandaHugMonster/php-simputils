@@ -3,8 +3,8 @@
 namespace general;
 
 use Closure;
-use Exception;
 use PHPUnit\Framework\TestCase;
+use spaf\simputils\exceptions\PathProblem;
 use spaf\simputils\FS;
 use spaf\simputils\models\File;
 use spaf\simputils\PHP;
@@ -25,12 +25,13 @@ use function fwrite;
  * @uses \spaf\simputils\traits\SimpleObjectTrait
  * @uses \spaf\simputils\traits\SimpleObjectTrait::__get
  * @uses \spaf\simputils\traits\SimpleObjectTrait::__set
- * @uses \spaf\simputils\traits\SimpleObjectTrait::____prepareProperty
+ * @uses \spaf\simputils\traits\SimpleObjectTrait::_simpUtilsPrepareProperty
  * @uses \spaf\simputils\traits\SimpleObjectTrait::__isset
  * @covers \spaf\simputils\generic\BasicResourceApp
  * @uses \spaf\simputils\FS
  * @uses \spaf\simputils\attributes\Property
  * @uses \spaf\simputils\traits\SimpleObjectTrait::getAllTheLastMethodsAndProperties
+ * @uses \spaf\simputils\traits\SimpleObjectTrait::_simpUtilsGetValidator
  */
 class FileModelTest extends TestCase {
 
@@ -110,7 +111,7 @@ class FileModelTest extends TestCase {
 		$new_file_obj->delete(true);
 		$this->assertFileDoesNotExist($new_file_obj->name_full);
 
-		$this->expectException(Exception::class);
+		$this->expectException(PathProblem::class);
 		$file->copy($file->name_full);
 	}
 

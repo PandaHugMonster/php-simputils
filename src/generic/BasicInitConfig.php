@@ -2,11 +2,14 @@
 
 namespace spaf\simputils\generic;
 
-use Exception;
+use spaf\simputils\attributes\markers\Shortcut;
 use spaf\simputils\attributes\Property;
+use spaf\simputils\DT;
+use spaf\simputils\exceptions\InitConfigAlreadyInitialized;
 use spaf\simputils\FS;
 use spaf\simputils\interfaces\InitBlockInterface;
 use spaf\simputils\models\Box;
+use spaf\simputils\models\DateTimeZone;
 use spaf\simputils\models\L10n;
 use spaf\simputils\PHP;
 use spaf\simputils\special\CommonMemoryCacheIndex;
@@ -18,6 +21,7 @@ use function is_numeric;
  *
  * @property-read Box|array $successful_init_blocks
  * @property ?L10n $l10n
+ * @property ?DateTimeZone $default_tz
  */
 abstract class BasicInitConfig extends SimpleObject {
 
@@ -42,6 +46,7 @@ abstract class BasicInitConfig extends SimpleObject {
 	const REDEF_TEMPERATURE = 'Temperature';
 	const REDEF_SYSTEM_FINGERPRINT = 'SystemFingerprint';
 	const REDEF_STR_OBJ = 'StrObj';
+	const REDEF_SET = 'Set';
 
 	public ?string $name = null;
 	public ?string $code_root = null;
@@ -53,6 +58,17 @@ abstract class BasicInitConfig extends SimpleObject {
 	protected array $_successful_init_blocks = [];
 	protected bool $_is_already_setup = false;
 
+	#[Property('default_tz')]
+	#[Shortcut('DT::getDefaultTimeZone()')]
+	protected function getDefaultTimeZone(): DateTimeZone {
+		return DT::getDefaultTimeZone();
+	}
+
+	#[Property('default_tz')]
+	#[Shortcut('DT::setDefaultTimeZone()')]
+	protected function setDefaultTimeZone(string|DateTimeZone $tz) {
+		DT::setDefaultTimeZone($tz);
+	}
 
 	#[Property('l10n_name')]
 	protected function getL10nName(): mixed {
@@ -66,18 +82,22 @@ abstract class BasicInitConfig extends SimpleObject {
 
 	#[Property('l10n')]
 	protected function setL10n(null|string|L10n $val): void {
-		if (Str::is($val)) {
+		if (empty($val)) {
 			$this->_l10n_name = $val;
+		} else {
+			if (Str::is($val)) {
+				$this->_l10n_name = $val;
 
-			$class = PHP::redef(L10n::class);
-			$l10n_name = Str::upper($val);
-			$path = FS::path(PHP::frameworkDir(), 'data', 'l10n', "{$l10n_name}.json");
-			$val = $class::createFrom($path);
-		}
+				$class = PHP::redef(L10n::class);
+				$l10n_name = Str::upper($val);
+				$path = FS::path(PHP::frameworkDir(), 'data', 'l10n', "{$l10n_name}.json");
+				$val = $class::createFrom($path);
+			}
 
-		/** @var L10n $val */
-		if ($val::$is_auto_setup) {
-			$val->doSetUp();
+			/** @var L10n $val */
+			if ($val::$is_auto_setup) {
+				$val->doSetUp();
+			}
 		}
 		$this->_l10n = $val;
 	}
@@ -173,9 +193,9 @@ abstract class BasicInitConfig extends SimpleObject {
 				}
 			}
 		} else {
-			throw new Exception(
+			throw new InitConfigAlreadyInitialized(
 				'The InitConfig object is already setup and initialized.' .
-				'It\'s no longer possible to change the setup.'
+				'It\'s not possible to initialize it more than once.'
 			);
 		}
 		return $this;

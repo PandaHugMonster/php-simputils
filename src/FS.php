@@ -2,16 +2,20 @@
 
 namespace spaf\simputils;
 
-use Exception;
 use finfo;
+use spaf\simputils\exceptions\CannotDeleteDirectory;
 use spaf\simputils\generic\BasicResourceApp;
 use spaf\simputils\models\Dir;
 use spaf\simputils\models\File;
+use function file_exists;
+use function is_dir;
+use const DIRECTORY_SEPARATOR;
 
 /**
  * FileSystem class
  *
  * TODO Add fileExists method
+ * TODO Add real-path property and check if realpath is the same as specified.
  */
 class FS {
 
@@ -140,13 +144,12 @@ class FS {
 	 * @param bool        $recursively    Recursively deletes directories (required if not empty)
 	 *
 	 * @return bool|null
-	 * @throws \Exception Exception if regular file path is supplied, and not a directory path
 	 * @todo Add root dir protection
 	 */
 	public static function rmDir(?string $directory_path, bool $recursively = false): ?bool {
 		if (!is_dir($directory_path)) {
 			// TODO Fix exception
-			throw new Exception("{$directory_path} is not a directory");
+			throw new CannotDeleteDirectory("{$directory_path} is not a directory");
 		}
 		if ($recursively) {
 			$res = false;
@@ -176,7 +179,6 @@ class FS {
 	 *                                      directory path supplied instead of a regular file path.
 	 *
 	 * @return bool|null
-	 * @throws \Exception Exception if `$strict` param is true and the file path provided is
 	 *                    a directory.
 	 */
 	public static function rmFile(
@@ -199,7 +201,7 @@ class FS {
 		if (is_dir($file)) {
 			if ($strict) {
 				// TODO Fix exception
-				throw new Exception("{$file} is a directory, and a strict mode is on");
+				throw new CannotDeleteDirectory("{$file} is a directory, and a strict mode is on");
 			} else {
 				return static::rmDir($file, $recursively);
 			}
@@ -331,7 +333,6 @@ class FS {
 	 * @param mixed|null       $app  Read/Write processor
 	 *
 	 * @return \spaf\simputils\models\File|null
-	 * @throws \Exception
 	 */
 	public static function file(
 		mixed $file = null,
@@ -349,7 +350,6 @@ class FS {
 	 *
 	 * FIX  Improve supported params (Directory, Files that are directories, etc. Regexp strings)
 	 * @return Dir|null
-	 * @throws \Exception
 	 */
 	public static function dir(null|string|Dir $dir = null): ?Dir {
 		if ($dir instanceof Dir) {
@@ -359,17 +359,38 @@ class FS {
 		return new $class($dir);
 	}
 
+	/**
+	 * @param string|null ...$parts
+	 *
+	 * TODO Implement root part somehow
+	 * @return string|null
+	 */
 	public static function path(?string ...$parts): ?string {
-		$res = '';
-		$sep = '/';
+		$sep = DIRECTORY_SEPARATOR;
 		if ($parts) {
-			$i = 0;
-			foreach ($parts as $part) {
-				$res .= ($i++ == 0?'':$sep).$part;
-			}
+			$res = PHP::box($parts)->join($sep);
 		}
-		return $res
-			?realpath($res)
-			:null;
+		return $res ?? null;
+	}
+
+	/**
+	 * Returns file obj or path to the file relative to work-dir
+	 *
+	 *
+	 * @param string|null ...$parts
+	 *
+	 * FIX  implement different plugins/modules/extensions support
+	 *
+	 * @return string|\spaf\simputils\models\File|\spaf\simputils\models\Dir|null
+	 */
+	public static function locate(?string ...$parts): File|Dir {
+		$work_dir = PHP::getInitConfig()->working_dir;
+
+		$path = static::path($work_dir, ...$parts);
+		if (is_dir($path)) {
+			return static::dir($path);
+		}
+
+		return static::file($path);
 	}
 }

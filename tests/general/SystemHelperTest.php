@@ -86,10 +86,9 @@ class SystemHelperTest extends TestCase {
 	 *
 	 * @runInSeparateProcess
 	 * @return void
-	 * @throws \Exception
 	 */
 	public function testCustomFingerPrintParsingException() {
-		$this->expectException(Exception::class);
+		$this->expectException(ValueError::class);
 		SystemFingerprint::parse(
 			'PAN/cac55efcadcea418138717390e7ec654,5ed77353205283d243ec7d0f5804cfb367ec5149b51cd2362d9f6a4659da2cba/0.2.3/0'
 		);

@@ -4,10 +4,13 @@ namespace spaf\simputils\generic;
 
 use Exception;
 use spaf\simputils\attributes\Property;
+use spaf\simputils\exceptions\Inconsistent;
+use spaf\simputils\exceptions\ParsingProblem;
 use spaf\simputils\generic\constants\ConstSystemFingerprint as constants;
 use spaf\simputils\logger\Logger;
 use spaf\simputils\models\Box;
 use spaf\simputils\PHP;
+use ValueError;
 use function explode;
 use function is_null;
 use function preg_replace;
@@ -87,7 +90,7 @@ abstract class BasicSystemFingerprint extends SimpleObject {
 	public static function parse(string $fingerprint_string): static {
 		$params = static::parseString($fingerprint_string);
 		if (empty($params) || $params['name'] !== static::NAME) {
-			throw new Exception('Params are empty or name is not correct');
+			throw new ValueError('Params are empty or name is not correct');
 		}
 		$instance = static::createDummy();
 		unset($params['name']);
@@ -108,7 +111,6 @@ abstract class BasicSystemFingerprint extends SimpleObject {
 	 * @param Box|array $params Params to assign to fields
 	 *
 	 * @return void
-	 * @throws \Exception Exception if indices' types are not homogenous
 	 */
 	protected function assignParams(Box|array $params) {
 		$index_type = null;
@@ -119,7 +121,7 @@ abstract class BasicSystemFingerprint extends SimpleObject {
 				$index_type = $t;
 			} else if ($index_type !== $t) {// @codeCoverageIgnore
 				// FIX  Should be implemented differently (to use both int and str keys)
-				throw new Exception( // @codeCoverageIgnore
+				throw new Inconsistent( // @codeCoverageIgnore
 					'Index/keys must be of the same type' // @codeCoverageIgnore
 				);
 			}
@@ -164,7 +166,6 @@ abstract class BasicSystemFingerprint extends SimpleObject {
 	 * @param bool $only_base
 	 *
 	 * @return string
-	 * @throws \Exception
 	 */
 	public function generateString(bool $only_base = false): string {
 		$res = $this->name.'/'.$this->first_hash.','.$this->second_hash;
@@ -175,7 +176,7 @@ abstract class BasicSystemFingerprint extends SimpleObject {
 		if (!empty($this->parts)) {
 			foreach ($this->parts as $part) {
 				if (!isset($this->$part)) {
-					throw new Exception( // @codeCoverageIgnore
+					throw new ValueError( // @codeCoverageIgnore
 						"\"{$part}\" property is not specified" // @codeCoverageIgnore
 					);
 				}
@@ -228,7 +229,7 @@ abstract class BasicSystemFingerprint extends SimpleObject {
 		$base_parts = $parts->shift(2)->stash;
 
 		if (empty($base_parts) || $base_parts->size < 2) {
-			throw new Exception( // @codeCoverageIgnore
+			throw new ParsingProblem( // @codeCoverageIgnore
 				'Parsing has failed, too few data-parts are found' // @codeCoverageIgnore
 			);
 		}
@@ -249,7 +250,6 @@ abstract class BasicSystemFingerprint extends SimpleObject {
 
 	/**
 	 * @return string
-	 * @throws \Exception
 	 */
 	public function __toString(): string {
 		return $this->generateString();

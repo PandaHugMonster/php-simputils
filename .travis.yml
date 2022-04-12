@@ -12,14 +12,22 @@ stages:
   - name: test
     if: type = pull_request or (branch = main and type = push)
   - name: codecov
-    if: branch = main and type = push
+    if: (branch = main and type = push) or (branch = dev and type = pull_request)
 
 jobs:
   include:
     - stage: test
       script:
-        - phpunit
+        - composer run-script tests-clover
+      workspaces:
+        create:
+          name: ws1
+          paths:
+            - clover.xml
+
     - stage: codecov
+      workspaces:
+        use: ws1
       script:
         - curl -Os https://uploader.codecov.io/latest/linux/codecov
         - chmod +x codecov

@@ -1,0 +1,8 @@
+{
+  "DateTime": {
+    "user_date_format": "d/m/Y",
+    "user_time_format": "H:i",
+    "user_datetime_format": "d/m/Y H:i",
+    "user_default_tz": "Europe/Paris"
+  }
+}

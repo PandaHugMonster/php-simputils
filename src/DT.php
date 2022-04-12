@@ -9,6 +9,8 @@ use spaf\simputils\interfaces\helpers\DateTimeHelperInterface;
 use spaf\simputils\models\DateInterval;
 use spaf\simputils\models\DateTime;
 use spaf\simputils\models\DateTimeZone;
+use function date_default_timezone_get;
+use function date_default_timezone_set;
 use function is_string;
 
 /**
@@ -34,13 +36,12 @@ class DT implements DateTimeHelperInterface {
 	 *                  instead of "now". This should not be used ever, but can help
 	 *                  in some cases of testing/mocking and experimenting.
 	 *
-	 * @param \DateTimeZone|null $tz
+	 * @param DateTimeZone|string|null $tz
 	 *
 	 * @return DateTime|null
-	 * @throws \Exception
 	 */
-	public static function now(DateTimeZone|null $tz = null): ?DateTime {
-		return static::normalize(static::$now_string ?? 'now');
+	public static function now(DateTimeZone|bool|string|null $tz = null): ?DateTime {
+		return static::normalize(static::$now_string ?? 'now', $tz);
 	}
 
 	/**
@@ -54,12 +55,11 @@ class DT implements DateTimeHelperInterface {
 	 *
 	 * @return DateTime|null
 	 *
-	 * @throws \Exception Parsing error
 	 */
 	#[Shortcut('DT::normalize()')]
 	public static function ts(
 		DateTime|string|int $dt,
-		null|DateTimeZone|string $tz = null,
+		null|bool|DateTimeZone|string $tz = null,
 		string $fmt = null
 	): ?DateTime {
 		return DT::normalize($dt, $tz, $fmt);
@@ -87,28 +87,49 @@ class DT implements DateTimeHelperInterface {
 	 *                                  Default is true.
 	 *
 	 * @return DateTime|null
-	 * @throws \Exception
 	 */
 	public static function normalize(
 		DateTime|string|int $dt,
-		null|DateTimeZone|string $tz = null,
+		null|bool|DateTimeZone|string $tz = null,
 		string $fmt = null,
 		bool $is_clone_allowed = true,
 	): ?DateTime {
-		$class = PHP::redef(DateTime::class);
-		if (is_string($tz)) {
-			$tz_class = PHP::redef(DateTimeZone::class);
-			$tz = new $tz_class($tz);
+		if ($dt instanceof DateTime) {
+			return $is_clone_allowed
+				?clone $dt
+				:$dt;
 		}
 
+		$class = PHP::redef(DateTime::class);
+		$tz_class = PHP::redef(DateTimeZone::class);
+
+		$from_utc = false;
+
+		// Incoming
+		if ($tz === true) {
+			// Zoned input
+			$tz = null;
+		} else if (is_string($tz)) {
+			// Zoned input
+			$tz = new $tz_class($tz);
+		} else if (empty($tz)) {
+			// Un-zoned input!
+			$tz = new $tz_class('UTC');
+			$from_utc = true;
+		}
+		/** @var DateTime $res */
+		// Resulting
 		if (Str::is($dt)) {
 			$res = !empty($fmt)
 				?$class::createFromFormat($fmt, $dt, $tz)
 				:new $class($dt, $tz);
-		} elseif (is_integer($dt))
+		} else if (is_integer($dt)) {
 			$res = new $class(date(DATE_ATOM, $dt), $tz);
-		else
-			$res = $is_clone_allowed?clone $dt:$dt;
+		}
+
+		if ($from_utc) {
+			$res->setTimezone(static::getDefaultTimeZone());
+		}
 
 		return $res;
 	}
@@ -122,7 +143,6 @@ class DT implements DateTimeHelperInterface {
 	 * @param string|null $parsing_fmt
 	 *
 	 * @return string|null
-	 * @throws \Exception
 	 */
 	public static function stringify(
 		DateTime|string|int $dt,
@@ -162,7 +182,6 @@ class DT implements DateTimeHelperInterface {
 	 * @param string|\spaf\simputils\models\DateInterval $step
 	 *
 	 * @return \spaf\simputils\models\DatePeriod
-	 * @throws \Exception
 	 */
 	#[Shortcut('\spaf\simputils\models\DateTime::walk()')]
 	public static function walk(
@@ -171,5 +190,15 @@ class DT implements DateTimeHelperInterface {
 		string|DateInterval $step
 	) {
 		return static::normalize($start)->walk(static::normalize($end), $step);
+	}
+
+	public static function getDefaultTimeZone(): DateTimeZone {
+		$class = PHP::redef(DateTimeZone::class);
+		$tz = new $class(date_default_timezone_get());
+		return $tz;
+	}
+
+	public static function setDefaultTimeZone(string|DateTimeZone $tz) {
+		date_default_timezone_set("{$tz}");
 	}
 }

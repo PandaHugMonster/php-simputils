@@ -2,13 +2,13 @@
 
 namespace spaf\simputils\traits;
 
-use Exception;
 use spaf\simputils\attributes\Property;
 use spaf\simputils\models\SystemFingerprint;
 use spaf\simputils\models\Version;
 use spaf\simputils\PHP;
 use spaf\simputils\Str;
 use spaf\simputils\traits\dsf\DsfVersionsMethodsTrait;
+use ValueError;
 
 /**
  * @codeCoverageIgnore Unfinished
@@ -83,17 +83,16 @@ trait DefaultSystemFingerprintTrait {
 	 *
 	 * @codeCoverageIgnore
 	 * @return mixed
-	 * @throws \Exception Exception value is wrong
 	 */
 	public function preCheckProperty(string $field, mixed $val): mixed {
 		$version_class = PHP::redef(Version::class);
 		if ($field === 'version') {
 			if (empty($val)) {
-				throw new Exception('Version parameter/property must be specified');
+				throw new ValueError('Version parameter/property must be specified');
 			} else if (Str::is($val)) {
 				return new $version_class($val);
 			} else if (!PHP::classContains($val, $version_class)) {
-				throw new Exception('Version object is not a correct one');
+				throw new ValueError('Version object is not a correct one');
 			}
 		}
 
@@ -110,7 +109,6 @@ trait DefaultSystemFingerprintTrait {
 	 *
 	 * @return bool True if `$this` is fitting to `$val`, false otherwise
 	 *
-	 * @throws \Exception Error
 	 */
 	public function fits(mixed $val, bool $strict = false): bool {
 		if (is_null($val)) {

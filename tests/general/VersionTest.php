@@ -106,10 +106,13 @@ class VersionTest extends TestCase {
 		$this->assertEquals('A', $v2->build_type, 'Check build type');
 		$this->assertEquals(99, $v2->build_revision, 'Check build revision');
 
+		/** @var Version $v3 */
 		$v3 = new $version_class($str_v3);
 		$this->assertEquals(intval($str_v3), $v3->major, 'Another major version value check');
 		$this->assertEquals(0, $v3->minor, 'Another minor version value check');
 		$this->assertEquals(0, $v3->patch, 'Another patch version value check');
+
+		$this->assertEquals('"20090130.0.0"', $v3->toJson());
 
 	}
 

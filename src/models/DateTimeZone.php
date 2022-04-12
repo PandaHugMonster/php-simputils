@@ -7,6 +7,6 @@ use spaf\simputils\generic\fixups\FixUpDateTimeZone;
 class DateTimeZone extends FixUpDateTimeZone {
 
 	public function __toString(): string {
-		return $this->getName();
+		return $this->getName(); // @codeCoverageIgnore
 	}
 }

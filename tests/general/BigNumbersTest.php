@@ -22,10 +22,12 @@ use function spaf\simputils\basic\env;
  * @uses \spaf\simputils\models\PhpInfo
  * @uses \spaf\simputils\models\Version
  * @uses \spaf\simputils\special\CodeBlocksCacheIndex
- * @uses \spaf\simputils\traits\SimpleObjectTrait::____prepareProperty
- * @uses \spaf\simputils\traits\SimpleObjectTrait::____propertyBatchMethodGet
+ * @uses \spaf\simputils\traits\SimpleObjectTrait::_simpUtilsPrepareProperty
+ * @uses \spaf\simputils\traits\SimpleObjectTrait::_simpUtilsPropertyBatchMethodGet
  * @uses \spaf\simputils\traits\SimpleObjectTrait::__get
+ * @uses \spaf\simputils\traits\SimpleObjectTrait::__set
  * @uses \spaf\simputils\traits\SimpleObjectTrait::getAllTheLastMethodsAndProperties
+ * @uses \spaf\simputils\traits\SimpleObjectTrait::_simpUtilsGetValidator
  */
 class BigNumbersTest extends TestCase {
 
@@ -56,7 +58,6 @@ class BigNumbersTest extends TestCase {
 	 * @param string $val
 	 *
 	 * @return void
-	 * @throws \Exception
 	 */
 	public function testBcmathConversion() {
 		$this->_extensionWiseTests(
@@ -73,7 +74,6 @@ class BigNumbersTest extends TestCase {
 	 * @param string $val
 	 *
 	 * @return void
-	 * @throws \Exception
 	 */
 	public function testGmpConversion() {
 		$this->_extensionWiseTests(
@@ -84,16 +84,233 @@ class BigNumbersTest extends TestCase {
 	}
 
 	private function _extensionWiseTests($ext, $data, $disabled) {
+		$this->skipIfExtIsNotAvailable($disabled);
+
+		foreach ($data as [$expected, $val]) {
+			$bn = new BigNumber($val, extension: $ext);
+			$this->assertEquals($expected, "{$bn}");
+		}
+	}
+
+	private function skipIfExtIsNotAvailable($ext, $disabled = false) {
 		if ($disabled || !BigNumber::checkExtensionAvailability($ext)) {
 			if ($disabled) {
 				$txt_faked = ' (faked through the env variable)';
 			}
 			$this->markTestSkipped("The extension of {$ext} is not available{$txt_faked}");
+			return false;
 		}
-		foreach ($data as [$expected, $val]) {
-			$bn = new BigNumber($val, extension: $ext);
-			$this->assertEquals($expected, "{$bn}");
-		}
+
+		return true;
+	}
+
+	/**
+	 * @return void
+	 */
+	function testWithGmp() {
+		$ext = BigNumber::SUBSYSTEM_GMP;
+		$this->skipIfExtIsNotAvailable($ext, $this->fake_disabled_gmp);
+
+		// Mutable
+		$bn = new BigNumber(123, true, $ext);
+
+		// NOTE Irrelevant for GMP
+		$this->assertEquals("{$bn}", "{$bn->floor()}");
+
+		$this->assertFalse($bn->fractions_supported);
+		$this->assertTrue($bn->mutable);
+		$this->assertEquals($ext, $bn->extension);
+		$this->assertEquals('123', "$bn");
+
+		$bn->add(22);
+		$this->assertEquals('145', "$bn");
+
+		$bn->mul('1000000000000000000999');
+		$this->assertEquals('145000000000000000144855', "$bn");
+
+		$bn->sub('500000000')->div('100000')->add(33);
+		$this->assertEquals('1449999999999995034', "$bn");
+
+		$bn->sub('999000000000');
+		$this->assertEquals('1449999000999995034', "$bn");
+
+		$bn->mod(55);
+		$this->assertEquals(39, "$bn");
+
+		$this->assertEquals(0, "{$bn->cmp(39)}");
+		$this->assertEquals(-1, "{$bn->cmp(50)}");
+		$this->assertEquals(1, "{$bn->cmp(30)}");
+
+		$bn->pow(2);
+		$this->assertEquals(1521, "{$bn}");
+
+		$bn->powMod(2, 33);
+		$this->assertEquals(9, "{$bn}");
+
+		$bn->sqrt();
+		$this->assertEquals(3, "{$bn}");
+
+		$this->assertFalse($bn->isZero());
+
+		$bn->mul(0);
+		$this->assertEquals('0', "$bn");
+		$this->assertTrue($bn->isZero());
+
+		// Immutable
+		$orig = $bn = new BigNumber(123, extension: $ext);
+
+		$bn->mutable = false;
+
+		$bn = $bn->floor();
+		$this->assertEquals("{$orig}", "{$bn}");
+
+		$this->assertFalse($bn->mutable);
+
+		$this->assertEquals($ext, $bn->extension);
+
+		$this->assertEquals('123', "$bn");
+
+		$bn = $bn->add(22);
+
+		$this->assertNotEquals($orig->obj_id, $bn->obj_id);
+
+		$this->assertEquals('145', "$bn");
+
+		$bn = $bn->mul('1000000000000000000999');
+		$this->assertEquals('145000000000000000144855', "$bn");
+
+		$bn = $bn->sub('500000000')->div('100000')->add(33);
+		$this->assertEquals('1449999999999995034', "$bn");
+
+		$bn = $bn->sub('999000000000');
+		$this->assertEquals('1449999000999995034', "$bn");
+
+		$bn = $bn->mod(55);
+		$this->assertEquals(39, "$bn");
+
+		$this->assertEquals(0, "{$bn->cmp(39)}");
+		$this->assertEquals(-1, "{$bn->cmp(50)}");
+		$this->assertEquals(1, "{$bn->cmp(30)}");
+
+		$bn = $bn->pow(2);
+		$this->assertEquals(1521, "{$bn}");
+
+		$bn = $bn->powMod(2, 33);
+		$this->assertEquals(9, "{$bn}");
+
+		$bn = $bn->sqrt();
+		$this->assertEquals(3, "{$bn}");
+
+		$this->assertFalse($bn->isZero());
+
+		$bn = $bn->mul(0);
+		$this->assertEquals('0', "$bn");
+		$this->assertTrue($bn->isZero());
+
+	}
+
+	/**
+	 * @return void
+	 */
+	function testWithBcmath() {
+		$ext = BigNumber::SUBSYSTEM_BCMATH;
+		$this->skipIfExtIsNotAvailable($ext, $this->fake_disabled_bcmath);
+
+		// Mutable
+		$bn = new BigNumber(123.6, true, $ext);
+
+		$this->assertEquals(123, "{$bn->floor()}");
+
+		$this->assertTrue($bn->fractions_supported);
+		$this->assertTrue($bn->mutable);
+		$this->assertEquals($ext, $bn->extension);
+		$this->assertEquals('123', "$bn");
+
+		$bn->add(22);
+		$this->assertEquals('145', "$bn");
+
+		$bn->mul('1000000000000000000999');
+		$this->assertEquals('145000000000000000144855', "$bn");
+
+		$bn->sub('500000000')->div('100000')->add(33);
+		$this->assertEquals('1449999999999995034', "$bn");
+
+		$bn->sub('999000000000');
+		$this->assertEquals('1449999000999995034', "$bn");
+
+		$bn->mod(55);
+		$this->assertEquals(39, "$bn");
+
+		$this->assertEquals(0, "{$bn->cmp(39)}");
+		$this->assertEquals(-1, "{$bn->cmp(50)}");
+		$this->assertEquals(1, "{$bn->cmp(30)}");
+
+		$bn->pow(2);
+		$this->assertEquals(1521, "{$bn}");
+
+		$bn->powMod(2, 33);
+		$this->assertEquals(9, "{$bn}");
+
+		$bn->sqrt();
+		$this->assertEquals(3, "{$bn}");
+
+		$this->assertFalse($bn->isZero());
+
+		$bn->mul(0);
+		$this->assertEquals('0', "$bn");
+		$this->assertTrue($bn->isZero());
+
+		// Immutable
+		$orig = $bn = new BigNumber(123.58, extension: $ext);
+
+		$bn->mutable = false;
+
+		$bn = $bn->floor();
+		$this->assertEquals(123, "{$bn}");
+
+		$this->assertFalse($bn->mutable);
+
+		$this->assertEquals($ext, $bn->extension);
+
+		$this->assertEquals('123', "$bn");
+
+		$bn = $bn->add(22);
+
+		$this->assertNotEquals($orig->obj_id, $bn->obj_id);
+
+		$this->assertEquals('145', "$bn");
+
+		$bn = $bn->mul('1000000000000000000999');
+		$this->assertEquals('145000000000000000144855', "$bn");
+
+		$bn = $bn->sub('500000000')->div('100000')->add(33);
+		$this->assertEquals('1449999999999995034', "$bn");
+
+		$bn = $bn->sub('999000000000');
+		$this->assertEquals('1449999000999995034', "$bn");
+
+		$bn = $bn->mod(55);
+		$this->assertEquals(39, "$bn");
+
+		$this->assertEquals(0, "{$bn->cmp(39)}");
+		$this->assertEquals(-1, "{$bn->cmp(50)}");
+		$this->assertEquals(1, "{$bn->cmp(30)}");
+
+		$bn = $bn->pow(2);
+		$this->assertEquals(1521, "{$bn}");
+
+		$bn = $bn->powMod(2, 33);
+		$this->assertEquals(9, "{$bn}");
+
+		$bn = $bn->sqrt();
+		$this->assertEquals(3, "{$bn}");
+
+		$this->assertFalse($bn->isZero());
+
+		$bn = $bn->mul(0);
+		$this->assertEquals('0', "$bn");
+		$this->assertTrue($bn->isZero());
+
 	}
 
 }

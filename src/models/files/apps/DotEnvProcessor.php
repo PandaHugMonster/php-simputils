@@ -2,7 +2,7 @@
 
 namespace spaf\simputils\models\files\apps;
 
-use Exception;
+use spaf\simputils\exceptions\DotEnvCommentExtensionProblem;
 use spaf\simputils\generic\BasicDotEnvCommentExt;
 use spaf\simputils\generic\BasicResource;
 use spaf\simputils\models\files\apps\settings\DotEnvSettings;
@@ -40,7 +40,6 @@ class DotEnvProcessor extends TextProcessor {
 	 * TODO Yes, lots of `trim()`s, yes it's sub-optimal probably! Subject for improvement.
 	 *
 	 * @return mixed
-	 * @throws \Exception
 	 */
 	public function getContent(mixed $fd, ?BasicResource $file = null): ?array {
 		$s = static::getSettings($file);
@@ -105,7 +104,6 @@ class DotEnvProcessor extends TextProcessor {
 	 * @param mixed          $data Data to store
 	 * @param ?BasicResource $file File instance
 	 *
-	 * @throws \Exception Error
 	 */
 	public function setContent(mixed $fd, $data, ?BasicResource $file = null): void {
 		$lines = [];
@@ -128,7 +126,7 @@ class DotEnvProcessor extends TextProcessor {
 
 				if ($value instanceof BasicDotEnvCommentExt) {
 					if ($value->getPrefix() !== BasicDotEnvCommentExt::PREFIX_ROW) {
-						throw new Exception(
+						throw new DotEnvCommentExtensionProblem(
 							'Comment-extensions value-wrappers are allowed only for '.
 							'"PREFIX_ROW" type.'
 						);

@@ -3,7 +3,8 @@
 namespace spaf\simputils\special;
 
 use Closure;
-use Exception;
+use spaf\simputils\exceptions\InitConfigException;
+use spaf\simputils\exceptions\InitConfigNonUniqueCodeBlock;
 use spaf\simputils\generic\BasicInitConfig;
 use spaf\simputils\logger\Logger;
 use spaf\simputils\models\BigNumber;
@@ -19,6 +20,7 @@ use spaf\simputils\models\GitRepo;
 use spaf\simputils\models\InitConfig;
 use spaf\simputils\models\L10n;
 use spaf\simputils\models\PhpInfo;
+use spaf\simputils\models\Set;
 use spaf\simputils\models\StackFifo;
 use spaf\simputils\models\StackLifo;
 use spaf\simputils\models\StrObj;
@@ -61,15 +63,15 @@ class CodeBlocksCacheIndex {
 			InitConfig::REDEF_TEMPERATURE => Temperature::class,
 			InitConfig::REDEF_SYSTEM_FINGERPRINT => SystemFingerprint::class,
 			InitConfig::REDEF_STR_OBJ => StrObj::class,
+			InitConfig::REDEF_SET => Set::class,
 		]);
 	}
 
 	public static function registerInitBlock(BasicInitConfig $config): ?bool {
-		$name = empty($config->name)
-			?'app'
-			:$config->name;
+		$name = empty($config->name)?'app':$config->name;
+
 		if (static::hasInitBlock($name)) {
-			throw new Exception(
+			throw new InitConfigNonUniqueCodeBlock(
 				'Code block can be registered just once with a unique name. '.
 				"Name \"{$config->name}\" is not unique. Config: {$config}"
 			);
@@ -82,7 +84,7 @@ class CodeBlocksCacheIndex {
 			if (!empty($config->redefinitions)) {
 				foreach ($config->redefinitions as $key => $redef) {
 					if (empty($list[$key])) {
-						throw new Exception('');
+						throw new InitConfigException('Init Config Redefinitions Problem');
 					}
 					static::$redefinitions[$key] = $redef;
 				}
@@ -95,9 +97,7 @@ class CodeBlocksCacheIndex {
 	}
 
 	public static function getInitBlock($name): ?BasicInitConfig {
-		$name = empty($name)
-			?'app'
-			:$name;
+		$name = empty($name)?'app':$name;
 		return static::$index[$name] ?? null;
 	}
 

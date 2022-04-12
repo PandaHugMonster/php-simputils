@@ -4,6 +4,7 @@ namespace general;
 
 use Exception;
 use PHPUnit\Framework\TestCase;
+use spaf\simputils\exceptions\Inconsistent;
 use spaf\simputils\FS;
 use spaf\simputils\models\Box;
 use spaf\simputils\models\files\apps\CsvProcessor;
@@ -41,10 +42,11 @@ use function spaf\simputils\basic\fl;
  * @uses \spaf\simputils\FS
  * @uses \spaf\simputils\attributes\Property
  * @uses \spaf\simputils\basic\bx
- * @uses \spaf\simputils\traits\SimpleObjectTrait::____prepareProperty
+ * @uses \spaf\simputils\traits\SimpleObjectTrait::_simpUtilsPrepareProperty
  * @uses \spaf\simputils\basic\fl
  * @uses \spaf\simputils\traits\SimpleObjectTrait::getAllTheLastMethodsAndProperties
  * @uses \spaf\simputils\Str
+ * @uses \spaf\simputils\traits\SimpleObjectTrait::_simpUtilsGetValidator
  */
 class DefaultAppProcessorsTest extends TestCase {
 
@@ -237,7 +239,7 @@ class DefaultAppProcessorsTest extends TestCase {
 	function testCsvProcessorExceptionKeysMix() {
 		$file = FS::file('/tmp/csv-test-file-example-bla-bla-bla.csv');
 
-		$this->expectException(Exception::class);
+		$this->expectException(Inconsistent::class);
 
 		$file->content = [
 			['dver' => 'Value1', 'Value2', 'Value3', 'Value4'],

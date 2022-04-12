@@ -2,6 +2,11 @@
 
 namespace spaf\simputils\special;
 
+use spaf\simputils\components\normalizers\BooleanNormalizer;
+use spaf\simputils\components\normalizers\DateTimeNormalizer;
+use spaf\simputils\components\normalizers\FloatNormalizer;
+use spaf\simputils\components\normalizers\IntegerNormalizer;
+use spaf\simputils\components\normalizers\StringNormalizer;
 use spaf\simputils\models\Box;
 use spaf\simputils\models\PhpInfo;
 
@@ -21,4 +26,12 @@ class CommonMemoryCacheIndex {
 	// NOTE ILP - Infinite Loop Prevention
 	public static ?array $to_array_ilp_storage = null;
 
+	public static int $property_validators_enabled = 2;
+	public static ?array $property_validators = [
+		'string' => StringNormalizer::class,
+		'bool' => BooleanNormalizer::class,
+		'int' => IntegerNormalizer::class,
+		'float' => FloatNormalizer::class,
+		'DateTime' => DateTimeNormalizer::class,
+	];
 }

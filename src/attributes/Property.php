@@ -4,10 +4,13 @@ namespace spaf\simputils\attributes;
 
 use Attribute;
 use ReflectionMethod;
+use ReflectionProperty;
 use ReflectionUnionType;
 use spaf\simputils\generic\BasicAttribute;
 use spaf\simputils\special\PropertiesCacheIndex;
 use spaf\simputils\Str;
+use function is_string;
+use function ucfirst;
 
 /**
  * Property attribute for methods
@@ -29,7 +32,7 @@ use spaf\simputils\Str;
  *
  * @package spaf\simputils\attributes
  */
-#[Attribute(Attribute::TARGET_METHOD)]
+#[Attribute(Attribute::TARGET_PROPERTY | Attribute::TARGET_METHOD)]
 class Property extends BasicAttribute {
 
 	const TYPE_SET = 'set';
@@ -41,14 +44,16 @@ class Property extends BasicAttribute {
 	const MODIFIER_PRIVATE = 'private';
 
 	/**
-	 * @param string|null $name         Property name
-	 * @param string|null $type         Enforced property type (get, set, both)
+	 * @param string|null      $name  Property name
+	 * @param string|null      $type  Enforced property type (get, set, both)
+	 * @param null|string|bool $valid Normalizer/Validator/Filter
 	 *
 	 * @codeCoverageIgnore
 	 */
 	public function __construct(
 		public ?string $name = null,
-		public ?string $type = null
+		public ?string $type = null,
+		public null|bool|string $valid = true
 	) {}
 
 	public static function subProcess(
@@ -58,20 +63,28 @@ class Property extends BasicAttribute {
 		$name,
 		$call_type
 	): array {
-		$ref_name = $obj::class.'#'.$name;
-		$ref_name_type = $ref_name.'#'.Property::TYPE_GET;
-		$func_ref = $item->name;
 
-		//// NOTE   Impossible to optimize and extract due to PHP limitations on passing by ref...
-		if (!isset(PropertiesCacheIndex::$index[$ref_name_type])) {
-			PropertiesCacheIndex::$index[$ref_name_type] = null;
-		}
-		$index = &PropertiesCacheIndex::$index;
-		////
+		$func_ref = $item->name;
 
 		$args = $attr->getArguments();
 
-		if ($name === static::expectedName($func_ref, $attr, $args)) {
+		if ($name === static::expectedName($func_ref, $attr, $args, $item)) {
+
+			if ($item instanceof ReflectionProperty) {
+				$name = $func_ref;
+				$func_ref = '_simpUtilsPropertyFieldMethod'.ucfirst($call_type);
+			}
+
+			$ref_name = $obj::class.'#'.$name;
+
+			// NOTE   Impossible to optimize and extract due to PHP limitations
+			//        on passing by ref...
+			if (!isset(PropertiesCacheIndex::$index[$ref_name.'#'.Property::TYPE_GET])) {
+				PropertiesCacheIndex::$index[$ref_name.'#'.Property::TYPE_GET] = null;
+			}
+			$index = &PropertiesCacheIndex::$index;
+			////
+
 			$method_type = static::methodAccessType($item, $attr, $args);
 
 			if ($method_type === Property::TYPE_BOTH) {
@@ -82,7 +95,7 @@ class Property extends BasicAttribute {
 					$index[$key_type] = $func_ref;
 				}
 
-				return [$func_ref, true];
+				return [$func_ref, true, $name];
 			} else if ($call_type === $method_type) {
 				if ($method_type === Property::TYPE_GET) {
 					if (
@@ -91,7 +104,7 @@ class Property extends BasicAttribute {
 						$index[$key_type] = $func_ref;
 					}
 
-					return [$func_ref, true];
+					return [$func_ref, true, $name];
 				} else if ($method_type === Property::TYPE_SET) {
 					if (
 						!isset($index[$key_type = $ref_name.'#'.Property::TYPE_SET])
@@ -99,21 +112,30 @@ class Property extends BasicAttribute {
 						$index[$key_type] = $func_ref;
 					}
 
-					return [$func_ref, true];
+					return [$func_ref, true, $name];
 				}
 			}
 
-			return [$func_ref, $method_type === Property::TYPE_GET?'read-only':'write-only'];
+			return [$func_ref, $method_type === Property::TYPE_GET?'read-only':'write-only', $name];
 		}
 
-		return [$func_ref, false];
+		return [$func_ref, false, $name];
 	}
 
-	public static function expectedName($func_ref, \ReflectionAttribute $attr, $args = null) {
+	public static function expectedName(
+		$func_ref,
+		\ReflectionAttribute $attr,
+		$args = null,
+		$item = null
+	) {
+		if ($item instanceof ReflectionProperty && is_string($func_ref) && $func_ref[0] === '_') {
+			$func_ref = Str::removeStarting($func_ref, '_');
+		}
+
 		$args = $args ?? $attr->getArguments();
 		$res = $args[0] ?? $args['name'] ?? $func_ref;
 		if ($res instanceof ReflectionMethod) {
-			$res = $res->getName();
+			$res = $res->getName(); // @codeCoverageIgnore
 		}
 		return $res;
 	}
@@ -126,7 +148,7 @@ class Property extends BasicAttribute {
 
 		if (!empty($method_type)) {
 			$method_type = Str::lower($method_type);
-		} else {
+		} else if ($ref instanceof ReflectionMethod) {
 			$ref_ret_type = $ref?->getReturnType() ?? null;
 			if ($ref_ret_type instanceof ReflectionUnionType) {
 				$r = [];
@@ -156,6 +178,8 @@ class Property extends BasicAttribute {
 				// SET
 				$method_type = Property::TYPE_SET;
 			}
+		} else {
+			$method_type = Property::TYPE_BOTH;
 		}
 
 		return $method_type;

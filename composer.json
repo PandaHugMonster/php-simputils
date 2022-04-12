@@ -34,8 +34,14 @@
     "files": ["src/basic.php"]
   },
   "scripts": {
-    "test": [
+    "tests": [
       "phpunit tests"
+    ],
+    "tests-clover": [
+      "XDEBUG_MODE=coverage phpunit tests --coverage-clover clover.xml"
+    ],
+    "tests-html": [
+      "XDEBUG_MODE=coverage phpunit tests --coverage-html html-coverage/"
     ]
   }
 }

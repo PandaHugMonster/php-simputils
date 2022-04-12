@@ -25,6 +25,6 @@ class Date extends FixUpDateTimePrism {
 	#[Property('for_user')]
 	protected function getForUser(): string {
 		$obj = $this->_object;
-		return $obj->format($obj::$l10n_user_date_format);
+		return $obj->format(DateTime::$l10n_user_date_format);
 	}
 }

@@ -39,7 +39,7 @@ class PropertyBatch extends Property {
 
 		$args = $args ?? $attr->getArguments();
 
-		$value_store_ref = $args[2] ?? $args['storage'] ?? '____property_batch_storage';
+		$value_store_ref = $args[2] ?? $args['storage'] ?? '_simpUtilsProperty_batch_storage';
 		if (!empty($default_values)) {
 			if ($value_store_ref === PropertyBatch::STORAGE_SELF) {
 				$value_store = &$obj;
@@ -48,17 +48,17 @@ class PropertyBatch extends Property {
 			}
 
 			$is_read_only = is_object($value_store) &&
-				method_exists($value_store, '____isReadOnly') &&
-				$value_store->____isReadOnly();
+				method_exists($value_store, '_simpUtilsIsReadOnly') &&
+				$value_store->_simpUtilsIsReadOnly();
 
 			if ($is_read_only) {
-				$value_store->____setReadOnly(false);
+				$value_store->_simpUtilsSetReadOnly(false);
 			}
 			foreach ($default_values as $k => $v) {
 				$value_store[$k] = $v;
 			}
 			if ($is_read_only) {
-				$value_store->____setReadOnly(true);
+				$value_store->_simpUtilsSetReadOnly(true);
 			}
 		}
 
@@ -87,7 +87,7 @@ class PropertyBatch extends Property {
 		$ref_name = $obj::class.'#'.$name;
 		$ref_name_type = $ref_name.'#'.static::TYPE_GET;
 
-		$func_ref_prefix = '____propertyBatchMethod';
+		$func_ref_prefix = '_simpUtilsPropertyBatchMethod';
 		$func_ref = $func_ref_prefix.ucfirst($call_type);
 
 		//// NOTE   Impossible to optimize and extract due to PHP limitations on passing by ref...

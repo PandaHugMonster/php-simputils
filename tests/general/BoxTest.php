@@ -16,11 +16,11 @@ use spaf\simputils\PHP;
  * @uses \spaf\simputils\Str::is
  * @uses \spaf\simputils\attributes\Property
  * @uses \spaf\simputils\special\CodeBlocksCacheIndex
- * @uses \spaf\simputils\traits\SimpleObjectTrait::____PrepareProperty
+ * @uses \spaf\simputils\traits\SimpleObjectTrait::_simpUtilsPrepareProperty
  * @uses \spaf\simputils\traits\SimpleObjectTrait::__get
  * @uses \spaf\simputils\traits\SimpleObjectTrait::getAllTheLastMethodsAndProperties
  * @uses \spaf\simputils\Math
- * @uses \spaf\simputils\traits\SimpleObjectTrait::simpUtilsGetValidator
+ * @uses \spaf\simputils\traits\SimpleObjectTrait::_simpUtilsGetValidator
  */
 class BoxTest extends TestCase {
 
@@ -67,6 +67,7 @@ class BoxTest extends TestCase {
 	/**
 	 * @uses \spaf\simputils\PHP::box
 	 * @uses \spaf\simputils\Str
+	 * @uses \spaf\simputils\models\Set
 	 *
 	 * @return void
 	 * @throws \Exception
@@ -136,6 +137,121 @@ class BoxTest extends TestCase {
 				return 0;
 			})
 		);
+		$this->assertEquals(
+			PHP::box(['b_abc_123', 'a_abc_123', 'c_abc_123', 'd_abc_123', 'y_abc_123']),
+			$bx->sort(true, false, true, true, function () {
+				return 0;
+			})
+		);
+		$this->assertEquals(
+			PHP::box(['b_abc_123', 'a_abc_123', 'c_abc_123', 'd_abc_123', 'y_abc_123']),
+			$bx->sort(false, false, true, true)
+		);
+
+		$bx = PHP::box(['test1', 'test2'], ['test3', 'test4'])->join();
+		$this->assertEquals('test1, test2, test3, test4', $bx);
+
+		$bx0 = $bx = PHP::box(
+			['t1' => 'test1', 't2' => 'test2', 't3' => 'lol'],
+			['t3' => 'test3', 't4' => 'test4']
+		);
+
+		$bx = $bx->join(' - ');
+		$this->assertEquals('test1 - test2 - test3 - test4', $bx);
+
+		$bx = PHP::box([1, 2, 3, 4, 5, 6]);
+		$this->assertEquals(21, $bx->sum());
+
+		$bx = PHP::box([-2, -2, -2, -3, 5, 6.6, 7.7, 8.8]);
+		$this->assertEquals(19.1, $bx->sum());
+
+		$bx->load(['stuff1', 'stuff2'], ['stuff3']);
+		$this->assertEquals(PHP::box(['stuff1', 'stuff2', 'stuff3']), $bx);
+
+		$this->assertEquals(
+			PHP::box(['t1' => 'test1', 't4' => 'test4']),
+			$bx0->extract('t1', 't4')
+		);
+
+		$bx = Box::combine(
+			[ 'Raz', 'Dva', 'Tri'],
+			[  1.1,   2.2,   3.3 ],
+		);
+		$this->assertEquals(PHP::box(['Raz' => 1.1, 'Dva' => 2.2, 'Tri' => 3.3]), $bx);
+
+		$bx = PHP::box([
+			'key1' => 100,
+			'key2' => 200,
+			'key3' => 300,
+			'key4' => 400,
+		]);
+
+		$bx = $bx->each(
+			fn($val, $key) => !in_array($key, ['key1', 'key3'])
+				?[$key, $val]
+				:null
+		);
+		$this->assertEquals(2, $bx->size);
+		$this->assertEquals(PHP::box(['key2' => 200, 'key4' => 400]), $bx);
+
+		// Just cloning
+		$bx1 = $bx->each();
+		$this->assertNotEquals($bx->obj_id, $bx1->obj_id);
+		$this->assertEquals(2, $bx1->size);
+		$this->assertEquals(PHP::box(['key2' => 200, 'key4' => 400]), $bx1);
+
+		$bx[] = 'test100500';
+		$bx[] = 'test100500';
+		$bx[] = 'test100500';
+		$bx[] = 'test100500';
+		$bx[] = 'test100500';
+		$bx[] = 'test100500';
+
+		$this->assertEquals(8, $bx->size);
+		$this->assertEquals(3, $bx->toSet()->size);
+
+		$bx->cbValues(fn($val) => null);
+		$this->assertEquals(8, $bx->size);
+		$this->assertEquals(
+			PHP::box([
+				'key2' => null,
+				'key4' => null,
+				0 => null,
+				1 => null,
+				2 => null,
+				3 => null,
+				4 => null,
+				5 => null,
+			]),
+			$bx
+		);
+
+//		$bx->cbKeys([Str::class, 'upper']);
+//		$this->assertEquals(8, $bx->size);
+//		$this->assertEquals(
+//			PHP::box([
+//				'KEY2' => null,
+//				'KEY4' => null,
+//				0 => null,
+//				1 => null,
+//				2 => null,
+//				3 => null,
+//				4 => null,
+//				5 => null,
+//			]),
+//			$bx
+//		);
+	}
+
+	/**
+	 * @runInSeparateProcess
+	 * @return void
+	 * @throws \Exception
+	 */
+	function testBoxSumException() {
+		$this->expectException(Exception::class);
+		$bx = PHP::box([-2, -2, -2, -3, 'my text that will lead to failure', 6.6, 7.7, 8.8]);
+		$this->assertEquals(99, $bx->sum());
 	}
 
 	function testStacks() {

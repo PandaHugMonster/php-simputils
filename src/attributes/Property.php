@@ -72,7 +72,7 @@ class Property extends BasicAttribute {
 
 			if ($item instanceof ReflectionProperty) {
 				$name = $func_ref;
-				$func_ref = '____propertyFieldMethod'.ucfirst($call_type);
+				$func_ref = '_simpUtilsPropertyFieldMethod'.ucfirst($call_type);
 			}
 
 			$ref_name = $obj::class.'#'.$name;

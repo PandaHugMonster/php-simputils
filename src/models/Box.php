@@ -364,6 +364,8 @@ class Box extends ArrayObject {
 	 *                                         otherwise
 	 *
 	 * @return static A new box instance with filtered elements
+	 * @codeCoverageIgnore
+	 * FIX  Subject to elimination, or significant modification
 	 */
 	public function filter(null|Closure|callable $callback = null): static {
 		if (is_null($callback)) {
@@ -398,7 +400,7 @@ class Box extends ArrayObject {
 		}
 		$res = new static;
 		foreach ($this as $key => $val) {
-			$sub_res = $callback($key, $val, $this);
+			$sub_res = $callback($val, $key, $this);
 			if (!empty($sub_res)) {
 				[$key, $val] = $sub_res;
 				$res[$key] = $val;
@@ -563,7 +565,7 @@ class Box extends ArrayObject {
 			$to_unset = new static;
 			$to_replace = new static;
 			foreach ($this as $k => $v) {
-				$res = $callback($k, $v, $this);
+				$res = $callback($v, $k, $this);
 				if (is_null($res)) {
 					$to_unset[] = $k;
 				} else {
@@ -615,7 +617,8 @@ class Box extends ArrayObject {
 		foreach ($callbacks as $callback) {
 			$callback = $this->clearClosure($callback);
 
-			$this->cb(function ($k, $v) use ($callback) {
+			// FIX  Issue, it does add new keys, and not modifying those
+			$this->cb(function ($v, $k) use ($callback) {
 				return [$callback($k), $v];
 			});
 		}
@@ -655,7 +658,7 @@ class Box extends ArrayObject {
 		foreach ($callbacks as $callback) {
 			$callback = $this->clearClosure($callback);
 
-			$this->cb(function ($k, $v) use ($callback) {
+			$this->cb(function ($v, $k) use ($callback) {
 				return [$k, $callback($v)];
 			});
 		}
@@ -664,7 +667,7 @@ class Box extends ArrayObject {
 
 	protected function clearClosure($callback) {
 		if (is_array($callback) || is_string($callback)) {
-			$callback = Closure::fromCallable($callback);
+			$callback = Closure::fromCallable($callback); // @codeCoverageIgnore
 		}
 		return $callback;
 	}
@@ -885,9 +888,7 @@ class Box extends ArrayObject {
 			if ($callback) {
 				uksort($res, $callback);
 			} else {
-				$flags = $case_sensitive
-					?SORT_FLAG_CASE
-					:0;
+				$flags = $case_sensitive?SORT_FLAG_CASE:0;
 				if ($descending) {
 					krsort($res, $flags);
 				} else {

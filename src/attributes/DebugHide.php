@@ -28,7 +28,7 @@ use Attribute;
  * NOTE This attribute could be used to hide `password` or `secrete` values for output
  *      or even logging!
  *
- * FIX  I don't know hide to fix it, but for now you can't hide "PropertyBatch" target
+ * TODO I don't know how to fix it, but for now you can't hide "PropertyBatch" target
  *      fields-values.
  *
  * @codeCoverageIgnore

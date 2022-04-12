@@ -59,7 +59,7 @@ trait PropertiesTrait {
 	// FIX  Public modifier is a temporary solution, due to external modification of the field
 	#[DebugHide]
 	#[Extract(false)]
-	public $____property_batch_storage = [];
+	public $_simpUtilsProperty_batch_storage = [];
 
 	/**
 	 * @param string $name
@@ -72,7 +72,7 @@ trait PropertiesTrait {
 			return $this->$method_name(null, Property::TYPE_GET, $name);
 		}
 		try {
-			return $this->____prepareProperty($name, Property::TYPE_GET);
+			return $this->_simpUtilsPrepareProperty($name, Property::TYPE_GET);
 		} catch (PropertyAccessError | PropertyDoesNotExist $e) {
 			try {
 				/** @noinspection PhpUndefinedMethodInspection */
@@ -90,14 +90,14 @@ trait PropertiesTrait {
 			$this->$method_name($value, Property::TYPE_SET, $name);
 		} else {
 			try {
-				$this->____prepareProperty($name, Property::TYPE_SET, $value);
+				$this->_simpUtilsPrepareProperty($name, Property::TYPE_SET, $value);
 			} catch (PropertyAccessError | PropertyDoesNotExist $e) {
 				try {
 					/** @noinspection PhpUndefinedMethodInspection */
-					parent::__set($name, $value);
-				} catch (Error) {
+					parent::__set($name, $value); // @codeCoverageIgnore
+				} catch (Error) { // @codeCoverageIgnore
 					/** @noinspection PhpUnhandledExceptionInspection */
-					throw $e;
+					throw $e; // @codeCoverageIgnore
 				}
 			}
 		}
@@ -109,27 +109,27 @@ trait PropertiesTrait {
 		if ($method_name = PropertiesCacheIndex::$index[$ref] ?? false) {
 			return $this->$method_name(null, $type, $name);
 		}
-		$res = $this->____prepareProperty($name, $type, check_and_do_not_call: true);
+		$res = $this->_simpUtilsPrepareProperty($name, $type, check_and_do_not_call: true);
 
 		if (!$res) {
 			try {
 				/** @noinspection PhpUndefinedMethodInspection */
 //				if (get_parent_class() && method_exists(parent::class, '__isset')) {
 				if (get_parent_class()) {
-					if (get_parent_class() !== ArrayObject::class) {
+					if (get_parent_class() !== ArrayObject::class) { // @codeCoverageIgnore
 						$res = parent::__isset($name);
 					}
 				}
-			} catch (Error $e) {
+			} catch (Error $e) { // @codeCoverageIgnore
 				/** @noinspection PhpUnhandledExceptionInspection */
-				throw $e;
+				throw $e; // @codeCoverageIgnore
 			}
 		}
 
 		return $res;
 	}
 
-	private function ____propertyBatchMethodGet($value, $type, $name): mixed {
+	private function _simpUtilsPropertyBatchMethodGet($value, $type, $name): mixed {
 		$settings = PropertiesCacheIndex::$property_settings[static::class.'#'.$name];
 		$value_store_ref = $settings['storage'];
 		if ($value_store_ref === PropertyBatch::STORAGE_SELF) {
@@ -140,7 +140,7 @@ trait PropertiesTrait {
 		return $value_store[$name] ?? null;
 	}
 
-	private function ____propertyBatchMethodSet($value, $type, $name): void {
+	private function _simpUtilsPropertyBatchMethodSet($value, $type, $name): void {
 		$settings = PropertiesCacheIndex::$property_settings[static::class.'#'.$name];
 		$value_store_ref = $settings['storage'];
 		if ($value_store_ref === PropertyBatch::STORAGE_SELF) {
@@ -185,7 +185,7 @@ trait PropertiesTrait {
 	 * @throws PropertyAccessError
 	 * @throws PropertyDoesNotExist
 	 */
-	private function ____prepareProperty(
+	private function _simpUtilsPrepareProperty(
 		string $name,
 		string $call_type,
 		mixed $value = null,
@@ -218,7 +218,7 @@ trait PropertiesTrait {
 							// NOTE Skipping already found methods, so the parent stuff
 							//      would not overwrite/return data
 
-							continue;
+							continue; // @codeCoverageIgnore
 						}
 						$already_defined[] = $name;
 
@@ -229,7 +229,7 @@ trait PropertiesTrait {
 
 						if ($call_type === Property::TYPE_SET) {
 							// NOTE Validation
-							$validator = $this->simpUtilsGetValidator($item, $attr, $call_type);
+							$validator = $this->_simpUtilsGetValidator($item, $attr, $call_type);
 							if ($validator) {
 								$value = $validator($value);
 							}
@@ -258,7 +258,7 @@ trait PropertiesTrait {
 		throw new PropertyDoesNotExist('No such property '.$name);
 	}
 
-	private function simpUtilsGetValidator($item, $attr, $call_type): ?Closure {
+	private function _simpUtilsGetValidator($item, $attr, $call_type): ?Closure {
 		$validators_enabled = CommonMemoryCacheIndex::$property_validators_enabled;
 		$validators = CommonMemoryCacheIndex::$property_validators;
 
@@ -271,13 +271,13 @@ trait PropertiesTrait {
 					$t = $item->getType();
 					if ($t instanceof ReflectionUnionType) {
 						// NOTE Union-Types are not supported due to unpredictable nature
-						return null;
+						return null; // @codeCoverageIgnore
 					} else if ($t instanceof ReflectionNamedType) {
 						$class = $t->getName();
 						if (empty($validators[$class])) {
 							$class = PHP::classShortName($class);
 							if (empty($validators[$class])) {
-								return null;
+								return null; // @codeCoverageIgnore
 							}
 						}
 						if (!empty($validators[$class]) && PHP::isClass($validators[$class])) {
@@ -305,6 +305,8 @@ trait PropertiesTrait {
 	 * @param bool $debug_hide_attr_on
 	 *
 	 * FIX  Finalize $extract_attr_on arg
+	 * FIX  Fix the debugArray!!
+	 * @codeCoverageIgnore
 	 * @return array|string[]
 	 */
 	protected function ___extractFields(
@@ -441,17 +443,34 @@ trait PropertiesTrait {
 		return $res;
 	}
 
-	private function ____propertyFieldMethodSet($value, $type, $name) {
+	/**
+	 * @param $value
+	 * @param $type
+	 * @param $name
+	 *
+	 * @codeCoverageIgnore
+	 * @return void
+	 */
+	private function _simpUtilsPropertyFieldMethodSet($value, $type, $name) {
 		$this->$name = $value;
 	}
 
-	private function ____propertyFieldMethodGet($value, $type, $name) {
+	/**
+	 * @param $value
+	 * @param $type
+	 * @param $name
+	 *
+	 * @codeCoverageIgnore
+	 * @return mixed
+	 */
+	private function _simpUtilsPropertyFieldMethodGet($value, $type, $name) {
 		return $this->$name;
 	}
 
 	/**
 	 *
 	 * @return array|null
+	 * @codeCoverageIgnore
 	 */
 	public function __debugInfo(): array {
 		// FIX  Recursive unwrapping shows "Array" instead of "Box". Really bad!

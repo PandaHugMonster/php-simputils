@@ -41,11 +41,11 @@ use function spaf\simputils\basic\fl;
  * @uses \spaf\simputils\FS
  * @uses \spaf\simputils\attributes\Property
  * @uses \spaf\simputils\basic\bx
- * @uses \spaf\simputils\traits\SimpleObjectTrait::____PrepareProperty
+ * @uses \spaf\simputils\traits\SimpleObjectTrait::_simpUtilsPrepareProperty
  * @uses \spaf\simputils\basic\fl
  * @uses \spaf\simputils\traits\SimpleObjectTrait::getAllTheLastMethodsAndProperties
  * @uses \spaf\simputils\Str
- * @uses \spaf\simputils\traits\SimpleObjectTrait::simpUtilsGetValidator
+ * @uses \spaf\simputils\traits\SimpleObjectTrait::_simpUtilsGetValidator
  */
 class DefaultAppProcessorsTest extends TestCase {
 

@@ -25,13 +25,13 @@ use function fwrite;
  * @uses \spaf\simputils\traits\SimpleObjectTrait
  * @uses \spaf\simputils\traits\SimpleObjectTrait::__get
  * @uses \spaf\simputils\traits\SimpleObjectTrait::__set
- * @uses \spaf\simputils\traits\SimpleObjectTrait::____PrepareProperty
+ * @uses \spaf\simputils\traits\SimpleObjectTrait::_simpUtilsPrepareProperty
  * @uses \spaf\simputils\traits\SimpleObjectTrait::__isset
  * @covers \spaf\simputils\generic\BasicResourceApp
  * @uses \spaf\simputils\FS
  * @uses \spaf\simputils\attributes\Property
  * @uses \spaf\simputils\traits\SimpleObjectTrait::getAllTheLastMethodsAndProperties
- * @uses \spaf\simputils\traits\SimpleObjectTrait::simpUtilsGetValidator
+ * @uses \spaf\simputils\traits\SimpleObjectTrait::_simpUtilsGetValidator
  */
 class FileModelTest extends TestCase {
 

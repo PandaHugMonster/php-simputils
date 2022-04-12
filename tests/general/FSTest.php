@@ -30,9 +30,9 @@ use spaf\simputils\Str;
  * @uses \spaf\simputils\Str
  * @uses \spaf\simputils\models\Box
  * @uses \spaf\simputils\attributes\Property
- * @uses \spaf\simputils\traits\SimpleObjectTrait::____PrepareProperty
+ * @uses \spaf\simputils\traits\SimpleObjectTrait::_simpUtilsPrepareProperty
  * @uses \spaf\simputils\traits\SimpleObjectTrait::getAllTheLastMethodsAndProperties
- * @uses \spaf\simputils\traits\SimpleObjectTrait::simpUtilsGetValidator
+ * @uses \spaf\simputils\traits\SimpleObjectTrait::_simpUtilsGetValidator
  */
 class FSTest extends TestCase {
 

@@ -8,10 +8,10 @@ use spaf\simputils\models\Temperature;
 /**
  *
  * @uses \spaf\simputils\attributes\Property
- * @uses \spaf\simputils\traits\SimpleObjectTrait::____PrepareProperty
+ * @uses \spaf\simputils\traits\SimpleObjectTrait::_simpUtilsPrepareProperty
  * @uses \spaf\simputils\traits\SimpleObjectTrait::__get
  * @uses \spaf\simputils\traits\SimpleObjectTrait::getAllTheLastMethodsAndProperties
- * @uses \spaf\simputils\traits\SimpleObjectTrait::simpUtilsGetValidator
+ * @uses \spaf\simputils\traits\SimpleObjectTrait::_simpUtilsGetValidator
  *
  */
 class CommonPurposeModelsTest extends TestCase {

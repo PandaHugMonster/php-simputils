@@ -22,7 +22,7 @@ class Set extends Box {
 
 	protected function cleanUpAndCache(Box $array): Box {
 		$accu = PHP::box();
-		$array = $array->each(function ($key, $value) use (&$accu) {
+		$array = $array->each(function ($value, $key) use (&$accu) {
 			if ($accu->containsValue($value)) {
 				return null;
 			}

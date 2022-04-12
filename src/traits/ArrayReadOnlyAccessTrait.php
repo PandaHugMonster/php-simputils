@@ -37,7 +37,7 @@ trait ArrayReadOnlyAccessTrait {
 	/**
 	 * @var bool
 	 */
-	private bool $____read_only = true;
+	private bool $_simp_utils_read_only = true;
 
 	/**
 	 * Sets the read-only flag
@@ -48,8 +48,8 @@ trait ArrayReadOnlyAccessTrait {
 	 *
 	 * @return void
 	 */
-	public function ____setReadOnly(bool $val = true) {
-		$this->____read_only = $val;
+	public function _simpUtilsSetReadOnly(bool $val = true) {
+		$this->_simp_utils_read_only = $val;
 	}
 
 	/**
@@ -59,8 +59,8 @@ trait ArrayReadOnlyAccessTrait {
 	 * TODO Has to be refactored/or reorganized at some point
 	 * @return bool
 	 */
-	public function ____isReadOnly(): bool {
-		return $this->____read_only;
+	public function _simpUtilsIsReadOnly(): bool {
+		return $this->_simp_utils_read_only;
 	}
 
 	/**
@@ -73,7 +73,7 @@ trait ArrayReadOnlyAccessTrait {
 	 * @throws \Exception It's not allowed to change the value of read-only object
 	 */
 	final public function offsetSet(mixed $offset, mixed $value): void {
-		if ($this->____isReadOnly()) {
+		if ($this->_simpUtilsIsReadOnly()) {
 			$this->cannotUseIt();
 		} else {
 			parent::offsetSet($offset, $value);
@@ -87,7 +87,7 @@ trait ArrayReadOnlyAccessTrait {
 	 * @throws \Exception Modification of the object through the array interface is not allowed
 	 */
 	public function offsetUnset(mixed $offset): void {
-		if ($this->____isReadOnly()) {
+		if ($this->_simpUtilsIsReadOnly()) {
 			$this->cannotUseIt();
 		} else {
 			parent::offsetUnset($offset);

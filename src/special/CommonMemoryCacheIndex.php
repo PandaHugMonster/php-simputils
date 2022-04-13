@@ -3,6 +3,7 @@
 namespace spaf\simputils\special;
 
 use spaf\simputils\components\normalizers\BooleanNormalizer;
+use spaf\simputils\components\normalizers\DataUnitNormalizer;
 use spaf\simputils\components\normalizers\DateTimeNormalizer;
 use spaf\simputils\components\normalizers\FloatNormalizer;
 use spaf\simputils\components\normalizers\IntegerNormalizer;
@@ -33,5 +34,6 @@ class CommonMemoryCacheIndex {
 		'int' => IntegerNormalizer::class,
 		'float' => FloatNormalizer::class,
 		'DateTime' => DateTimeNormalizer::class,
+		'DataUnit' => DataUnitNormalizer::class,
 	];
 }

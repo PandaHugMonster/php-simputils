@@ -35,7 +35,7 @@ class DotEnvInitBlock extends SimpleObject implements InitBlockInterface {
 	 *
 	 * @return bool
 	 */
-	public function initBlock(BasicInitConfig $config): bool {
+	public function initBlock(BasicInitConfig $config) {
 		$class_file = PHP::redef(File::class);
 		$res = true;
 

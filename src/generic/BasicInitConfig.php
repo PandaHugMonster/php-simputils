@@ -8,13 +8,16 @@ use spaf\simputils\DT;
 use spaf\simputils\exceptions\InitConfigAlreadyInitialized;
 use spaf\simputils\FS;
 use spaf\simputils\interfaces\InitBlockInterface;
+use spaf\simputils\models\BigNumber;
 use spaf\simputils\models\Box;
+use spaf\simputils\models\DataUnit;
 use spaf\simputils\models\DateTimeZone;
 use spaf\simputils\models\L10n;
 use spaf\simputils\PHP;
 use spaf\simputils\special\CommonMemoryCacheIndex;
 use spaf\simputils\Str;
 use ValueError;
+use function is_null;
 use function is_numeric;
 
 /**
@@ -22,6 +25,9 @@ use function is_numeric;
  * @property-read Box|array $successful_init_blocks
  * @property ?L10n $l10n
  * @property ?DateTimeZone $default_tz
+ *
+ * @property string $big_number_extension
+ * @property bool $data_unit_long
  */
 abstract class BasicInitConfig extends SimpleObject {
 
@@ -111,6 +117,30 @@ abstract class BasicInitConfig extends SimpleObject {
 		return new $class_box($this->_successful_init_blocks);
 	}
 
+	#[Property('big_number_extension')]
+	#[Shortcut('BigNumber::$default_extension')]
+	protected function setBigNumberExt(string $val) {
+		 BigNumber::$default_extension = $val;
+	}
+
+	#[Property('big_number_extension')]
+	#[Shortcut('BigNumber::$default_extension')]
+	protected function getBigNumberExt(): string {
+		return BigNumber::$default_extension;
+	}
+
+	#[Property('data_unit_long')]
+	#[Shortcut('DataUnit::$long_format')]
+	protected function setDataUnitLong(bool $val) {
+		DataUnit::$long_format = $val;
+	}
+
+	#[Property('data_unit_long')]
+	#[Shortcut('DataUnit::$long_format')]
+	protected function getDataUnitLong(): bool {
+		return DataUnit::$long_format;
+	}
+
 	/**
 	 * @var array|Box|null $init_blocks List of classes FQNs (those classes must implement
 	 *                                  interface `\spaf\simputils\interfaces\InitBlockInterface`)
@@ -160,7 +190,8 @@ abstract class BasicInitConfig extends SimpleObject {
 
 				$init_block_obj = $orig_obj ?? new $block_class;
 				/** @var \spaf\simputils\interfaces\InitBlockInterface $init_block_obj */
-				if ($init_block_obj->initBlock($this)) {
+				$init_res = $init_block_obj->initBlock($this);
+				if (is_null($init_res) || $init_res == true) {
 					$this->_successful_init_blocks[] = $init_block_obj;
 				}
 			}

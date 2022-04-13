@@ -69,6 +69,10 @@ class LoggerTest extends TestCase {
 
 	}
 
+	/**
+	 * @uses \spaf\simputils\components\normalizers\IntegerNormalizer
+	 * @return void
+	 */
 	public function testLoggerObject() {
 		Logger::$default = new Logger('my-tests-shiny-logger');
 		ob_start();
@@ -77,6 +81,10 @@ class LoggerTest extends TestCase {
 		$this->assertMatchesRegularExpression('/.*TEST/i', $buffer, 'Checking the output');
 	}
 
+	/**
+	 * @uses \spaf\simputils\components\normalizers\IntegerNormalizer
+	 * @return void
+	 */
 	public function testLoggerObjectDefaultName() {
 		$logger = new Logger();
 		$this->assertEquals('default', $logger->name);

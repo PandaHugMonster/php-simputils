@@ -276,22 +276,26 @@ trait PropertiesTrait {
 
 			if ($valid === true) {
 				if ($item instanceof ReflectionProperty) {
-					$t = $item->getType();
-					if ($t instanceof ReflectionUnionType) {
-						// NOTE Union-Types are not supported due to unpredictable nature
-						return null; // @codeCoverageIgnore
-					} else if ($t instanceof ReflectionNamedType) {
-						$class = $t->getName();
+					$t = $item?->getType();
+				} else if ($item instanceof ReflectionMethod) {
+					$param = $item->getParameters()[0] ?? null;
+					/** @var \ReflectionParameter $param */
+					$t = $param?->getType();
+				}
+				if ($t instanceof ReflectionUnionType) {
+					// NOTE Union-Types are not supported due to unpredictable nature
+					return null; // @codeCoverageIgnore
+				} else if ($t instanceof ReflectionNamedType) {
+					$class = $t->getName();
+					if (empty($validators[$class])) {
+						$class = PHP::classShortName($class);
 						if (empty($validators[$class])) {
-							$class = PHP::classShortName($class);
-							if (empty($validators[$class])) {
-								return null; // @codeCoverageIgnore
-							}
+							return null; // @codeCoverageIgnore
 						}
-						if (!empty($validators[$class]) && PHP::isClass($validators[$class])) {
-							$closure = Closure::fromCallable([$validators[$class], 'process']);
-							return $closure;
-						}
+					}
+					if (!empty($validators[$class]) && PHP::isClass($validators[$class])) {
+						$closure = Closure::fromCallable([$validators[$class], 'process']);
+						return $closure;
 					}
 				}
 			} else if (is_string($valid)) {

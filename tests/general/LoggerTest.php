@@ -33,6 +33,10 @@ class LoggerTest extends TestCase {
 		Logger::getDefault()->logLevel = Logger::LEVEL_DEBUG;
 	}
 
+	/**
+	 * @uses \spaf\simputils\components\normalizers\IntegerNormalizer
+	 * @return void
+	 */
 	public function testDefaultLogging() {
 		$ref = 'mr.';
 		$year = (int) date('Y');

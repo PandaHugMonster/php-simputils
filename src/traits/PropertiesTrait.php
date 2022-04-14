@@ -274,7 +274,9 @@ trait PropertiesTrait {
 			$attr_instance = $attr->newInstance();
 			$valid = $attr_instance?->valid ?? false;
 
-			if ($valid === true) {
+			if ($valid === true &&
+				$validators_enabled === CommonMemoryCacheIndex::PROPERTY_VALIDATOR_ENABLED
+			) {
 				if ($item instanceof ReflectionProperty) {
 					$t = $item?->getType();
 				} else if ($item instanceof ReflectionMethod) {
@@ -298,7 +300,9 @@ trait PropertiesTrait {
 						return $closure;
 					}
 				}
-			} else if (is_string($valid)) {
+			} else if (is_string($valid) &&
+				$validators_enabled >= CommonMemoryCacheIndex::PROPERTY_VALIDATOR_LIMITED
+			) {
 				if (!empty($validators[$valid])) {
 					$closure = Closure::fromCallable([$validators[$valid], 'process']);
 					return $closure;

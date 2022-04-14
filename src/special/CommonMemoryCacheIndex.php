@@ -27,7 +27,19 @@ class CommonMemoryCacheIndex {
 	// NOTE ILP - Infinite Loop Prevention
 	public static ?array $to_array_ilp_storage = null;
 
+	const PROPERTY_VALIDATOR_DISABLED = 0;
+	const PROPERTY_VALIDATOR_LIMITED = 1;
+	const PROPERTY_VALIDATOR_ENABLED = 2;
+
+	/**
+	 * Levels:
+	 *  0 - validators/normalizers/etc disabled
+	 *  1 - auto - disabled, but explicitly specified validators/normalizers/etc enabled
+	 *  2 - All the validators/normalizers/etc enabled (auto and explicit)
+	 * @var int
+	 */
 	public static int $property_validators_enabled = 2;
+
 	public static ?array $property_validators = [
 		'string' => StringNormalizer::class,
 		'bool' => BooleanNormalizer::class,

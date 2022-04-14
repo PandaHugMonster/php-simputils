@@ -383,29 +383,69 @@ class Box extends ArrayObject {
 	/**
 	 * Iterates through elements with a callback
 	 *
-	 * Additional perk - you can filter elements if you return null instead of array of 2 elements!
+	 * If you return:
+	 *  1.  `null` - then the element will be removed from the array
+	 *  2.  `['some_value']` or `[0 => 'some_value']` or `['value' => 'some_value']`
+	 *      - will modify just value ("some_value" will be the new value)
+	 *  4.  `['key' => 'some_key']` or `[1 => 'some_key']` - will modify just the key
+	 *  5.  `['some_value', 'some_key']` or `['value' => 'some_value', 'key' => 'some_key']` or
+	 *      `[0 => 'some_value', 1 => 'some_key']` - will modify both key and value
+	 *  5.  To avoid modification of anything - return just an empty array `[]` - this will
+	 *      preserve original key and value.
 	 *
-	 * @param \Closure|callable|null $callback Callback that should return array of 2
-	 *                                         elements [$key, $value] that should be
-	 *                                         included into the result.
-	 *                                         Returning empty value like null or empty array
-	 *                                         will filter the whole element out
+	 * Simple example:
+	 * ```php
+	 *  $box = bx([1, 2, 3, 'test key' => 'test val'])
+	 *      ->each( fn($v) => [Str::upper("test_{$v}")] );
+	 *  // $box will contain:
+	 *  //  spaf\simputils\models\Box Object
+	 *      (
+	 *          [0] => TEST_1
+	 *          [1] => TEST_2
+	 *          [2] => TEST_3
+	 *          [test key] => TEST_TEST VAL
+	 *      )
+	 * ```
+	 *
+	 * @param null|Closure|callable|string $callback Callback that should return array of 2
+	 *                                               elements [$key, $value] that should be
+	 *                                               included into the result.
+	 *                                               Returning empty value like null or empty array
+	 *                                               will filter the whole element out
 	 *
 	 * @return static A new box instance with processed elements
+	 *
+	 * TODO Implement direct "$value" and "$key" callbacks for direct application
+	 *      of "Str::upper".
 	 */
-	public function each(null|Closure|callable $callback = null): static {
-		if (is_null($callback)) {
-			return $this->clone();
-		}
+	#[Affecting]
+	public function each(null|Closure|callable|string $callback = null): self {
 		$res = new static;
-		foreach ($this as $key => $val) {
-			$sub_res = $callback($val, $key, $this);
-			if (!empty($sub_res)) {
-				[$key, $val] = $sub_res;
-				$res[$key] = $val;
+		if (!is_null($callback)) {
+			$callback = static::clearClosure($callback);
+
+			foreach ($this as $key_orig => $val_orig) {
+				$sub_res = $callback($val_orig, $key_orig, $this);
+				if (!is_null($sub_res)) {
+					$val = match (true) {
+						array_key_exists('value', $sub_res) => $sub_res['value'],
+						array_key_exists(0, $sub_res) => $sub_res[0],
+						default => $val_orig,
+					};
+					$key = match (true) {
+						array_key_exists('key', $sub_res) => $sub_res['key'],
+						array_key_exists(1, $sub_res) => $sub_res[1],
+						default => $key_orig,
+					};
+
+					$res[$key] = $val;
+				}
 			}
+
+			$this->exchangeArray($res);
 		}
-		return $res;
+
+		return $this;
 	}
 
 	/**
@@ -512,159 +552,7 @@ class Box extends ArrayObject {
 		return (array) $this;
 	}
 
-	/**
-	 * Applies callbacks to keys and values
-	 *
-	 * Keys and values would be modified inside of the box
-	 *
-	 * The callback will received `$k`, `$v` and `$box` params, and
-	 * should return `$k` and `$v` or `null`.
-	 * In case `null` is returned, the element will be removed from the box.
-	 *
-	 * Important: avoid modification of `$box` reference inside the callback,
-	 * in the most cases you would receive unexpected result!
-	 *
-	 * `cb` stands for "callback"
-	 *
-	 * ```php
-	 *  function myCallback($k, $v) {
-	 *      if ($v instanceof Version) {
-	 *          $v = " ! {$v} ! ";
-	 *      }
-	 *      return [$k, $v];
-	 *  }
-	 *
-	 *  $res = bx([
-	 *      'Test 1' => 'aaa',
-	 *      'Test 2' => now(),
-	 *      'Test 3' => new Version('1.2.3'),
-	 *      'Test 4' => 'bbb',
-	 *      'Test 5' => 99,
-	 *      100500 => 'text',
-	 *      'Test 6' => 100,
-	 *  ]);
-	 *
-	 *  $res->cb('myCallback');
-	 *  // From PHP 8.1 you can use shorter callback reference:
-	 *  // $res->cb( myCallback(...) );
-	 *
-	 *  pd("{$res->toJson(true)}");
-	 *
-	 * ```
-	 *
-	 * @param callable|array|string ...$callbacks
-	 *
-	 * @return $this
-	 */
-	#[Affecting]
-	public function cb(callable|array|string ...$callbacks): self {
-		foreach ($callbacks as $callback) {
-			$callback = $this->clearClosure($callback);
-
-			$to_unset = new static;
-			$to_replace = new static;
-			foreach ($this as $k => $v) {
-				$res = $callback($v, $k, $this);
-				if (is_null($res)) {
-					$to_unset[] = $k;
-				} else {
-					$to_replace[$k] = $res;
-				}
-			}
-			foreach ($to_unset as $k) {
-				$this->unsetByKey($k);
-			}
-			foreach ($to_replace as $orig_k => [$k, $v]) {
-				if ($k !== $orig_k) {
-					$this->unsetByKey($orig_k);
-				}
-				$this[$k] = $v;
-			}
-		}
-		return $this;
-	}
-
-	/**
-	 * Applies callbacks to keys
-	 *
-	 * Inside it uses {@see self::cb()}
-	 *
-	 * Example:
-	 * ```php
-	 *  $res = bx([
-	 *      'Test 1' => 'aaa',
-	 *      'Test 2' => now(),
-	 *      'Test 3' => new Version('1.2.3'),
-	 *      'Test 4' => 'bbb',
-	 *      'Test 5' => 99,
-	 *      100500 => 'text',
-	 *      'Test 6' => 100,
-	 *  ]);
-	 *
-	 * 	// Or for PHP 8.1 and above:    `$res->cbKeys(Str::upper(...));`
-	 *  $res->cbKeys([Str::class, 'upper']);
-	 *
-	 * ```
-	 *
-	 *
-	 * @param callable|array|string ...$callbacks
-	 *
-	 * @return $this
-	 */
-	#[Affecting]
-	public function cbKeys(callable|array|string ...$callbacks): self {
-		foreach ($callbacks as $callback) {
-			$callback = $this->clearClosure($callback);
-
-			// FIX  Issue, it does add new keys, and not modifying those
-			$this->cb(function ($v, $k) use ($callback) {
-				return [$callback($k), $v];
-			});
-		}
-
-		return $this;
-	}
-
-	/**
-	 * Applies callbacks to values
-	 *
-	 * Inside it uses {@see self::cb()}
-	 *
-	 * Example:
-	 * ```php
-	 *  $res = bx([
-	 *      'Test 1' => 'aaa',
-	 *      'Test 2' => now(),
-	 *      'Test 3' => new Version('1.2.3'),
-	 *      'Test 4' => 'bbb',
-	 *      'Test 5' => 99,
-	 *      100500 => 'text',
-	 *      'Test 6' => 100,
-	 *  ]);
-	 *
-	 * 	// Or for PHP 8.1 and above:    `$res->cbValues(Str::upper(...));`
-	 *  $res->cbValues([Str::class, 'upper']);
-	 *
-	 * ```
-	 *
-	 *
-	 * @param callable|array|string ...$callbacks
-	 *
-	 * @return $this
-	 */
-	#[Affecting]
-	public function cbValues(callable|array|string ...$callbacks): self {
-		foreach ($callbacks as $callback) {
-			$callback = $this->clearClosure($callback);
-
-			$this->cb(function ($v, $k) use ($callback) {
-				return [$k, $callback($v)];
-			});
-		}
-		return $this;
-	}
-
-	protected function clearClosure($callback) {
+	protected static function clearClosure($callback) {
 		if (is_array($callback) || is_string($callback)) {
 			$callback = Closure::fromCallable($callback); // @codeCoverageIgnore
 		}

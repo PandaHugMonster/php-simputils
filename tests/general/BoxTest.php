@@ -186,14 +186,14 @@ class BoxTest extends TestCase {
 
 		$bx = $bx->each(
 			fn($val, $key) => !in_array($key, ['key1', 'key3'])
-				?[$key, $val]
+				?[$val, $key]
 				:null
 		);
 		$this->assertEquals(2, $bx->size);
 		$this->assertEquals(PHP::box(['key2' => 200, 'key4' => 400]), $bx);
 
 		// Just cloning
-		$bx1 = $bx->each();
+		$bx1 = $bx->clone()->each();
 		$this->assertNotEquals($bx->obj_id, $bx1->obj_id);
 		$this->assertEquals(2, $bx1->size);
 		$this->assertEquals(PHP::box(['key2' => 200, 'key4' => 400]), $bx1);
@@ -208,7 +208,7 @@ class BoxTest extends TestCase {
 		$this->assertEquals(8, $bx->size);
 		$this->assertEquals(3, $bx->toSet()->size);
 
-		$bx->cbValues(fn($val) => null);
+		$bx->each(fn($val) => [null]);
 		$this->assertEquals(8, $bx->size);
 		$this->assertEquals(
 			PHP::box([

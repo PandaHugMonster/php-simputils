@@ -16,6 +16,9 @@ class Set extends Box {
 		int $flags = 0,
 		string $iteratorClass = "ArrayIterator"
 	) {
+		if ($array instanceof Box) {
+			$array = $array->clone();
+		}
 		$array = $this->cleanUpAndCache(PHP::box($array));
 		parent::__construct($array, $flags, $iteratorClass);
 	}
@@ -27,7 +30,7 @@ class Set extends Box {
 				return null;
 			}
 			$accu[] = $value;
-			return [$key, $value];
+			return [$value, $key];
 		});
 
 		return $array;

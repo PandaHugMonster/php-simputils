@@ -822,6 +822,22 @@ class PHP {
 		return CodeBlocksCacheIndex::getRedefinition($hint, $target_class);
 	}
 
+	public static function setPropertyValidator($key, $class) {
+		CommonMemoryCacheIndex::$property_validators[$key] = $class;
+	}
+
+	public static function getPropertyValidator($key) {
+		return CommonMemoryCacheIndex::$property_validators[$key];
+	}
+
+	public static function setPropertyValidatorLevel($val) {
+		CommonMemoryCacheIndex::$property_validators_enabled = $val;
+	}
+
+	public static function getPropertyValidatorLevel(): int {
+		return CommonMemoryCacheIndex::$property_validators_enabled;
+	}
+
 	public static function classShortName(string $val): string {
 		$class_reflection = new ReflectionClass($val);
 		return $class_reflection->getShortName();

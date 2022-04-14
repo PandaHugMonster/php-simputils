@@ -21,10 +21,6 @@ use spaf\simputils\models\StrObj;
 use spaf\simputils\PHP;
 use spaf\simputils\Str;
 
-// NOTE env_set() removed, because it's not a very "urgent" type of functionality that you need
-//      all over your code. + Naming was not really fitting the overall condition of this file.
-//      You always can use `\spaf\simputils\PHP::envSet()` functionality.
-
 /**
  * Please Die function
  *
@@ -163,14 +159,14 @@ function path(?string ...$args): ?string {
 	return FS::path(...$args);
 }
 
-/**
- * @return string
- * @codeCoverageIgnore
- */
-#[Shortcut('Str::uuid()')]
-function uuid(): string {
-	return Str::uuid();
-}
+///**
+// * @return string
+// * @codeCoverageIgnore
+// */
+//#[Shortcut('Str::uuid()')]
+//function uuid(): string {
+//	return Str::uuid();
+//}
 
 /**
  * DataUnit shortcut

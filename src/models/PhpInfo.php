@@ -22,8 +22,6 @@ use function in_array;
  * manually as a new object, but rather using {@see PHP::info()} method, because it caches
  * the object, and you receive the same object with every call.
  *
- * FIX  Wrap all the `array`s into `Box`s
- *
  * @property-read Version $php_version
  * @property-read Version $simp_utils_version
  * @property-read string $simp_utils_license
@@ -139,9 +137,8 @@ class PhpInfo extends Box {
 	/**
 	 * Acquiring values of PHP info and similar
 	 *
-	 * FIX  Review and implement $box_class for arrays
-	 *
 	 * @return array|\spaf\simputils\models\Box
+	 * @throws \spaf\simputils\exceptions\RedefUnimplemented
 	 */
 	protected static function compose(): array|Box {
 		$reg_exps = static::getPhpInfoRegExpArray();

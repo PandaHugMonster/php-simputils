@@ -128,7 +128,7 @@ trait MetaMagic {
 	 * @param bool  $with_class Default to false, whether the additional "#class" value
 	 *                          should be added
 	 *
-	 * FIX  Huge mess, refactor toJson + toArray + toBox to be fully efficient and compatible
+	 * TODO Huge mess, refactor toJson + toArray + toBox to be fully efficient and compatible
 	 * @return string
 	 */
 	public function toJson(?bool $pretty = null, bool $with_class = false): string {
@@ -426,35 +426,6 @@ trait MetaMagic {
 
 		return $obj;
 	}
-
-//	/**
-//	 * To a normal PHP array
-//	 *
-//	 * @inheritdoc
-//	 *
-//	 * @param bool $with_class Pack with class, default is "false"
-//	 *
-//	 * @return array
-//	 */
-//	public function toArray(bool $with_class = false, bool $recursively = true): array {
-//		if ($recursively) {
-//			$res = [];
-//			foreach ($this as $key => $val) {
-//				if ($val instanceof Box) {
-//					$res[$key] = $val->toArray(recursively: $recursively);
-//				} else {
-//					// FIX Implement meta-magic here, and improve "toBox()", "toArray" and "toJson"
-//					$res[$key] = $val;
-//				}
-//			}
-//		} else {
-//			$res = (array) $this;
-//		}
-//
-//		if ($with_class)
-//			$res[PHP::$serialized_class_key_name] = static::class;
-//		return $res;
-//	}
 
 	/**
 	 * Create an object from array

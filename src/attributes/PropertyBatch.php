@@ -73,7 +73,7 @@ class PropertyBatch extends Property {
 	 * @param $value
 	 * @param $call_type
 	 *
-	 * FIX  Subject to a better optimization later
+	 * TODO Subject to a better optimization later
 	 *
 	 * @return array|string[]
 	 */

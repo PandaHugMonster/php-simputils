@@ -356,7 +356,7 @@ class PHPHelperTest extends TestCase {
 			['this is string', 'string'],
 			['anotherstringishere', 'string'],
 			[12, 'integer'],
-			[22.22, 'double'],
+			[22.22, 'float'],
 			[new $version_class('0.0.0', 'no app'), $version_class],
 			[PHP::info(), $phpinfo_class],
 			[true, 'boolean'],

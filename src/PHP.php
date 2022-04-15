@@ -133,12 +133,14 @@ class PHP {
 			$args = [];
 		}
 
-		$config = ($config ?? new InitConfig)->___setup($args ?? []);
+		$config = $config ?? new InitConfig;
 
 		$config->code_root = $config->code_root ?? debug_backtrace()[0]['file'];
 		$config->working_dir = $config->working_dir ?? $config->code_root;
 
-		// FIX  Implement code below into config through Properties
+		$config->___setup($args ?? []);
+
+		// TODO Implement code below into config through Properties
 		if (!is_dir($config->code_root)) {
 			$config->code_root = dirname($config->code_root);
 		}
@@ -168,7 +170,7 @@ class PHP {
 	 *
 	 * @return ?string
 	 *
-	 * FIX  Implement recursive toJson control to objects (So object can decide,
+	 * TODO Implement recursive toJson control to objects (So object can decide,
 	 *      whether it wants to be a string, an array or a number).
 	 *
 	 */
@@ -209,7 +211,7 @@ class PHP {
 	 * @param ?int    $enforced_type Enforced serialization type (per function call
 	 *                               overrides the default serialization type)
 	 *
-	 * FIX  Deserialization does not recursively uses boxes instead of arrays. Should be fixed!!
+	 * MARK Deserialization does not recursively uses boxes instead of arrays. Should be fixed!!
 	 * @return mixed
 	 * @throws \ReflectionException Reflection related exceptions
 	 */
@@ -349,8 +351,12 @@ class PHP {
 	 * @return string
 	 */
 	public static function type(mixed $var): string {
-		// FIX  Unify aliases with the same name. For example "double" and "float"
-		return is_object($var)?get_class($var):gettype($var);
+		$res = is_object($var)?get_class($var):gettype($var);
+		if ($res === 'double') {
+			return 'float';
+		}
+
+		return $res;
 	}
 
 	/**
@@ -536,7 +542,7 @@ class PHP {
 	 * with the following code:
 
 	 * TODO implement simple log integration
-	 * FIX  Prepare example!
+	 * TODO Prepare example!
 	 *
 	 * @param mixed ...$args Anything you want to print out before dying
 	 *

@@ -5,10 +5,6 @@ namespace spaf\simputils;
 
 
 
-use spaf\simputils\generic\BasicSystemFingerprint;
-use spaf\simputils\models\SystemFingerprint;
-use spaf\simputils\models\Version;
-
 /**
  *
  */
@@ -70,12 +66,5 @@ class System {
 	 */
 	public static function serverApi(): string {
 		return PHP_SAPI;
-	}
-
-	public static function systemFingerprint(Version|string $version = null)
-	: BasicSystemFingerprint|string {
-		$class = PHP::redef(SystemFingerprint::class);
-		$version = $version ?? PHP::simpUtilsVersion();
-		return new $class($version);
 	}
 }

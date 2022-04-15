@@ -19,7 +19,6 @@ use function scandir;
 
 /**
  *
- * FIX  Maybe do not extend from Box because of stupid PHP bug :(
  * @property-read $exists
  * @property-read $type
  * @property-read ?string $name
@@ -108,21 +107,22 @@ class Dir extends Box {
 	 *
 	 * ```
 	 *
-	 * @param bool                                   $recursively Whether it should be walked
+	 * @param bool $recursively Whether it should be walked
 	 *                                                            recursively
-	 * @param WalkThroughFilterInterface|string|null ...$filters  Filter rules, null or empty
+	 * @param WalkThroughFilterInterface|string|null ...$filters Filter rules, null or empty
 	 *                                                            values - ignored,
 	 *                                                            if string - check regexp,
 	 *                                                            if not then compares complete name
 	 *
+	 * @return \spaf\simputils\models\File[]|\spaf\simputils\models\Dir[]
+	 *
+	 * TODO Maybe generator is better?
+	 * @throws \spaf\simputils\exceptions\RedefUnimplemented
 	 * @see \spaf\simputils\components\filters\OnlyDirsFilter
 	 * @see \spaf\simputils\components\filters\OnlyFilesFilter
 	 * @see \spaf\simputils\components\filters\DirExtFilter
 	 * @see \spaf\simputils\interfaces\WalkThroughFilterInterface
 	 * @see \scandir()
-	 * @return \spaf\simputils\models\File[]|\spaf\simputils\models\Dir[]
-	 *
-	 * MARK Maybe generator is better?
 	 */
 	public function walk(
 		bool $recursively = false,

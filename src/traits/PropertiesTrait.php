@@ -25,11 +25,6 @@ use function get_parent_class;
 use function in_array;
 
 /**
- * MARK Provide explanation for the traits messiness.
- * Why this trait is so messy?!
- *
- *
- * MARK Relocate this into documentation
  *
  * An efficiency of the property is improved to the level almost equal to calling `__get()`
  * magical method. Though, important to note, that the `__get()` method is 3 (up to 4) times slower
@@ -57,7 +52,7 @@ use function in_array;
  */
 trait PropertiesTrait {
 
-	// FIX  Public modifier is a temporary solution, due to external modification of the field
+	// TODO Public modifier is a temporary solution, due to external modification of the field
 	#[DebugHide]
 	#[Extract(false)]
 	public $_simpUtilsProperty_batch_storage = [];
@@ -321,7 +316,7 @@ trait PropertiesTrait {
 	 * @param bool $debug_hide_attr_on
 	 *
 	 * FIX  Finalize $extract_attr_on arg
-	 * FIX  Fix the debugArray!!
+	 *
 	 * @codeCoverageIgnore
 	 * @return array|string[]
 	 */
@@ -371,7 +366,7 @@ trait PropertiesTrait {
 
 			/** @var ReflectionMethod|ReflectionProperty $item */
 			if ($item->isStatic()) {
-				// FIX  Implement options in InitConfig
+				// TODO Implement options in InitConfig
 				$prefix = 'static::';
 				continue;
 			}
@@ -489,9 +484,6 @@ trait PropertiesTrait {
 	 * @codeCoverageIgnore
 	 */
 	public function __debugInfo(): array {
-		// FIX  Recursive unwrapping shows "Array" instead of "Box". Really bad!
-		// $this->___extractFields(false, true)
-		// FIX  Broken! Segfaults because of ___extractFields() Really weird
-		return [];
+		return $this->___extractFields(false, true);
 	}
 }

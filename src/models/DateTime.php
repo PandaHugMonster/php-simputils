@@ -82,7 +82,7 @@ class DateTime extends FixUpDateTime {
 
 	/**
 	 *
-	 * FIX  Implement caching of the value
+	 * TODO Implement caching of the value
 	 * @return \spaf\simputils\models\Date|string
 	 */
 	#[Property('date')]
@@ -92,7 +92,7 @@ class DateTime extends FixUpDateTime {
 
 	/**
 	 *
-	 * FIX  Implement caching of the value
+	 * TODO Implement caching of the value
 	 * @return \spaf\simputils\models\Time|string
 	 */
 	#[Property('time')]

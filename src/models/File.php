@@ -42,12 +42,11 @@ use function stream_get_contents;
  *
  * TODO I would not rely right now on the backup functionality at all! Only on the future releases!
  *
- * FIX  Maybe some kind of caching mechanism should be done for `$this->content` property, OR
- *      turn it back to method!
+ * TODO  Maybe some kind of caching mechanism should be done for `$this->content` property!
  *
- * FIX  Implement low-level format separation as "binary" and "text"
+ * TODO Implement low-level format separation as "binary" and "text"
  *
- * FIX  Implement path resolution on object creation
+ * TODO Implement path resolution on object creation
  *
  * @property ?BasicResourceApp $app
  * @property mixed $content Each use of the property causes real file read/write. Make sure to
@@ -75,7 +74,7 @@ class File extends BasicResource {
 	}
 
 	/**
-	 * FIX  Implement as property
+	 * TODO Implement as property
 	 * @var bool $is_backup_preserved   When this option is set to true, then file is not deleted,
 	 *                                  but relocated to "/tmp" folder with temporary random name
 	 *                                  when `delete()` method is called. This allows to recover
@@ -151,7 +150,7 @@ class File extends BasicResource {
 		}
 
 
-		// FIX  Reconsider the code
+		// TODO Reconsider the code
 		if (empty($app) || Str::is($app)) {
 			if (!empty($app)) {
 				$this->_is_default_app = false; // @codeCoverageIgnore

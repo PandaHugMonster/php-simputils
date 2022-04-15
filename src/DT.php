@@ -5,7 +5,6 @@ namespace spaf\simputils;
 
 
 use spaf\simputils\attributes\markers\Shortcut;
-use spaf\simputils\interfaces\helpers\DateTimeHelperInterface;
 use spaf\simputils\models\DateInterval;
 use spaf\simputils\models\DateTime;
 use spaf\simputils\models\DateTimeZone;
@@ -25,7 +24,13 @@ use function is_string;
  * @see \spaf\simputils\models\DatePeriod
  *
  */
-class DT implements DateTimeHelperInterface {
+class DT {
+
+	const FMT_DATE = 'Y-m-d';
+	const FMT_TIME = 'H:i:s';
+	const FMT_DATETIME = self::FMT_DATE.' '.self::FMT_TIME;
+	const FMT_DATETIME_FULL = self::FMT_DATETIME.'.u';
+	const FMT_STRINGIFY_DEFAULT = self::FMT_DATETIME_FULL;
 
 	public static ?string $now_string = null;
 

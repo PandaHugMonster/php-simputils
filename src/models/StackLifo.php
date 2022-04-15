@@ -3,6 +3,7 @@
 namespace spaf\simputils\models;
 
 use Generator;
+use spaf\simputils\exceptions\SortingIsNotPermitted;
 use spaf\simputils\Math;
 use spaf\simputils\traits\RedefinableComponentTrait;
 
@@ -12,8 +13,6 @@ use spaf\simputils\traits\RedefinableComponentTrait;
  *  Last IN - First OUT
  * |===================<>
  *
- *
- * FIX  Block sorting functionalities
  */
 class StackLifo extends Box {
 	use RedefinableComponentTrait;
@@ -46,6 +45,51 @@ class StackLifo extends Box {
 		foreach (Math::range(0, $this->size - 1) as $i) {
 			yield $this->pop();
 		}
+	}
+
+	private function sortingIsNotPermitted() {
+		return new SortingIsNotPermitted('The sorting functionality is not allowed on Stacks');
+	}
+
+	#[\ReturnTypeWillChange]
+	public function sort(
+		bool $descending = null,
+		bool $by_values = null,
+		bool $case_sensitive = null,
+		bool $natural = null,
+		callable $callback = null
+	): Box {
+		throw $this->sortingIsNotPermitted();
+	}
+
+	#[\ReturnTypeWillChange]
+	public function uasort(callable $callback) {
+		throw $this->sortingIsNotPermitted();
+	}
+
+	#[\ReturnTypeWillChange]
+	public function ksort(int $flags = SORT_REGULAR) {
+		throw $this->sortingIsNotPermitted();
+	}
+
+	#[\ReturnTypeWillChange]
+	public function uksort(callable $callback) {
+		throw $this->sortingIsNotPermitted();
+	}
+
+	#[\ReturnTypeWillChange]
+	public function asort(int $flags = SORT_REGULAR) {
+		throw $this->sortingIsNotPermitted();
+	}
+
+	#[\ReturnTypeWillChange]
+	public function natcasesort() {
+		throw $this->sortingIsNotPermitted();
+	}
+
+	#[\ReturnTypeWillChange]
+	public function natsort() {
+		throw $this->sortingIsNotPermitted();
 	}
 
 	public static function redefComponentName(): string {

@@ -134,7 +134,7 @@ use function uasort;
  * identical by functionality. `box()` is just a shortcut for {@see PHP::box()}, and `PHP::box()`
  * is a shortcut for `new Box()`.
  *
- * FIX  Implement switchable on/off for silent "null" instead of exception return
+ * TODO Implement switchable on/off for silent "null" instead of exception return
  *
  * @package spaf\simputils\generic
  *
@@ -353,34 +353,6 @@ class Box extends ArrayObject {
 	}
 
 	/**
-	 * Filtering elements
-	 *
-	 * TODO Add more intuitive filtering ways
-	 *
-	 * @param \Closure|callable|null $callback Callback that receives $val, [$key, $self]
-	 *                                         arguments, and should return "true" if value
-	 *                                         should be resent in the result, and false
-	 *                                         otherwise
-	 *
-	 * @return static A new box instance with filtered elements
-	 * @codeCoverageIgnore
-	 * FIX  Subject to elimination, or significant modification
-	 */
-	public function filter(null|Closure|callable $callback = null): static {
-		if (is_null($callback)) {
-			return $this->clone();
-		}
-
-		$res = new static;
-		foreach ($this as $key => $val) {
-			if ($callback($val, $key, $this)) {
-				$res[$key] = $val;
-			}
-		}
-		return $res;
-	}
-
-	/**
 	 * Iterates through elements with a callback
 	 *
 	 * If you return:
@@ -453,7 +425,7 @@ class Box extends ArrayObject {
 	 *
 	 * @param int|string ...$keys Keys of items that should be remove/unset
 	 *
-	 * FIX  Add "unsetByValue" and "removeDuplicates"
+	 * TODO Add "unsetByValue"
 	 * @return $this
 	 */
 	public function unsetByKey(int|string ...$keys): self {
@@ -498,7 +470,6 @@ class Box extends ArrayObject {
 	 * It's not recursive!
 	 *
 	 *
-	 * FIX  Implement "mergeFromRecursive" and "mergeFromStrict" at some point
 	 * @param self|array ...$boxes Boxes/Arrays that should be merged
 	 *
 	 * @return self Returns self reference
@@ -732,7 +703,7 @@ class Box extends ArrayObject {
 	 * @param bool|null $natural
 	 * @param callable|null $callback
 	 *
-	 * FIX  Make sure all the sortings are tested and documented properly
+	 * TODO Make sure all the sortings are tested and documented properly
 	 * @return self
 	 */
 	public function sort(

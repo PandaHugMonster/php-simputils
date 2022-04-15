@@ -65,8 +65,8 @@ use function preg_replace;
  *
  * TODO Implemented only limited amount of common functionality between gmp and bcmath.
  *      Should be implemented all the GMP similar functionality.
- * FIX  Consider implementing "Decimal" extension support https://github.com/php-decimal
- * FIX  Possibly implement hacks for "floated point numbers" for GMP
+ * TODO Consider implementing "Decimal" extension support https://github.com/php-decimal
+ * TODO Possibly implement hacks for "floated point numbers" for GMP
  *
  * @see https://www.php.net/manual/en/intro.gmp.php
  * @see https://www.php.net/manual/en/intro.bc.php

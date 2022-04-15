@@ -9,8 +9,8 @@ use ValueError;
 /**
  *
  *
- * FIX  Add strict mode at some point
- * FIX  Add wrapping up/splitting of comment-extensions in case if it's too long
+ * TODO Add strict mode at some point
+ * TODO Add wrapping up/splitting of comment-extensions in case if it's too long
  *
  */
 class DotEnvSettings extends SimpleObject {

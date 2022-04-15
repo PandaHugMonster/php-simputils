@@ -234,7 +234,8 @@ class FS {
 	 *
 	 * TODO Must be extended further + implement dynamic replacement of the functionality
 	 *      so the per-project settings could be used
-	 * FIX  Subject to serious optimization! Currently extremely messy
+	 *
+	 * TODO Subject to serious optimization! Currently extremely messy
 	 *
 	 * TODO Consider extracting particular mime-type identification into "processors" code,
 	 *      when those processors are registered in the framework (even external ones)
@@ -265,7 +266,7 @@ class FS {
 
 			if ($check) {
 				// DotEnv files are extremely loosely defined
-				// FIX  Implement detailed description/documentation compiled from all other
+				// TODO Implement detailed description/documentation compiled from all other
 				//      languages implementations. Maybe define a specification of that compilation
 				return 'application/dotenv'; // @codeCoverageIgnore
 			}
@@ -348,7 +349,7 @@ class FS {
 	/**
 	 * @param null|string|Dir $dir
 	 *
-	 * FIX  Improve supported params (Directory, Files that are directories, etc. Regexp strings)
+	 * TODO Improve supported params (Directory, Files that are directories, etc. Regexp strings)
 	 * @return Dir|null
 	 */
 	public static function dir(null|string|Dir $dir = null): ?Dir {
@@ -379,7 +380,7 @@ class FS {
 	 *
 	 * @param string|null ...$parts
 	 *
-	 * FIX  implement different plugins/modules/extensions support
+	 * TODO implement different plugins/modules/extensions support
 	 *
 	 * @return string|\spaf\simputils\models\File|\spaf\simputils\models\Dir|null
 	 */

@@ -56,7 +56,7 @@ class DotEnvProcessor extends TextProcessor {
 				// TODO Comment-extension processing must happen here!
 
 				if ($s->show_comments) {
-					// FIX  Temporary!
+					// TODO Temporary!
 					$res[] = "$line";
 				}
 				continue;
@@ -88,8 +88,8 @@ class DotEnvProcessor extends TextProcessor {
 			}
 
 			$res[$s->normalizeName($key)] = $val;
-			// FIX  Implement clearing of "export ..." stuff if present
-			// FIX  Implement DotEnv functionality for $_ENV etc...
+			// TODO Implement clearing of "export ..." stuff if present
+			// TODO Implement DotEnv functionality for $_ENV etc...
 		}
 		return $res;
 	}

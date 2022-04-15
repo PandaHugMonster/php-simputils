@@ -9,6 +9,9 @@ use spaf\simputils\traits\MetaMagic;
 use spaf\simputils\traits\PropertiesTrait;
 use spaf\simputils\traits\RedefinableComponentTrait;
 
+/**
+ * @codeCoverageIgnore
+ */
 class FixUpDateTime extends DateTime {
 	use PropertiesTrait;
 	use RedefinableComponentTrait;

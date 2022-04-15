@@ -17,7 +17,7 @@ class Set extends Box {
 		string $iteratorClass = "ArrayIterator"
 	) {
 		if ($array instanceof Box) {
-			$array = $array->clone();
+			$array = $array->clone(); // @codeCoverageIgnore
 		}
 		$array = $this->cleanUpAndCache(PHP::box($array));
 		parent::__construct($array, $flags, $iteratorClass);

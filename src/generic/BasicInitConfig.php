@@ -98,6 +98,13 @@ abstract class BasicInitConfig extends SimpleObject {
 				$l10n_name = Str::upper($val);
 				$path = FS::path(PHP::frameworkDir(), 'data', 'l10n', "{$l10n_name}.json");
 				$val = $class::createFrom($path);
+
+				$custom_file = FS::file(
+					FS::path($this->working_dir, 'data', 'l10n', "{$l10n_name}.json")
+				);
+				if ($custom_file->exists) {
+					static::_metaMagic($val, '___setup', $custom_file->content ?? []);
+				}
 			}
 
 			/** @var L10n $val */
@@ -202,11 +209,12 @@ abstract class BasicInitConfig extends SimpleObject {
 	/**
 	 * Setting up the InitConfig
 	 *
-	 * FIX  Changed the modifier to "public" maybe another solution?
+	 * TODO Changed the modifier to "public" maybe another solution?
 	 *
 	 * @param array $data Arguments for the object
 	 *
 	 * @return $this
+	 * @throws \spaf\simputils\exceptions\InitConfigAlreadyInitialized
 	 */
 	public function ___setup(array $data): static {
 		if (!$this->_is_already_setup) {

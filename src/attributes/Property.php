@@ -141,7 +141,7 @@ class Property extends BasicAttribute {
 	}
 
 	public static function methodAccessType($ref, \ReflectionAttribute $attr, $args = null) {
-		// FIX  Optimize later
+		// TODO Optimize it better
 		$args = $args ?? $attr->getArguments();
 
 		$method_type = $args[1] ?? $args['type'] ?? null;

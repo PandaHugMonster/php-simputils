@@ -47,10 +47,25 @@ class StackLifo extends Box {
 		}
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 * @return \spaf\simputils\exceptions\SortingIsNotPermitted
+	 */
 	private function sortingIsNotPermitted() {
 		return new SortingIsNotPermitted('The sorting functionality is not allowed on Stacks');
 	}
 
+	/**
+	 * @param bool|null $descending
+	 * @param bool|null $by_values
+	 * @param bool|null $case_sensitive
+	 * @param bool|null $natural
+	 * @param callable|null $callback
+	 *
+	 * @codeCoverageIgnore
+	 * @return \spaf\simputils\models\Box
+	 * @throws \spaf\simputils\exceptions\SortingIsNotPermitted
+	 */
 	#[\ReturnTypeWillChange]
 	public function sort(
 		bool $descending = null,
@@ -62,36 +77,80 @@ class StackLifo extends Box {
 		throw $this->sortingIsNotPermitted();
 	}
 
+	/**
+	 * @param callable $callback
+	 *
+	 * @codeCoverageIgnore
+	 * @return bool
+	 * @throws \spaf\simputils\exceptions\SortingIsNotPermitted
+	 */
 	#[\ReturnTypeWillChange]
 	public function uasort(callable $callback) {
 		throw $this->sortingIsNotPermitted();
 	}
 
+	/**
+	 * @param int $flags
+	 *
+	 * @codeCoverageIgnore
+	 * @return bool
+	 * @throws \spaf\simputils\exceptions\SortingIsNotPermitted
+	 */
 	#[\ReturnTypeWillChange]
 	public function ksort(int $flags = SORT_REGULAR) {
 		throw $this->sortingIsNotPermitted();
 	}
 
+	/**
+	 * @param callable $callback
+	 *
+	 * @codeCoverageIgnore
+	 * @return bool
+	 * @throws \spaf\simputils\exceptions\SortingIsNotPermitted
+	 */
 	#[\ReturnTypeWillChange]
 	public function uksort(callable $callback) {
 		throw $this->sortingIsNotPermitted();
 	}
 
+	/**
+	 * @param int $flags
+	 *
+	 * @codeCoverageIgnore
+	 * @return bool
+	 * @throws \spaf\simputils\exceptions\SortingIsNotPermitted
+	 */
 	#[\ReturnTypeWillChange]
 	public function asort(int $flags = SORT_REGULAR) {
 		throw $this->sortingIsNotPermitted();
 	}
 
+	/**
+	 *
+	 * @codeCoverageIgnore
+	 * @return bool
+	 * @throws \spaf\simputils\exceptions\SortingIsNotPermitted
+	 */
 	#[\ReturnTypeWillChange]
 	public function natcasesort() {
 		throw $this->sortingIsNotPermitted();
 	}
 
+	/**
+	 *
+	 * @codeCoverageIgnore
+	 * @return bool
+	 * @throws \spaf\simputils\exceptions\SortingIsNotPermitted
+	 */
 	#[\ReturnTypeWillChange]
 	public function natsort() {
 		throw $this->sortingIsNotPermitted();
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 * @return string
+	 */
 	public static function redefComponentName(): string {
 		return InitConfig::REDEF_STACK_LIFO;
 	}

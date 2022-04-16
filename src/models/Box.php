@@ -402,12 +402,12 @@ class Box extends ArrayObject {
 					$val = match (true) {
 						array_key_exists('value', $sub_res) => $sub_res['value'],
 						array_key_exists(0, $sub_res) => $sub_res[0],
-						default => $val_orig,
+						default => $val_orig, // @codeCoverageIgnore
 					};
 					$key = match (true) {
 						array_key_exists('key', $sub_res) => $sub_res['key'],
 						array_key_exists(1, $sub_res) => $sub_res[1],
-						default => $key_orig,
+						default => $key_orig, // @codeCoverageIgnore
 					};
 
 					$res[$key] = $val;
@@ -786,6 +786,9 @@ class Box extends ArrayObject {
 	 */
 	public function ___setup(array $data): static {
 		foreach ($data as $key => $val) {
+			if ($key === PHP::$serialized_class_key_name) {
+				continue;
+			}
 			$this[$key] = $val;
 		}
 		return $this;

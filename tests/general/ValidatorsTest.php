@@ -4,12 +4,14 @@ namespace general;
 
 use PHPUnit\Framework\TestCase;
 use spaf\simputils\components\normalizers\BooleanNormalizer;
+use spaf\simputils\components\normalizers\DataUnitNormalizer;
 use spaf\simputils\components\normalizers\DateTimeNormalizer;
 use spaf\simputils\components\normalizers\FloatNormalizer;
 use spaf\simputils\components\normalizers\IntegerNormalizer;
 use spaf\simputils\components\normalizers\LowerCaseNormalizer;
 use spaf\simputils\components\normalizers\StringNormalizer;
 use spaf\simputils\components\normalizers\UpperCaseNormalizer;
+use spaf\simputils\models\DataUnit;
 use spaf\simputils\models\DateTime;
 
 /**
@@ -142,8 +144,23 @@ class ValidatorsTest extends TestCase {
 	/**
 	 * @covers \spaf\simputils\components\normalizers\UpperCaseNormalizer
 	 * @covers \spaf\simputils\components\normalizers\LowerCaseNormalizer
+	 * @covers \spaf\simputils\components\normalizers\DataUnitNormalizer
 	 *
 	 * @uses \spaf\simputils\Str
+	 * @uses \spaf\simputils\PHP
+	 * @uses \spaf\simputils\models\DataUnit
+	 * @uses \spaf\simputils\attributes\Property
+	 * @uses \spaf\simputils\models\BigNumber
+	 * @uses \spaf\simputils\models\Box
+	 * @uses \spaf\simputils\Data
+	 * @uses \spaf\simputils\models\PhpInfo
+	 * @uses \spaf\simputils\special\CodeBlocksCacheIndex
+	 * @uses \spaf\simputils\traits\SimpleObjectTrait::__get
+	 * @uses \spaf\simputils\traits\SimpleObjectTrait::__set
+	 * @uses \spaf\simputils\traits\SimpleObjectTrait::_simpUtilsPrepareProperty
+	 * @uses \spaf\simputils\traits\SimpleObjectTrait::_simpUtilsPropertyBatchMethodGet
+	 * @uses \spaf\simputils\traits\SimpleObjectTrait::getAllTheLastMethodsAndProperties
+	 *
 	 *
 	 * @return void
 	 */
@@ -173,5 +190,9 @@ class ValidatorsTest extends TestCase {
 
 		$this->assertIsString($v = LowerCaseNormalizer::process(false));
 		$this->assertEquals('false', $v);
+
+		$this->assertInstanceOf(DataUnit::class, $v = DataUnitNormalizer::process('1234'));
+		/** @var DataUnit $v */
+		$this->assertEquals(1234, $v->for_system);
 	}
 }

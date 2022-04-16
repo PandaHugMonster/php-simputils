@@ -332,9 +332,7 @@ trait MetaMagic {
 
 		$sub = [];
 		$is_box_already = $this instanceof Box;
-		$res = $is_box_already
-			?$this
-			:new $box_class;
+		$res = $is_box_already?$this:new $box_class;
 		/** @var Box $res */
 
 		if ($this instanceof Box) {
@@ -365,9 +363,7 @@ trait MetaMagic {
 			$sub[PHP::$serialized_class_key_name] = static::class;
 		}
 
-		return $sub instanceof $box_class
-			?$res->load($sub)
-			:$sub;
+		return $sub instanceof $box_class?$res->load($sub):PHP::box($sub);
 	}
 
 	private function _iterateConvertObjectsAndArrays(

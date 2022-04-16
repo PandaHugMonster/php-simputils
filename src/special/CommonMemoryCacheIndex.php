@@ -7,7 +7,9 @@ use spaf\simputils\components\normalizers\DataUnitNormalizer;
 use spaf\simputils\components\normalizers\DateTimeNormalizer;
 use spaf\simputils\components\normalizers\FloatNormalizer;
 use spaf\simputils\components\normalizers\IntegerNormalizer;
+use spaf\simputils\components\normalizers\LowerCaseNormalizer;
 use spaf\simputils\components\normalizers\StringNormalizer;
+use spaf\simputils\components\normalizers\UpperCaseNormalizer;
 use spaf\simputils\models\Box;
 use spaf\simputils\models\PhpInfo;
 
@@ -47,5 +49,8 @@ class CommonMemoryCacheIndex {
 		'float' => FloatNormalizer::class,
 		'DateTime' => DateTimeNormalizer::class,
 		'DataUnit' => DataUnitNormalizer::class,
+
+		'lower' => LowerCaseNormalizer::class,
+		'upper' => UpperCaseNormalizer::class,
 	];
 }

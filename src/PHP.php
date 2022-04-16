@@ -828,18 +828,41 @@ class PHP {
 		return CodeBlocksCacheIndex::getRedefinition($hint, $target_class);
 	}
 
+	/**
+	 * @param $key
+	 * @param $class
+	 *
+	 * @codeCoverageIgnore
+	 * @return void
+	 */
 	public static function setPropertyValidator($key, $class) {
 		CommonMemoryCacheIndex::$property_validators[$key] = $class;
 	}
 
+	/**
+	 * @param $key
+	 *
+	 * @codeCoverageIgnore
+	 * @return mixed|string
+	 */
 	public static function getPropertyValidator($key) {
 		return CommonMemoryCacheIndex::$property_validators[$key];
 	}
 
+	/**
+	 * @param $val
+	 *
+	 * @codeCoverageIgnore
+	 * @return void
+	 */
 	public static function setPropertyValidatorLevel($val) {
 		CommonMemoryCacheIndex::$property_validators_enabled = $val;
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 * @return int
+	 */
 	public static function getPropertyValidatorLevel(): int {
 		return CommonMemoryCacheIndex::$property_validators_enabled;
 	}

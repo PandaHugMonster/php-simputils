@@ -295,7 +295,7 @@ class PHPHelperTest extends TestCase {
 	/**
 	 * @return array[]
 	 */
-	public function dataProviderToBool(): array {
+	public function dataProviderBoolFrom(): array {
 		return [
 			['true', true], ['1', true], ['T', true], ['trUe', true], ['t', true], ['y', true],
 			['yes', true], ['yEs', true], ['enabled', true], [1, true], ['+', true],
@@ -308,14 +308,36 @@ class PHPHelperTest extends TestCase {
 		];
 	}
 
+	public function dataProviderBoolTo(): array {
+		return [
+			[true, Boolean::$to_yes],
+			['true', Boolean::$to_yes],
+			['y', Boolean::$to_yes],
+			['1', Boolean::$to_yes],
+			[1, Boolean::$to_yes],
+			['yes', Boolean::$to_yes],
+			['enable', Boolean::$to_yes],
+			['enabled', Boolean::$to_yes],
+
+			[false, Boolean::$to_no],
+			['false', Boolean::$to_no],
+			['n', Boolean::$to_no],
+			['0', Boolean::$to_no],
+			[0, Boolean::$to_no],
+			['no', Boolean::$to_no],
+			['disable', Boolean::$to_no],
+			['disabled', Boolean::$to_no],
+		];
+	}
+
 	/**
 	 * @param mixed $mixed_val    Mixed value from dp
 	 * @param bool  $expected_val Expected value from dp
 	 *
-	 * @dataProvider dataProviderToBool
+	 * @dataProvider dataProviderBoolFrom
 	 * @covers \spaf\simputils\Boolean::from
-	 * @return void
 	 * FIX  Should be moved out
+	 * @return void
 	 */
 	public function testAsBool(mixed $mixed_val, ?bool $expected_val) {
 		$sub_res = Boolean::from($mixed_val);
@@ -331,10 +353,27 @@ class PHPHelperTest extends TestCase {
 	}
 
 	/**
+	 * @covers \spaf\simputils\Boolean::to
+	 * @uses \spaf\simputils\Boolean::from()
+	 *
+	 * @dataProvider dataProviderBoolTo
+	 *
+	 * @param mixed $mixed_val
+	 * @param bool|null $expected_val
+	 * FIX  Should be moved out
+	 * @return void
+	 */
+	public function testBoolTo(mixed $mixed_val, string $expected_val) {
+		$this->assertEquals($expected_val, Boolean::to($mixed_val),
+			"Checking conversion bool to string of {$mixed_val} to {$expected_val}"
+		);
+	}
+
+	/**
 	 * @param mixed $mixed_val    Mixed value from dp
 	 * @param bool  $expected_val Expected value from dp
 	 *
-	 * @dataProvider dataProviderToBool
+	 * @dataProvider dataProviderBoolFrom
 	 * @covers \spaf\simputils\Boolean::from
 	 * FIX  Should be moved out
 	 * @return void

@@ -1,14 +1,59 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
+use spaf\simputils\attributes\DebugHide;
+use spaf\simputils\attributes\Extract;
 use spaf\simputils\attributes\Property;
 use spaf\simputils\attributes\PropertyBatch;
+use spaf\simputils\components\normalizers\LowerCaseNormalizer;
 use spaf\simputils\exceptions\PropertyDoesNotExist;
 use spaf\simputils\exceptions\PropertyIsWriteOnly;
 use spaf\simputils\generic\SimpleObject;
 use spaf\simputils\models\Box;
 use spaf\simputils\models\DateTime;
 use spaf\simputils\traits\ArrayReadOnlyAccessTrait;
+
+/**
+ *
+ * @property ?DateTime $field1
+ * @property string $field2
+ * @property string $field3
+ * @property mixed $field4
+ * @property mixed $field5
+ * @property mixed $field6
+ */
+class PreAOne extends SimpleObject {
+
+	protected $field0 = 0;
+
+	#[Property]
+	protected ?DateTime $_field1 = null;
+
+	#[Property(valid: LowerCaseNormalizer::class)]
+	protected string $_field2 = 'TEstOVayA StriNG WOW!';
+
+	#[Property(valid: 'upper')]
+	protected string $_field3 = '3';
+
+	#[Property]
+	protected $_field4 = 4;
+
+	#[Property]
+	protected $_field5 = 5;
+
+	#[Property]
+	protected $_field6 = 6;
+}
+
+#[DebugHide]
+class PreATwo extends PreAOne {
+
+}
+
+#[DebugHide(false, 'bebebe')]
+class PreAThree extends PreAOne {
+
+}
 
 /**
  *
@@ -32,8 +77,15 @@ use spaf\simputils\traits\ArrayReadOnlyAccessTrait;
  */
 class A extends SimpleObject {
 
+	#[Extract(false)]
+	#[Property]
+	protected $_test_sto_piatsot = '100 500...';
+
 	private $test1 = 'test1';
-	private $test2 = 'test2';
+
+	protected $test2 = 'test2';
+
+	#[DebugHide]
 	private $_test7 = 'test7';
 
 	#[PropertyBatch]
@@ -42,6 +94,7 @@ class A extends SimpleObject {
 	#[PropertyBatch]
 	private $props2 = ['test5', 'test6'];
 
+	#[Extract(false)]
 	#[PropertyBatch]
 	private function getDynamicListOfProperties() {
 		$res = [];
@@ -81,6 +134,7 @@ class A extends SimpleObject {
 		return null;
 	}
 
+	#[DebugHide]
 	public $_test8 = null;
 
 	#[Property('test8')]
@@ -88,8 +142,12 @@ class A extends SimpleObject {
 		$this->_test8 = $var;
 	}
 
+	#[Extract(false)]
+	#[DebugHide]
 	private $_test9 = 'test9';
 
+	#[Extract(false)]
+	#[DebugHide]
 	#[Property('test9')]
 	public function getTest9(): null|string|Box {
 		return $this->_test9;
@@ -100,8 +158,11 @@ class A extends SimpleObject {
 		return true;
 	}
 
+	#[Extract(false)]
+	#[DebugHide]
 	public $_duo1 = null;
 
+	#[DebugHide(false)]
 	#[Property('duo1')]
 	public function duo1($var, $type): ?string {
 		if ($type === 'get') {
@@ -110,7 +171,6 @@ class A extends SimpleObject {
 		$this->_duo1 = $var;
 		return null;
 	}
-
 
 	#[Property('tort', type: 'tort')]
 	public function tort(): mixed {
@@ -218,6 +278,7 @@ class D extends SimpleObject {
 class PropertiesTest extends TestCase {
 
 	/**
+	 * @uses \spaf\simputils\Str
 	 * @return void
 	 */
 	public function testValuesCheckProperty() {
@@ -381,5 +442,103 @@ class PropertiesTest extends TestCase {
 
 		$this->expectException(PropertyIsWriteOnly::class);
 		$this->assertEquals(null, $b0->prop1);
+	}
+
+	/**
+	 *
+	 * @uses \spaf\simputils\models\Box
+	 * @uses \spaf\simputils\special\CodeBlocksCacheIndex
+	 * @uses \spaf\simputils\Str
+	 * @uses \spaf\simputils\PHP
+	 *
+	 * @return void
+	 * @throws \spaf\simputils\exceptions\InfiniteLoopPreventionExceptions
+	 */
+	function testExtractFieldsAndDebugOutput() {
+		$a = new A();
+		$a->test3 = 666;
+		$this->assertEquals([
+			'duo1' => '****',
+			'kk_0' => null,
+			'kk_1' => null,
+			'kk_2' => null,
+			'kk_3' => null,
+			'kk_4' => null,
+			'kk_5' => null,
+			'test1' => 'test1',
+			'test2' => 'test2',
+			'test3' => 666,
+			'test4' => null,
+			'test5' => null,
+			'test6' => null,
+			'test7' => 'test7',
+			'test99' => true,
+			'test_sto_piatsot' => '100 500...',
+		], $a->__debugInfo());
+		$this->assertEquals([
+			'duo1' => null,
+			'test1' => 'test1',
+			'test2' => 'test2',
+			'test3' => 666,
+			'test4' => null,
+			'test5' => null,
+			'test6' => null,
+			'test7' => 'test7',
+			'test99' => true,
+			'_test7' => 'test7',
+			'_test8' => null,
+		], $a->toArray());
+
+		$pa1 = new PreAOne();
+		$kk = [
+			'field0' => 0,
+			'field1' => null,
+			'field2' => 'TEstOVayA StriNG WOW!',
+			'field3' => 3,
+			'field4' => 4,
+			'field5' => 5,
+			'field6' => 6,
+		];
+		$this->assertEquals($kk, $pa1->toArray());
+		$this->assertEquals($kk, $pa1->__debugInfo());
+
+		$pa2 = new PreATwo();
+		$this->assertEmpty($pa2->__debugInfo());
+
+		$pa3 = new PreAThree();
+		$this->assertNotEmpty($v = $pa3->__debugInfo());
+		$this->assertEquals(['bebebe'], $v);
+	}
+
+	/**
+	 * @uses \spaf\simputils\DT
+	 * @uses \spaf\simputils\PHP
+	 * @uses \spaf\simputils\Str
+	 * @uses \spaf\simputils\components\normalizers\DateTimeNormalizer
+	 * @uses \spaf\simputils\components\normalizers\LowerCaseNormalizer
+	 * @uses \spaf\simputils\components\normalizers\UpperCaseNormalizer
+	 * @uses \spaf\simputils\components\normalizers\BooleanNormalizer
+	 * @uses \spaf\simputils\models\DateTime
+	 * @uses \spaf\simputils\special\CodeBlocksCacheIndex
+	 *
+	 * @return void
+	 */
+	function testValidatorsAspects() {
+		$pa1 = new PreAOne();
+		$pa1->field1 = 42;
+		$this->assertInstanceOf(DateTime::class, $pa1->field1);
+
+		$this->assertEquals('TEstOVayA StriNG WOW!', $pa1->field2);
+		$pa1->field2 = "BIGGER_THAN_IT_LOOKS :: {$pa1->field2}";
+		$this->assertEquals(
+			'bigger_than_it_looks :: testovaya string wow!',
+			$pa1->field2
+		);
+
+		$pa1->field3 = "new string that suppose to be lower case";
+		$this->assertEquals(
+			'NEW STRING THAT SUPPOSE TO BE LOWER CASE',
+			$pa1->field3
+		);
 	}
 }

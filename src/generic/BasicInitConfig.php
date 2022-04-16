@@ -89,7 +89,7 @@ abstract class BasicInitConfig extends SimpleObject {
 	#[Property('l10n')]
 	protected function setL10n(null|string|L10n $val): void {
 		if (empty($val)) {
-			$this->_l10n_name = $val;
+			$this->_l10n_name = $val; // @codeCoverageIgnore
 		} else {
 			if (Str::is($val)) {
 				$this->_l10n_name = $val;
@@ -103,7 +103,9 @@ abstract class BasicInitConfig extends SimpleObject {
 					FS::path($this->working_dir, 'data', 'l10n', "{$l10n_name}.json")
 				);
 				if ($custom_file->exists) {
-					static::_metaMagic($val, '___setup', $custom_file->content ?? []);
+					static::_metaMagic( // @codeCoverageIgnore
+						$val, '___setup', $custom_file->content ?? [] // @codeCoverageIgnore
+					); // @codeCoverageIgnore
 				}
 			}
 
@@ -116,7 +118,9 @@ abstract class BasicInitConfig extends SimpleObject {
 	}
 
 	/**
-	 * @return array
+	 * @codeCoverageIgnore
+	 * @return \spaf\simputils\models\Box|array
+	 * @throws \spaf\simputils\exceptions\RedefUnimplemented
 	 */
 	#[Property('successful_init_blocks')]
 	protected function getSuccessfulInitBlocks(): Box|array {
@@ -124,24 +128,44 @@ abstract class BasicInitConfig extends SimpleObject {
 		return new $class_box($this->_successful_init_blocks);
 	}
 
+	/**
+	 * @param string $val
+	 *
+	 * @codeCoverageIgnore
+	 * @return void
+	 */
 	#[Property('big_number_extension')]
 	#[Shortcut('BigNumber::$default_extension')]
 	protected function setBigNumberExt(string $val) {
 		 BigNumber::$default_extension = $val;
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 * @return string
+	 */
 	#[Property('big_number_extension')]
 	#[Shortcut('BigNumber::$default_extension')]
 	protected function getBigNumberExt(): string {
 		return BigNumber::$default_extension;
 	}
 
+	/**
+	 * @param bool $val
+	 *
+	 * @codeCoverageIgnore
+	 * @return void
+	 */
 	#[Property('data_unit_long')]
 	#[Shortcut('DataUnit::$long_format')]
 	protected function setDataUnitLong(bool $val) {
 		DataUnit::$long_format = $val;
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 * @return bool
+	 */
 	#[Property('data_unit_long')]
 	#[Shortcut('DataUnit::$long_format')]
 	protected function getDataUnitLong(): bool {
@@ -180,8 +204,7 @@ abstract class BasicInitConfig extends SimpleObject {
 		// The only place getenv is used. It might be safe enough, though not sure yet.
 		if (empty($this->name) || $this->name === 'app') {
 			$_ENV = CommonMemoryCacheIndex::$initial_get_env_state = !empty($_ENV)
-				?$_ENV // @codeCoverageIgnore
-				:(getenv() ?? []);
+				?$_ENV:(getenv() ?? []); // @codeCoverageIgnore
 		}
 
 		foreach ($this->init_blocks as $block_class) {

@@ -415,8 +415,7 @@ trait PropertiesTrait {
 					if (in_array($access_type, $batch_array_of_prop_types)) {
 						foreach ($expected_names as $expected_name) {
 							$res["{$expected_name}"] = $it_set_by_attr
-								?$it_attr_value
-								:$this->$expected_name;
+								?$it_attr_value:$this->$expected_name;
 						}
 					}
 				} else if (!empty($ta) && $ta->getName() === Property::class) {
@@ -431,15 +430,13 @@ trait PropertiesTrait {
 
 					if (in_array($method_type, $property_array_of_prop_types)) {
 						$res["{$expected_name}"] = $it_set_by_attr
-							?$it_attr_value
-							:$this->$expected_name;
+							?$it_attr_value:$this->$expected_name;
 					}
 				} else {
 					// NOTE Real PHP native property
 					$item->setAccessible(true);
 					$res["{$prefix}{$name}"] = $it_set_by_attr
-						?$it_attr_value
-						:$item->getValue($this);
+						?$it_attr_value:$item->getValue($this);
 					$item->setAccessible(false);
 				}
 			} else if ($item instanceof ReflectionMethod) {
@@ -451,8 +448,7 @@ trait PropertiesTrait {
 
 					if (in_array($method_type, $property_array_of_prop_types)) {
 						$res["{$expected_name}"] = $it_set_by_attr
-							?$it_attr_value
-							:$this->$expected_name;
+							?$it_attr_value:$this->$expected_name;
 					}
 				} else if (!empty($ta) && $ta->getName() === PropertyBatch::class) {
 					[$expected_names, $_] = PropertyBatch::expectedNamesAndDefaultValues(
@@ -464,8 +460,7 @@ trait PropertiesTrait {
 
 						foreach ($expected_names as $expected_name) {
 							$res["{$expected_name}"] = $it_set_by_attr
-								?$it_attr_value
-								:$this->$expected_name;
+								?$it_attr_value:$this->$expected_name;
 						}
 					}
 				}

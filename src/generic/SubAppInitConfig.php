@@ -12,6 +12,6 @@ abstract class SubAppInitConfig extends InitConfig implements InitBlockInterface
 	public null|array|Box $init_blocks = [];
 
 	public function initBlock(BasicInitConfig $config) {
-		return (bool) PHP::init($this);
+		return (bool) PHP::init($this); // @codeCoverageIgnore
 	}
 }

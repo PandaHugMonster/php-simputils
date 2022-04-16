@@ -7,6 +7,7 @@ use spaf\simputils\models\Box;
 use spaf\simputils\models\DateTime;
 use spaf\simputils\models\Dir;
 use spaf\simputils\models\File;
+use spaf\simputils\models\Set;
 use spaf\simputils\models\StackFifo;
 use spaf\simputils\models\StackLifo;
 use spaf\simputils\PHP;
@@ -239,5 +240,16 @@ class ShortcutsTest extends TestCase {
 
 		$res = path(...$lines);
 		$this->assertEquals($expected, $res);
+	}
+
+	/**
+	 * @covers \spaf\simputils\PHP::set
+	 * @uses \spaf\simputils\models\Set
+	 *
+	 * @return void
+	 */
+	function testPHPSet() {
+		$set = PHP::set(1, 2, 3, 3, 4, 4);
+		$this->assertInstanceOf(Set::class, $set);
 	}
 }

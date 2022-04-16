@@ -149,8 +149,10 @@ abstract class BasicResource extends SimpleObject {
 	/**
 	 * @codeCoverageIgnore
 	 * @return string|null
-	 * @throws \spaf\simputils\exceptions\NonExistingDataUnit
-	 * @throws \spaf\simputils\exceptions\UnspecifiedDataUnit
+	 * @throws \spaf\simputils\exceptions\NonExistingDataUnit Data Unit that is specified
+	 *                                                        is not recognized
+	 * @throws \spaf\simputils\exceptions\RedefUnimplemented  Redefinable component is not defined
+	 * @throws \spaf\simputils\exceptions\UnspecifiedDataUnit No data unit is specified
 	 */
 	#[Property('size_hr')]
 	protected function getSizeHuman(): ?string {

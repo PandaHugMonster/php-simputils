@@ -199,20 +199,6 @@ class Box extends ArrayObject {
 		return new static(array_flip((array) $this));
 	}
 
-//	/**
-//	 * Determines if the given array is a list
-//	 *
-//	 * An array is considered a list if its keys consist of consecutive
-//	 * numbers from 0 to count($array)-1.
-//	 *
-//	 * @return bool
-//	 */
-//	#[Shortcut('\array_is_list()')]
-//	#[Property('isList')]
-//	protected function getIsList(): bool {
-//		return array_is_list((array) $this);
-//	}
-
 	/**
 	 * Returns key by the specified value
 	 *
@@ -496,7 +482,7 @@ class Box extends ArrayObject {
 	 *
 	 * TODO Add a flag for case-independent check
 	 *
-	 * @param string $key
+	 * @param string $key Key that have to be checked
 	 *
 	 * @return bool
 	 */
@@ -541,8 +527,8 @@ class Box extends ArrayObject {
 	 *  );
 	 * ```
 	 *
-	 * @param array|Box $keys
-	 * @param array|Box $values
+	 * @param array|Box $keys   Keys to combine
+	 * @param array|Box $values Values to combine
 	 *
 	 * @return static
 	 */
@@ -552,7 +538,7 @@ class Box extends ArrayObject {
 	}
 
 	/**
-	 * @param int $num
+	 * @param int $num Amount of random keys
 	 *
 	 * @return \Generator
 	 * @codeCoverageIgnore
@@ -569,7 +555,7 @@ class Box extends ArrayObject {
 	}
 
 	/**
-	 * @param int $num
+	 * @param int $num Amount of random values
 	 *
 	 * @return \Generator
 	 * @codeCoverageIgnore
@@ -595,12 +581,10 @@ class Box extends ArrayObject {
 	}
 
 	/**
-	 * @param int $num
-	 *
 	 * @return false|mixed
 	 * @codeCoverageIgnore
 	 */
-	public function randValue(int $num = 1) {
+	public function randValue() {
 		$values = $this->values;
 		return $values[Math::rand(0, $values->size - 1)];
 	}
@@ -697,13 +681,14 @@ class Box extends ArrayObject {
 	/**
 	 * Sort of any kind
 	 *
-	 * @param bool|null $descending
-	 * @param bool|null $by_values
-	 * @param bool|null $case_sensitive
-	 * @param bool|null $natural
-	 * @param callable|null $callback
+	 * @param bool      $descending     Descending/Ascending
+	 * @param bool      $by_values      By values/keys
+	 * @param bool      $case_sensitive Case sensitive/insensitive
+	 * @param bool      $natural        Natural sorting or not
+	 * @param ?callable $callback       Use a callback
 	 *
 	 * TODO Make sure all the sortings are tested and documented properly
+	 *
 	 * @return self
 	 */
 	public function sort(
@@ -801,7 +786,7 @@ class Box extends ArrayObject {
 	 *
 	 * @codeCoverageIgnore
 	 * @return array
-	 * @throws \spaf\simputils\exceptions\InfiniteLoopPreventionExceptions
+	 * @throws \spaf\simputils\exceptions\InfiniteLoopPreventionExceptions ILP Exception
 	 */
 	public function __debugInfo(): array {
 		return $this->toArray();

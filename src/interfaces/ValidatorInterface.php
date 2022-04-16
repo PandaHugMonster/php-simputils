@@ -14,7 +14,7 @@ interface ValidatorInterface {
 	/**
 	 * Validate/Normalizes/Converts value from "setter"
 	 *
-	 * @param mixed $value
+	 * @param mixed $value Value that should pass the validation/normalization
 	 *
 	 * @return mixed
 	 */

@@ -22,10 +22,11 @@ class Data {
 	/**
 	 * Shortcut for creation of DataUnit object
 	 *
-	 * @param null|int|string|DataUnit $value
-	 * @param string|null $format
+	 * @param null|int|string|DataUnit $value  Data Unit in any format (string, int, null, object)
+	 * @param string|null              $format Default user format for the object
 	 *
 	 * @return \spaf\simputils\models\DataUnit
+	 * @throws \spaf\simputils\exceptions\RedefUnimplemented Redefinable component is not defined
 	 */
 	public static function du(
 		null|int|string|DataUnit $value = null,

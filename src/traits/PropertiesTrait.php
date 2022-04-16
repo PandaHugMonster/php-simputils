@@ -61,11 +61,13 @@ trait PropertiesTrait {
 	public $_simp_utils_property_batch_storage = [];
 
 	/**
-	 * @param string $name
+	 * @param string $name Name of the property
 	 *
 	 * @return mixed
+	 * @throws \spaf\simputils\exceptions\PropertyDoesNotExist Property does not exist
+	 * @throws \spaf\simputils\exceptions\PropertyIsReadOnly   Property is read-only
 	 */
-	public function __get($name): mixed {
+	public function __get(string $name): mixed {
 		$ref = static::class.'#'.$name.'#'.Property::TYPE_GET;
 		if ($method_name = PropertiesCacheIndex::$index[$ref] ?? false) {
 			return $this->$method_name(null, Property::TYPE_GET, $name);
@@ -175,14 +177,16 @@ trait PropertiesTrait {
 	}
 
 	/**
-	 * @param string $name
-	 * @param string $call_type
-	 * @param mixed $value
-	 * @param bool $check_and_do_not_call
+	 * @param string $name                  Called property name
+	 * @param string $call_type             Call type ('set' or 'get')
+	 * @param mixed  $value                 Value
+	 * @param bool   $check_and_do_not_call If true, then value will not be prepared (
+	 *                                      relevant only for {@see __isset()})
 	 *
 	 * @return bool
-	 * @throws PropertyIsReadOnly
-	 * @throws PropertyDoesNotExist
+	 * @throws \spaf\simputils\exceptions\PropertyDoesNotExist Property does not exist
+	 * @throws \spaf\simputils\exceptions\PropertyIsReadOnly   Property is read-only
+	 * @throws \spaf\simputils\exceptions\PropertyIsWriteOnly  Property is write-only
 	 */
 	private function _simpUtilsPrepareProperty(
 		string $name,
@@ -287,6 +291,11 @@ trait PropertiesTrait {
 					return null; // @codeCoverageIgnore
 				} else if ($t instanceof ReflectionNamedType) {
 					$class = $t->getName();
+
+					if ($class === 'mixed') {
+						return null;
+					}
+
 					if (empty($validators[$class])) {
 						$class = PHP::classShortName($class);
 						if (empty($validators[$class])) {
@@ -334,8 +343,8 @@ trait PropertiesTrait {
 	}
 
 	/**
-	 * @param bool $extract_attr_on
-	 * @param bool $debug_hide_attr_on
+	 * @param bool $extract_attr_on    Whether the Extract attribute behaviour should be applied
+	 * @param bool $debug_hide_attr_on Whether the DebugHide attribute behaviour should be applied
 	 *
 	 * @return array|string[]
 	 */
@@ -471,26 +480,26 @@ trait PropertiesTrait {
 	}
 
 	/**
-	 * @param $value
-	 * @param $type
-	 * @param $name
+	 * @param mixed  $value Supplied value
+	 * @param string $type  Call type ('set' or 'get')
+	 * @param string $name  Property name that has been requested
 	 *
 	 * @codeCoverageIgnore
 	 * @return void
 	 */
-	private function _simpUtilsPropertyFieldMethodSet($value, $type, $name) {
+	private function _simpUtilsPropertyFieldMethodSet(mixed $value, string $type, string $name) {
 		$this->$name = $value;
 	}
 
 	/**
-	 * @param $value
-	 * @param $type
-	 * @param $name
+	 * @param mixed  $value Supplied value
+	 * @param string $type  Call type ('set' or 'get')
+	 * @param string $name  Property name that has been requested
 	 *
 	 * @codeCoverageIgnore
 	 * @return mixed
 	 */
-	private function _simpUtilsPropertyFieldMethodGet($value, $type, $name) {
+	private function _simpUtilsPropertyFieldMethodGet(mixed $value, string $type, string $name) {
 		return $this->$name;
 	}
 

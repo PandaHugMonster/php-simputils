@@ -108,11 +108,14 @@ class BigNumber extends SimpleObject {
 	/**
 	 * Create BigNumber object
 	 *
-	 * @param int|static|string $val       String or integer value representing number or big-number
-	 * @param bool              $mutable   If set to true, then all the operations will be changing
-	 *                                     value of this object
-	 * @param ?string           $extension Enforcing usage of particular extension for this number
+	 * @param int|static|float|string $val       String or integer value representing number
+	 *                                           or big-number
+	 * @param bool                    $mutable   If set to true, then all the operations
+	 *                                           will be changing value of this object
+	 * @param ?string                 $extension Enforcing usage of particular extension
+	 *                                           for this number
 	 *
+	 * @throws \spaf\simputils\exceptions\NoExtensionFound No math extension found
 	 */
 	public function __construct(
 		int|self|float|string $val = 0,
@@ -184,12 +187,13 @@ class BigNumber extends SimpleObject {
 	 *
 	 * `$a + $b`
 	 *
-	 * @param self|string|int $b
+	 * @param self|string|int $b       Parameter "b"
 	 * @param bool|null       $mutable If set to true of false, then overrides
 	 *                                 the default "is mutable" flag of the object
 	 *                                 for this operation
 	 *
 	 * @return static
+	 * @throws \spaf\simputils\exceptions\NoExtensionFound No math extension found
 	 * @see \gmp_add()
 	 * @see \bcadd()
 	 */
@@ -218,13 +222,14 @@ class BigNumber extends SimpleObject {
 	 *
 	 * `$a - $b`
 	 *
-	 * @param self|string|int $b
-	 * @param bool|null       $mutable If set to true of false, then overrides
-	 *                                 the default "is mutable" flag of the object
-	 *                                 for this operation
+	 * @param static|string|int $b       Parameter "b"
+	 * @param bool|null         $mutable If set to true of false, then overrides
+	 *                                   the default "is mutable" flag of the object
+	 *                                   for this operation
 	 *
 	 * @return static
 	 *
+	 * @throws \spaf\simputils\exceptions\NoExtensionFound No math extension found
 	 * @see \gmp_sub()
 	 * @see \bcsub()
 	 */
@@ -253,13 +258,14 @@ class BigNumber extends SimpleObject {
 	 *
 	 * `$a / $b`
 	 *
-	 * @param self|string|int $b
-	 * @param bool|null       $mutable If set to true of false, then overrides
-	 *                                 the default "is mutable" flag of the object
-	 *                                 for this operation
+	 * @param static|string|float|int $b       Parameter "b"
+	 * @param bool|null               $mutable If set to true of false, then overrides
+	 *                                         the default "is mutable" flag of the object
+	 *                                         for this operation
 	 *
 	 * @return static
 	 *
+	 * @throws \spaf\simputils\exceptions\NoExtensionFound No math extension found
 	 * @see \gmp_div_q()
 	 * @see \bcdiv()
 	 */
@@ -302,13 +308,14 @@ class BigNumber extends SimpleObject {
 	 *
 	 * `$a * $b`
 	 *
-	 * @param self|string|int $b
+	 * @param self|string|int $b       Parameter "b"
 	 * @param bool|null       $mutable If set to true of false, then overrides
 	 *                                 the default "is mutable" flag of the object
 	 *                                 for this operation
 	 *
 	 * @return static
 	 *
+	 * @throws \spaf\simputils\exceptions\NoExtensionFound No math extension found
 	 * @see \gmp_mul()
 	 * @see \bcmul()
 	 */
@@ -335,13 +342,14 @@ class BigNumber extends SimpleObject {
 	/**
 	 * Modulo operation
 	 *
-	 * @param self|string|int $modulo
+	 * @param self|string|int $modulo  Modulo
 	 * @param bool|null       $mutable If set to true of false, then overrides
 	 *                                 the default "is mutable" flag of the object
 	 *                                 for this operation
 	 *
 	 * @return static
 	 *
+	 * @throws \spaf\simputils\exceptions\NoExtensionFound No math extension found
 	 * @see \gmp_mod()
 	 * @see \bcmod()
 	 */
@@ -375,12 +383,9 @@ class BigNumber extends SimpleObject {
 	/**
 	 * Comparison
 	 *
-	 * @param self|string|int $b
-	 * @param bool|null       $mutable If set to true of false, then overrides
-	 *                                 the default "is mutable" flag of the object
-	 *                                 for this operation
+	 * @param static|string|int|float $b Parameter "b"
 	 *
-	 * @return static
+	 * @return int
 	 *
 	 * @see \gmp_cmp()
 	 * @see \bccomp()
@@ -402,13 +407,14 @@ class BigNumber extends SimpleObject {
 	/**
 	 * Power
 	 *
-	 * @param self|string|int $exponent
-	 * @param bool|null       $mutable If set to true of false, then overrides
-	 *                                 the default "is mutable" flag of the object
-	 *                                 for this operation
+	 * @param self|string|int $exponent Exponent
+	 * @param bool|null       $mutable  If set to true of false, then overrides
+	 *                                  the default "is mutable" flag of the object
+	 *                                  for this operation
 	 *
 	 * @return static
 	 *
+	 * @throws \spaf\simputils\exceptions\NoExtensionFound No math extension found
 	 * @see \gmp_pow()
 	 * @see \bcpow()
 	 */
@@ -435,14 +441,15 @@ class BigNumber extends SimpleObject {
 	/**
 	 * Power with modulo
 	 *
-	 * @param self|string|int $exponent
-	 * @param self|string|int $modulo
-	 * @param bool|null       $mutable If set to true of false, then overrides
-	 *                                 the default "is mutable" flag of the object
-	 *                                 for this operation
+	 * @param self|string|int $exponent Exponent
+	 * @param self|string|int $modulo   Modulo
+	 * @param bool|null       $mutable  If set to true of false, then overrides
+	 *                                  the default "is mutable" flag of the object
+	 *                                  for this operation
 	 *
 	 * @return static
 	 *
+	 * @throws \spaf\simputils\exceptions\NoExtensionFound No math extension found
 	 * @see \gmp_powm()
 	 * @see \bcpowmod()
 	 */
@@ -473,12 +480,13 @@ class BigNumber extends SimpleObject {
 	/**
 	 * Square Root
 	 *
-	 * @param bool|null       $mutable If set to true of false, then overrides
-	 *                                 the default "is mutable" flag of the object
-	 *                                 for this operation
+	 * @param bool|null $mutable If set to true of false, then overrides
+	 *                           the default "is mutable" flag of the object
+	 *                           for this operation
 	 *
 	 * @return static
 	 *
+	 * @throws \spaf\simputils\exceptions\NoExtensionFound No math extension found
 	 * @see \gmp_sqrt()
 	 * @see \bcsqrt()
 	 */

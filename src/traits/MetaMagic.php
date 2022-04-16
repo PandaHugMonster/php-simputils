@@ -214,12 +214,12 @@ trait MetaMagic {
 	 *
 	 * If you want to convert to Json string, use {@see \spaf\simputils\traits\MetaMagic::toJson()}
 	 *
-	 * @param bool $recursively Do the conversion recursively
-	 * @param bool $with_class Result will contain full class name
-	 * @param array $exclude_fields
+	 * @param bool  $recursively    Do the conversion recursively
+	 * @param bool  $with_class     Result will contain full class name
+	 * @param array $exclude_fields Fields that should be excluded
 	 *
 	 * @return array
-	 * @throws \spaf\simputils\exceptions\InfiniteLoopPreventionExceptions
+	 * @throws \spaf\simputils\exceptions\InfiniteLoopPreventionExceptions ILP Exception
 	 */
 	public function toArray(
 		bool $recursively = false,
@@ -396,13 +396,16 @@ trait MetaMagic {
 	 * For the purpose of migrating the parent narrow class object, to the child wider
 	 * class object.
 	 *
-	 * @param string|object $class_or_object          Class/Object that should be filled up
-	 *                                                with data
-	 * @param bool          $strict_inheritance_check Additional check to make sure the provided
-	 *                                                class or object is a child from this one.
-	 *                                                By default is true
+	 * @param object  $parent                   Parent
+	 * @param ?object $child                    Child
+	 * @param bool    $strict_inheritance_check Additional check to make sure the provided
+	 *                                          class or object is a child from this one.
+	 *                                          By default is true
 	 *
 	 * @return object Always returns a new object of type provided as a first argument
+	 * @throws \ReflectionException Reflection issue
+	 * @throws \spaf\simputils\exceptions\MetaMagicStrictInheritanceProblem Strict Inheritance
+	 *                                                                      Problem
 	 */
 	public static function expandFrom(
 		object $parent,
@@ -558,9 +561,11 @@ trait MetaMagic {
 	 * @see https://www.php.net/manual/en/language.oop5.visibility.php#language.oop5.visibility-other-objects
 	 *      Visibility of the "relatives"
 	 *
+	 * FIX  Final touches in matter of meta-magic + Solidly define the idea of the meta-magic
+	 *
 	 * @return mixed
 	 */
-	public static function _metaMagic(...$spell): mixed {
+	public static function _metaMagic(mixed ...$spell): mixed {
 		$context = $spell[0];
 		$endpoint = $spell[1];
 		array_shift($spell);

@@ -211,12 +211,13 @@ class PHP {
 	 * @param ?int    $enforced_type Enforced serialization type (per function call
 	 *                               overrides the default serialization type)
 	 *
-	 * MARK Deserialization does not recursively uses boxes instead of arrays. Should be fixed!!
+	 * TODO Deserialization does not recursively uses boxes instead of arrays.
+	 *      Should be fixed!!
 	 * @return mixed
 	 * @throws \ReflectionException Reflection related exceptions
 	 */
 	public static function deserialize(
-		string|null $str,
+		?string $str,
 		?string $class = null,
 		?int $enforced_type = null
 	): mixed {
@@ -552,7 +553,7 @@ class PHP {
 	 * @see \print_r()
 	 * @return void
 	 */
-	public static function pd(...$args) {
+	public static function pd(mixed ...$args) {
 		$callback = CodeBlocksCacheIndex::getRedefinition(InitConfig::REDEF_PD);
 		if ($callback && $callback !== InitConfig::REDEF_PD) {
 			$res = (bool) $callback(...$args);
@@ -589,11 +590,11 @@ class PHP {
 	 * @see PHP::pr()
 	 * @see \ob_get_clean()
 	 *
-	 * @param ...$args
+	 * @param mixed ...$args Any arguments
 	 *
 	 * @return string|null
 	 */
-	public static function prstr(...$args): ?string {
+	public static function prstr(mixed ...$args): ?string {
 		if (empty($args)) {
 			return null;
 		}
@@ -693,7 +694,7 @@ class PHP {
 	/**
 	 * Creating "Set"
 	 *
-	 * @param mixed ...$data
+	 * @param mixed ...$data Arguments that will be elements of the Set
 	 *
 	 */
 	public static function set(mixed ...$data): Set {
@@ -829,33 +830,33 @@ class PHP {
 	}
 
 	/**
-	 * @param $key
-	 * @param $class
+	 * @param string $key   Validator/Normalizer key
+	 * @param string $class Validator/Normalizer class ref
 	 *
 	 * @codeCoverageIgnore
 	 * @return void
 	 */
-	public static function setPropertyValidator($key, $class) {
+	public static function setPropertyValidator(string $key, string $class) {
 		CommonMemoryCacheIndex::$property_validators[$key] = $class;
 	}
 
 	/**
-	 * @param $key
+	 * @param string $key Validator/Normalizer key
 	 *
 	 * @codeCoverageIgnore
 	 * @return mixed|string
 	 */
-	public static function getPropertyValidator($key) {
+	public static function getPropertyValidator(string $key) {
 		return CommonMemoryCacheIndex::$property_validators[$key];
 	}
 
 	/**
-	 * @param $val
+	 * @param int $val Validator/Normalizer appliance level
 	 *
 	 * @codeCoverageIgnore
 	 * @return void
 	 */
-	public static function setPropertyValidatorLevel($val) {
+	public static function setPropertyValidatorLevel(int $val) {
 		CommonMemoryCacheIndex::$property_validators_enabled = $val;
 	}
 

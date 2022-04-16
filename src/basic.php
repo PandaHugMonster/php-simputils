@@ -17,9 +17,7 @@ use spaf\simputils\models\Dir;
 use spaf\simputils\models\File;
 use spaf\simputils\models\StackFifo;
 use spaf\simputils\models\StackLifo;
-use spaf\simputils\models\StrObj;
 use spaf\simputils\PHP;
-use spaf\simputils\Str;
 
 /**
  * Please Die function
@@ -50,15 +48,15 @@ use spaf\simputils\Str;
  * @see \print_r()
  */
 #[Shortcut('PHP::pd()')]
-function pd(...$args) {
+function pd(mixed ...$args) {
 	PHP::pd(...$args);
 }
 
 /**
  * Create Box array-like object
  *
- * @param null|Box|array $array Array that should be wrapped into a box
- * @param mixed ...$merger
+ * @param null|Box|array $array     Array that should be wrapped into a box
+ * @param mixed          ...$merger Arrays/Boxes to merge into first one
  *
  * @return Box|array
  */
@@ -86,13 +84,12 @@ function stack(mixed ...$items_and_conf): StackFifo|StackLifo {
 /**
  * Short and quick getting "now" `DateTime` object
  *
- * @param \DateTimeZone|null $tz TimeZone
+ * @param DateTimeZone|bool|string|null $tz TimeZone
  *
- * @return \spaf\simputils\models\DateTime|null
- *
+ * @return DateTime|null
  */
 #[Shortcut('DT::now()')]
-function now(null|bool|DateTimeZone $tz = null): ?DateTime {
+function now(DateTimeZone|bool|string|null $tz = null): ?DateTime {
 	return DT::now($tz);
 }
 
@@ -129,9 +126,8 @@ function dr(null|string $path = null): ?Dir {
 /**
  * Getting Environment Variable value
  *
- * @param ?string $name   Variable name
- * @param bool    $strict Is strict mode (`$name` must be exactly as variable specified, otherwise
- *                        exception will be raised)
+ * @param ?string $name    Variable name
+ * @param mixed   $default Default value if env variable does not exist
  *
  * @return mixed returns value of the environment variable or if no `name` is provided returns all
  *               the env variables.
@@ -171,22 +167,14 @@ function path(?string ...$args): ?string {
 /**
  * DataUnit shortcut
  *
- * @param int|string|\spaf\simputils\models\DataUnit|null $value
+ * @param int|string|DataUnit|null $value  Data unit in any format
+ * @param string|null              $format Data Unit object default format (if not set, then HR
+ *                                         is used)
  *
  * @return \spaf\simputils\models\DataUnit
+ * @throws \spaf\simputils\exceptions\RedefUnimplemented Redefinable component is not defined
  */
 #[Shortcut('Data::du()')]
 function du(null|int|string|DataUnit $value = null, ?string $format = null): DataUnit {
 	return Data::du($value, $format);
-}
-
-/**
- * @param string ...$strings
- * @codeCoverageIgnore
- *
- * @return \spaf\simputils\models\StrObj|string
- */
-#[Shortcut('Str::obj()')]
-function str(string ...$strings): StrObj|string {
-	return Str::obj(...$strings);
 }

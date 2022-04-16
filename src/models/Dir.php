@@ -107,9 +107,9 @@ class Dir extends Box {
 	 *
 	 * ```
 	 *
-	 * @param bool $recursively Whether it should be walked
+	 * @param bool                                   $recursively Whether it should be walked
 	 *                                                            recursively
-	 * @param WalkThroughFilterInterface|string|null ...$filters Filter rules, null or empty
+	 * @param WalkThroughFilterInterface|string|null ...$filters  Filter rules, null or empty
 	 *                                                            values - ignored,
 	 *                                                            if string - check regexp,
 	 *                                                            if not then compares complete name
@@ -117,7 +117,7 @@ class Dir extends Box {
 	 * @return \spaf\simputils\models\File[]|\spaf\simputils\models\Dir[]
 	 *
 	 * TODO Maybe generator is better?
-	 * @throws \spaf\simputils\exceptions\RedefUnimplemented
+	 * @throws \spaf\simputils\exceptions\RedefUnimplemented Redefinable component is not defined
 	 * @see \spaf\simputils\components\filters\OnlyDirsFilter
 	 * @see \spaf\simputils\components\filters\OnlyFilesFilter
 	 * @see \spaf\simputils\components\filters\DirExtFilter

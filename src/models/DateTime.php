@@ -277,7 +277,6 @@ class DateTime extends FixUpDateTime {
 	}
 
 	public function toJson(?bool $pretty = null, bool $with_class = false): string {
-//		return json_encode($this->for_user);
 		// TODO Implement optional choice of "for_*"
 		return json_encode($this->for_system);
 	}

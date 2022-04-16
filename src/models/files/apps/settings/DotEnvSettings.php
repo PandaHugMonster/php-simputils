@@ -1,5 +1,4 @@
 <?php
-
 namespace spaf\simputils\models\files\apps\settings;
 
 use spaf\simputils\generic\SimpleObject;
@@ -11,6 +10,7 @@ use ValueError;
  *
  * TODO Add strict mode at some point
  * TODO Add wrapping up/splitting of comment-extensions in case if it's too long
+ *
  *
  */
 class DotEnvSettings extends SimpleObject {
@@ -36,14 +36,14 @@ class DotEnvSettings extends SimpleObject {
 
 	/**
 	 * @var ?string $always_quote_values Always wrapping values into quote symbol specified.
-	 *                                  It would be ignored if the value having first and last
-	 *                                  symbol of double-quote or single-quote (both must be
-	 *                                  matching).
-	 *                                  For example: $a = "\"Test Me\"" would not be additionally
-	 *                                  wrapped. It's done like this so you could control
-	 *                                  quote-wrapping by yourself in place. If set to null then
-	 *                                  ignored always, and auto-wrapping would not happen in any
-	 *                                  case.
+	 *                                   It would be ignored if the value having first and last
+	 *                                   symbol of double-quote or single-quote (both must be
+	 *                                   matching).
+	 *                                   For example: $a = "\"Test Me\"" would not be additionally
+	 *                                   wrapped. It's done like this so you could control
+	 *                                   quote-wrapping by yourself in place. If set to null then
+	 *                                   ignored always, and auto-wrapping would not happen in any
+	 *                                   case.
 	 */
 	public ?string $always_quote_values = '"';
 
@@ -114,8 +114,7 @@ class DotEnvSettings extends SimpleObject {
 			static::LETTER_CASE_LOWER => Str::lower($name),
 			static::LETTER_CASE_NONE => $name,
 			default => throw new ValueError(
-				"Letter Case \"{$this->enforce_letter_case}\" is not supported"
-			)
+				"Letter Case \"{$this->enforce_letter_case}\" is not supported")
 		};
 
 		$name = preg_replace('/[\-\s]/', '_', $name);
@@ -142,10 +141,8 @@ class DotEnvSettings extends SimpleObject {
 		if (empty($value)) {
 			return null;
 		}
-		if (
-			($value[0] == '"' && $value[$last] == '"') ||
-			($value[0] == "'" && $value[$last] == "'")
-		) {
+		if (($value[0] == '"' && $value[$last] == '"') ||
+			($value[0] == "'" && $value[$last] == "'")) {
 			// NOTE If the value is already wrapped, no auto-wrapping should happen!
 			$q = null;
 		}

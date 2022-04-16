@@ -86,6 +86,7 @@ abstract class BasicInitConfig extends SimpleObject {
 		return $this->_l10n;
 	}
 
+	/** @noinspection PhpUndefinedMethodInspection */
 	#[Property('l10n')]
 	protected function setL10n(null|string|L10n $val): void {
 		if (empty($val)) {
@@ -120,7 +121,7 @@ abstract class BasicInitConfig extends SimpleObject {
 	/**
 	 * @codeCoverageIgnore
 	 * @return \spaf\simputils\models\Box|array
-	 * @throws \spaf\simputils\exceptions\RedefUnimplemented
+	 * @throws \spaf\simputils\exceptions\RedefUnimplemented Redefinable component is not defined
 	 */
 	#[Property('successful_init_blocks')]
 	protected function getSuccessfulInitBlocks(): Box|array {
@@ -129,7 +130,7 @@ abstract class BasicInitConfig extends SimpleObject {
 	}
 
 	/**
-	 * @param string $val
+	 * @param string $val Name of the extension that should be used by default
 	 *
 	 * @codeCoverageIgnore
 	 * @return void
@@ -151,7 +152,7 @@ abstract class BasicInitConfig extends SimpleObject {
 	}
 
 	/**
-	 * @param bool $val
+	 * @param bool $val If set to true, then long format is used for DataUnit otherwise short
 	 *
 	 * @codeCoverageIgnore
 	 * @return void
@@ -237,7 +238,7 @@ abstract class BasicInitConfig extends SimpleObject {
 	 * @param array $data Arguments for the object
 	 *
 	 * @return $this
-	 * @throws \spaf\simputils\exceptions\InitConfigAlreadyInitialized
+	 * @throws \spaf\simputils\exceptions\InitConfigAlreadyInitialized Already initialized
 	 */
 	public function ___setup(array $data): static {
 		if (!$this->_is_already_setup) {

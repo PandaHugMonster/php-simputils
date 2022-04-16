@@ -5,7 +5,9 @@
     "simple", "utils", "micro", "framework", "quick prototyping",
     "properties", "phpinfo", "php", "easy cast", "meta-magic", "files",
     "dotenv", "csv", "json", "namespaced", "routines", "data unit conversion",
-    "box", "wrappers", "library"
+    "box", "wrappers", "library", "validation", "normalization", "debug", "quick",
+    "fields", "attributes", "datetime", "date", "time", "timezone", "tz", "serialization",
+    "deserialization", "set", "math set", "optimization", "light", "version"
   ],
   "minimum-stability": "stable",
   "license": "MIT",
@@ -22,10 +24,12 @@
     "ext-mbstring": "*"
   },
   "require-dev": {
+    "squizlabs/php_codesniffer": "^3",
     "phpunit/phpunit": "^9"
   },
   "suggest": {
-    "ext-gmp": "GMP Extension (BigNumbers calculation functionality)"
+    "ext-gmp": "GMP Extension (BigNumbers calculation functionality, without fractions support but much quicker)",
+    "ext-bcmath": "BCMATH Extension (BigNumbers calculation functionality with fractions support, but slower)"
   },
   "autoload": {
     "psr-4": {
@@ -42,6 +46,9 @@
     ],
     "tests-html": [
       "XDEBUG_MODE=coverage phpunit tests --coverage-html html-coverage/"
+    ],
+    "code-sniff": [
+      "phpcs src/"
     ]
   }
 }

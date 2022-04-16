@@ -184,7 +184,7 @@ class File extends BasicResource {
 	/**
 	 * @codeCoverageIgnore
 	 * @return void
-	 * @throws \spaf\simputils\exceptions\NotImplementedYet
+	 * @throws \spaf\simputils\exceptions\NotImplementedYet Not yet implemented
 	 */
 	public function recoverFromBackup() {
 		if ($this->is_backup_preserved) {
@@ -261,7 +261,7 @@ class File extends BasicResource {
 					$this->_fd = null;
 				}
 			} else if (rename($this->name_full, $file_path)) {
-//				[$this->_path, $this->_name, $this->_ext] = $split_data;
+				// NOTE Renamed
 			}
 		}
 
@@ -320,7 +320,8 @@ class File extends BasicResource {
 	/**
 	 * @codeCoverageIgnore
 	 * @return void
-	 * @throws \spaf\simputils\exceptions\NotImplementedYet
+	 * @throws \spaf\simputils\exceptions\IOProblem         Input/Output problem
+	 * @throws \spaf\simputils\exceptions\NotImplementedYet Not yet implemented
 	 */
 	protected function preserveFile() {
 		if (empty($this->_backup_file)) {

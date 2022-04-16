@@ -11,8 +11,6 @@ use function str_ends_with;
 use function str_starts_with;
 use function substr;
 
-//use spaf\simputils\models\StrObj;
-
 /**
  *
  * Due to some significantly outdated limitations of PHP, it's too overcomplicated to have a native
@@ -92,19 +90,6 @@ class Str {
 		return mb_strlen($var);
 	}
 
-//	/**
-//	 * Quick uuid solution
-//	 *
-//	 * @return string
-//	 * @throws \spaf\simputils\exceptions\NotImplementedYet
-//	 * @see Uuid
-//	 *
-//	 * @codeCoverageIgnore
-//	 */
-//	public static function uuid(): string {
-//		throw new NotImplementedYet();
-//	}
-
 	/**
 	 * Check if a string is JSON parsable
 	 *
@@ -122,7 +107,7 @@ class Str {
 	/**
 	 * Change all the letters to upper-case letters
 	 *
-	 * @param ?string $string $string Target string
+	 * @param ?string $string Target string
 	 *
 	 * @return string
 	 */
@@ -239,15 +224,4 @@ class Str {
 
 		return $target;
 	}
-//
-//	/**
-//	 * @param string ...$strings
-//	 *
-//	 * @codeCoverageIgnore
-//	 * @return \spaf\simputils\models\StrObj|string
-//	 */
-//	public static function obj(string ...$strings): StrObj|string {
-//		$class_strobj = PHP::redef(StrObj::class);
-//		return new $class_strobj(...$strings);
-//	}
 }

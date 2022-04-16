@@ -100,7 +100,8 @@ class PhpInfo extends Box {
 	 */
 	public static function getOriginalPhpInfo(bool $use_fresh = false): string {
 		if ($use_fresh || empty(CommonMemoryCacheIndex::$original_phpinfo_string)) {
-			ob_start(); phpinfo(); CommonMemoryCacheIndex::$original_phpinfo_string = ob_get_clean();
+			ob_start(); phpinfo();
+			CommonMemoryCacheIndex::$original_phpinfo_string = ob_get_clean();
 		}
 
 		return CommonMemoryCacheIndex::$original_phpinfo_string;
@@ -138,7 +139,7 @@ class PhpInfo extends Box {
 	 * Acquiring values of PHP info and similar
 	 *
 	 * @return array|\spaf\simputils\models\Box
-	 * @throws \spaf\simputils\exceptions\RedefUnimplemented
+	 * @throws \spaf\simputils\exceptions\RedefUnimplemented Redefinable component is not defined
 	 */
 	protected static function compose(): array|Box {
 		$reg_exps = static::getPhpInfoRegExpArray();

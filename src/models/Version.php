@@ -207,7 +207,7 @@ class Version extends SimpleObject {
 	 * @return void
 	 */
 	#[Property('parser')]
-	public function setParser($val) {
+	public function setParser(mixed $val) {
 		$this->_parser = $val;
 	}
 

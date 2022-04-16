@@ -347,7 +347,7 @@ class FS {
 	}
 
 	/**
-	 * @param null|string|Dir $dir
+	 * @param null|string|Dir $dir Directory
 	 *
 	 * TODO Improve supported params (Directory, Files that are directories, etc. Regexp strings)
 	 * @return Dir|null
@@ -361,9 +361,10 @@ class FS {
 	}
 
 	/**
-	 * @param string|null ...$parts
+	 * @param string|null ...$parts Parts that should be joined depending on the platform
 	 *
 	 * TODO Implement root part somehow
+	 * TODO Windows is not tested, and might cause errors for now
 	 * @return string|null
 	 */
 	public static function path(?string ...$parts): ?string {
@@ -378,11 +379,11 @@ class FS {
 	 * Returns file obj or path to the file relative to work-dir
 	 *
 	 *
-	 * @param string|null ...$parts
+	 * @param string|null ...$parts Parts that should be joined depending on the platform
 	 *
 	 * TODO implement different plugins/modules/extensions support
 	 *
-	 * @return string|\spaf\simputils\models\File|\spaf\simputils\models\Dir|null
+	 * @return File|Dir
 	 */
 	public static function locate(?string ...$parts): File|Dir {
 		$work_dir = PHP::getInitConfig()->working_dir;

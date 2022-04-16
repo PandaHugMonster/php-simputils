@@ -20,7 +20,7 @@ use function is_string;
  * @see DateTime
  * @see \spaf\simputils\models\Date
  * @see \spaf\simputils\models\Time
- * @see DateInterval
+ * @see \spaf\simputils\models\DateInterval
  * @see \spaf\simputils\models\DatePeriod
  *
  */
@@ -41,7 +41,7 @@ class DT {
 	 *                  instead of "now". This should not be used ever, but can help
 	 *                  in some cases of testing/mocking and experimenting.
 	 *
-	 * @param DateTimeZone|string|null $tz
+	 * @param DateTimeZone|bool|string|null $tz Time zone
 	 *
 	 * @return DateTime|null
 	 */
@@ -82,16 +82,22 @@ class DT {
 	 * but you have to make sure you understand all the risks, and strongly recommended to avoid
 	 * using this param, when possible
 	 *
-	 * @param DateTime|string|int $dt   You datetime data you want to normalize
-	 * @param \DateTimeZone|null $tz    Your TimeZone if applicable
-	 * @param string|null $fmt          Allows to enforce datetime format, though it's usually not needed.
-	 *                                  This parameter plays role only in case of the input datetime
-	 *                                  in string type.
-	 * @param bool $is_clone_allowed    If false and DateTime object supplied, the same object is
-	 *                                  returned, instead of the cloned one (instead of a new object).
-	 *                                  Default is true.
+	 * @param DateTime|string|int           $dt               You datetime data you want
+	 *                                                        to normalize
+	 * @param bool|DateTimeZone|string|null $tz               Your TimeZone if applicable
+	 * @param string|null                   $fmt              Allows to enforce datetime format,
+	 *                                                        though it's usually not needed.
+	 *                                                        This parameter plays role only
+	 *                                                        in case of the input datetime in
+	 *                                                        string type.
+	 * @param bool                          $is_clone_allowed If false and DateTime object supplied,
+	 *                                                        the same object is returned, instead
+	 *                                                        of the cloned one (instead of
+	 *                                                        a new object). Default is true.
 	 *
 	 * @return DateTime|null
+	 * @throws \spaf\simputils\exceptions\RedefUnimplemented Redefinable component is not defined
+	 * @noinspection PhpUndefinedMethodInspection
 	 */
 	public static function normalize(
 		DateTime|string|int $dt,
@@ -142,17 +148,19 @@ class DT {
 	/**
 	 * Stringify date with normalization
 	 *
-	 * @param DateTime|string|int $dt
-	 * @param string|null $fmt
-	 * @param \DateTimeZone|null $tz
-	 * @param string|null $parsing_fmt
+	 * @param DateTime|string|int      $dt          Date/Time reference (in any format string,
+	 *                                              int, obj)
+	 * @param string|null              $fmt         String output-format
+	 * @param DateTimeZone|string|null $tz          Time zone reference
+	 * @param string|null              $parsing_fmt Parsing string input-format hint
 	 *
 	 * @return string|null
+	 * @throws \spaf\simputils\exceptions\RedefUnimplemented Redefinable component is not defined
 	 */
 	public static function stringify(
 		DateTime|string|int $dt,
 		string $fmt = null,
-		DateTimeZone|null $tz = null,
+		DateTimeZone|string|null $tz = null,
 		string $parsing_fmt = null,
 	): ?string {
 
@@ -182,9 +190,9 @@ class DT {
 	 * Will print out all the hours between 2022-01-01 and 2022-02-01 with a step
 	 * of 3 hours (180 mins)
 	 *
-	 * @param \spaf\simputils\models\DateTime|string|int $start
-	 * @param \spaf\simputils\models\DateTime|string|int $end
-	 * @param string|\spaf\simputils\models\DateInterval $step
+	 * @param DateTime|string|int $start Start
+	 * @param DateTime|string|int $end   End
+	 * @param string|DateInterval $step  Step
 	 *
 	 * @return \spaf\simputils\models\DatePeriod
 	 */

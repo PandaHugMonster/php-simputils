@@ -66,23 +66,22 @@ class PropertyBatch extends Property {
 	}
 
 	/**
-	 * @param $obj
-	 * @param $item
-	 * @param $attr
-	 * @param $name
-	 * @param $value
-	 * @param $call_type
+	 * @param mixed $obj       Will be specified later // TODO   Fix param
+	 * @param mixed $item      Will be specified later // TODO   Fix param
+	 * @param mixed $attr      Will be specified later // TODO   Fix param
+	 * @param mixed $name      Will be specified later // TODO   Fix param
+	 * @param mixed $call_type Will be specified later // TODO   Fix param
 	 *
 	 * TODO Subject to a better optimization later
 	 *
-	 * @return array|string[]
+	 * @return array
 	 */
 	public static function subProcess(
-		$obj,
-		$item,
-		$attr,
-		$name,
-		$call_type
+		mixed $obj,
+		mixed $item,
+		mixed $attr,
+		mixed $name,
+		mixed $call_type
 	): array {
 		$ref_name = $obj::class.'#'.$name;
 		$ref_name_type = $ref_name.'#'.static::TYPE_GET;

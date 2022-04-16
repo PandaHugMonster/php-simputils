@@ -18,11 +18,14 @@ use spaf\simputils\attributes\PropertyBatch;
 use spaf\simputils\exceptions\PropertyDoesNotExist;
 use spaf\simputils\exceptions\PropertyIsReadOnly;
 use spaf\simputils\exceptions\PropertyIsWriteOnly;
+use spaf\simputils\generic\BasicOutputControlAttribute;
+use spaf\simputils\models\Box;
 use spaf\simputils\PHP;
 use spaf\simputils\special\CommonMemoryCacheIndex;
 use spaf\simputils\special\PropertiesCacheIndex;
 use function get_parent_class;
 use function in_array;
+use function is_null;
 
 /**
  *
@@ -55,7 +58,7 @@ trait PropertiesTrait {
 	// TODO Public modifier is a temporary solution, due to external modification of the field
 	#[DebugHide]
 	#[Extract(false)]
-	public $_simpUtilsProperty_batch_storage = [];
+	public $_simp_utils_property_batch_storage = [];
 
 	/**
 	 * @param string $name
@@ -311,89 +314,92 @@ trait PropertiesTrait {
 		return null;
 	}
 
+	private function _simpUtilsClassLevelHideUp($extract_attr_on, $debug_hide_attr_on): ?Box {
+		$this_obj_reflection = new ReflectionObject($this);
+		foreach ($this_obj_reflection->getAttributes() as $attr) {
+			$attr_instance = $attr->newInstance();
+			$is_applicable = $attr_instance instanceof BasicOutputControlAttribute
+				&& $attr_instance->isApplicable($extract_attr_on, $debug_hide_attr_on);
+
+			if ($is_applicable) {
+				/** @var \spaf\simputils\generic\BasicOutputControlAttribute $attr_instance */
+				$res = $attr_instance->appliedOnClass($this);
+				if (!is_null($res)) {
+					return $res;
+				}
+			}
+		}
+
+		return null;
+	}
+
 	/**
 	 * @param bool $extract_attr_on
 	 * @param bool $debug_hide_attr_on
 	 *
-	 * FIX  Finalize $extract_attr_on arg
-	 *
-	 * @codeCoverageIgnore
 	 * @return array|string[]
 	 */
 	protected function ___extractFields(
 		bool $extract_attr_on = true,
 		bool $debug_hide_attr_on = false
 	) {
-		$res = [];
-
-		// NOTE If the whole class is marked
-		$self_class = new ReflectionObject($this);
-		if (
-			$debug_hide_attr_on &&
-			($attr = ($self_class->getAttributes(DebugHide::class)[0] ?? null)) ?? false
-		) {
-			/** @var \ReflectionAttribute $attr */
-			/** @var DebugHide $dh */
-			$dh = $attr->newInstance();
-			if ($dh->hide_all) {
-				return [];
-			}
-
-			return [$dh->show_instead ?? '****'];
+		$hide_up = $this->_simpUtilsClassLevelHideUp($extract_attr_on, $debug_hide_attr_on);
+		if (!is_null($hide_up)) {
+			return (array) $hide_up;
 		}
-//		if (
-//			$extract_attr_on &&
-//			($attr = ($self_class->getAttributes(Extract::class)[0] ?? null)) ?? false
-//		) {
-//			/** @var \ReflectionAttribute $attr */
-//			/** @var Extract $ex */
-//			$ex = $attr->newInstance();
-//			if (!$ex->enabled) {
-//				return [];
-//			}
-//		}
 
-		$it_items = $this->getAllTheLastMethodsAndProperties();
 		$batch_array_of_prop_types = [PropertyBatch::TYPE_GET, PropertyBatch::TYPE_BOTH];
 		$property_array_of_prop_types = [Property::TYPE_GET, Property::TYPE_BOTH];
 
-		foreach ($it_items as $item) {
-			$prefix = null;
-			$name = $item->getName();
-			$ta = null; // target attribute
-			$value = null;
-			$is_show_instead_set = false;
+		$res = PHP::box();
 
+		foreach ($this->getAllTheLastMethodsAndProperties() as $item) {
 			/** @var ReflectionMethod|ReflectionProperty $item */
+			$name = $item->getName();
+
+			$prefix = null;
+			$ta = null; // target attribute
+
 			if ($item->isStatic()) {
 				// TODO Implement options in InitConfig
 				$prefix = 'static::';
 				continue;
 			}
 
-			foreach ($item->getAttributes() as $attr) {
-				$dh = null;
-				if ($debug_hide_attr_on && $attr->getName() === DebugHide::class) {
-					if ($dh = $attr->newInstance()) {
-						/** @var DebugHide $dh */
-						// NOTE Don't optimize or reformat this code block.
-						//      It should not be invoked if the "DebugHide" is being used.
-						if ($dh->hide_all) {
-							// Skipping the whole field output
-							continue 2;
-						} else {
-							$value = $dh->show_instead ?? '****';
-							$is_show_instead_set = true;
-						}
+			$item_attributes = $item->getAttributes();
+
+			if (empty($item_attributes) && $item instanceof ReflectionMethod) {
+				// NOTE Methods without attributes are absolutely irrelevant at here,
+				//      so skipping
+				continue;
+			}
+
+			$it_set_by_attr = false;
+			$it_attr_value = null;
+
+			foreach ($item_attributes as $attr) {
+				if (in_array($attr->getName(), [Property::class, PropertyBatch::class])) {
+					if (empty($ta)) {
+						$ta = $attr;
 					}
-				} else if (
-					$extract_attr_on && $attr->getName() === Extract::class &&
-					!$attr->newInstance()->enabled
-				) {
-					// Skipping the whole field output
-					continue 2;
-				}  else if (empty($ta)) {
-					$ta = $attr;
+					continue;
+				}
+				$attr_instance = $attr->newInstance();
+				$is_applicable = $attr_instance instanceof BasicOutputControlAttribute
+					&& $attr_instance->isApplicable($extract_attr_on, $debug_hide_attr_on);
+
+				if ($is_applicable) {
+					/** @var BasicOutputControlAttribute $attr_instance */
+					$sub_res = $attr_instance->appliedOnProperty();
+					if ($sub_res === false) {
+						// NOTE Any of the attribute decided to hide up the field
+						continue 2;
+					} else if ($sub_res === true) {
+						// NOTE Skipping those that do not affect the result
+					} else {
+						$it_attr_value = $sub_res;
+						$it_set_by_attr = true;
+					}
 				}
 			}
 
@@ -408,16 +414,31 @@ trait PropertiesTrait {
 
 					if (in_array($access_type, $batch_array_of_prop_types)) {
 						foreach ($expected_names as $expected_name) {
-							$res["{$expected_name}"] = $is_show_instead_set
-								?$value
-								:$this->{$expected_name};
+							$res["{$expected_name}"] = $it_set_by_attr
+								?$it_attr_value
+								:$this->$expected_name;
 						}
+					}
+				} else if (!empty($ta) && $ta->getName() === Property::class) {
+
+					$expected_name = Property::expectedName(
+						$item->getName(),
+						$ta,
+						$ta->getArguments(),
+						$item
+					);
+					$method_type = Property::methodAccessType($item, $ta);
+
+					if (in_array($method_type, $property_array_of_prop_types)) {
+						$res["{$expected_name}"] = $it_set_by_attr
+							?$it_attr_value
+							:$this->$expected_name;
 					}
 				} else {
 					// NOTE Real PHP native property
 					$item->setAccessible(true);
-					$res["{$prefix}{$name}"] = $is_show_instead_set
-						?$value
+					$res["{$prefix}{$name}"] = $it_set_by_attr
+						?$it_attr_value
 						:$item->getValue($this);
 					$item->setAccessible(false);
 				}
@@ -425,13 +446,12 @@ trait PropertiesTrait {
 				// NOTE Property/PropertyBatch from method
 
 				if (!empty($ta) && $ta->getName() === Property::class) {
-					$expected_name = Property::expectedName($item, $attr);
-					$method_type = Property::methodAccessType($item, $attr);
+					$expected_name = Property::expectedName($item, $ta);
+					$method_type = Property::methodAccessType($item, $ta);
 
 					if (in_array($method_type, $property_array_of_prop_types)) {
-//						echo "({$expected_name} / {$value})";
-						$res["{$expected_name}"] = $is_show_instead_set
-							?$value
+						$res["{$expected_name}"] = $it_set_by_attr
+							?$it_attr_value
 							:$this->$expected_name;
 					}
 				} else if (!empty($ta) && $ta->getName() === PropertyBatch::class) {
@@ -443,15 +463,16 @@ trait PropertiesTrait {
 					if (in_array($access_type, $batch_array_of_prop_types)) {
 
 						foreach ($expected_names as $expected_name) {
-							$res["{$expected_name}"] = $is_show_instead_set
-								?$value
-								:$this->{$expected_name};
+							$res["{$expected_name}"] = $it_set_by_attr
+								?$it_attr_value
+								:$this->$expected_name;
 						}
 					}
 				}
 			}
 		}
-		return $res;
+		$res->sort(by_values: false);
+		return (array) $res;
 	}
 
 	/**
@@ -479,9 +500,7 @@ trait PropertiesTrait {
 	}
 
 	/**
-	 *
-	 * @return array|null
-	 * @codeCoverageIgnore
+	 * @return array
 	 */
 	public function __debugInfo(): array {
 		return $this->___extractFields(false, true);

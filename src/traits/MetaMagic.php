@@ -247,7 +247,7 @@ trait MetaMagic {
 			throw new InfiniteLoopPreventionExceptions('toArray() method noticed');
 		}
 
-		$exclude_fields[] = '_simpUtilsProperty_batch_storage';
+		$exclude_fields[] = '_simp_utils_property_batch_storage';
 
 		if (method_exists($this, '___extractFields')) {
 			$sub = $this->___extractFields(true, false);

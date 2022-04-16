@@ -39,7 +39,7 @@ class PropertyBatch extends Property {
 
 		$args = $args ?? $attr->getArguments();
 
-		$value_store_ref = $args[2] ?? $args['storage'] ?? '_simpUtilsProperty_batch_storage';
+		$value_store_ref = $args[2] ?? $args['storage'] ?? '_simp_utils_property_batch_storage';
 		if (!empty($default_values)) {
 			if ($value_store_ref === PropertyBatch::STORAGE_SELF) {
 				$value_store = &$obj;

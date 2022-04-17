@@ -494,6 +494,7 @@ trait MetaMagic {
 	 * Serialization meta-magic method
 	 *
 	 * @return Box|array
+	 * @throws \spaf\simputils\exceptions\InfiniteLoopPreventionExceptions ILP Exception
 	 */
 	protected function ___serialize(): Box|array {
 		return $this->toArray(
@@ -560,8 +561,6 @@ trait MetaMagic {
 	 *
 	 * @see https://www.php.net/manual/en/language.oop5.visibility.php#language.oop5.visibility-other-objects
 	 *      Visibility of the "relatives"
-	 *
-	 * FIX  Final touches in matter of meta-magic + Solidly define the idea of the meta-magic
 	 *
 	 * @return mixed
 	 */

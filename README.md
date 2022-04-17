@@ -40,13 +40,17 @@ I will be really happy hearing from you.
 
 ----
 
-**Important note about documentation**: Due to urgent need of the stable release, 
+## Documentation
+
+**Important note about the documentation**: Due to urgent need of the stable release, 
 I had to strip out all the documentation (it was really outdated because of my architecture 
 revisions). So please, wait just a bit, __with patches after the stable release I will provide
-lots of documentation__. The very first stable release must be polished in matter of architecture,
+more documentation__. The very first stable release must be polished in matter of architecture,
 so documentation will come after that in the very nearest time. My apologies.
 
-Small portion of documentation is glossary: [docs/glossary.md](docs/glossary.md)
+### Some:
+ 1. [Glossary](docs/glossary.md)
+ 2. [Structure](docs/structure.md)
 
 ----
 

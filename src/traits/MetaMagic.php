@@ -487,7 +487,6 @@ trait MetaMagic {
 				$obj = PHP::createDummy($val[PHP::$serialized_class_key_name]);
 				unset($val[PHP::$serialized_class_key_name]);
 				$val = PHP::metaMagicSpell($obj, 'setup', $val);
-//				$val = $obj->___setup($val);
 			}
 			$this->$key = $val;
 		}

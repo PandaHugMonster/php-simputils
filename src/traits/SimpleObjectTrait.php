@@ -23,6 +23,7 @@ use function spl_object_id;
  */
 trait SimpleObjectTrait {
 	use PropertiesTrait;
+	use MetaMagic;
 
 	/**
 	 * @return int

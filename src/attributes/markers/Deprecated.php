@@ -6,21 +6,21 @@ use Attribute;
 use spaf\simputils\generic\BasicAttribute;
 
 /**
+ * Deprecated marker
+ *
+ * Almost exactly the same as the one provided by JetBrains
+ *
  * @codeCoverageIgnore
  */
 #[Attribute]
 class Deprecated extends BasicAttribute {
 
-	protected ?string $reason = null;
-	protected ?string $replacement = null;
-	public ?string $target_representation = null;
-
 	/**
 	 * @param string|null $reason      Reason
 	 * @param string|null $replacement Suggested replacement
 	 */
-	public function __construct(?string $reason = null, ?string $replacement = null) {
-		$this->reason = $reason;
-		$this->replacement = $replacement;
-	}
+	public function __construct(
+		public ?string $reason = null,
+		public ?string $replacement = null
+	) {}
 }

@@ -3,6 +3,9 @@
 namespace spaf\simputils\attributes;
 
 use Attribute;
+use spaf\simputils\generic\BasicOutputControlAttribute;
+use spaf\simputils\models\Box;
+use spaf\simputils\PHP;
 
 /**
  * Hide/Hide value of fields/properties for "DebugOutput"s like `pr`, `pd` or `print_r`
@@ -28,16 +31,39 @@ use Attribute;
  * NOTE This attribute could be used to hide `password` or `secrete` values for output
  *      or even logging!
  *
- * TODO I don't know how to fix it, but for now you can't hide "PropertyBatch" target
- *      fields-values.
- *
  * @codeCoverageIgnore
  */
 #[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_CLASS | Attribute::TARGET_PROPERTY)]
-class DebugHide {
+class DebugHide extends BasicOutputControlAttribute {
 
 	public function __construct(
 		public bool $hide_all = true,
 		public ?string $show_instead = '****',
-	) {}
+	) { }
+
+	/**
+	 * @inheritDoc
+	 */
+	function appliedOnClass(): ?Box {
+		if ($this->hide_all) {
+			return PHP::box();
+		}
+		return PHP::box([$this->show_instead ?? '****']);
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	function appliedOnProperty(): null|string|false {
+		return $this->hide_all
+			?false
+			:$this->show_instead;
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	function isApplicable(bool $extract_attr_on, bool $debug_hide_attr_on): bool {
+		return $debug_hide_attr_on;
+	}
 }

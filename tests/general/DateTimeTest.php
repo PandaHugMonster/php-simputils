@@ -23,7 +23,6 @@ use function spaf\simputils\basic\ts;
  * @covers \spaf\simputils\models\DatePeriod
  * @covers \spaf\simputils\models\DatePeriod
  *
- * @uses \spaf\simputils\interfaces\helpers\DateTimeHelperInterface
  * @uses \spaf\simputils\PHP
  * @uses \spaf\simputils\special\CodeBlocksCacheIndex
  * @uses \spaf\simputils\attributes\Property

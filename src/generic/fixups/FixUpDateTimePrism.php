@@ -10,6 +10,9 @@ use spaf\simputils\models\DateTimeZone;
 use spaf\simputils\PHP;
 use spaf\simputils\traits\ForOutputsTrait;
 
+/**
+ * @codeCoverageIgnore
+ */
 abstract class FixUpDateTimePrism extends BasicPrism {
 	use ForOutputsTrait;
 

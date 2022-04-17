@@ -124,8 +124,8 @@ class FSTest extends TestCase {
 	function testOther() {
 		$path = FS::path('path1', 'path2', 'path3');
 		$this->assertIsString($path);
-		// TODO Windows should be supported too?
-		$this->assertEquals('path1/path2/path3', $path);
+		$ds = DIRECTORY_SEPARATOR;
+		$this->assertEquals("path1{$ds}path2{$ds}path3", $path);
 
 
 		$orig_dir = new Dir('/tmp');

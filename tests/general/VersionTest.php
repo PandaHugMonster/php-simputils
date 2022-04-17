@@ -41,6 +41,7 @@ class CustomParserSample extends DefaultVersionParser {
  * @uses \spaf\simputils\Str::from
  * @uses \spaf\simputils\attributes\Property
  * @uses \spaf\simputils\Str
+ * @uses \spaf\simputils\Boolean
  */
 class VersionTest extends TestCase {
 

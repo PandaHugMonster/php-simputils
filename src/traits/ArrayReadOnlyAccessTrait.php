@@ -43,7 +43,7 @@ trait ArrayReadOnlyAccessTrait {
 	 * Sets the read-only flag
 	 *
 	 * TODO Has to be refactored/or reorganized at some point
-	 * FIX  Temporarily set as public instead of protected. Fix it at some point!
+	 * TODO Temporarily set as public instead of protected. Fix it at some point!
 	 * @param bool $val Enable or Disable, default is to enable
 	 *
 	 * @return void
@@ -55,7 +55,7 @@ trait ArrayReadOnlyAccessTrait {
 	/**
 	 * Checks read-only flag
 	 *
-	 * FIX  Temporarily set as public instead of protected. Fix it at some point!
+	 * TODO Temporarily set as public instead of protected. Fix it at some point!
 	 * TODO Has to be refactored/or reorganized at some point
 	 * @return bool
 	 */

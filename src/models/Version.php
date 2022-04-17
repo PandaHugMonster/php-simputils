@@ -69,7 +69,7 @@ use function json_encode;
  *
  * TODO Replace with interface
  * TODO In future versions implement "format" method like for dates
- * FIX  Implement option to display with software name (but compatibly with parsing)
+ * TODO Implement option to display with software name (but compatibly with parsing)
  * @property \spaf\simputils\generic\BasicVersionParser $parser
  *
  * @see https://www.php.net/manual/en/function.version-compare.php
@@ -207,7 +207,7 @@ class Version extends SimpleObject {
 	 * @return void
 	 */
 	#[Property('parser')]
-	public function setParser($val) {
+	public function setParser(mixed $val) {
 		$this->_parser = $val;
 	}
 
@@ -243,7 +243,7 @@ class Version extends SimpleObject {
 	 * @return string
 	 */
 	public function __toString(): string {
-		// IMP FIX  There is a problem here if "parser" property is used
+		// TODO There is a problem here if "parser" property is used
 		return $this->getParser()
 			?$this->getParser()->toString($this)
 			:'';

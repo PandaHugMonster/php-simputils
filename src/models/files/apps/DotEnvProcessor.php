@@ -33,13 +33,12 @@ class DotEnvProcessor extends TextProcessor {
 	}
 
 	/**
-	 * @param mixed $fd
-	 * @param ?BasicResource $file
-	 *
+	 * @param mixed          $fd   File descriptor
+	 * @param ?BasicResource $file Resource/File object
 	 *
 	 * TODO Yes, lots of `trim()`s, yes it's sub-optimal probably! Subject for improvement.
 	 *
-	 * @return mixed
+	 * @return array|null
 	 */
 	public function getContent(mixed $fd, ?BasicResource $file = null): ?array {
 		$s = static::getSettings($file);
@@ -56,7 +55,7 @@ class DotEnvProcessor extends TextProcessor {
 				// TODO Comment-extension processing must happen here!
 
 				if ($s->show_comments) {
-					// FIX  Temporary!
+					// TODO Temporary!
 					$res[] = "$line";
 				}
 				continue;
@@ -88,8 +87,8 @@ class DotEnvProcessor extends TextProcessor {
 			}
 
 			$res[$s->normalizeName($key)] = $val;
-			// FIX  Implement clearing of "export ..." stuff if present
-			// FIX  Implement DotEnv functionality for $_ENV etc...
+			// TODO Implement clearing of "export ..." stuff if present
+			// TODO Implement DotEnv functionality for $_ENV etc...
 		}
 		return $res;
 	}
@@ -104,8 +103,10 @@ class DotEnvProcessor extends TextProcessor {
 	 * @param mixed          $data Data to store
 	 * @param ?BasicResource $file File instance
 	 *
+	 * @throws \spaf\simputils\exceptions\DotEnvCommentExtensionProblem Dot Env comment extension
+	 *                                                                  problem
 	 */
-	public function setContent(mixed $fd, $data, ?BasicResource $file = null): void {
+	public function setContent(mixed $fd, mixed $data, ?BasicResource $file = null): void {
 		$lines = [];
 		/** @var DotEnvSettings $s */
 		$s = static::getSettings($file);

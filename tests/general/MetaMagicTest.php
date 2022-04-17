@@ -1,6 +1,7 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
+use spaf\simputils\models\Box;
 use spaf\simputils\PHP;
 use spaf\simputils\traits\MetaMagic;
 
@@ -18,9 +19,13 @@ class MyObject {
 
 /**
  * @covers \spaf\simputils\traits\MetaMagic
+ *
  * @uses \spaf\simputils\PHP
  * @uses \spaf\simputils\special\CodeBlocksCacheIndex
  * @uses \spaf\simputils\Str
+ * @uses \spaf\simputils\models\Box
+ * @uses \spaf\simputils\components\normalizers\BooleanNormalizer
+ *
  */
 class MetaMagicTest extends TestCase {
 
@@ -81,5 +86,33 @@ class MetaMagicTest extends TestCase {
 		$this->assertEquals($obj->field_1, $new_obj->field_1, 'Is deserialization field is not empty (php standard)');
 
 		PHP::$serialization_mechanism = PHP::SERIALIZATION_TYPE_JSON;
+	}
+
+	function testOther() {
+		$obj1 = new MyObject('test 100500');
+		$obj2 = PHP::box(['one', 'two', 'three']);
+
+		$tb = $obj1->toBox(true);
+		$this->assertInstanceOf(Box::class, $tb);
+
+		$tb = $obj2->toBox(true, true);
+		$this->assertInstanceOf(Box::class, $tb);
+
+//		$nobj = new MyObject;
+//		MyObject::_metaMagic($nobj, '___setup', $obj1->toArray(with_class: true));
+//
+//		$json = $tb->toJson(with_class: true);
+//		$this->assertIsString($json);
+//		$this->assertEquals(
+//			'{"0":"one","1":"two","2":"three","#class":"spaf\\\\simputils\\\\models\\\\Box"}',
+//			$json
+//		);
+//
+//		$res = $tb->toArray(with_class: false);
+//
+//		$new_box_from_json = PHP::box();
+//		Box::_metaMagic($new_box_from_json, '___setup', $res);
+//		$this->assertInstanceOf(Box::class, $new_box_from_json);
+//		$this->assertEquals(PHP::box(['one', 'two', 'three']), $new_box_from_json);
 	}
 }

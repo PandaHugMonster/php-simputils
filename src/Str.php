@@ -3,7 +3,6 @@
 namespace spaf\simputils;
 
 use spaf\simputils\attributes\markers\Shortcut;
-use spaf\simputils\models\StrObj;
 use function is_integer;
 use function is_null;
 use function is_string;
@@ -17,7 +16,7 @@ use function substr;
  * Due to some significantly outdated limitations of PHP, it's too overcomplicated to have a native
  * String class. So this class will remain static as `Math` and `PHP`
  *
- * FIX  Implement StrObj wrapper for the string, so the operations could be done in chain
+ * TODO Implement StrObj wrapper for the string, so the operations could be done in chain
  */
 class Str {
 
@@ -72,10 +71,11 @@ class Str {
 	 * TODO Add optional translations
 	 * @return string|null
 	 * @see \spaf\simputils\Boolean::from()
+	 * @see \spaf\simputils\Boolean::to()
 	 */
 	public static function from(mixed $value): ?string {
 		if ($value === true || $value === false) {
-			return $value ?'true':'false';
+			return Boolean::to($value);
 		}
 
 		return "$value";
@@ -89,18 +89,6 @@ class Str {
 	#[Shortcut('\strlen()')]
 	public static function len(string $var) {
 		return mb_strlen($var);
-	}
-
-	/**
-	 * Quick uuid solution
-	 *
-	 * @see Uuid
-	 *
-	 * @codeCoverageIgnore
-	 * @return string
-	 */
-	public static function uuid(): string {
-		throw new NotImplementedYet();
 	}
 
 	/**
@@ -120,7 +108,7 @@ class Str {
 	/**
 	 * Change all the letters to upper-case letters
 	 *
-	 * @param ?string $string $string Target string
+	 * @param ?string $string Target string
 	 *
 	 * @return string
 	 */
@@ -192,7 +180,6 @@ class Str {
 	 * @param string|int $ending The second parameter that specifies exact string to remove or
 	 *                           amount of symbols to remove
 	 *
-	 * FIX  Implement urgently removeStarting in the same way
 	 * @return string
 	 */
 	public static function removeEnding(
@@ -237,16 +224,5 @@ class Str {
 		}
 
 		return $target;
-	}
-
-	/**
-	 * @param string ...$strings
-	 *
-	 * @codeCoverageIgnore
-	 * @return \spaf\simputils\models\StrObj|string
-	 */
-	public static function obj(string ...$strings): StrObj|string {
-		$class_strobj = PHP::redef(StrObj::class);
-		return new $class_strobj(...$strings);
 	}
 }

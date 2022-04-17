@@ -12,8 +12,8 @@ interface VersionParserInterface {
 	/**
 	 * The main parsing method
 	 *
-	 * @param \spaf\simputils\models\Version $version_object
-	 * @param string|null $string_version
+	 * @param Version $version_object Version object
+	 * @param ?string $string_version String representation of version that should be parsed
 	 *
 	 * @return array
 	 */
@@ -22,8 +22,8 @@ interface VersionParserInterface {
 	/**
 	 * Logic of ">"
 	 *
-	 * @param \spaf\simputils\models\Version|string $obj1
-	 * @param \spaf\simputils\models\Version|string $obj2
+	 * @param Version|string $obj1 Left Version object
+	 * @param Version|string $obj2 Right Version object
 	 *
 	 * @return bool
 	 */
@@ -31,8 +31,8 @@ interface VersionParserInterface {
 
 	/**
 	 * Logic of ">="
-	 * @param \spaf\simputils\models\Version|string $obj1
-	 * @param \spaf\simputils\models\Version|string $obj2
+	 * @param Version|string $obj1 Left Version object
+	 * @param Version|string $obj2 Right Version object
 	 *
 	 * @return bool
 	 */
@@ -41,8 +41,8 @@ interface VersionParserInterface {
 	/**
 	 * Logic of "=="
 	 *
-	 * @param \spaf\simputils\models\Version|string $obj1
-	 * @param \spaf\simputils\models\Version|string $obj2
+	 * @param Version|string $obj1 Left Version object
+	 * @param Version|string $obj2 Right Version object
 	 *
 	 * @return bool
 	 */
@@ -51,8 +51,8 @@ interface VersionParserInterface {
 	/**
 	 * Logic of "<"
 	 *
-	 * @param \spaf\simputils\models\Version|string $obj1
-	 * @param \spaf\simputils\models\Version|string $obj2
+	 * @param Version|string $obj1 Left Version object
+	 * @param Version|string $obj2 Right Version object
 	 *
 	 * @return bool
 	 */
@@ -60,8 +60,9 @@ interface VersionParserInterface {
 
 	/**
 	 * Logic of "<="
-	 * @param \spaf\simputils\models\Version|string $obj1
-	 * @param \spaf\simputils\models\Version|string $obj2
+	 *
+	 * @param Version|string $obj1 Left Version object
+	 * @param Version|string $obj2 Right Version object
 	 *
 	 * @return bool
 	 */
@@ -70,10 +71,9 @@ interface VersionParserInterface {
 	/**
 	 * Turn version object to string
 	 *
-	 * @param \spaf\simputils\models\Version|string $obj
+	 * @param Version|string $obj Version that should be turned into a string
 	 *
 	 * @return string
 	 */
 	public function toString(Version|string $obj): string;
-
 }

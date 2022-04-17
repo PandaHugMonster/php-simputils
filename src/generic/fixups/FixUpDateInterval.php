@@ -7,6 +7,9 @@ use spaf\simputils\traits\MetaMagic;
 use spaf\simputils\traits\PropertiesTrait;
 use spaf\simputils\traits\RedefinableComponentTrait;
 
+/**
+ * @codeCoverageIgnore
+ */
 class FixUpDateInterval extends \DateInterval {
 	use PropertiesTrait;
 	use RedefinableComponentTrait;

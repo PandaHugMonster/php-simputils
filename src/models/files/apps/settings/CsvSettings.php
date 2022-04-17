@@ -29,7 +29,7 @@ class CsvSettings extends SimpleObject {
 	 */
 	public bool $first_line_header = true;
 
-	// FIX  Maybe implement optional left vertical header as well?
+	// TODO Maybe implement optional left vertical header as well?
 
 	/**
 	 * @var bool $allow_raw_string_saving By default `false` what means it's not allowed
@@ -54,5 +54,5 @@ class CsvSettings extends SimpleObject {
 	public null|Closure|array $postprocessing_callback = null;
 
 
-	// FIX  Add "null" or "empty" setting, that will be used to fulfill and to be parsed as null
+	// TODO Add "null" or "empty" setting, that will be used to fulfill and to be parsed as null
 }

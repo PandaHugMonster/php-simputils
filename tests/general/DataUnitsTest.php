@@ -115,6 +115,8 @@ class DataUnitsTest extends TestCase {
 	/**
 	 * Test GMP conversion
 	 *
+	 * @uses \spaf\simputils\components\normalizers\BooleanNormalizer
+	 *
 	 * @param string $expected
 	 * @param string $val
 	 *

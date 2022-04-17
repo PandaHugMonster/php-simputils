@@ -43,6 +43,7 @@ abstract class BasicVersionParser extends SimpleObject implements VersionParserI
 	abstract public function parse(Version $version_object, ?string $string_version): array;
 
 	abstract public function greaterThan(Version|string $obj1, Version|string $obj2): bool;
+
 	abstract public function equalsTo(Version|string $obj1, Version|string $obj2): bool;
 
 	public function greaterThanEqual(Version|string $obj1, Version|string $obj2): bool {
@@ -67,7 +68,10 @@ abstract class BasicVersionParser extends SimpleObject implements VersionParserI
 			($this->lessThan($obj1, $obj2) || $this->equalsTo($obj1, $obj2));
 	}
 
-	public static function normalize(Version|string|null $item, ?string $app_name = null): ?Version {
+	public static function normalize(
+		Version|string|null $item,
+		?string $app_name = null
+	): ?Version {
 		$class = PHP::redef(Version::class);
 
 		if (is_null($item))

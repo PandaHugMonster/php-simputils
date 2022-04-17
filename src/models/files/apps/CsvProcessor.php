@@ -87,12 +87,12 @@ class CsvProcessor extends TextProcessor {
 	 * NOTE Due to some flexibility, current mechanisms might not be fully efficient (maybe will be
 	 *      fixed in the future!)
 	 *
-	 * @param mixed          $fd
-	 * @param mixed          $data
-	 * @param ?BasicResource $file
+	 * @param mixed          $fd   File descriptor
+	 * @param mixed          $data Data
+	 * @param ?BasicResource $file Resource/File object
 	 *
 	 */
-	public function setContent(mixed $fd, $data, ?BasicResource $file = null): void {
+	public function setContent(mixed $fd, mixed $data, ?BasicResource $file = null): void {
 		/** @var CsvSettings $s */
 
 		$s = static::getSettings($file);
@@ -155,10 +155,6 @@ class CsvProcessor extends TextProcessor {
 			foreach ($row as $key => $val) {
 				// NOTE Mix up check (In case of mix up, exception is raised here)
 				static::_checkMixUpOfKeys($key, $is_index_used, $is_assoc_used);
-
-//				if ($exc instanceof Inconsistent) {
-//					throw $exc;
-//				}
 
 				// NOTE Using in such way to simulate "sets" behaviour
 				if ($is_assoc_used) {

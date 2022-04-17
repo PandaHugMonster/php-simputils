@@ -3,10 +3,13 @@
 namespace spaf\simputils\special;
 
 use spaf\simputils\components\normalizers\BooleanNormalizer;
+use spaf\simputils\components\normalizers\DataUnitNormalizer;
 use spaf\simputils\components\normalizers\DateTimeNormalizer;
 use spaf\simputils\components\normalizers\FloatNormalizer;
 use spaf\simputils\components\normalizers\IntegerNormalizer;
+use spaf\simputils\components\normalizers\LowerCaseNormalizer;
 use spaf\simputils\components\normalizers\StringNormalizer;
+use spaf\simputils\components\normalizers\UpperCaseNormalizer;
 use spaf\simputils\models\Box;
 use spaf\simputils\models\PhpInfo;
 
@@ -26,12 +29,28 @@ class CommonMemoryCacheIndex {
 	// NOTE ILP - Infinite Loop Prevention
 	public static ?array $to_array_ilp_storage = null;
 
+	const PROPERTY_VALIDATOR_DISABLED = 0;
+	const PROPERTY_VALIDATOR_LIMITED = 1;
+	const PROPERTY_VALIDATOR_ENABLED = 2;
+
+	/**
+	 * Levels:
+	 *  0 - validators/normalizers/etc disabled
+	 *  1 - auto - disabled, but explicitly specified validators/normalizers/etc enabled
+	 *  2 - All the validators/normalizers/etc enabled (auto and explicit)
+	 * @var int
+	 */
 	public static int $property_validators_enabled = 2;
+
 	public static ?array $property_validators = [
 		'string' => StringNormalizer::class,
 		'bool' => BooleanNormalizer::class,
 		'int' => IntegerNormalizer::class,
 		'float' => FloatNormalizer::class,
 		'DateTime' => DateTimeNormalizer::class,
+		'DataUnit' => DataUnitNormalizer::class,
+
+		'lower' => LowerCaseNormalizer::class,
+		'upper' => UpperCaseNormalizer::class,
 	];
 }

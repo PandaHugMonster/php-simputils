@@ -13,8 +13,8 @@ use spaf\simputils\PHP;
  *      PARAM_1="1234"
  * ```
  *
- * FIX  Unfinished. Proceed with comment-extensions after the current pull-request is resolved.
- * FIX  Maybe define the full format for the extension params, will be better!
+ * TODO Unfinished. Proceed with comment-extensions after the current pull-request is resolved.
+ * TODO Maybe define the full format for the extension params, will be better!
  *
  * IMP  **Important:** For the security reasons type casting for non-standard primitives like custom
  *      classes and etc. can be performed only when it's registered.

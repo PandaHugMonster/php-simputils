@@ -273,7 +273,12 @@ class D extends SimpleObject {
  * @covers \spaf\simputils\attributes\PropertyBatch
  * @covers \spaf\simputils\attributes\Property
  * @covers \spaf\simputils\traits\PropertiesTrait
+ *
  * @uses \spaf\simputils\generic\SimpleObject
+ * @uses \spaf\simputils\traits\MetaMagic::_ilpRegisterObjIdUsage
+ * @uses \spaf\simputils\traits\MetaMagic::_metaMagic
+ * @uses \spaf\simputils\traits\MetaMagic::_toArray
+ * @uses \spaf\simputils\traits\MetaMagic::toArray
  */
 class PropertiesTest extends TestCase {
 

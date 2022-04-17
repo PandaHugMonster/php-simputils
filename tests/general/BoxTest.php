@@ -21,6 +21,8 @@ use spaf\simputils\PHP;
  * @uses \spaf\simputils\traits\SimpleObjectTrait::getAllTheLastMethodsAndProperties
  * @uses \spaf\simputils\Math
  * @uses \spaf\simputils\traits\SimpleObjectTrait::_simpUtilsGetValidator
+ * @uses \spaf\simputils\traits\MetaMagic::_jsonFlags
+ * @uses \spaf\simputils\traits\MetaMagic::toJson
  */
 class BoxTest extends TestCase {
 

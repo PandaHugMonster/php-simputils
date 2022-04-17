@@ -18,7 +18,6 @@ use spaf\simputils\exceptions\RedefUnimplemented;
 use spaf\simputils\exceptions\RedefWrongReference;
 use spaf\simputils\exceptions\SerializationProblem;
 use spaf\simputils\exceptions\UnBoxable;
-use spaf\simputils\exceptions\UnsupportedMetaMagic;
 use spaf\simputils\generic\BasicInitConfig;
 use spaf\simputils\models\Box;
 use spaf\simputils\models\InitConfig;
@@ -166,9 +165,10 @@ class PHP {
 			return $ref::_metaMagic($ref, $spell, ...$args);
 		}
 
-		$args = static::box($args);
-		throw new UnsupportedMetaMagic("This meta-magic spell is " .
-			"unsupported/unknown: {$ref} | {$spell} | {$args}");
+		return null;
+		// $args = static::box($args);
+		// throw new UnsupportedMetaMagic("This meta-magic spell is " .
+		// 	"unsupported/unknown: {$ref} | {$spell} | {$args}");
 	}
 
 	public static function getInitConfig(?string $name = null): ?BasicInitConfig {

@@ -164,11 +164,11 @@ class PHP {
 		$spell = "___{$spell}";
 		if ((static::isClass($ref) || is_object($ref)) && method_exists($ref, '_metaMagic')) {
 			return $ref::_metaMagic($ref, $spell, ...$args);
-//		} else if (is_object($ref) && method_exists($ref, '_metaMagic')) {
-//			return $ref->_metaMagic($ref, $spell, ...$args);
 		}
 
-		throw new UnsupportedMetaMagic('This meta-magic spell is unsupported/unknown');
+		$args = static::box($args);
+		throw new UnsupportedMetaMagic("This meta-magic spell is " .
+			"unsupported/unknown: {$ref} | {$spell} | {$args}");
 	}
 
 	public static function getInitConfig(?string $name = null): ?BasicInitConfig {

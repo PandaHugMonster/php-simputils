@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection PhpMissingParamTypeInspection */
 
 namespace spaf\simputils\traits;
 
@@ -66,8 +66,9 @@ trait PropertiesTrait {
 	 * @return mixed
 	 * @throws \spaf\simputils\exceptions\PropertyDoesNotExist Property does not exist
 	 * @throws \spaf\simputils\exceptions\PropertyIsReadOnly   Property is read-only
+	 * @throws \spaf\simputils\exceptions\PropertyIsWriteOnly  Property is write-only
 	 */
-	public function __get(string $name): mixed {
+	public function __get($name) {
 		$ref = static::class.'#'.$name.'#'.Property::TYPE_GET;
 		if ($method_name = PropertiesCacheIndex::$index[$ref] ?? false) {
 			return $this->$method_name(null, Property::TYPE_GET, $name);
@@ -85,7 +86,7 @@ trait PropertiesTrait {
 		}
 	}
 
-	public function __set($name, $value): void {
+	public function __set($name, $value) {
 		$ref = static::class.'#'.$name.'#'.Property::TYPE_SET;
 		if ($method_name = PropertiesCacheIndex::$index[$ref] ?? false) {
 			$this->$method_name($value, Property::TYPE_SET, $name);
@@ -506,8 +507,7 @@ trait PropertiesTrait {
 	/**
 	 * @return array
 	 */
-	public function __debugInfo(): array {
-//		return $this->___extractFields(false, true);
+	public function __debugInfo() {
 		return PHP::metaMagicSpell($this, 'extractFields', false, true);
 	}
 }

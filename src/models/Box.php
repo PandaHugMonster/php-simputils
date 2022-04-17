@@ -788,7 +788,7 @@ class Box extends ArrayObject {
 	 * @return array
 	 * @throws \spaf\simputils\exceptions\InfiniteLoopPreventionExceptions ILP Exception
 	 */
-	public function __debugInfo(): array {
+	public function __debugInfo() {
 		return $this->toArray();
 	}
 }

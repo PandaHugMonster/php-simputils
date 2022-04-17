@@ -48,8 +48,8 @@ normal classes.
     * `du()` - `Data::du()` "du" in this context stands for "Data Unit" and **not** "Disk Usage"
       (Creates data-unit object)
  4. `DT` Static Class (date-time) 
-    * `now()` - `DT::now()` (Creates DataTime object with the current time)
-    * `ts()` - `DT::ts()` (Creates DataTime object with the specified date/time, in any format)
+    * `now()` - `DT::now()` (Creates DateTime object with the current time)
+    * `ts()` - `DT::ts()` (Creates DateTime object with the specified date/time, in any format)
 
 ### Relation between static classes and models
 

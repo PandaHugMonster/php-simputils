@@ -72,6 +72,10 @@ More about semantic versioning: [Semantic Versioning Explanation](https://semver
 
 Just a few tini-tiny examples of very condensed functionality :)
 
+1. [Properties](#Properties)
+2. [Date Times](#Date-Times)
+3. [Advanced PHP Info Object](#Advanced-PHP-Info-Object)
+
 ### Properties
 
 ```php
@@ -279,7 +283,7 @@ foreach (DT::walk('2000-05-05', '2000-05-09', '12 hours') as $dt) {
 $conf->l10n = 'RU';
 
 // Both bellow are equivalents. Shortcut is a better choice
-$obj1 = new DateTime('2001-05-17 15:00');
+$obj1 = new DateTime('2001-05-17 15:00', 'UTC');
 $obj2 = ts('2001-06-01 16:00');
 
 foreach ($obj1->walk($obj2, '1 day') as $dt) {

@@ -508,6 +508,6 @@ trait PropertiesTrait {
 	 * @return array
 	 */
 	public function __debugInfo() {
-		return PHP::metaMagicSpell($this, 'extractFields', false, true);
+		return (array) PHP::metaMagicSpell($this, 'extractFields', false, true);
 	}
 }

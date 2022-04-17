@@ -8,7 +8,7 @@ class DatePeriod extends FixUpDatePeriod {
 
 	/**
 	 *
-	 * FIX  Maybe add "interval"
+	 * TODO Add "interval" part to the string
 	 * @return string
 	 */
 	public function __toString(): string {

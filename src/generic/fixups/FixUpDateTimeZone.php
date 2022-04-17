@@ -8,6 +8,9 @@ use spaf\simputils\models\InitConfig;
 use spaf\simputils\traits\PropertiesTrait;
 use spaf\simputils\traits\RedefinableComponentTrait;
 
+/**
+ * @codeCoverageIgnore
+ */
 class FixUpDateTimeZone extends DateTimeZone {
 	use PropertiesTrait;
 	use RedefinableComponentTrait;

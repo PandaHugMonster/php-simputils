@@ -111,6 +111,7 @@
 			<property name="tabIndent" value="true"/>
 		</properties>
 		<exclude name="Generic.WhiteSpace.ScopeIndent.IncorrectExact" />
+		<exclude name="Generic.WhiteSpace.ScopeIndent.Incorrect" />
 	</rule>
 	<rule ref="Squiz.WhiteSpace.FunctionSpacing">
 		<properties>
@@ -124,4 +125,5 @@
 	<rule ref="Squiz.Classes.ValidClassName.MissingBrace">
 		<exclude name="Squiz.Classes.ValidClassName.MissingBrace" />
 	</rule>
+	<exclude-pattern type="relative">^models/files/apps/settings/DotEnvSettings.php</exclude-pattern>
 </ruleset>

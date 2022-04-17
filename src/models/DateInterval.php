@@ -2,7 +2,6 @@
 
 namespace spaf\simputils\models;
 
-use ReturnTypeWillChange;
 use spaf\simputils\generic\fixups\FixUpDateInterval;
 
 class DateInterval extends FixUpDateInterval {
@@ -27,7 +26,7 @@ class DateInterval extends FixUpDateInterval {
 		return $res;
 	}
 
-	#[ReturnTypeWillChange]
+	#[\ReturnTypeWillChange]
 	public static function createFromDateString(string $datetime): static {
 		/** @noinspection PhpIncompatibleReturnTypeInspection */
 		return static::expandFrom(parent::createFromDateString($datetime), new static('P1D'));

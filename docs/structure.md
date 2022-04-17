@@ -13,19 +13,20 @@
 * Bright red lines with double arrows - means bidirectional co-operation, they might not
   be related in matter of OOP relations
 * Sketched squares - not implemented yet, but most likely will be implemented
+* Dashed, sharp-cornered with green, italic label - PHP Interfaces
 
-![Structure Schema](images/Structure%20Scheme%20v2.png)
+![Structure Schema](images/Structure%20Scheme.png)
 
 ## Recommended usage structure
 
-![Structure Schema](images/Usage%20structure%20of%20classes%20groups%20v1.png)
+![Structure Schema](images/Usage%20structure%20of%20classes%20groups.png)
 
 General suggestion is to use shortcut methods from "basic.php" first (like `fl()`, `bx()`, 
 `ts()`, `now()`, etc.) to use models' related functionality (like `File`, `Box`, `DateTime`, etc.)
 
 Those shortcuts should be really comfortable to use together with IDEs, but in case if it troubles
 you that IDE does not recognize properly those shortcuts for some reason - you could use 
-Static Classes of the correspondent functionality. Almost all the "basic" functions are using
+Static Classes of the corresponding functionality. Almost all the "basic" functions are using
 relevant methods from static classes. So you can use those static class methods directly. 
 This for sure will not mess with your IDEs auto-completion functionality, because those are
 normal classes.
@@ -33,24 +34,22 @@ normal classes.
 ### Current basic functions and their static class equivalents
 
  1. `PHP` Static Class
-    * `bx()` - `PHP::box()`
-    * `env()` - `PHP::env()`
-    * `pd()` - `PHP::pd()`
-    * `pr()` - `PHP::pr()`
-    * `prstr()` - `PHP::prstr()`
-    * `stack()` - `PHP::stack()`
+    * `bx()` - `PHP::box()` (Creates advanced object-array, can be used instead of normal arrays)
+    * `env()` - `PHP::env()` (Getting environmental value)
+    * `pd()` - `PHP::pd()` (Prints out arguments in a debug mode and then dies)
+    * `pr()` - `PHP::pr()` (Prints out arguments in a debug mode)
+    * `prstr()` - `PHP::prstr()` (Prints out arguments into a string in a debug mode)
+    * `stack()` - `PHP::stack()` (Creates Stack object)
  2. `FS` Static Class (file-system)
-    * `dr()` - `FS::dir()`
-    * `fl()` - `FS::file()`
-    * `path()` - `FS::path()`
+    * `dr()` - `FS::dir()` (Creates a directory object)
+    * `fl()` - `FS::file()` (Creates a file object)
+    * `path()` - `FS::path()` (Joins elements into a path string depending on the platform)
  3. `Data` Static Class
     * `du()` - `Data::du()` "du" in this context stands for "Data Unit" and **not** "Disk Usage"
+      (Creates data-unit object)
  4. `DT` Static Class (date-time) 
-    * `now()` - `DT::now()`
-    * `ts()` - `DT::ts()`
- 5. `Str` Static Class
-    * `str()` - not implemented
-    * `uuid()` - not implemented
+    * `now()` - `DT::now()` (Creates DateTime object with the current time)
+    * `ts()` - `DT::ts()` (Creates DateTime object with the specified date/time, in any format)
 
 ### Relation between static classes and models
 
@@ -158,23 +157,17 @@ to obtain info about the system/platform
 
 1. [Version](#Version) (code [\spaf\simputils\models\Version](https://github.com/PandaHugMonster/php-simputils/blob/main/src/models/Version.php))
 2. [DataUnit](#DataUnit) (code [\spaf\simputils\models\DataUnit](https://github.com/PandaHugMonster/php-simputils/blob/main/src/models/DataUnit.php))
-3. [Temperature](#Temperature) (code [\spaf\simputils\models\Temperature](https://github.com/PandaHugMonster/php-simputils/blob/main/src/models/Temperature.php))
-4. [BigNumber](#BigNumber) (code [\spaf\simputils\models\BigNumber](https://github.com/PandaHugMonster/php-simputils/blob/main/src/models/BigNumber.php))
-5. [L10n](#L10n) (code [\spaf\simputils\models\L10n](https://github.com/PandaHugMonster/php-simputils/blob/main/src/models/L10n.php))
-6. [SystemFingerprint](#SystemFingerprint) (code [\spaf\simputils\models\SystemFingerprint](https://github.com/PandaHugMonster/php-simputils/blob/main/src/models/SystemFingerprint.php))
-7. ? StrObj - not a finished idea
+3. [BigNumber](#BigNumber) (code [\spaf\simputils\models\BigNumber](https://github.com/PandaHugMonster/php-simputils/blob/main/src/models/BigNumber.php))
+4. [L10n](#L10n) (code [\spaf\simputils\models\L10n](https://github.com/PandaHugMonster/php-simputils/blob/main/src/models/L10n.php))
+
 
 #### Version
 
 #### DataUnit
 
-#### Temperature
-
 #### BigNumber
 
 #### L10n
-
-#### SystemFingerprint
 
 -------
 
@@ -206,13 +199,10 @@ to obtain info about the system/platform
 
 1. [File](#File) (code [\spaf\simputils\models\File](https://github.com/PandaHugMonster/php-simputils/blob/main/src/models/File.php))
 2. [Dir](#Dir) (code [\spaf\simputils\models\Dir](https://github.com/PandaHugMonster/php-simputils/blob/main/src/models/Dir.php))
-3. [GitRepo](#GitRepo) (code [\spaf\simputils\models\GitRepo](https://github.com/PandaHugMonster/php-simputils/blob/main/src/models/GitRepo.php))
 
 #### File
 
 #### Dir
-
-#### GitRepo
 
 
 -------
@@ -220,6 +210,7 @@ to obtain info about the system/platform
 ### Models of arrays and data-structures
 
 1. [Box](#Box) (code [\spaf\simputils\models\Box](https://github.com/PandaHugMonster/php-simputils/blob/main/src/models/Box.php))
+1. [Set](#Set) (code [\spaf\simputils\models\Set](https://github.com/PandaHugMonster/php-simputils/blob/main/src/models/Set.php))
 2. [StackLifo](#StackLifo) (code [\spaf\simputils\models\StackLifo](https://github.com/PandaHugMonster/php-simputils/blob/main/src/models/StackLifo.php))
 3. [StackFifo](#StackFifo) (code [\spaf\simputils\models\StackFifo](https://github.com/PandaHugMonster/php-simputils/blob/main/src/models/StackFifo.php))
 4. [PhpInfo](#PhpInfo) (code [\spaf\simputils\models\PhpInfo](https://github.com/PandaHugMonster/php-simputils/blob/main/src/models/PhpInfo.php))

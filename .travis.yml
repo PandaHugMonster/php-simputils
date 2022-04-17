@@ -18,6 +18,7 @@ jobs:
   include:
     - stage: test
       script:
+        - composer run-script code-sniff
         - composer run-script tests-clover
       workspaces:
         create:

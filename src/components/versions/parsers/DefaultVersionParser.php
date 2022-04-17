@@ -16,7 +16,7 @@ class DefaultVersionParser extends BasicVersionParser {
 
 	/**
 	 * @inheritdoc
-	 * @throws \spaf\simputils\exceptions\IncorrectVersionFormat
+	 * @throws \spaf\simputils\exceptions\IncorrectVersionFormat Version format problem
 	 */
 	public function parse(Version $version_object, ?string $string_version): array {
 
@@ -38,20 +38,25 @@ class DefaultVersionParser extends BasicVersionParser {
 		} else {
 			$string_version = Str::upper($string_version);
 			if (!empty($version_object->software_name))
-				$string_version = str_replace(Str::upper($version_object->software_name), '', $string_version);
+				$string_version = str_replace(
+					Str::upper($version_object->software_name), '', $string_version
+				);
 
 			$string_version = preg_replace('/[-_+.]+/', '.', $string_version);
 			$string_version = str_replace(' ', '', $string_version);
 
-			$regexp = '/(?P<ltype>'.$statuses_bunch.')?\.?(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)\.?(?P<rtype>'.$statuses_bunch.')?\.?(?P<revision>\d+)?/i';
+			$regexp = '/(?P<ltype>'.$statuses_bunch.')?\.?(?P<major>\d+)\.(?P<minor>\d+)'.
+					  '\.(?P<patch>\d+)\.?(?P<rtype>'.$statuses_bunch.')?\.?(?P<revision>\d+)?/i';
 
 			$res = '';
 			for ($i = 0; $i < strlen($string_version); $i++) {
 				$symbol_prev = $i > 0?$string_version[$i-1]:null;
 				$symbol_current = !empty($string_version[$i])?$string_version[$i]:0;
 
-				$left_side = preg_match('/[A-Z]/', $symbol_current ?? '') && preg_match('/[0-9]/', $symbol_prev ?? '');
-				$right_side = preg_match('/[0-9]/', $symbol_current ?? '') && preg_match('/[A-Z]/', $symbol_prev ?? '');
+				$left_side = preg_match('/[A-Z]/', $symbol_current ?? '')
+					&& preg_match('/[0-9]/', $symbol_prev ?? '');
+				$right_side = preg_match('/[0-9]/', $symbol_current ?? '')
+					&& preg_match('/[A-Z]/', $symbol_prev ?? '');
 
 				if ($left_side || $right_side) {
 					$res .= '.';
@@ -63,7 +68,9 @@ class DefaultVersionParser extends BasicVersionParser {
 		}
 
 		if (empty($matches)) {
-			throw new IncorrectVersionFormat("Could not parse version string \"{$string_version}\" by \"{$regexp}\"");
+			throw new IncorrectVersionFormat(
+				"Could not parse version string \"{$string_version}\" by \"{$regexp}\""
+			);
 		}
 
 		return [
@@ -126,12 +133,19 @@ class DefaultVersionParser extends BasicVersionParser {
 		$obj2 = static::normalize($obj2);
 
 		$priorities = static::$build_type_priorities;
-		if ($obj1->major === $obj2->major && $obj1->minor === $obj2->minor && $obj1->patch === $obj2->patch) {
+		if ($obj1->major === $obj2->major
+			&& $obj1->minor === $obj2->minor
+			&& $obj1->patch === $obj2->patch
+		) {
 			if (!empty($priorities[$obj1->build_type]) && empty($priorities[$obj2->build_type])) {
 				return false;
-			} else if (empty($priorities[$obj1->build_type]) && empty($priorities[$obj2->build_type])) {
+			} else if (empty($priorities[$obj1->build_type])
+				&& empty($priorities[$obj2->build_type])
+			) {
 				return true;
-			} else if (!empty($priorities[$obj1->build_type]) && !empty($priorities[$obj2->build_type])) {
+			} else if (!empty($priorities[$obj1->build_type])
+				&& !empty($priorities[$obj2->build_type])
+			) {
 				if ($obj1->build_type == $obj2->build_type) {
 					$rev1 = $obj1->build_revision ?? 0;
 					$rev2 = $obj2->build_revision ?? 0;

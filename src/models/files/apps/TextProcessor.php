@@ -25,7 +25,7 @@ class TextProcessor extends BasicResourceApp {
 	 * @param ?BasicResource $file File instance
 	 *
 	 */
-	public function setContent(mixed $fd, $data, ?BasicResource $file = null): void {
+	public function setContent(mixed $fd, mixed $data, ?BasicResource $file = null): void {
 		fwrite($fd, $data);
 	}
 }

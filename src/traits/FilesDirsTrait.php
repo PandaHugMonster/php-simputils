@@ -41,9 +41,9 @@ trait FilesDirsTrait {
 	 *                                of the string), if <0 then adjusting relativity
 	 *                                of the path from the file name side (right part of
 	 *                                the string before filename).
-	 * @param bool       $include_ext
+	 * @param bool       $include_ext Should extensions be included
 	 *
-	 * @return string
+	 * @return string|null
 	 */
 	public function format(int|string $relativity = 0, bool $include_ext = true): ?string {
 		$sep = '/';

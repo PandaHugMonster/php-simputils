@@ -8,13 +8,16 @@ use spaf\simputils\DT;
 use spaf\simputils\exceptions\InitConfigAlreadyInitialized;
 use spaf\simputils\FS;
 use spaf\simputils\interfaces\InitBlockInterface;
+use spaf\simputils\models\BigNumber;
 use spaf\simputils\models\Box;
+use spaf\simputils\models\DataUnit;
 use spaf\simputils\models\DateTimeZone;
 use spaf\simputils\models\L10n;
 use spaf\simputils\PHP;
 use spaf\simputils\special\CommonMemoryCacheIndex;
 use spaf\simputils\Str;
 use ValueError;
+use function is_null;
 use function is_numeric;
 
 /**
@@ -22,6 +25,9 @@ use function is_numeric;
  * @property-read Box|array $successful_init_blocks
  * @property ?L10n $l10n
  * @property ?DateTimeZone $default_tz
+ *
+ * @property string $big_number_extension
+ * @property bool $data_unit_long
  */
 abstract class BasicInitConfig extends SimpleObject {
 
@@ -80,10 +86,11 @@ abstract class BasicInitConfig extends SimpleObject {
 		return $this->_l10n;
 	}
 
+	/** @noinspection PhpUndefinedMethodInspection */
 	#[Property('l10n')]
 	protected function setL10n(null|string|L10n $val): void {
 		if (empty($val)) {
-			$this->_l10n_name = $val;
+			$this->_l10n_name = $val; // @codeCoverageIgnore
 		} else {
 			if (Str::is($val)) {
 				$this->_l10n_name = $val;
@@ -92,6 +99,15 @@ abstract class BasicInitConfig extends SimpleObject {
 				$l10n_name = Str::upper($val);
 				$path = FS::path(PHP::frameworkDir(), 'data', 'l10n', "{$l10n_name}.json");
 				$val = $class::createFrom($path);
+
+				$custom_file = FS::file(
+					FS::path($this->working_dir, 'data', 'l10n', "{$l10n_name}.json")
+				);
+				if ($custom_file->exists) {
+					static::_metaMagic( // @codeCoverageIgnore
+						$val, '___setup', $custom_file->content ?? [] // @codeCoverageIgnore
+					); // @codeCoverageIgnore
+				}
 			}
 
 			/** @var L10n $val */
@@ -103,12 +119,58 @@ abstract class BasicInitConfig extends SimpleObject {
 	}
 
 	/**
-	 * @return array
+	 * @codeCoverageIgnore
+	 * @return \spaf\simputils\models\Box|array
+	 * @throws \spaf\simputils\exceptions\RedefUnimplemented Redefinable component is not defined
 	 */
 	#[Property('successful_init_blocks')]
 	protected function getSuccessfulInitBlocks(): Box|array {
 		$class_box = PHP::redef(Box::class);
 		return new $class_box($this->_successful_init_blocks);
+	}
+
+	/**
+	 * @param string $val Name of the extension that should be used by default
+	 *
+	 * @codeCoverageIgnore
+	 * @return void
+	 */
+	#[Property('big_number_extension')]
+	#[Shortcut('BigNumber::$default_extension')]
+	protected function setBigNumberExt(string $val) {
+		 BigNumber::$default_extension = $val;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 * @return string
+	 */
+	#[Property('big_number_extension')]
+	#[Shortcut('BigNumber::$default_extension')]
+	protected function getBigNumberExt(): string {
+		return BigNumber::$default_extension;
+	}
+
+	/**
+	 * @param bool $val If set to true, then long format is used for DataUnit otherwise short
+	 *
+	 * @codeCoverageIgnore
+	 * @return void
+	 */
+	#[Property('data_unit_long')]
+	#[Shortcut('DataUnit::$long_format')]
+	protected function setDataUnitLong(bool $val) {
+		DataUnit::$long_format = $val;
+	}
+
+	/**
+	 * @codeCoverageIgnore
+	 * @return bool
+	 */
+	#[Property('data_unit_long')]
+	#[Shortcut('DataUnit::$long_format')]
+	protected function getDataUnitLong(): bool {
+		return DataUnit::$long_format;
 	}
 
 	/**
@@ -123,7 +185,8 @@ abstract class BasicInitConfig extends SimpleObject {
 	public null|array|Box $redefinitions = [];
 
 	public function __construct(?array $args = null) {
-		$this->___setup($args ?? []);
+//		$this->___setup($args ?? []);
+		PHP::metaMagicSpell($this, 'setup', $args ?? []);
 	}
 
 	/**
@@ -143,8 +206,7 @@ abstract class BasicInitConfig extends SimpleObject {
 		// The only place getenv is used. It might be safe enough, though not sure yet.
 		if (empty($this->name) || $this->name === 'app') {
 			$_ENV = CommonMemoryCacheIndex::$initial_get_env_state = !empty($_ENV)
-				?$_ENV // @codeCoverageIgnore
-				:(getenv() ?? []);
+				?$_ENV:(getenv() ?? []); // @codeCoverageIgnore
 		}
 
 		foreach ($this->init_blocks as $block_class) {
@@ -160,7 +222,8 @@ abstract class BasicInitConfig extends SimpleObject {
 
 				$init_block_obj = $orig_obj ?? new $block_class;
 				/** @var \spaf\simputils\interfaces\InitBlockInterface $init_block_obj */
-				if ($init_block_obj->initBlock($this)) {
+				$init_res = $init_block_obj->initBlock($this);
+				if (is_null($init_res) || $init_res == true) {
 					$this->_successful_init_blocks[] = $init_block_obj;
 				}
 			}
@@ -171,11 +234,12 @@ abstract class BasicInitConfig extends SimpleObject {
 	/**
 	 * Setting up the InitConfig
 	 *
-	 * FIX  Changed the modifier to "public" maybe another solution?
+	 * TODO Changed the modifier to "public" maybe another solution?
 	 *
 	 * @param array $data Arguments for the object
 	 *
 	 * @return $this
+	 * @throws \spaf\simputils\exceptions\InitConfigAlreadyInitialized Already initialized
 	 */
 	public function ___setup(array $data): static {
 		if (!$this->_is_already_setup) {

@@ -17,12 +17,12 @@ use function strtoupper;
  * @uses \spaf\simputils\special\CodeBlocksCacheIndex
  * @uses \spaf\simputils\traits\PropertiesTrait
  * @uses \spaf\simputils\models\DateTime
- * @uses \spaf\simputils\interfaces\helpers\DateTimeHelperInterface
  * @uses \spaf\simputils\generic\BasicResource
  * @uses \spaf\simputils\models\File
  * @uses \spaf\simputils\generic\BasicResourceApp
  * @uses \spaf\simputils\models\files\apps\TextProcessor
  * @uses \spaf\simputils\Str
+ * @uses \spaf\simputils\Boolean
  */
 class StrTest extends TestCase {
 

@@ -7,6 +7,7 @@ use spaf\simputils\models\Box;
 use spaf\simputils\models\DateTime;
 use spaf\simputils\models\Dir;
 use spaf\simputils\models\File;
+use spaf\simputils\models\Set;
 use spaf\simputils\models\StackFifo;
 use spaf\simputils\models\StackLifo;
 use spaf\simputils\PHP;
@@ -30,7 +31,6 @@ use function spaf\simputils\basic\ts;
  * @uses \spaf\simputils\special\CodeBlocksCacheIndex
  * @uses \spaf\simputils\traits\PropertiesTrait
  * @uses \spaf\simputils\models\DateTime
- * @uses \spaf\simputils\interfaces\helpers\DateTimeHelperInterface
  * @uses \spaf\simputils\generic\BasicResource
  * @uses \spaf\simputils\models\File
  * @uses \spaf\simputils\generic\BasicResourceApp
@@ -168,10 +168,10 @@ class ShortcutsTest extends TestCase {
 	 */
 	function testStacks() {
 
-		$stack = stack(1, 2, 3, 4);
+		$stack = stack([1, 2, 3, 4]);
 		$this->assertInstanceOf(StackLifo::class, $stack);
 
-		$stack = stack(1, 2, 3, 4, type: PHP::STACK_FIFO);
+		$stack = stack([1, 2, 3, 4], type: PHP::STACK_FIFO);
 		$this->assertInstanceOf(StackFifo::class, $stack);
 
 	}
@@ -240,5 +240,16 @@ class ShortcutsTest extends TestCase {
 
 		$res = path(...$lines);
 		$this->assertEquals($expected, $res);
+	}
+
+	/**
+	 * @covers \spaf\simputils\PHP::set
+	 * @uses \spaf\simputils\models\Set
+	 *
+	 * @return void
+	 */
+	function testPHPSet() {
+		$set = PHP::set([1, 2, 3, 3, 4, 4]);
+		$this->assertInstanceOf(Set::class, $set);
 	}
 }

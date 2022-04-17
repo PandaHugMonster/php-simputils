@@ -11,6 +11,9 @@ class Boolean {
 		'disabled', 'no', 'f', 'false', 'n', '-', '0', 'disable',
 	];
 
+	public static string $to_yes = 'true';
+	public static string $to_no = 'false';
+
 	/**
 	 * Tries to recognize string or other types of value as bool TRUE or FALSE
 	 *
@@ -45,5 +48,9 @@ class Boolean {
 			return null;
 		}
 		return $sub_res;
+	}
+
+	public static function to(mixed $val): mixed {
+		return static::from($val)?static::$to_yes:static::$to_no;
 	}
 }

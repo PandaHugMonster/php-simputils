@@ -128,7 +128,7 @@ trait MetaMagic {
 	 * @param bool  $with_class Default to false, whether the additional "#class" value
 	 *                          should be added
 	 *
-	 * FIX  Huge mess, refactor toJson + toArray + toBox to be fully efficient and compatible
+	 * TODO Huge mess, refactor toJson + toArray + toBox to be fully efficient and compatible
 	 * @return string
 	 */
 	public function toJson(?bool $pretty = null, bool $with_class = false): string {
@@ -214,12 +214,12 @@ trait MetaMagic {
 	 *
 	 * If you want to convert to Json string, use {@see \spaf\simputils\traits\MetaMagic::toJson()}
 	 *
-	 * @param bool $recursively Do the conversion recursively
-	 * @param bool $with_class Result will contain full class name
-	 * @param array $exclude_fields
+	 * @param bool  $recursively    Do the conversion recursively
+	 * @param bool  $with_class     Result will contain full class name
+	 * @param array $exclude_fields Fields that should be excluded
 	 *
 	 * @return array
-	 * @throws \spaf\simputils\exceptions\InfiniteLoopPreventionExceptions
+	 * @throws \spaf\simputils\exceptions\InfiniteLoopPreventionExceptions ILP Exception
 	 */
 	public function toArray(
 		bool $recursively = false,
@@ -247,10 +247,12 @@ trait MetaMagic {
 			throw new InfiniteLoopPreventionExceptions('toArray() method noticed');
 		}
 
-		$exclude_fields[] = '_simpUtilsProperty_batch_storage';
+		$exclude_fields[] = '_simp_utils_property_batch_storage';
 
+		// TODO Improve meta-magic spell availability
 		if (method_exists($this, '___extractFields')) {
-			$sub = $this->___extractFields(true, false);
+//			$sub = $this->___extractFields(true, false);
+			$sub = PHP::metaMagicSpell($this, 'extractFields', true, false);
 			foreach ($sub as $k => $v) {
 				// TODO Re-evaluate the exclusion mechanism
 				if (in_array($k, $exclude_fields) || $v instanceof BasicPrism) {
@@ -332,9 +334,7 @@ trait MetaMagic {
 
 		$sub = [];
 		$is_box_already = $this instanceof Box;
-		$res = $is_box_already
-			?$this
-			:new $box_class;
+		$res = $is_box_already?$this:new $box_class;
 		/** @var Box $res */
 
 		if ($this instanceof Box) {
@@ -352,7 +352,8 @@ trait MetaMagic {
 //		} else if (PHP::classUsesTrait($this, ForOutputsTrait::class)) {
 //			$sub = $this->for_system;
 		} else if (method_exists($this, '___extractFields')) {
-			$fields = $this->___extractFields(true, false);
+//			$fields = $this->___extractFields(true, false);
+			$fields = PHP::metaMagicSpell($this, 'extractFields', true, false);
 			$sub = $recursively
 				?$this->_iterateConvertObjectsAndArrays($fields, $recursively, $with_class)
 				:$fields;
@@ -365,9 +366,7 @@ trait MetaMagic {
 			$sub[PHP::$serialized_class_key_name] = static::class;
 		}
 
-		return $sub instanceof $box_class
-			?$res->load($sub)
-			:$sub;
+		return $sub instanceof $box_class?$res->load($sub):PHP::box($sub);
 	}
 
 	private function _iterateConvertObjectsAndArrays(
@@ -400,13 +399,16 @@ trait MetaMagic {
 	 * For the purpose of migrating the parent narrow class object, to the child wider
 	 * class object.
 	 *
-	 * @param string|object $class_or_object          Class/Object that should be filled up
-	 *                                                with data
-	 * @param bool          $strict_inheritance_check Additional check to make sure the provided
-	 *                                                class or object is a child from this one.
-	 *                                                By default is true
+	 * @param object  $parent                   Parent
+	 * @param ?object $child                    Child
+	 * @param bool    $strict_inheritance_check Additional check to make sure the provided
+	 *                                          class or object is a child from this one.
+	 *                                          By default is true
 	 *
 	 * @return object Always returns a new object of type provided as a first argument
+	 * @throws \ReflectionException Reflection issue
+	 * @throws \spaf\simputils\exceptions\MetaMagicStrictInheritanceProblem Strict Inheritance
+	 *                                                                      Problem
 	 */
 	public static function expandFrom(
 		object $parent,
@@ -426,35 +428,6 @@ trait MetaMagic {
 
 		return $obj;
 	}
-
-//	/**
-//	 * To a normal PHP array
-//	 *
-//	 * @inheritdoc
-//	 *
-//	 * @param bool $with_class Pack with class, default is "false"
-//	 *
-//	 * @return array
-//	 */
-//	public function toArray(bool $with_class = false, bool $recursively = true): array {
-//		if ($recursively) {
-//			$res = [];
-//			foreach ($this as $key => $val) {
-//				if ($val instanceof Box) {
-//					$res[$key] = $val->toArray(recursively: $recursively);
-//				} else {
-//					// FIX Implement meta-magic here, and improve "toBox()", "toArray" and "toJson"
-//					$res[$key] = $val;
-//				}
-//			}
-//		} else {
-//			$res = (array) $this;
-//		}
-//
-//		if ($with_class)
-//			$res[PHP::$serialized_class_key_name] = static::class;
-//		return $res;
-//	}
 
 	/**
 	 * Create an object from array
@@ -513,7 +486,8 @@ trait MetaMagic {
 			if (is_array($val) && !empty($val[PHP::$serialized_class_key_name])) {
 				$obj = PHP::createDummy($val[PHP::$serialized_class_key_name]);
 				unset($val[PHP::$serialized_class_key_name]);
-				$val = $obj->___setup($val);
+				$val = PHP::metaMagicSpell($obj, 'setup', $val);
+//				$val = $obj->___setup($val);
 			}
 			$this->$key = $val;
 		}
@@ -524,6 +498,7 @@ trait MetaMagic {
 	 * Serialization meta-magic method
 	 *
 	 * @return Box|array
+	 * @throws \spaf\simputils\exceptions\InfiniteLoopPreventionExceptions ILP Exception
 	 */
 	protected function ___serialize(): Box|array {
 		return $this->toArray(
@@ -593,7 +568,7 @@ trait MetaMagic {
 	 *
 	 * @return mixed
 	 */
-	public static function _metaMagic(...$spell): mixed {
+	public static function _metaMagic(mixed ...$spell): mixed {
 		$context = $spell[0];
 		$endpoint = $spell[1];
 		array_shift($spell);
@@ -602,6 +577,8 @@ trait MetaMagic {
 			'___serialize' => $context->___serialize(),
 			'___deserialize' => $context->___deserialize(...$spell),
 			'___setup' => $context->___setup(...$spell),
+			'___extractFields' => $context->___extractFields(...$spell),
+
 			'___l10n' => $context::___l10n(...$spell),
 		};
 		return $res;

@@ -3,6 +3,7 @@
 namespace spaf\simputils\models;
 
 use Generator;
+use spaf\simputils\exceptions\SortingIsNotPermitted;
 use spaf\simputils\Math;
 use spaf\simputils\traits\RedefinableComponentTrait;
 
@@ -12,8 +13,6 @@ use spaf\simputils\traits\RedefinableComponentTrait;
  *  Last IN - First OUT
  * |===================<>
  *
- *
- * FIX  Block sorting functionalities
  */
 class StackLifo extends Box {
 	use RedefinableComponentTrait;
@@ -48,6 +47,116 @@ class StackLifo extends Box {
 		}
 	}
 
+	// NOTE Disabling phpcs
+	// phpcs:disable
+
+	/**
+	 * @codeCoverageIgnore
+	 * @return \spaf\simputils\exceptions\SortingIsNotPermitted
+	 */
+	private function sortingIsNotPermitted() {
+		return new SortingIsNotPermitted('The sorting functionality is not allowed on Stacks');
+	}
+
+	/**
+	 * @param bool      $descending     Descending
+	 * @param bool      $by_values      By values
+	 * @param bool      $case_sensitive Case sensitive
+	 * @param bool      $natural        Natural
+	 * @param ?callable $callback       Callback
+	 *
+	 * @codeCoverageIgnore
+	 * @return \spaf\simputils\models\Box
+	 * @throws \spaf\simputils\exceptions\SortingIsNotPermitted Sorting is not allowed
+	 */
+	#[\ReturnTypeWillChange]
+	public function sort(
+		bool $descending = null,
+		bool $by_values = null,
+		bool $case_sensitive = null,
+		bool $natural = null,
+		?callable $callback = null
+	): Box {
+		throw $this->sortingIsNotPermitted();
+	}
+
+	/**
+	 * @param callable $callback Callback
+	 *
+	 * @codeCoverageIgnore
+	 * @return bool
+	 * @throws \spaf\simputils\exceptions\SortingIsNotPermitted Sorting is not allowed
+	 */
+	#[\ReturnTypeWillChange]
+	public function uasort(callable $callback) {
+		throw $this->sortingIsNotPermitted();
+	}
+
+	/**
+	 * @param int $flags Flags
+	 *
+	 * @codeCoverageIgnore
+	 * @return bool
+	 * @throws \spaf\simputils\exceptions\SortingIsNotPermitted Sorting is not allowed
+	 */
+	#[\ReturnTypeWillChange]
+	public function ksort(int $flags = SORT_REGULAR) {
+		throw $this->sortingIsNotPermitted();
+	}
+
+	/**
+	 * @param callable $callback Callback
+	 *
+	 * @codeCoverageIgnore
+	 * @return bool
+	 * @throws \spaf\simputils\exceptions\SortingIsNotPermitted Sorting is not allowed
+	 */
+	#[\ReturnTypeWillChange]
+	public function uksort(callable $callback) {
+		throw $this->sortingIsNotPermitted();
+	}
+
+	/**
+	 * @param int $flags Flags
+	 *
+	 * @codeCoverageIgnore
+	 * @return bool
+	 * @throws \spaf\simputils\exceptions\SortingIsNotPermitted Sorting is not allowed
+	 */
+	#[\ReturnTypeWillChange]
+	public function asort(int $flags = SORT_REGULAR) {
+		throw $this->sortingIsNotPermitted();
+	}
+
+	/**
+	 *
+	 * @codeCoverageIgnore
+	 * @return bool
+	 * @throws \spaf\simputils\exceptions\SortingIsNotPermitted Sorting is not allowed
+	 */
+	#[\ReturnTypeWillChange]
+	public function natcasesort() {
+		throw $this->sortingIsNotPermitted();
+	}
+
+	/**
+	 *
+	 * @codeCoverageIgnore
+	 * @return bool
+	 * @throws \spaf\simputils\exceptions\SortingIsNotPermitted Sorting is not allowed
+	 */
+	#[\ReturnTypeWillChange]
+	public function natsort() {
+		throw $this->sortingIsNotPermitted();
+	}
+
+	// NOTE Enable phpcs back
+	// phpcs:enable
+
+	/**
+	 * @codeCoverageIgnore
+	 * @return string
+	 */
 	public static function redefComponentName(): string {
 		return InitConfig::REDEF_STACK_LIFO;
 	}

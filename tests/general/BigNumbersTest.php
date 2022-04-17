@@ -105,6 +105,7 @@ class BigNumbersTest extends TestCase {
 	}
 
 	/**
+	 * @uses \spaf\simputils\components\normalizers\BooleanNormalizer
 	 * @return void
 	 */
 	function testWithGmp() {

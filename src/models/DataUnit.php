@@ -5,7 +5,6 @@ namespace spaf\simputils\models;
 use spaf\simputils\attributes\DebugHide;
 use spaf\simputils\attributes\Property;
 use spaf\simputils\exceptions\NonExistingDataUnit;
-use spaf\simputils\exceptions\UnspecifiedDataUnit;
 use spaf\simputils\generic\SimpleObject;
 use spaf\simputils\PHP;
 use spaf\simputils\Str;
@@ -16,8 +15,8 @@ use function json_encode;
 
 /**
  *
- * @property-read bool $fractions_supported Whether fractions (float) supported
- *                                          by the big number extension
+ * @property-read bool   $fractions_supported  Whether fractions (float) supported
+ *                                             by the big number extension
  * @property-read string $big_number_extension
  */
 class DataUnit extends SimpleObject {
@@ -144,12 +143,13 @@ class DataUnit extends SimpleObject {
 	 *
 	 * By default uses "user format"
 	 *
-	 * @param ?string $format
-	 * @param bool    $with_units
+	 * @param ?string $format     Format
+	 * @param bool    $with_units Output should include units
 	 *
 	 * @return string
-	 * @throws \spaf\simputils\exceptions\NonExistingDataUnit
-	 * @throws \spaf\simputils\exceptions\UnspecifiedDataUnit
+	 *
+	 * @throws \spaf\simputils\exceptions\NonExistingDataUnit Unit does not exist, not recognized
+	 * @throws \spaf\simputils\exceptions\UnspecifiedDataUnit Unit was not specified or missing
 	 */
 	public function format(?string $format = null, bool $with_units = true): string {
 		$format = $format ?? $this->user_format;
@@ -162,7 +162,6 @@ class DataUnit extends SimpleObject {
 			static::bytesTo($this->_value, $format),
 			$with_units?Str::upper($format):null
 		);
-//		return static::bytesTo($this->_value, $format).($with_units?Str::upper($format):null);
 	}
 
 	protected static function formattedStr($val, ?string $unit_code = null) {
@@ -170,28 +169,45 @@ class DataUnit extends SimpleObject {
 	}
 
 	/**
-	 * @param string $b Value to add With Unit
+	 * @param string $b Value with unit that should be added to the object
 	 *
 	 * @return $this
-	 * @throws \spaf\simputils\exceptions\NonExistingDataUnit
-	 * @throws \spaf\simputils\exceptions\UnspecifiedDataUnit
+	 * @throws \spaf\simputils\exceptions\NonExistingDataUnit Unit does not exist, not recognized
+	 * @throws \spaf\simputils\exceptions\UnspecifiedDataUnit Unit was not specified or missing
 	 */
-	public function add(string $b): static {
+	public function add(string $b): self {
 		$this->_value->add(static::toBytes($b));
 		return $this;
 	}
 
-	public function sub(string $b): static {
+	/**
+	 * @param string $b Value with unit that should be subtracted from the object
+	 *
+	 * @return $this
+	 * @throws \spaf\simputils\exceptions\NonExistingDataUnit Unit does not exist, not recognized
+	 * @throws \spaf\simputils\exceptions\UnspecifiedDataUnit Unit was not specified or missing
+	 */
+	public function sub(string $b): self {
 		$this->_value->sub(static::toBytes($b));
 		return $this;
 	}
 
-	public function mul(BigNumber|int|string $b): static {
+	/**
+	 * @param BigNumber|int|string $b Numeric value to use as a multiplier
+	 *
+	 * @return $this
+	 */
+	public function mul(BigNumber|int|string $b): self {
 		$this->_value->mul($b);
 		return $this;
 	}
 
-	public function div(BigNumber|int|string $b): static {
+	/**
+	 * @param BigNumber|int|string $b Numeric value to use as a divider
+	 *
+	 * @return $this
+	 */
+	public function div(BigNumber|int|string $b): self {
 		$this->_value->div($b);
 		return $this;
 	}
@@ -219,9 +235,10 @@ class DataUnit extends SimpleObject {
 	 *
 	 * @param string $value Value of "number and abbreviation" that should be converted into bytes
 	 *
-	 * @return int Amount of bytes converted from incoming value
-	 * @throws \spaf\simputils\exceptions\NonExistingDataUnit
-	 * @throws \spaf\simputils\exceptions\UnspecifiedDataUnit
+	 * @return BigNumber|string|int Amount of bytes converted from incoming value
+	 *
+	 * @throws \spaf\simputils\exceptions\NonExistingDataUnit Unit does not exist, not recognized
+	 * @throws \spaf\simputils\exceptions\UnspecifiedDataUnit Unit was not specified or missing
 	 */
 	protected static function toBytes(string $value): BigNumber|string|int {
 		return static::unitTo($value);
@@ -263,9 +280,11 @@ class DataUnit extends SimpleObject {
 	 * @param string $to_unit The optional unit abbreviation to which convert, by default
 	 *                        is set to bytes
 	 *
-	 * @return float|int Resulting value of conversion
-	 * @throws \spaf\simputils\exceptions\NonExistingDataUnit
-	 * @throws \spaf\simputils\exceptions\UnspecifiedDataUnit
+	 * @return BigNumber Resulting value of conversion
+	 *
+	 * @throws \spaf\simputils\exceptions\NonExistingDataUnit Unit does not exist, not recognized
+	 * @throws \spaf\simputils\exceptions\RedefUnimplemented  Redefinable component is not defined
+	 * @throws \spaf\simputils\exceptions\UnspecifiedDataUnit Unit was not specified or missing
 	 */
 	protected static function unitTo(string $value, string $to_unit = DataUnit::BYTE): BigNumber {
 		$unit_codes = static::unitToPowerMap();
@@ -317,8 +336,8 @@ class DataUnit extends SimpleObject {
 	 *                     that will be removed)
 	 *
 	 * @return string Cleared and normalized unit abbreviation
-	 * @throws NonExistingDataUnit
-	 * @throws UnspecifiedDataUnit
+	 *
+	 * @throws \spaf\simputils\exceptions\NonExistingDataUnit Unit does not exist, not recognized
 	 *
 	 * @see static::unitCodeToPowerArray()
 	 */
@@ -362,14 +381,16 @@ class DataUnit extends SimpleObject {
 	 * // Output would be (kb): 1
 	 * ```
 	 *
-	 * @param int    $bytes   Size in bytes that should be converted into specified
-	 *                        in "$to_unit" level
-	 * @param string $to_unit Represents abbreviation of unit-type into which the value of "$bytes"
-	 *                        should be converted to
+	 * @param string|int $bytes   Size in bytes that should be converted into specified
+	 *                            in "$to_unit" level
+	 * @param string     $to_unit Represents abbreviation of unit-type into which
+	 *                            the value of "$bytes" should be converted to
 	 *
-	 * @return float Resulting value of "$to_unit" level as a float number
-	 * @throws \spaf\simputils\exceptions\NonExistingDataUnit
-	 * @throws \spaf\simputils\exceptions\UnspecifiedDataUnit
+	 * @return BigNumber Resulting value of "$to_unit" level as a float number
+	 *
+	 * @throws \spaf\simputils\exceptions\NonExistingDataUnit Unit does not exist, not recognized
+	 * @throws \spaf\simputils\exceptions\RedefUnimplemented  Redefinable component is not defined
+	 * @throws \spaf\simputils\exceptions\UnspecifiedDataUnit Unit was not specified or missing
 	 * @see \spaf\simputils\Data::unitTo()
 	 */
 	protected static function bytesTo(string|int $bytes, string $to_unit): BigNumber {
@@ -410,8 +431,9 @@ class DataUnit extends SimpleObject {
 	 * @return BigNumber|string|null String with the resulting measure and
 	 *                               correctly abbreviated level
 	 *
-	 * @throws \spaf\simputils\exceptions\NonExistingDataUnit
-	 * @throws \spaf\simputils\exceptions\UnspecifiedDataUnit
+	 * @throws \spaf\simputils\exceptions\NonExistingDataUnit Unit does not exist, not recognized
+	 * @throws \spaf\simputils\exceptions\RedefUnimplemented  Redefinable component is not defined
+	 * @throws \spaf\simputils\exceptions\UnspecifiedDataUnit Unit was not specified or missing
 	 */
 	public static function humanReadable(BigNumber|int|string $value): null|BigNumber|string {
 		$res = '';

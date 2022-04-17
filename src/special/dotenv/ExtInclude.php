@@ -11,8 +11,8 @@ use spaf\simputils\generic\BasicDotEnvCommentExt;
  *      #: include /tmp/my-path-omg.txt
  * ```
  *
- * FIX  Unfinished. Proceed with comment-extensions after the current pull-request is resolved.
- * FIX  Maybe define the full format for the extension params, will be better!
+ * TODO Unfinished. Proceed with comment-extensions after the current pull-request is resolved.
+ * TODO Maybe define the full format for the extension params, will be better!
  * @codeCoverageIgnore
  */
 class ExtInclude extends BasicDotEnvCommentExt {

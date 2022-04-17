@@ -35,5 +35,6 @@ abstract class BasicPrism extends SimpleObject {
 	public static function wrap(object $target_object) {
 		$self = static::createDummy();
 		$self->init($target_object);
+		return $self;
 	}
 }

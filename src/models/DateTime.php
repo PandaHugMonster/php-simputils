@@ -82,7 +82,7 @@ class DateTime extends FixUpDateTime {
 
 	/**
 	 *
-	 * FIX  Implement caching of the value
+	 * TODO Implement caching of the value
 	 * @return \spaf\simputils\models\Date|string
 	 */
 	#[Property('date')]
@@ -92,7 +92,7 @@ class DateTime extends FixUpDateTime {
 
 	/**
 	 *
-	 * FIX  Implement caching of the value
+	 * TODO Implement caching of the value
 	 * @return \spaf\simputils\models\Time|string
 	 */
 	#[Property('time')]
@@ -277,7 +277,6 @@ class DateTime extends FixUpDateTime {
 	}
 
 	public function toJson(?bool $pretty = null, bool $with_class = false): string {
-//		return json_encode($this->for_user);
 		// TODO Implement optional choice of "for_*"
 		return json_encode($this->for_system);
 	}

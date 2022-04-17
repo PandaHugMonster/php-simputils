@@ -134,7 +134,7 @@ use function uasort;
  * identical by functionality. `box()` is just a shortcut for {@see PHP::box()}, and `PHP::box()`
  * is a shortcut for `new Box()`.
  *
- * FIX  Implement switchable on/off for silent "null" instead of exception return
+ * TODO Implement switchable on/off for silent "null" instead of exception return
  *
  * @package spaf\simputils\generic
  *
@@ -198,20 +198,6 @@ class Box extends ArrayObject {
 		// TODO Improve flipping so it would hash objects when possible for keys
 		return new static(array_flip((array) $this));
 	}
-
-//	/**
-//	 * Determines if the given array is a list
-//	 *
-//	 * An array is considered a list if its keys consist of consecutive
-//	 * numbers from 0 to count($array)-1.
-//	 *
-//	 * @return bool
-//	 */
-//	#[Shortcut('\array_is_list()')]
-//	#[Property('isList')]
-//	protected function getIsList(): bool {
-//		return array_is_list((array) $this);
-//	}
 
 	/**
 	 * Returns key by the specified value
@@ -353,59 +339,71 @@ class Box extends ArrayObject {
 	}
 
 	/**
-	 * Filtering elements
-	 *
-	 * TODO Add more intuitive filtering ways
-	 *
-	 * @param \Closure|callable|null $callback Callback that receives $val, [$key, $self]
-	 *                                         arguments, and should return "true" if value
-	 *                                         should be resent in the result, and false
-	 *                                         otherwise
-	 *
-	 * @return static A new box instance with filtered elements
-	 * @codeCoverageIgnore
-	 * FIX  Subject to elimination, or significant modification
-	 */
-	public function filter(null|Closure|callable $callback = null): static {
-		if (is_null($callback)) {
-			return $this->clone();
-		}
-
-		$res = new static;
-		foreach ($this as $key => $val) {
-			if ($callback($val, $key, $this)) {
-				$res[$key] = $val;
-			}
-		}
-		return $res;
-	}
-
-	/**
 	 * Iterates through elements with a callback
 	 *
-	 * Additional perk - you can filter elements if you return null instead of array of 2 elements!
+	 * If you return:
+	 *  1.  `null` - then the element will be removed from the array
+	 *  2.  `['some_value']` or `[0 => 'some_value']` or `['value' => 'some_value']`
+	 *      - will modify just value ("some_value" will be the new value)
+	 *  4.  `['key' => 'some_key']` or `[1 => 'some_key']` - will modify just the key
+	 *  5.  `['some_value', 'some_key']` or `['value' => 'some_value', 'key' => 'some_key']` or
+	 *      `[0 => 'some_value', 1 => 'some_key']` - will modify both key and value
+	 *  5.  To avoid modification of anything - return just an empty array `[]` - this will
+	 *      preserve original key and value.
 	 *
-	 * @param \Closure|callable|null $callback Callback that should return array of 2
-	 *                                         elements [$key, $value] that should be
-	 *                                         included into the result.
-	 *                                         Returning empty value like null or empty array
-	 *                                         will filter the whole element out
+	 * Simple example:
+	 * ```php
+	 *  $box = bx([1, 2, 3, 'test key' => 'test val'])
+	 *      ->each( fn($v) => [Str::upper("test_{$v}")] );
+	 *  // $box will contain:
+	 *  //  spaf\simputils\models\Box Object
+	 *      (
+	 *          [0] => TEST_1
+	 *          [1] => TEST_2
+	 *          [2] => TEST_3
+	 *          [test key] => TEST_TEST VAL
+	 *      )
+	 * ```
+	 *
+	 * @param null|Closure|callable|string $callback Callback that should return array of 2
+	 *                                               elements [$key, $value] that should be
+	 *                                               included into the result.
+	 *                                               Returning empty value like null or empty array
+	 *                                               will filter the whole element out
 	 *
 	 * @return static A new box instance with processed elements
+	 *
+	 * TODO Implement direct "$value" and "$key" callbacks for direct application
+	 *      of "Str::upper".
 	 */
-	public function each(null|Closure|callable $callback = null): static {
-		if (is_null($callback)) {
-			return $this->clone();
-		}
+	#[Affecting]
+	public function each(null|Closure|callable|string $callback = null): self {
 		$res = new static;
-		foreach ($this as $key => $val) {
-			$sub_res = $callback($val, $key, $this);
-			if (!empty($sub_res)) {
-				[$key, $val] = $sub_res;
-				$res[$key] = $val;
+		if (!is_null($callback)) {
+			$callback = static::clearClosure($callback);
+
+			foreach ($this as $key_orig => $val_orig) {
+				$sub_res = $callback($val_orig, $key_orig, $this);
+				if (!is_null($sub_res)) {
+					$val = match (true) {
+						array_key_exists('value', $sub_res) => $sub_res['value'],
+						array_key_exists(0, $sub_res) => $sub_res[0],
+						default => $val_orig, // @codeCoverageIgnore
+					};
+					$key = match (true) {
+						array_key_exists('key', $sub_res) => $sub_res['key'],
+						array_key_exists(1, $sub_res) => $sub_res[1],
+						default => $key_orig, // @codeCoverageIgnore
+					};
+
+					$res[$key] = $val;
+				}
 			}
+
+			$this->exchangeArray($res);
 		}
-		return $res;
+
+		return $this;
 	}
 
 	/**
@@ -413,7 +411,7 @@ class Box extends ArrayObject {
 	 *
 	 * @param int|string ...$keys Keys of items that should be remove/unset
 	 *
-	 * FIX  Add "unsetByValue" and "removeDuplicates"
+	 * TODO Add "unsetByValue"
 	 * @return $this
 	 */
 	public function unsetByKey(int|string ...$keys): self {
@@ -458,7 +456,6 @@ class Box extends ArrayObject {
 	 * It's not recursive!
 	 *
 	 *
-	 * FIX  Implement "mergeFromRecursive" and "mergeFromStrict" at some point
 	 * @param self|array ...$boxes Boxes/Arrays that should be merged
 	 *
 	 * @return self Returns self reference
@@ -485,7 +482,7 @@ class Box extends ArrayObject {
 	 *
 	 * TODO Add a flag for case-independent check
 	 *
-	 * @param string $key
+	 * @param string $key Key that have to be checked
 	 *
 	 * @return bool
 	 */
@@ -512,159 +509,7 @@ class Box extends ArrayObject {
 		return (array) $this;
 	}
 
-	/**
-	 * Applies callbacks to keys and values
-	 *
-	 * Keys and values would be modified inside of the box
-	 *
-	 * The callback will received `$k`, `$v` and `$box` params, and
-	 * should return `$k` and `$v` or `null`.
-	 * In case `null` is returned, the element will be removed from the box.
-	 *
-	 * Important: avoid modification of `$box` reference inside the callback,
-	 * in the most cases you would receive unexpected result!
-	 *
-	 * `cb` stands for "callback"
-	 *
-	 * ```php
-	 *  function myCallback($k, $v) {
-	 *      if ($v instanceof Version) {
-	 *          $v = " ! {$v} ! ";
-	 *      }
-	 *      return [$k, $v];
-	 *  }
-	 *
-	 *  $res = bx([
-	 *      'Test 1' => 'aaa',
-	 *      'Test 2' => now(),
-	 *      'Test 3' => new Version('1.2.3'),
-	 *      'Test 4' => 'bbb',
-	 *      'Test 5' => 99,
-	 *      100500 => 'text',
-	 *      'Test 6' => 100,
-	 *  ]);
-	 *
-	 *  $res->cb('myCallback');
-	 *  // From PHP 8.1 you can use shorter callback reference:
-	 *  // $res->cb( myCallback(...) );
-	 *
-	 *  pd("{$res->toJson(true)}");
-	 *
-	 * ```
-	 *
-	 * @param callable|array|string ...$callbacks
-	 *
-	 * @return $this
-	 */
-	#[Affecting]
-	public function cb(callable|array|string ...$callbacks): self {
-		foreach ($callbacks as $callback) {
-			$callback = $this->clearClosure($callback);
-
-			$to_unset = new static;
-			$to_replace = new static;
-			foreach ($this as $k => $v) {
-				$res = $callback($v, $k, $this);
-				if (is_null($res)) {
-					$to_unset[] = $k;
-				} else {
-					$to_replace[$k] = $res;
-				}
-			}
-			foreach ($to_unset as $k) {
-				$this->unsetByKey($k);
-			}
-			foreach ($to_replace as $orig_k => [$k, $v]) {
-				if ($k !== $orig_k) {
-					$this->unsetByKey($orig_k);
-				}
-				$this[$k] = $v;
-			}
-		}
-		return $this;
-	}
-
-	/**
-	 * Applies callbacks to keys
-	 *
-	 * Inside it uses {@see self::cb()}
-	 *
-	 * Example:
-	 * ```php
-	 *  $res = bx([
-	 *      'Test 1' => 'aaa',
-	 *      'Test 2' => now(),
-	 *      'Test 3' => new Version('1.2.3'),
-	 *      'Test 4' => 'bbb',
-	 *      'Test 5' => 99,
-	 *      100500 => 'text',
-	 *      'Test 6' => 100,
-	 *  ]);
-	 *
-	 * 	// Or for PHP 8.1 and above:    `$res->cbKeys(Str::upper(...));`
-	 *  $res->cbKeys([Str::class, 'upper']);
-	 *
-	 * ```
-	 *
-	 *
-	 * @param callable|array|string ...$callbacks
-	 *
-	 * @return $this
-	 */
-	#[Affecting]
-	public function cbKeys(callable|array|string ...$callbacks): self {
-		foreach ($callbacks as $callback) {
-			$callback = $this->clearClosure($callback);
-
-			// FIX  Issue, it does add new keys, and not modifying those
-			$this->cb(function ($v, $k) use ($callback) {
-				return [$callback($k), $v];
-			});
-		}
-
-		return $this;
-	}
-
-	/**
-	 * Applies callbacks to values
-	 *
-	 * Inside it uses {@see self::cb()}
-	 *
-	 * Example:
-	 * ```php
-	 *  $res = bx([
-	 *      'Test 1' => 'aaa',
-	 *      'Test 2' => now(),
-	 *      'Test 3' => new Version('1.2.3'),
-	 *      'Test 4' => 'bbb',
-	 *      'Test 5' => 99,
-	 *      100500 => 'text',
-	 *      'Test 6' => 100,
-	 *  ]);
-	 *
-	 * 	// Or for PHP 8.1 and above:    `$res->cbValues(Str::upper(...));`
-	 *  $res->cbValues([Str::class, 'upper']);
-	 *
-	 * ```
-	 *
-	 *
-	 * @param callable|array|string ...$callbacks
-	 *
-	 * @return $this
-	 */
-	#[Affecting]
-	public function cbValues(callable|array|string ...$callbacks): self {
-		foreach ($callbacks as $callback) {
-			$callback = $this->clearClosure($callback);
-
-			$this->cb(function ($v, $k) use ($callback) {
-				return [$k, $callback($v)];
-			});
-		}
-		return $this;
-	}
-
-	protected function clearClosure($callback) {
+	protected static function clearClosure($callback) {
 		if (is_array($callback) || is_string($callback)) {
 			$callback = Closure::fromCallable($callback); // @codeCoverageIgnore
 		}
@@ -682,8 +527,8 @@ class Box extends ArrayObject {
 	 *  );
 	 * ```
 	 *
-	 * @param array|Box $keys
-	 * @param array|Box $values
+	 * @param array|Box $keys   Keys to combine
+	 * @param array|Box $values Values to combine
 	 *
 	 * @return static
 	 */
@@ -693,7 +538,7 @@ class Box extends ArrayObject {
 	}
 
 	/**
-	 * @param int $num
+	 * @param int $num Amount of random keys
 	 *
 	 * @return \Generator
 	 * @codeCoverageIgnore
@@ -710,7 +555,7 @@ class Box extends ArrayObject {
 	}
 
 	/**
-	 * @param int $num
+	 * @param int $num Amount of random values
 	 *
 	 * @return \Generator
 	 * @codeCoverageIgnore
@@ -736,12 +581,10 @@ class Box extends ArrayObject {
 	}
 
 	/**
-	 * @param int $num
-	 *
 	 * @return false|mixed
 	 * @codeCoverageIgnore
 	 */
-	public function randValue(int $num = 1) {
+	public function randValue() {
 		$values = $this->values;
 		return $values[Math::rand(0, $values->size - 1)];
 	}
@@ -838,13 +681,14 @@ class Box extends ArrayObject {
 	/**
 	 * Sort of any kind
 	 *
-	 * @param bool|null $descending
-	 * @param bool|null $by_values
-	 * @param bool|null $case_sensitive
-	 * @param bool|null $natural
-	 * @param callable|null $callback
+	 * @param bool      $descending     Descending/Ascending
+	 * @param bool      $by_values      By values/keys
+	 * @param bool      $case_sensitive Case sensitive/insensitive
+	 * @param bool      $natural        Natural sorting or not
+	 * @param ?callable $callback       Use a callback
 	 *
-	 * FIX  Make sure all the sortings are tested and documented properly
+	 * TODO Make sure all the sortings are tested and documented properly
+	 *
 	 * @return self
 	 */
 	public function sort(
@@ -927,6 +771,9 @@ class Box extends ArrayObject {
 	 */
 	public function ___setup(array $data): static {
 		foreach ($data as $key => $val) {
+			if ($key === PHP::$serialized_class_key_name) {
+				continue;
+			}
 			$this[$key] = $val;
 		}
 		return $this;
@@ -939,7 +786,7 @@ class Box extends ArrayObject {
 	 *
 	 * @codeCoverageIgnore
 	 * @return array
-	 * @throws \spaf\simputils\exceptions\InfiniteLoopPreventionExceptions
+	 * @throws \spaf\simputils\exceptions\InfiniteLoopPreventionExceptions ILP Exception
 	 */
 	public function __debugInfo(): array {
 		return $this->toArray();

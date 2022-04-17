@@ -16,7 +16,6 @@ use spaf\simputils\models\files\apps\TextProcessor;
 /**
  * Basic resource abstract model
  * TODO Currently only "local" resources/files are supported. In the future it will be extended
- * FIX  The architecture must be reviewed and adjusted before release
  *
  * @property-read ?string $mime_type
  * @property-read int $size Size in bytes
@@ -150,8 +149,10 @@ abstract class BasicResource extends SimpleObject {
 	/**
 	 * @codeCoverageIgnore
 	 * @return string|null
-	 * @throws \spaf\simputils\exceptions\NonExistingDataUnit
-	 * @throws \spaf\simputils\exceptions\UnspecifiedDataUnit
+	 * @throws \spaf\simputils\exceptions\NonExistingDataUnit Data Unit that is specified
+	 *                                                        is not recognized
+	 * @throws \spaf\simputils\exceptions\RedefUnimplemented  Redefinable component is not defined
+	 * @throws \spaf\simputils\exceptions\UnspecifiedDataUnit No data unit is specified
 	 */
 	#[Property('size_hr')]
 	protected function getSizeHuman(): ?string {

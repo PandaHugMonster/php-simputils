@@ -2,6 +2,7 @@
 
 namespace spaf\simputils\generic;
 
+use spaf\simputils\attributes\DebugHide;
 use spaf\simputils\attributes\markers\Shortcut;
 use spaf\simputils\attributes\Property;
 use spaf\simputils\DT;
@@ -58,10 +59,15 @@ abstract class BasicInitConfig extends SimpleObject {
 	public ?string $code_root = null;
 	public ?string $working_dir = null;
 	public array|Box $disable_init_for = [];
+
+	#[DebugHide]
 	protected null|string $_l10n_name = null;
+	#[DebugHide]
 	protected mixed $_l10n = null;
 
+	#[DebugHide]
 	protected array $_successful_init_blocks = [];
+	#[DebugHide]
 	protected bool $_is_already_setup = false;
 
 	#[Property('default_tz')]
@@ -76,11 +82,6 @@ abstract class BasicInitConfig extends SimpleObject {
 		DT::setDefaultTimeZone($tz);
 	}
 
-	#[Property('l10n_name')]
-	protected function getL10nName(): mixed {
-		return $this->_l10n_name;
-	}
-
 	#[Property('l10n')]
 	protected function getL10n(): mixed {
 		return $this->_l10n;
@@ -93,11 +94,11 @@ abstract class BasicInitConfig extends SimpleObject {
 			$this->_l10n_name = $val; // @codeCoverageIgnore
 		} else {
 			if (Str::is($val)) {
-				$this->_l10n_name = $val;
 
 				$class = PHP::redef(L10n::class);
 				$l10n_name = Str::upper($val);
 				$path = FS::path(PHP::frameworkDir(), 'data', 'l10n', "{$l10n_name}.json");
+				/** @var L10n $val */
 				$val = $class::createFrom($path);
 
 				$custom_file = FS::file(
@@ -108,6 +109,7 @@ abstract class BasicInitConfig extends SimpleObject {
 						$val, 'setup', $custom_file->content ?? [] // @codeCoverageIgnore
 					); // @codeCoverageIgnore
 				}
+				$val->name = $l10n_name;
 			}
 
 			/** @var L10n $val */

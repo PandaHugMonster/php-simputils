@@ -13,6 +13,7 @@ class OthersTest extends TestCase {
 
 	/**
 	 * @covers \spaf\simputils\models\L10n
+	 * @covers \spaf\simputils\traits\MetaMagic
 	 * @return void
 	 */
 	function testL10n() {

@@ -394,6 +394,11 @@ trait PropertiesTrait {
 					}
 					continue;
 				}
+
+				if ($attr->getName() === 'ReturnTypeWillChange') {
+					continue;
+				}
+
 				$attr_instance = $attr->newInstance();
 				$is_applicable = $attr_instance instanceof BasicOutputControlAttribute
 					&& $attr_instance->isApplicable($extract_attr_on, $debug_hide_attr_on);

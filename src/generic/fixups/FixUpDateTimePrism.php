@@ -16,9 +16,6 @@ use spaf\simputils\traits\ForOutputsTrait;
 abstract class FixUpDateTimePrism extends BasicPrism {
 	use ForOutputsTrait;
 
-	/** @var DateTime $_object */
-	protected $_object;
-
 	public function __construct(DateTime|string $datetime = "now", ?DateTimeZone $timezone = null) {
 		$class_dt = PHP::redef(DateTime::class);
 		if ($datetime instanceof DateTime) {

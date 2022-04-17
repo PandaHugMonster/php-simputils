@@ -28,17 +28,16 @@ class L10n extends SimpleObject {
 	 *
 	 * @return void
 	 * @throws \spaf\simputils\exceptions\RedefUnimplemented Redefinable component is not defined
-	 * @noinspection PhpUndefinedMethodInspection
 	 */
 	public function doSetUp() {
 		$class = PHP::redef(DateTime::class);
-		$class::_metaMagic($class, '___l10n', $this->DateTime);
+		PHP::metaMagicSpell($class, 'l10n', $this->DateTime);
 		if (!empty($this?->DateTime['user_default_tz'])) {
 			date_default_timezone_set($this->DateTime['user_default_tz']);
 		}
 
 		$class = PHP::redef(DataUnit::class);
-		$class::_metaMagic($class, '___l10n', $this->DataUnit);
+		PHP::metaMagicSpell($class, 'l10n', $this->DataUnit);
 	}
 
 	public static function redefComponentName(): string {

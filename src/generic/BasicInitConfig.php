@@ -104,8 +104,8 @@ abstract class BasicInitConfig extends SimpleObject {
 					FS::path($this->working_dir, 'data', 'l10n', "{$l10n_name}.json")
 				);
 				if ($custom_file->exists) {
-					static::_metaMagic( // @codeCoverageIgnore
-						$val, '___setup', $custom_file->content ?? [] // @codeCoverageIgnore
+					PHP::metaMagicSpell( // @codeCoverageIgnore
+						$val, 'setup', $custom_file->content ?? [] // @codeCoverageIgnore
 					); // @codeCoverageIgnore
 				}
 			}
@@ -257,7 +257,7 @@ abstract class BasicInitConfig extends SimpleObject {
 				}
 			}
 		} else {
-			throw new InitConfigAlreadyInitialized(
+			throw new InitConfigAlreadyInitialized( // @codeCoverageIgnore
 				'The InitConfig object is already setup and initialized.' .
 				'It\'s not possible to initialize it more than once.'
 			);

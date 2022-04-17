@@ -3,11 +3,12 @@
   "description": "Simple minimal but useful set of utils (properties, strings, datetimes, etc.) ",
   "keywords": [
     "simple", "utils", "micro", "framework", "quick prototyping",
-    "properties", "phpinfo", "php", "easy cast", "meta-magic", "files",
-    "dotenv", "csv", "json", "namespaced", "routines", "data unit conversion",
-    "box", "wrappers", "library", "validation", "normalization", "debug", "quick",
-    "fields", "attributes", "datetime", "date", "time", "timezone", "tz", "serialization",
-    "deserialization", "set", "math set", "optimization", "light", "version"
+    "properties", "phpinfo", "php", "easy cast", "meta-magic", "files", "dirs", "env",
+    "dotenv", "csv", "json", "namespace", "routines", "data unit conversion",
+    "box", "wrappers", "library", "validation", "normalization", "norm", "valid", "debug",
+    "quick", "fields", "attributes", "datetime", "date", "time", "timezone", "tz",
+    "serialization", "deserialization", "set", "math sets", "optimization", "light",
+    "version", "array-object"
   ],
   "minimum-stability": "stable",
   "license": "MIT",

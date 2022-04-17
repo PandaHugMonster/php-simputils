@@ -50,7 +50,7 @@ class Boolean {
 		return $sub_res;
 	}
 
-	public static function to(mixed $val): string {
+	public static function to(mixed $val): mixed {
 		return static::from($val)?static::$to_yes:static::$to_no;
 	}
 }

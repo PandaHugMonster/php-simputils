@@ -134,6 +134,7 @@ class ValidatorsTest extends TestCase {
 	 * @dataProvider stringNormalizerData
 	 *
 	 * @uses \spaf\simputils\Str
+	 * @uses \spaf\simputils\Boolean
 	 * @return void
 	 */
 	function testStringNormalizers($expected, $val) {
@@ -160,6 +161,7 @@ class ValidatorsTest extends TestCase {
 	 * @uses \spaf\simputils\traits\SimpleObjectTrait::_simpUtilsPrepareProperty
 	 * @uses \spaf\simputils\traits\SimpleObjectTrait::_simpUtilsPropertyBatchMethodGet
 	 * @uses \spaf\simputils\traits\SimpleObjectTrait::getAllTheLastMethodsAndProperties
+	 * @uses \spaf\simputils\Boolean
 	 *
 	 *
 	 * @return void

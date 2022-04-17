@@ -71,10 +71,11 @@ class Str {
 	 * TODO Add optional translations
 	 * @return string|null
 	 * @see \spaf\simputils\Boolean::from()
+	 * @see \spaf\simputils\Boolean::to()
 	 */
 	public static function from(mixed $value): ?string {
 		if ($value === true || $value === false) {
-			return $value ?'true':'false';
+			return Boolean::to($value);
 		}
 
 		return "$value";

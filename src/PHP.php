@@ -18,6 +18,7 @@ use spaf\simputils\exceptions\RedefUnimplemented;
 use spaf\simputils\exceptions\RedefWrongReference;
 use spaf\simputils\exceptions\SerializationProblem;
 use spaf\simputils\exceptions\UnBoxable;
+use spaf\simputils\exceptions\UnsupportedMetaMagic;
 use spaf\simputils\generic\BasicInitConfig;
 use spaf\simputils\models\Box;
 use spaf\simputils\models\InitConfig;
@@ -106,7 +107,7 @@ class PHP {
 	 */
 	public static function simpUtilsVersion(): Version|string {
 		$class = static::redef(Version::class);
-		return new $class('0.3.4', 'SimpUtils');
+		return new $class('1.0.0', 'SimpUtils');
 	}
 
 	/**
@@ -138,7 +139,8 @@ class PHP {
 		$config->code_root = $config->code_root ?? debug_backtrace()[0]['file'];
 		$config->working_dir = $config->working_dir ?? $config->code_root;
 
-		$config->___setup($args ?? []);
+//		$config->___setup($args ?? []);
+		static::metaMagicSpell($config, 'setup', $args ?? []);
 
 		// TODO Implement code below into config through Properties
 		if (!is_dir($config->code_root)) {
@@ -157,6 +159,18 @@ class PHP {
 		return $config;
 	}
 
+	public static function metaMagicSpell(string|object $ref, $spell, ...$args) {
+		$spell = Str::removeStarting($spell, '___');
+		$spell = "___{$spell}";
+		if ((static::isClass($ref) || is_object($ref)) && method_exists($ref, '_metaMagic')) {
+			return $ref::_metaMagic($ref, $spell, ...$args);
+//		} else if (is_object($ref) && method_exists($ref, '_metaMagic')) {
+//			return $ref->_metaMagic($ref, $spell, ...$args);
+		}
+
+		throw new UnsupportedMetaMagic('This meta-magic spell is unsupported/unknown');
+	}
+
 	public static function getInitConfig(?string $name = null): ?BasicInitConfig {
 		return CodeBlocksCacheIndex::getInitBlock($name);
 	}
@@ -170,6 +184,7 @@ class PHP {
 	 *
 	 * @return ?string
 	 *
+	 * FIX  Important
 	 * TODO Implement recursive toJson control to objects (So object can decide,
 	 *      whether it wants to be a string, an array or a number).
 	 *
@@ -228,10 +243,6 @@ class PHP {
 		if (empty($class)) {
 			$class = static::determineSerializedClass($str);
 		}
-
-//		if (empty($class))
-//			// TODO Fix this exception to a more appropriate one
-//			throw new Exception('Cannot determine class for deserialization');
 
 		if (is_null($enforced_type)) {
 			$enforced_type = static::$serialization_mechanism;
@@ -478,7 +489,7 @@ class PHP {
 	}
 
 	/**
-	 * Creates dummy object (without calling __construct)
+	 * Creates dummy object (without calling constructor)
 	 *
 	 * This way of creating objects should be avoided in the most of the cases. It's needed
 	 * only if you are working with serialization-alike functionality.
@@ -496,7 +507,7 @@ class PHP {
 	}
 
 	/**
-	 * Determines whether value is array-alike (can be treated as array)
+	 * Determines whether value is array-alike (can be treated as an array)
 	 *
 	 * Basically it checks presence of {@see Iterator} + {@see ArrayAccess} interfaces (must have
 	 * both), or if the variable type is "array".
@@ -669,37 +680,49 @@ class PHP {
 	/**
 	 * Create a stack object
 	 *
-	 * @param mixed  ...$items_and_conf All the items that should be pushed into the newly created
-	 *                                  stack object. Must not have "keys"
-	 * @param string $type              This key should be explicitly specified. Should contain
-	 *                                  "fifo" or "lifo", by default is "lifo".
+	 * @param Box|StackLifo|StackFifo|array|null $items              All the items that should
+	 *                                                               be pushed into
+	 *                                                               the newly created stack object.
+	 *                                                               Must not have "keys".
+	 * @param mixed                              ...$merger_and_conf Merger and  keyed-params
+	 * @param string                             $type               This key should be explicitly
+	 *                                                               specified. Should contain
+	 *                                                               "fifo" or "lifo",
+	 *                                                               by default is "lifo".
 	 *
+	 * TODO Improve stack processing, for example if Stack provided, then do not create a new one
 	 * @return \spaf\simputils\models\StackFifo|\spaf\simputils\models\StackLifo
 	 */
-	public static function stack(mixed ...$items_and_conf): StackFifo|StackLifo {
+	public static function stack(
+		Box|StackLifo|StackFifo|array|null $items = null,
+		mixed ...$merger_and_conf
+	): StackFifo|StackLifo {
 		$class_stack_lifo = static::redef(StackLifo::class);
 		$class_stack_fifo = static::redef(StackFifo::class);
+		$items = $items ?? [];
 
-		$items_and_conf = static::box($items_and_conf);
-		$type = $items_and_conf->get('type', static::STACK_LIFO);
-		if ($items_and_conf->containsKey('type')) {
-			$items_and_conf = $items_and_conf->unsetByKey('type')->values;
+		$merger_and_conf = static::box($merger_and_conf);
+		$type = $merger_and_conf->get('type', static::STACK_LIFO);
+		if ($merger_and_conf->containsKey('type')) {
+			$merger_and_conf = $merger_and_conf->unsetByKey('type')->values;
 		}
+		$items = static::box($items, $merger_and_conf);
 		$obj = $type === static::STACK_LIFO
-			?new $class_stack_lifo($items_and_conf)
-			:new $class_stack_fifo($items_and_conf);
+			?new $class_stack_lifo($items)
+			:new $class_stack_fifo($items);
 		return $obj;
 	}
 
 	/**
 	 * Creating "Set"
 	 *
-	 * @param mixed ...$data Arguments that will be elements of the Set
+	 * @param Box|array $items Arguments that will be elements of the Set
 	 *
 	 */
-	public static function set(mixed ...$data): Set {
+	public static function set(Box|array|null $items = null): Set {
 		$class = static::redef(Set::class);
-		return new $class($data);
+		$items = $items ?? [];
+		return new $class($items);
 	}
 
 	/**

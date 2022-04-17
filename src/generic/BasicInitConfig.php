@@ -185,7 +185,8 @@ abstract class BasicInitConfig extends SimpleObject {
 	public null|array|Box $redefinitions = [];
 
 	public function __construct(?array $args = null) {
-		$this->___setup($args ?? []);
+//		$this->___setup($args ?? []);
+		PHP::metaMagicSpell($this, 'setup', $args ?? []);
 	}
 
 	/**

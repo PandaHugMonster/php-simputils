@@ -695,7 +695,7 @@ class PHPHelperTest extends TestCase {
 		$this->assertNotEmpty(PHP::env('TEST_VAR_IS_OK'));
 		$this->assertEquals('TrUe It iS', PHP::env('TEST_VAR_IS_OK'));
 
-		$stack = PHP::stack(1, 2, 3, 4);
+		$stack = PHP::stack([1, 2, 3, 4]);
 		$this->assertInstanceOf(StackLifo::class, $stack);
 
 		$this->assertEquals(
@@ -707,7 +707,7 @@ class PHPHelperTest extends TestCase {
 		$this->assertEquals(3, $stack->pop());
 		$this->assertEquals(2, $stack->size);
 
-		$stack = PHP::stack(1, 2, 3, 4, type: 'fifo');
+		$stack = PHP::stack([1, 2, 3, 4], type: 'fifo');
 		$this->assertInstanceOf(StackFifo::class, $stack);
 
 		$this->assertIsBool(PHP::info()->hasExtension('Core'));

@@ -249,8 +249,10 @@ trait MetaMagic {
 
 		$exclude_fields[] = '_simp_utils_property_batch_storage';
 
+		// TODO Improve meta-magic spell availability
 		if (method_exists($this, '___extractFields')) {
-			$sub = $this->___extractFields(true, false);
+//			$sub = $this->___extractFields(true, false);
+			$sub = PHP::metaMagicSpell($this, 'extractFields', true, false);
 			foreach ($sub as $k => $v) {
 				// TODO Re-evaluate the exclusion mechanism
 				if (in_array($k, $exclude_fields) || $v instanceof BasicPrism) {
@@ -350,7 +352,8 @@ trait MetaMagic {
 //		} else if (PHP::classUsesTrait($this, ForOutputsTrait::class)) {
 //			$sub = $this->for_system;
 		} else if (method_exists($this, '___extractFields')) {
-			$fields = $this->___extractFields(true, false);
+//			$fields = $this->___extractFields(true, false);
+			$fields = PHP::metaMagicSpell($this, 'extractFields', true, false);
 			$sub = $recursively
 				?$this->_iterateConvertObjectsAndArrays($fields, $recursively, $with_class)
 				:$fields;
@@ -483,7 +486,8 @@ trait MetaMagic {
 			if (is_array($val) && !empty($val[PHP::$serialized_class_key_name])) {
 				$obj = PHP::createDummy($val[PHP::$serialized_class_key_name]);
 				unset($val[PHP::$serialized_class_key_name]);
-				$val = $obj->___setup($val);
+				$val = PHP::metaMagicSpell($obj, 'setup', $val);
+//				$val = $obj->___setup($val);
 			}
 			$this->$key = $val;
 		}
@@ -573,6 +577,8 @@ trait MetaMagic {
 			'___serialize' => $context->___serialize(),
 			'___deserialize' => $context->___deserialize(...$spell),
 			'___setup' => $context->___setup(...$spell),
+			'___extractFields' => $context->___extractFields(...$spell),
+
 			'___l10n' => $context::___l10n(...$spell),
 		};
 		return $res;

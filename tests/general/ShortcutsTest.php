@@ -168,10 +168,10 @@ class ShortcutsTest extends TestCase {
 	 */
 	function testStacks() {
 
-		$stack = stack(1, 2, 3, 4);
+		$stack = stack([1, 2, 3, 4]);
 		$this->assertInstanceOf(StackLifo::class, $stack);
 
-		$stack = stack(1, 2, 3, 4, type: PHP::STACK_FIFO);
+		$stack = stack([1, 2, 3, 4], type: PHP::STACK_FIFO);
 		$this->assertInstanceOf(StackFifo::class, $stack);
 
 	}
@@ -249,7 +249,7 @@ class ShortcutsTest extends TestCase {
 	 * @return void
 	 */
 	function testPHPSet() {
-		$set = PHP::set(1, 2, 3, 3, 4, 4);
+		$set = PHP::set([1, 2, 3, 3, 4, 4]);
 		$this->assertInstanceOf(Set::class, $set);
 	}
 }

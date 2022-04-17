@@ -252,8 +252,8 @@ class BoxTest extends TestCase {
 	}
 
 	function testStacks() {
-		$stack_l = PHP::stack(1, 2, 3, 4, type: 'lifo');
-		$stack_f = PHP::stack(1, 2, 3, 4, type: 'fifo');
+		$stack_l = PHP::stack([1, 2, 3, 4], type: 'lifo');
+		$stack_f = PHP::stack([1, 2, 3, 4], type: 'fifo');
 
 		// Yes, the string/content representation is no different
 		$this->assertEquals("{$stack_l}", "{$stack_f}");
@@ -304,7 +304,7 @@ class BoxTest extends TestCase {
 	 * @return void
 	 */
 	function testSets() {
-		$set = PHP::set('test', 'test', 'test', 'test2', 'test2', 'test3');
+		$set = PHP::set(['test', 'test', 'test', 'test2', 'test2', 'test3']);
 
 		$this->assertInstanceOf(Set::class, $set);
 		$this->assertEquals(3, $set->size);

@@ -110,6 +110,37 @@ class PHP {
 	}
 
 	/**
+	 * List of mime-types of PHP executables
+	 *
+	 * Only PHP-related mime-types!
+	 *
+	 * @return \spaf\simputils\models\Box
+	 */
+	static function listOfExecPhpMimeTypes(): Box {
+		return static::box([
+			'application/x-php', // This one usually preferable
+
+			'text/x-php',
+			'application/x-httpd-php', 'application/x-httpd-php-source', // Debian-related
+
+			'application/php', 'text/php' // if to follow IANA - those are not correct
+		]);
+	}
+
+	/**
+	 * List of file extensions of PHP executables
+	 *
+	 * @return \spaf\simputils\models\Box
+	 */
+	static function listOfExecPhpFileExtensions(): Box {
+		return static::box([
+			'php', // normal
+
+			'phps', 'php5', 'php4', 'php3', 'phtml' // just a few, list might be extended later
+		]);
+	}
+
+	/**
 	 * Initializer of the framework
 	 *
 	 * Should be called just once by any code-group (Main app, independent libraries)

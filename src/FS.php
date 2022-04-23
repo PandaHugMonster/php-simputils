@@ -3,6 +3,7 @@
 namespace spaf\simputils;
 
 use finfo;
+use spaf\simputils\attributes\markers\Shortcut;
 use spaf\simputils\exceptions\CannotDeleteDirectory;
 use spaf\simputils\generic\BasicResourceApp;
 use spaf\simputils\models\Dir;
@@ -18,6 +19,65 @@ use const DIRECTORY_SEPARATOR;
  * TODO Add real-path property and check if realpath is the same as specified.
  */
 class FS {
+
+	/**
+	 * Require (working-dir relative)
+	 *
+	 * @param ...$parts
+	 *
+	 * @return mixed
+	 */
+	#[Shortcut('require', 'but relative')]
+	static function require(...$parts) {
+		return require static::locate(...$parts);
+	}
+
+	/**
+	 * Include (working-dir relative)
+	 *
+	 * @param ...$parts
+	 *
+	 * @return mixed
+	 */
+	#[Shortcut('include', 'but relative')]
+	static function include(...$parts) {
+		return include static::locate(...$parts);
+	}
+
+	/**
+	 * Returns data from a file (PHP, or any other)
+	 *
+	 * It's always recommended to use this method for all in-code data gathering from files
+	 *
+	 * instead of `$t = require '........')` and instead of file objects usages
+	 * for other types of files (json, csv, xml, ...)
+	 *
+	 * This method is highly convenient, and comfortable to use.
+	 *
+	 * By default it uses `require` and not `include`.
+	 *
+	 * IMP  If file does not exist `null` is returned
+	 *
+	 * @param mixed ...$parts Path parts relative to the working-dir
+	 *
+	 * TODO Implement optional assoc arguments like "to use include instead of default require"
+	 *
+	 * @see FS::require()
+	 * @return mixed
+	 */
+	static function data(mixed ...$parts) {
+		$file = static::locate(...$parts);
+		$mt = PHP::listOfExecPhpMimeTypes();
+		$pe = PHP::listOfExecPhpFileExtensions();
+		if ($mt->containsValue($file->mime_type) || $pe->containsValue($file->extension)) {
+			if (!$file->exists) {
+				return null;
+			}
+			return static::require(...$parts);
+		}
+		// NOTE Non-php file
+		return $file?->content ?? null;
+	}
 
 	/**
 	 * Create file
@@ -381,7 +441,9 @@ class FS {
 	 *
 	 * @param string|null ...$parts Parts that should be joined depending on the platform
 	 *
-	 * TODO implement different plugins/modules/extensions support
+	 * TODO Implement assoc args as parameters. Implement such "working_dir" arg
+	 *      Implement such "working_dir" arg and implement "name" of init-config
+	 * TODO Maybe implement transparent support of files as arguments
 	 *
 	 * @return File|Dir
 	 */

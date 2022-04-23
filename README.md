@@ -40,6 +40,16 @@ I will be really happy hearing from you.
 
 ----
 
+## Changelog
+
+### 1.1.0
+
+ * Implemented `FS::require()`, `FS::include()` and `FS::data()`
+ * Implemented `PHP::listOfExecPhpFileExtensions()`, `PHP::listOfExecPhpMimeTypes()`
+
+
+----
+
 ## Documentation
 
 **Important note about the documentation**: Due to urgent need of the stable release, 

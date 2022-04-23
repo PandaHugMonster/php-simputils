@@ -23,24 +23,24 @@ class FS {
 	/**
 	 * Require (working-dir relative)
 	 *
-	 * @param ...$parts
+	 * @param mixed ...$parts Path parts
 	 *
 	 * @return mixed
 	 */
 	#[Shortcut('require', 'but relative')]
-	static function require(...$parts) {
+	static function require(mixed ...$parts) {
 		return require static::locate(...$parts);
 	}
 
 	/**
 	 * Include (working-dir relative)
 	 *
-	 * @param ...$parts
+	 * @param mixed ...$parts Path parts
 	 *
 	 * @return mixed
 	 */
 	#[Shortcut('include', 'but relative')]
-	static function include(...$parts) {
+	static function include(mixed ...$parts) {
 		return include static::locate(...$parts);
 	}
 
@@ -439,7 +439,7 @@ class FS {
 	 * Returns file obj or path to the file relative to work-dir
 	 *
 	 *
-	 * @param string|null ...$parts Parts that should be joined depending on the platform
+	 * @param mixed ...$parts Parts that should be joined depending on the platform
 	 *
 	 * TODO Implement assoc args as parameters. Implement such "working_dir" arg
 	 *      Implement such "working_dir" arg and implement "name" of init-config
@@ -447,7 +447,7 @@ class FS {
 	 *
 	 * @return File|Dir
 	 */
-	public static function locate(?string ...$parts): File|Dir {
+	public static function locate(mixed ...$parts): File|Dir {
 		$work_dir = PHP::getInitConfig()->working_dir;
 
 		$path = static::path($work_dir, ...$parts);

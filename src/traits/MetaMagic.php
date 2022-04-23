@@ -349,10 +349,7 @@ trait MetaMagic {
 			} else {
 				return $this;
 			}
-//		} else if (PHP::classUsesTrait($this, ForOutputsTrait::class)) {
-//			$sub = $this->for_system;
 		} else if (method_exists($this, '___extractFields')) {
-//			$fields = $this->___extractFields(true, false);
 			$fields = PHP::metaMagicSpell($this, 'extractFields', true, false);
 			$sub = $recursively
 				?$this->_iterateConvertObjectsAndArrays($fields, $recursively, $with_class)
@@ -424,7 +421,7 @@ trait MetaMagic {
 			}
 		}
 
-		static::_metaMagic($obj, '___setup', get_object_vars($parent));
+		PHP::metaMagicSpell($obj, 'setup', get_object_vars($parent));
 
 		return $obj;
 	}
@@ -445,7 +442,7 @@ trait MetaMagic {
 		}
 
 		$obj = $class::createDummy();
-		return static::_metaMagic($obj, '___setup', $data);
+		return PHP::metaMagicSpell($obj, 'setup', $data);
 	}
 
 	/**
@@ -464,7 +461,7 @@ trait MetaMagic {
 		$file = FS::file($file);
 		$obj = static::createDummy();
 		$content = $file->content ?? [];
-		return static::_metaMagic($obj, '___setup', $content);
+		return PHP::metaMagicSpell($obj, 'setup', $content);
 	}
 
 	protected static function ___l10n(array $data) {
@@ -487,7 +484,6 @@ trait MetaMagic {
 				$obj = PHP::createDummy($val[PHP::$serialized_class_key_name]);
 				unset($val[PHP::$serialized_class_key_name]);
 				$val = PHP::metaMagicSpell($obj, 'setup', $val);
-//				$val = $obj->___setup($val);
 			}
 			$this->$key = $val;
 		}
@@ -517,7 +513,7 @@ trait MetaMagic {
 	protected function ___deserialize(Box|array $data): static {
 		if (isset($data[PHP::$serialized_class_key_name]))
 			unset($data[PHP::$serialized_class_key_name]);
-		return static::_metaMagic($this, '___setup', $data);
+		return PHP::metaMagicSpell($this, 'setup', $data);
 	}
 
 	/**
@@ -595,7 +591,7 @@ trait MetaMagic {
 	 * @return array
 	 */
 	public function __serialize(): array {
-		return (array) static::_metaMagic($this, '___serialize');
+		return (array) PHP::metaMagicSpell($this, 'serialize');
 	}
 
 	/**
@@ -612,6 +608,6 @@ trait MetaMagic {
 	 * @return void
 	 */
 	public function __unserialize(array $data): void {
-		static::_metaMagic($this, '___deserialize', $data);
+		PHP::metaMagicSpell($this, 'deserialize', $data);
 	}
 }

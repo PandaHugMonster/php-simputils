@@ -21,12 +21,8 @@ use spaf\simputils\attributes\Property;
  */
 abstract class BasicPrism extends SimpleObject {
 
+	#[Property(type: 'get')]
 	protected $_object;
-
-	#[Property('object')]
-	protected function getObject() {
-		return $this->_object;
-	}
 
 	public function init($target_object) {
 		$this->_object = $target_object;

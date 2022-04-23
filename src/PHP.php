@@ -18,7 +18,6 @@ use spaf\simputils\exceptions\RedefUnimplemented;
 use spaf\simputils\exceptions\RedefWrongReference;
 use spaf\simputils\exceptions\SerializationProblem;
 use spaf\simputils\exceptions\UnBoxable;
-use spaf\simputils\exceptions\UnsupportedMetaMagic;
 use spaf\simputils\generic\BasicInitConfig;
 use spaf\simputils\models\Box;
 use spaf\simputils\models\InitConfig;
@@ -164,11 +163,9 @@ class PHP {
 		$spell = "___{$spell}";
 		if ((static::isClass($ref) || is_object($ref)) && method_exists($ref, '_metaMagic')) {
 			return $ref::_metaMagic($ref, $spell, ...$args);
-//		} else if (is_object($ref) && method_exists($ref, '_metaMagic')) {
-//			return $ref->_metaMagic($ref, $spell, ...$args);
 		}
 
-		throw new UnsupportedMetaMagic('This meta-magic spell is unsupported/unknown');
+		return null; // @codeCoverageIgnore
 	}
 
 	public static function getInitConfig(?string $name = null): ?BasicInitConfig {
@@ -204,7 +201,7 @@ class PHP {
 				(is_object($data) || static::isClass($data))
 				&& static::classUsesTrait($data, MetaMagic::class)
 			) {
-				$res = $data::_metaMagic($data, '___serialize');
+				$res = static::metaMagicSpell($data, 'serialize');
 			} else {
 				$res = $data;
 			}
@@ -255,8 +252,7 @@ class PHP {
 			}
 			$dummy = PHP::createDummy($class);
 			if (static::classUsesTrait($class, MetaMagic::class)) {
-				/** @noinspection PhpUndefinedMethodInspection */
-				return $class::_metaMagic($dummy, '___deserialize', $data);
+				return static::metaMagicSpell($dummy, 'deserialize', $data);
 			} else {
 				foreach ($data as $key => $val) {
 					$dummy->$key = $val;
@@ -300,6 +296,9 @@ class PHP {
 	/**
 	 * Check if object/class using a trait
 	 *
+	 * It checks recursively (it checks on the target class, on all the parent classes,
+	 * and on all the sub-traits recursively)
+	 *
 	 * @param object|string $class_ref Object or class to check
 	 * @param string        $trait_ref Trait string reference
 	 *
@@ -307,17 +306,26 @@ class PHP {
 	 */
 	public static function classUsesTrait(object|string $class_ref, string $trait_ref): bool {
 		foreach (class_parents($class_ref) as $cp) {
-			$traits = class_uses($cp);
-			if (!empty($traits)) {
-				foreach ($traits as $trait) {
-					if ($trait == $trait_ref)
-						return true;
-				}
+			if (static::_iterateTraitsOver($cp, $trait_ref)) {
+				return true;
 			}
 		}
-		foreach (class_uses($class_ref) as $trait) {
-			if ($trait == $trait_ref)
-				return true;
+
+		if (static::_iterateTraitsOver($class_ref, $trait_ref)) {
+			return true;
+		}
+
+		return false;
+	}
+
+	private static function _iterateTraitsOver($cp, $trait_ref): bool {
+		$traits = class_uses($cp);
+		if (!empty($traits)) {
+			foreach ($traits as $trait) {
+				if ($trait == $trait_ref || static::_iterateTraitsOver($trait, $trait_ref)) {
+					return true;
+				}
+			}
 		}
 
 		return false;

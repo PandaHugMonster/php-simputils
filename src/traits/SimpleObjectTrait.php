@@ -9,6 +9,7 @@ use spaf\simputils\attributes\DebugHide;
 use spaf\simputils\attributes\Extract;
 use spaf\simputils\attributes\Property;
 use spaf\simputils\PHP;
+use function method_exists;
 use function spl_object_id;
 
 /**
@@ -22,6 +23,7 @@ use function spl_object_id;
  */
 trait SimpleObjectTrait {
 	use PropertiesTrait;
+	use MetaMagic;
 
 	/**
 	 * @return int
@@ -67,8 +69,10 @@ trait SimpleObjectTrait {
 	 * @return string
 	 */
 	public function __toString(): string {
-		return $this->toJson();
+		if (method_exists($this, 'toJson')) {
+			return $this->toJson();
+		}
 
-//		return 'Object <'.static::classShort().'#'.$this->obj_id.'>';
+		return 'Object <'.static::classShort().'#'.$this->obj_id.'>'; // @codeCoverageIgnore
 	}
 }

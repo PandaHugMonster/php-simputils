@@ -77,10 +77,10 @@ class MyBoxConvertable2 extends SimpleObject {
  * @covers \spaf\simputils\basic\bx
  * @covers \spaf\simputils\models\PhpInfo
  * @covers \spaf\simputils\generic\BasicInitConfig
+ * @covers \spaf\simputils\traits\MetaMagic
  *
  * @uses \spaf\simputils\models\Version
  * @uses \spaf\simputils\traits\SimpleObjectTrait
- * @uses \spaf\simputils\traits\MetaMagic
  * @uses \spaf\simputils\generic\BasicVersionParser
  * @uses \spaf\simputils\traits\PropertiesTrait
  * @uses \spaf\simputils\models\Box
@@ -214,9 +214,7 @@ class PHPHelperTest extends TestCase {
 		PHP::$serialization_mechanism = PHP::SERIALIZATION_TYPE_JSON;
 
 		$res = PHP::serialize(new MyBoxConvertable());
-//		pd('HERE ', $res);
 		$res = PHP::deserialize($res);
-
 		$this->assertEquals('EVEN stuff MORE', $res->EVEN_some_MORE);
 	}
 

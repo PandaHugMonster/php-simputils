@@ -363,7 +363,7 @@ class Version extends SimpleObject {
 	 *
 	 * @return array|null
 	 */
-	public function __debugInfo(): array {
+	public function __debugInfo() {
 		$res = [
 			'software_name' => $this->software_name,
 			'parsed_version' => strval($this),
@@ -372,7 +372,7 @@ class Version extends SimpleObject {
 		if (static::$debug_include_orig)
 			$res['orig_version'] = strval($this->original_value);
 
-		return $res;
+		return (array) $res;
 	}
 
 	public static function redefComponentName(): string {

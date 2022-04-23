@@ -27,6 +27,7 @@ class CustomInitCodeBlock extends SimpleObject implements InitBlockInterface {
 class InitConfigTest extends TestCase {
 
 	/**
+	 * @covers \spaf\simputils\models\L10n
 	 * @runInSeparateProcess
 	 * @return void
 	 */
@@ -37,7 +38,7 @@ class InitConfigTest extends TestCase {
 			new CustomInitCodeBlock(),
 		]);
 		$this->assertInstanceOf(L10n::class, $config->l10n);
-		$this->assertEquals('RU', $config->l10n_name);
+		$this->assertEquals('RU', $config->l10n->name);
 		$this->assertEquals('Asia/Novosibirsk', $config->default_tz);
 
 	}

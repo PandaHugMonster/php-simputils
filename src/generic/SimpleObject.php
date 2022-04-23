@@ -23,7 +23,6 @@ use spaf\simputils\traits\SimpleObjectTrait;
  */
 abstract class SimpleObject {
 	use SimpleObjectTrait;
-	use MetaMagic;
 
 	/**
 	 * Use JSON format when converted to a string

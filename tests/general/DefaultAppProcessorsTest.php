@@ -47,6 +47,8 @@ use function spaf\simputils\basic\fl;
  * @uses \spaf\simputils\traits\SimpleObjectTrait::getAllTheLastMethodsAndProperties
  * @uses \spaf\simputils\Str
  * @uses \spaf\simputils\traits\SimpleObjectTrait::_simpUtilsGetValidator
+ * @uses \spaf\simputils\traits\MetaMagic::_jsonFlags
+ * @uses \spaf\simputils\traits\MetaMagic::toJson
  */
 class DefaultAppProcessorsTest extends TestCase {
 

@@ -12,7 +12,6 @@ use spaf\simputils\attributes\Property;
 use spaf\simputils\Math;
 use spaf\simputils\PHP;
 use spaf\simputils\Str;
-use spaf\simputils\traits\MetaMagic;
 use spaf\simputils\traits\RedefinableComponentTrait;
 use spaf\simputils\traits\SimpleObjectTrait;
 use ValueError;
@@ -146,7 +145,6 @@ use function uasort;
  */
 class Box extends ArrayObject {
 	use SimpleObjectTrait;
-	use MetaMagic;
 	use RedefinableComponentTrait;
 
 	public static bool $to_string_format_json = true;

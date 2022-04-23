@@ -102,6 +102,7 @@
 		<exclude name="Squiz.Commenting.FunctionComment.MissingParamTag" />
 		<exclude name="Squiz.Commenting.FunctionComment.MissingReturn" />
 		<exclude name="Squiz.Commenting.FunctionComment.ExtraParamComment" />
+		<exclude name="Squiz.Commenting.FunctionComment.ScalarTypeHintMissing" />
 	</rule>
 	<arg name="tab-width" value="4"/>
 	<rule ref="Generic.WhiteSpace.DisallowSpaceIndent"/>

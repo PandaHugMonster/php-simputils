@@ -111,10 +111,12 @@ class DotEnvSettings extends SimpleObject {
 		$name = trim($name);
 		$name = match ($this->enforce_letter_case) {
 			static::LETTER_CASE_UPPER => Str::upper($name),
-			static::LETTER_CASE_LOWER => Str::lower($name),
-			static::LETTER_CASE_NONE => $name,
-			default => throw new ValueError(
-				"Letter Case \"{$this->enforce_letter_case}\" is not supported")
+			static::LETTER_CASE_LOWER => Str::lower($name), // @codeCoverageIgnore
+			static::LETTER_CASE_NONE => $name, // @codeCoverageIgnore
+			default => throw new ValueError(  // @codeCoverageIgnore
+				"Letter Case \"{$this->enforce_letter_case}\" " .  // @codeCoverageIgnore
+				"is not supported"  // @codeCoverageIgnore
+			) // @codeCoverageIgnore
 		};
 
 		$name = preg_replace('/[\-\s]/', '_', $name);

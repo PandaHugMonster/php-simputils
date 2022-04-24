@@ -5,10 +5,13 @@ namespace spaf\simputils;
 use finfo;
 use spaf\simputils\attributes\markers\Shortcut;
 use spaf\simputils\exceptions\CannotDeleteDirectory;
+use spaf\simputils\exceptions\DataDirectoryIsNotAllowed;
 use spaf\simputils\generic\BasicResourceApp;
+use spaf\simputils\models\Box;
 use spaf\simputils\models\Dir;
 use spaf\simputils\models\File;
 use function file_exists;
+use function is_array;
 use function is_dir;
 use const DIRECTORY_SEPARATOR;
 
@@ -23,57 +26,111 @@ class FS {
 	/**
 	 * Require (working-dir relative)
 	 *
-	 * @param mixed ...$parts Path parts
-	 *
+	 * @param array|Box|File $file File ref
+	 * @see FS::file()
+	 * @see File
+	 * @see FS::locate()
 	 * @return mixed
 	 */
 	#[Shortcut('require', 'but relative')]
-	static function require(mixed ...$parts) {
-		return require static::locate(...$parts);
+	static function require(array|Box|File $file) {
+		return require FS::file($file);
 	}
 
 	/**
 	 * Include (working-dir relative)
 	 *
-	 * @param mixed ...$parts Path parts
-	 *
+	 * @param array|Box|File $file File ref
+	 * @see FS::file()
+	 * @see File
+	 * @see FS::locate()
 	 * @return mixed
 	 */
 	#[Shortcut('include', 'but relative')]
-	static function include(mixed ...$parts) {
-		return include static::locate(...$parts);
+	static function include(array|Box|File $file) {
+		return include FS::file($file);
 	}
 
 	/**
 	 * Returns data from a file (PHP, or any other)
 	 *
-	 * It's always recommended to use this method for all in-code data gathering from files
+	 * IMP  It's always recommended to use this method for all in-code data
+	 *      gathering from files. (It's highly preferable instead of require or
+	 *      include for data files!)
 	 *
 	 * instead of `$t = require '........')` and instead of file objects usages
 	 * for other types of files (json, csv, xml, ...)
 	 *
 	 * This method is highly convenient, and comfortable to use.
 	 *
-	 * By default it uses `require` and not `include`.
+	 * It uses `require`.
+	 *
+	 * Important, it will not let you access file, unless it's in allowed data-directory
+	 * set {@see \spaf\simputils\models\InitConfig::$allowed_data_dirs} (they should be relative
+	 * to working dir paths, no absolute-paths are supported this way)
+	 *
+	 * IMP  If for some reason you need "absolute paths" for `InitConfig::$allowed_data_dirs`
+	 *      then just use files directly. It's strongly recommended against it, but you
+	 *      have options if you really need it.
+	 *      The data() method works only within projects working-dir
 	 *
 	 * IMP  If file does not exist `null` is returned
 	 *
-	 * @param mixed ...$parts Path parts relative to the working-dir
+	 * Example:
+	 * ```php
+	 *  PHP::init([
+	 *      'allowed_data_dirs' => [
+	 *          'data/data1',
+	 *          'data/data2/data4', // If you would comment this out, then exception will be raised
+	 *      ]
+	 *  ]);
+	 *  $data = FS::data(['data', 'data2', 'data4', 'exp.php']);
+	 *  pd($data);
+	 * ```
 	 *
-	 * TODO Implement optional assoc arguments like "to use include instead of default require"
+	 * @param array|Box|File $file File ref
+	 * @param ?string        $ic   Init Config name (default - is referenced to the app,
+	 *                             other non-empty names can be used by
+	 *                             the libraries/plugins)
 	 *
-	 * @see FS::require()
 	 * @return mixed
+	 * @throws \spaf\simputils\exceptions\DataDirectoryIsNotAllowed If directory was not
+	 *                                                              beforehand allowed
+	 *                                                              in init-config
+	 * @see FS::include()
+	 * @see FS::file()
+	 * @see File
+	 * @see FS::locate()
+	 * @see FS::require()
 	 */
-	static function data(mixed ...$parts) {
-		$file = static::locate(...$parts);
+	static function data(array|Box|File $file, ?string $ic = 'app') {
+		$file = FS::file($file);
+
+		if (empty($ic)) {
+			$ic = 'app';
+		}
+		$config = PHP::getInitConfig($ic);
+
+		$is_allowed = false;
+		foreach ($config->allowed_data_dirs as $dir) {
+			$dir = FS::locate($dir);
+			if (Str::startsWith($file, $dir)) {
+				$is_allowed = true;
+				break;
+			}
+		}
+		if (!$is_allowed) {
+			throw new DataDirectoryIsNotAllowed('Access to '.$file.' is ' .
+				'not allowed, because it\'s not in the allowed data-directory');
+		}
+
 		$mt = PHP::listOfExecPhpMimeTypes();
 		$pe = PHP::listOfExecPhpFileExtensions();
 		if ($mt->containsValue($file->mime_type) || $pe->containsValue($file->extension)) {
 			if (!$file->exists) {
 				return null;
 			}
-			return static::require(...$parts);
+			return static::require($file);
 		}
 		// NOTE Non-php file
 		return $file?->content ?? null;
@@ -388,10 +445,10 @@ class FS {
 	/**
 	 * Returns File instance for the provided argument
 	 *
-	 * @param string|File|null $file Can be a string - then it's a path to a file, or
-	 *                               a File instance, then it's just provided back
-	 *                               transparently
-	 * @param mixed|null       $app  Read/Write processor
+	 * @param null|string|Box|array|File $file Can be a string - then it's a path to a file, or
+	 *                                         a File instance, then it's just provided back
+	 *                                         transparently
+	 * @param mixed|null                 $app  Read/Write processor
 	 *
 	 * @return \spaf\simputils\models\File|null
 	 */

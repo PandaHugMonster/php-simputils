@@ -122,7 +122,7 @@ function ts(
 }
 
 #[Shortcut('FS::file()')]
-function fl(null|string|File $file = null, $app = null): ?File {
+function fl(null|string|Box|array|File $file = null, $app = null): ?File {
 	return FS::file($file, $app);
 }
 

@@ -60,6 +60,8 @@ abstract class BasicInitConfig extends SimpleObject {
 	public ?string $working_dir = null;
 	public array|Box $disable_init_for = [];
 
+	public null|array|Box $allowed_data_dirs = [];
+
 	#[DebugHide]
 	protected null|string $_l10n_name = null;
 	#[DebugHide]

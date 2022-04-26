@@ -1,0 +1,8 @@
+{
+  "DateTime": {
+    "user_date_format": "j/n/y",
+    "user_time_format": "H:i",
+    "user_datetime_format": "j/n/y H:i",
+    "user_default_tz": "Europe/Athens"
+  }
+}

@@ -40,6 +40,23 @@ I will be really happy hearing from you.
 
 ----
 
+## Changelog
+
+### 1.1.0
+
+ * Implemented `FS::require()`, `FS::include()` and `FS::data()`
+ * Implemented `PHP::listOfExecPhpFileExtensions()`, `PHP::listOfExecPhpMimeTypes()`
+ * Now array/box argument for `File` constructor is allowed (like for `FS::locate()`)
+ * Added support of `FS::locate()` alike array/box of path components for `fl()`, 
+   `FS::file()` and `File`. So now `fl(['part1', 'part2', 'file.txt'])` will make a file
+   object with path: "{working-dir}/part1/part2/file.txt"
+ * In `BasicInitConfig` introduced component-aware `$allowed_data_dirs` for specifying
+   allowed data-dirs
+ * New exception is introduced: `DataDirectoryIsNotAllowed`
+
+
+----
+
 ## Documentation
 
 **Important note about the documentation**: Due to urgent need of the stable release, 

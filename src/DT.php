@@ -8,8 +8,11 @@ use spaf\simputils\attributes\markers\Shortcut;
 use spaf\simputils\models\DateInterval;
 use spaf\simputils\models\DateTime;
 use spaf\simputils\models\DateTimeZone;
+use function date;
 use function date_default_timezone_get;
 use function date_default_timezone_set;
+use function intval;
+use function is_numeric;
 use function is_string;
 
 /**
@@ -131,11 +134,14 @@ class DT {
 		/** @var DateTime $res */
 		// Resulting
 		if (Str::is($dt)) {
+			if (Str::lower($dt) != 'now') {
+				$dt = date($dt);
+			}
 			$res = !empty($fmt)
 				?$class::createFromFormat($fmt, $dt, $tz)
 				:new $class($dt, $tz);
-		} else if (is_integer($dt)) {
-			$res = new $class(date(DATE_ATOM, $dt), $tz);
+		} else if (is_numeric($dt)) {
+			$res = new $class(date(DATE_ATOM, intval($dt)), $tz);
 		}
 
 		if ($from_utc) {
@@ -143,6 +149,44 @@ class DT {
 		}
 
 		return $res;
+	}
+
+	static function dateIntervalSpecificationString(\DateInterval $obj) {
+		$date = '';
+		$time = '';
+
+		if ($obj->y) {
+			$date .= "{$obj->y}Y";
+		}
+		if ($obj->m) {
+			$date .= "{$obj->m}M";
+		}
+		if ($obj->d) {
+			$date .= "{$obj->d}D";
+		}
+
+		if ($obj->h) {
+			$time .= "{$obj->h}H";
+		}
+		if ($obj->i) {
+			$time .= "{$obj->i}M";
+		}
+		if ($obj->s) {
+			$time .= "{$obj->s}S";
+		}
+		if (!empty($time)) {
+			$time = "T{$time}";
+		}
+
+		if (empty($date) && empty($time)) {
+			return "PT0S";
+		}
+
+		if ($obj->invert) {
+			return "-P{$date}{$time}";
+		}
+
+		return "P{$date}{$time}";
 	}
 
 	/**

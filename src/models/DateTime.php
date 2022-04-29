@@ -5,6 +5,7 @@ namespace spaf\simputils\models;
 
 use DateTimeInterface;
 use spaf\simputils\attributes\DebugHide;
+use spaf\simputils\attributes\markers\Shortcut;
 use spaf\simputils\attributes\Property;
 use spaf\simputils\DT;
 use spaf\simputils\generic\fixups\FixUpDateTime;
@@ -14,6 +15,7 @@ use spaf\simputils\traits\ForOutputsTrait;
 use function date_interval_create_from_date_string;
 use function is_null;
 use function json_encode;
+use function trim;
 
 /**
  * DateTime model of the framework
@@ -270,12 +272,49 @@ class DateTime extends FixUpDateTime {
 
 	public function walk(string|DateTime|int $to_date, string|DateInterval $step) {
 		$class_date_p = PHP::redef(DatePeriod::class);
+		$class_date_i = PHP::redef(DateInterval::class);
+
+		/** @noinspection PhpUndefinedMethodInspection */
 		$step = Str::is($step)
-			?DateInterval::createFromDateString($step)
+			?$class_date_i::createFromDateString($step)
 			:$step;
 		$to_date = DT::normalize($to_date);
 
 		return new $class_date_p($this, $step, $to_date);
+	}
+
+	private function preparePeriodSideValue($val) {
+		$val = trim($val);
+		if (Str::is($val) &&
+			(Str::startsWith($val, '+') || Str::startsWith($val, '-'))
+		) {
+			$nd = $this->clone();
+			$nd->modify($val);
+			return $nd;
+		}
+
+		return DT::normalize($val);
+	}
+
+	#[Shortcut('walk')]
+	public function period(
+		string|DateTime|int $to_date,
+		null|string|DateInterval $step = null,
+		bool $is_direct_only = true
+	): DatePeriod {
+		$left = $this;
+		$right = $this->preparePeriodSideValue($to_date);
+
+		if ($is_direct_only && $left > $right) {
+			$_mid = $left;
+			$left = $right;
+			$right = $_mid;
+		}
+
+		if (is_null($step)) {
+			$step = $left->diff($right);
+		}
+		return $left->walk($right, $step);
 	}
 
 	public function toJson(?bool $pretty = null, bool $with_class = false): string {

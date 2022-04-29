@@ -296,12 +296,19 @@ class DateTime extends FixUpDateTime {
 		return DT::normalize($val);
 	}
 
+	/**
+	 * @param string|\spaf\simputils\models\DateTime|int $to_date
+	 * @param string|\spaf\simputils\models\DateInterval|null $step
+	 * @param bool $is_direct_only
+	 *
+	 * @return DatePeriod
+	 */
 	#[Shortcut('walk')]
 	public function period(
 		string|DateTime|int $to_date,
 		null|string|DateInterval $step = null,
 		bool $is_direct_only = true
-	): DatePeriod {
+	) {
 		$left = $this;
 		$right = $this->preparePeriodSideValue($to_date);
 

@@ -3,6 +3,11 @@
     "user_date_format": "m/d/Y",
     "user_time_format": "h:i A",
     "user_datetime_format": "m/d/Y h:i A",
-    "user_default_tz": "America/New_York"
+    "user_default_tz": "America/New_York",
+
+    "user_time_ext_format": "h:i:s A",
+    "user_time_full_format": "h:i:s.u A",
+    "user_datetime_ext_format": "m/d/Y h:i:s A",
+    "user_datetime_full_format": "m/d/Y h:i:s.u A"
   }
 }

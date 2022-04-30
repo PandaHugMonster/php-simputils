@@ -3,6 +3,11 @@
     "user_date_format": "Y-m-d",
     "user_time_format": "H:i",
     "user_datetime_format": "Y-m-d H:i",
-    "user_default_tz": "Europe/Stockholm"
+    "user_default_tz": "Europe/Stockholm",
+
+    "user_time_ext_format": "H:i:s",
+    "user_time_full_format": "H:i:s.u",
+    "user_datetime_ext_format": "Y-m-d H:i:s",
+    "user_datetime_full_format": "Y-m-d H:i:s.u"
   }
 }

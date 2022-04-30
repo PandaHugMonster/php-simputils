@@ -3,6 +3,11 @@
     "user_date_format": "d.m.Y",
     "user_time_format": "H:i",
     "user_datetime_format": "d.m.Y H:i",
-    "user_default_tz": "Europe/Zurich"
+    "user_default_tz": "Europe/Zurich",
+
+    "user_time_ext_format": "H:i:s",
+    "user_time_full_format": "H:i:s.u",
+    "user_datetime_ext_format": "d.m.Y H:i:s",
+    "user_datetime_full_format": "d.m.Y H:i:s.u"
   }
 }

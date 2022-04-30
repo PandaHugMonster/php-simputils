@@ -63,6 +63,11 @@ class DateTime extends FixUpDateTime {
 	public static $l10n_user_time_format = DT::FMT_TIME;
 	public static $l10n_user_datetime_format = DT::FMT_DATETIME;
 
+	public static $l10n_user_time_ext_format = DT::FMT_TIME_EXT;
+	public static $l10n_user_time_full_format = DT::FMT_TIME_FULL;
+	public static $l10n_user_datetime_ext_format = DT::FMT_DATETIME_EXT;
+	public static $l10n_user_datetime_full_format = DT::FMT_DATETIME_FULL;
+
 	// NOTE Is not used anywhere, just a reference for the JSON files
 	public static $l10n_user_default_tz = 'UTC';
 
@@ -267,7 +272,9 @@ class DateTime extends FixUpDateTime {
 			$targetObject = $this->_orig_value ?? clone $this;
 		}
 		$res = parent::diff(DT::normalize($targetObject), $absolute);
-		return DateInterval::expandFrom($res, new $class_date_i('P1D'));
+
+		/** @noinspection PhpUndefinedMethodInspection */
+		return $class_date_i::expandFrom($res, new $class_date_i('P1D'));
 	}
 
 	public function walk(string|DateTime|int $to_date, string|DateInterval $step) {
@@ -284,10 +291,10 @@ class DateTime extends FixUpDateTime {
 	}
 
 	private function preparePeriodSideValue($val) {
-		$val = trim($val);
 		if (Str::is($val) &&
 			(Str::startsWith($val, '+') || Str::startsWith($val, '-'))
 		) {
+			$val = trim($val);
 			$nd = $this->clone();
 			$nd->modify($val);
 			return $nd;

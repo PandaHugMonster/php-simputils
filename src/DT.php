@@ -31,8 +31,14 @@ class DT {
 
 	const FMT_DATE = 'Y-m-d';
 	const FMT_TIME = 'H:i:s';
+
+	const FMT_TIME_EXT = self::FMT_TIME;
+	const FMT_TIME_FULL = self::FMT_TIME_EXT.'.u';
+
 	const FMT_DATETIME = self::FMT_DATE.' '.self::FMT_TIME;
-	const FMT_DATETIME_FULL = self::FMT_DATETIME.'.u';
+	const FMT_DATETIME_EXT = self::FMT_DATE.' '.self::FMT_TIME_EXT;
+	const FMT_DATETIME_FULL = self::FMT_DATE.' '.self::FMT_TIME_FULL;
+
 	const FMT_STRINGIFY_DEFAULT = self::FMT_DATETIME_FULL;
 
 	public static ?string $now_string = null;
@@ -134,9 +140,9 @@ class DT {
 		/** @var DateTime $res */
 		// Resulting
 		if (Str::is($dt)) {
-			if (Str::lower($dt) != 'now') {
-				$dt = date($dt);
-			}
+//			if (Str::lower($dt) != 'now') {
+//				$dt = date($dt);
+//			}
 			$res = !empty($fmt)
 				?$class::createFromFormat($fmt, $dt, $tz)
 				:new $class($dt, $tz);

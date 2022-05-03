@@ -41,7 +41,8 @@ use function trim;
  * @property int $month Month
  * @property int $day Day
  *
- * @property-read int $dow Numeric representation of the day of the week
+ * @property-read int $dow Numeric representation of the day of the week 0 (su) - 6 (sa)
+ * @property-read int $dow_iso Numeric representation of the day of the week 1 (mo) - 7 (su)
  *
  * @property int $hour Hours
  * @property int $minute Minutes
@@ -121,10 +122,14 @@ class DateTime extends FixUpDateTime {
 		return (int) $this->format('w');
 	}
 
+	#[Property('dow_iso')]
+	protected function getDowIso(): int {
+		return (int) $this->format('N');
+	}
+
 	#[Property('is_weekend')]
 	protected function getIsWeekend(): bool {
-		$dow_iso = (int) $this->format('N');
-		return $dow_iso > 5;
+		return $this->dow_iso > 5;
 	}
 
 	#[Property('is_weekday')]
@@ -317,9 +322,10 @@ class DateTime extends FixUpDateTime {
 	}
 
 	/**
-	 * @param string|\spaf\simputils\models\DateTime|int $to_date
-	 * @param string|\spaf\simputils\models\DateInterval|null $step
-	 * @param bool $is_direct_only
+	 * @param string|static|int        $to_date        Second date
+	 * @param string|DateInterval|null $step           Interval for iterations
+	 * @param bool                     $is_direct_only If true (default) - start date
+	 *                                                 will be always lower than the ending.
 	 *
 	 * @return DatePeriod
 	 */

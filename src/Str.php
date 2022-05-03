@@ -7,6 +7,7 @@ use function is_integer;
 use function is_null;
 use function is_string;
 use function mb_strlen;
+use function mb_strpos;
 use function str_ends_with;
 use function str_starts_with;
 use function substr;
@@ -185,7 +186,7 @@ class Str {
 	public static function removeEnding(
 		string $target,
 		string|int $ending,
-		bool   $is_case_sensitive = true
+		bool $is_case_sensitive = true
 	): string {
 		if (is_integer($ending)) {
 			if ($ending < 1) {
@@ -224,5 +225,26 @@ class Str {
 		}
 
 		return $target;
+	}
+
+	static function contains(
+		string $target,
+		string $sub_string,
+		bool $is_case_sensitive = true
+	): bool {
+		if (!$is_case_sensitive) {
+			$target = static::lower($target);
+			$sub_string = static::lower($sub_string);
+		}
+		if (mb_strpos($target, $sub_string) === false) {
+			return false;
+		}
+
+		return true;
+	}
+
+	#[Shortcut('static::contains()')]
+	static function has(string $target, string $sub_string, bool $is_case_sensitive = true): bool {
+		return static::contains($target, $sub_string, $is_case_sensitive);
 	}
 }

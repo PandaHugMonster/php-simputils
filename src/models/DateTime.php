@@ -55,6 +55,8 @@ use function trim;
  *
  * @property-read DateTime $orig_value Original value, if any modifications were performed,
  *                                     or manually snapshot
+ * @property-read bool $is_weekend Is day a weekend
+ * @property-read bool $is_weekday Is day a week-day
  */
 class DateTime extends FixUpDateTime {
 	use ForOutputsTrait;
@@ -117,6 +119,17 @@ class DateTime extends FixUpDateTime {
 	#[Property('dow')]
 	protected function getDow(): int {
 		return (int) $this->format('w');
+	}
+
+	#[Property('is_weekend')]
+	protected function getIsWeekend(): bool {
+		$dow_iso = (int) $this->format('N');
+		return $dow_iso > 5;
+	}
+
+	#[Property('is_weekday')]
+	protected function getIsWeekday(): bool {
+		return !$this->is_weekend;
 	}
 
 	#[Property('doy')]

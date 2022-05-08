@@ -2,8 +2,14 @@
 
 namespace spaf\simputils\models;
 
+use spaf\simputils\attributes\Property;
+use spaf\simputils\DT;
 use spaf\simputils\generic\fixups\FixUpDateInterval;
+use spaf\simputils\Str;
 
+/**
+ * @property-read string $specification_string
+ */
 class DateInterval extends FixUpDateInterval {
 
 	protected function formatForString() {
@@ -30,6 +36,22 @@ class DateInterval extends FixUpDateInterval {
 	public static function createFromDateString(string $datetime): static {
 		/** @noinspection PhpIncompatibleReturnTypeInspection */
 		return static::expandFrom(parent::createFromDateString($datetime), new static('P1D'));
+	}
+
+	public function __construct(string $duration) {
+		$is_inverted = false;
+		if (Str::startsWith($duration, '-')) {
+			$duration = Str::removeStarting($duration, '-');
+			$is_inverted = true;
+		}
+		parent::__construct($duration);
+
+		$this->invert = $is_inverted;
+	}
+
+	#[Property('specification_string')]
+	protected function getSpecificationString() {
+		return DT::dateIntervalSpecificationString($this);
 	}
 
 	public function __toString(): string {

@@ -5,6 +5,7 @@ namespace spaf\simputils\models;
 
 use DateTimeInterface;
 use spaf\simputils\attributes\DebugHide;
+use spaf\simputils\attributes\markers\Shortcut;
 use spaf\simputils\attributes\Property;
 use spaf\simputils\DT;
 use spaf\simputils\generic\fixups\FixUpDateTime;
@@ -14,6 +15,7 @@ use spaf\simputils\traits\ForOutputsTrait;
 use function date_interval_create_from_date_string;
 use function is_null;
 use function json_encode;
+use function trim;
 
 /**
  * DateTime model of the framework
@@ -39,7 +41,8 @@ use function json_encode;
  * @property int $month Month
  * @property int $day Day
  *
- * @property-read int $dow Numeric representation of the day of the week
+ * @property-read int $dow Numeric representation of the day of the week 0 (su) - 6 (sa)
+ * @property-read int $dow_iso Numeric representation of the day of the week 1 (mo) - 7 (su)
  *
  * @property int $hour Hours
  * @property int $minute Minutes
@@ -53,6 +56,8 @@ use function json_encode;
  *
  * @property-read DateTime $orig_value Original value, if any modifications were performed,
  *                                     or manually snapshot
+ * @property-read bool $is_weekend Is day a weekend
+ * @property-read bool $is_weekday Is day a week-day
  */
 class DateTime extends FixUpDateTime {
 	use ForOutputsTrait;
@@ -60,6 +65,11 @@ class DateTime extends FixUpDateTime {
 	public static $l10n_user_date_format = DT::FMT_DATE;
 	public static $l10n_user_time_format = DT::FMT_TIME;
 	public static $l10n_user_datetime_format = DT::FMT_DATETIME;
+
+	public static $l10n_user_time_ext_format = DT::FMT_TIME_EXT;
+	public static $l10n_user_time_full_format = DT::FMT_TIME_FULL;
+	public static $l10n_user_datetime_ext_format = DT::FMT_DATETIME_EXT;
+	public static $l10n_user_datetime_full_format = DT::FMT_DATETIME_FULL;
 
 	// NOTE Is not used anywhere, just a reference for the JSON files
 	public static $l10n_user_default_tz = 'UTC';
@@ -110,6 +120,21 @@ class DateTime extends FixUpDateTime {
 	#[Property('dow')]
 	protected function getDow(): int {
 		return (int) $this->format('w');
+	}
+
+	#[Property('dow_iso')]
+	protected function getDowIso(): int {
+		return (int) $this->format('N');
+	}
+
+	#[Property('is_weekend')]
+	protected function getIsWeekend(): bool {
+		return $this->dow_iso > 5;
+	}
+
+	#[Property('is_weekday')]
+	protected function getIsWeekday(): bool {
+		return !$this->is_weekend;
 	}
 
 	#[Property('doy')]
@@ -265,17 +290,64 @@ class DateTime extends FixUpDateTime {
 			$targetObject = $this->_orig_value ?? clone $this;
 		}
 		$res = parent::diff(DT::normalize($targetObject), $absolute);
-		return DateInterval::expandFrom($res, new $class_date_i('P1D'));
+
+		/** @noinspection PhpUndefinedMethodInspection */
+		return $class_date_i::expandFrom($res, new $class_date_i('P1D'));
 	}
 
 	public function walk(string|DateTime|int $to_date, string|DateInterval $step) {
 		$class_date_p = PHP::redef(DatePeriod::class);
+		$class_date_i = PHP::redef(DateInterval::class);
+
+		/** @noinspection PhpUndefinedMethodInspection */
 		$step = Str::is($step)
-			?DateInterval::createFromDateString($step)
+			?$class_date_i::createFromDateString($step)
 			:$step;
 		$to_date = DT::normalize($to_date);
 
 		return new $class_date_p($this, $step, $to_date);
+	}
+
+	private function preparePeriodSideValue($val) {
+		if (Str::is($val) &&
+			(Str::startsWith($val, '+') || Str::startsWith($val, '-'))
+		) {
+			$val = trim($val);
+			$nd = $this->clone();
+			$nd->modify($val);
+			return $nd;
+		}
+
+		return DT::normalize($val);
+	}
+
+	/**
+	 * @param string|static|int        $to_date        Second date
+	 * @param string|DateInterval|null $step           Interval for iterations
+	 * @param bool                     $is_direct_only If true (default) - start date
+	 *                                                 will be always lower than the ending.
+	 *
+	 * @return DatePeriod
+	 */
+	#[Shortcut('walk')]
+	public function period(
+		string|DateTime|int $to_date,
+		null|string|DateInterval $step = null,
+		bool $is_direct_only = true
+	) {
+		$left = $this;
+		$right = $this->preparePeriodSideValue($to_date);
+
+		if ($is_direct_only && $left > $right) {
+			$_mid = $left;
+			$left = $right;
+			$right = $_mid;
+		}
+
+		if (is_null($step)) {
+			$step = $left->diff($right);
+		}
+		return $left->walk($right, $step);
 	}
 
 	public function toJson(?bool $pretty = null, bool $with_class = false): string {

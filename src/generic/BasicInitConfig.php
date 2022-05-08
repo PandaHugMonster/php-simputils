@@ -258,6 +258,11 @@ abstract class BasicInitConfig extends SimpleObject {
 					$this->$key = $item;
 				}
 			}
+			if (isset($data['default_tz'])) {
+				// NOTE Important to do it so, because otherwise the "l10n" value will
+				//      override it depending on the order of the config array
+				$this->default_tz = $data['default_tz'];
+			}
 		} else {
 			throw new InitConfigAlreadyInitialized( // @codeCoverageIgnore
 				'The InitConfig object is already setup and initialized.' .

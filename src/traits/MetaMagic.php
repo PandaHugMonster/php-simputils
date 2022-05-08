@@ -474,11 +474,11 @@ trait MetaMagic {
 	/**
 	 * Setup object with fields values from assoc-array
 	 *
-	 * @param array $data Setup data
+	 * @param array|Box $data Setup data
 	 *
 	 * @return $this
 	 */
-	protected function ___setup(array $data): static {
+	protected function ___setup(array|Box $data): static {
 		foreach ($data as $key => $val) {
 			if (is_array($val) && !empty($val[PHP::$serialized_class_key_name])) {
 				$obj = PHP::createDummy($val[PHP::$serialized_class_key_name]);

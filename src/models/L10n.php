@@ -11,6 +11,9 @@ use spaf\simputils\traits\RedefinableComponentTrait;
 
 /**
  * @property $name Name of the locale (basically-read only, can be set only once)
+ *
+ * @property-read \spaf\simputils\models\Box|array $settings_date_time
+ * @property-read \spaf\simputils\models\Box|array $settings_data_unit
  */
 class L10n extends SimpleObject {
 	use RedefinableComponentTrait;
@@ -32,10 +35,27 @@ class L10n extends SimpleObject {
 
 	public static $is_auto_setup = true;
 
+	#[Property('settings_date_time')]
+	protected function getDateTime(): Box {
+		return PHP::box($this->DateTime);
+	}
+
+	#[Property('settings_data_unit')]
+	protected function getDataUnit(): Box {
+		return PHP::box($this->DataUnit);
+	}
+
 	protected $DateTime = [
 		'user_date_format' => DT::FMT_DATE,
 		'user_time_format' => DT::FMT_TIME,
+
+		'user_time_ext_format' => DT::FMT_TIME_EXT,
+		'user_time_full_format' => DT::FMT_TIME_FULL,
+
 		'user_datetime_format' => DT::FMT_DATETIME,
+		'user_datetime_ext_format' => DT::FMT_DATETIME_EXT,
+		'user_datetime_full_format' => DT::FMT_DATETIME_FULL,
+
 		'user_default_tz' => 'UTC',
 	];
 

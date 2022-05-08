@@ -3,10 +3,14 @@
 namespace spaf\simputils;
 
 use spaf\simputils\attributes\markers\Shortcut;
+use function intval;
+use function is_callable;
 use function is_integer;
 use function is_null;
+use function is_numeric;
 use function is_string;
 use function mb_strlen;
+use function mb_strpos;
 use function str_ends_with;
 use function str_starts_with;
 use function substr;
@@ -185,7 +189,7 @@ class Str {
 	public static function removeEnding(
 		string $target,
 		string|int $ending,
-		bool   $is_case_sensitive = true
+		bool $is_case_sensitive = true
 	): string {
 		if (is_integer($ending)) {
 			if ($ending < 1) {
@@ -224,5 +228,94 @@ class Str {
 		}
 
 		return $target;
+	}
+
+	static function contains(
+		string $target,
+		string $sub_string,
+		bool $is_case_sensitive = true
+	): bool {
+		if (!$is_case_sensitive) {
+			$target = static::lower($target);
+			$sub_string = static::lower($sub_string);
+		}
+		if (mb_strpos($target, $sub_string) === false) {
+			return false;
+		}
+
+		return true;
+	}
+
+	#[Shortcut('static::contains()')]
+	static function has(string $target, string $sub_string, bool $is_case_sensitive = true): bool {
+		return static::contains($target, $sub_string, $is_case_sensitive);
+	}
+
+	/**
+	 * Multiply (duplicate) string number of times
+	 *
+	 * @param string|callable $string String to repeat, or if it's callable - then
+	 *                                this callable will be repeated for an every iteration
+	 * @param int|string      $amount Amount of copies (by default is 1, so no copies).
+	 *                                If string is not numeric supplied - it's length
+	 *                                will be used (really commonly used in CLI UI)
+	 *                                If negative supplied - then it's being turned into
+	 *                                a positive number. If 0 is supplied, then return will
+	 *                                be empty (empty string)
+	 * @param string          $glue   The value in between each copy (by default is empty)
+	 *
+	 * @return string
+	 */
+	static function mul(
+		string|callable $string,
+		int|string $amount = 1,
+		string $glue = ''
+	): string {
+		$res = '';
+		if (is_numeric($amount)) {
+			$amount = intval($amount);
+		} else {
+			$amount = static::len($amount);
+		}
+		if ($amount === 0) {
+			return $res;
+		}
+		foreach (Math::range(1, Math::abs($amount)) as $i) {
+			if (!empty($res)) {
+				$res .= $glue;
+			}
+			if (is_callable($string)) {
+				$res .= $string($i);
+			} else {
+				$res .= $string;
+			}
+		}
+
+		return $res;
+	}
+
+	/**
+	 * Duplicate (multiply) string number of times
+	 *
+	 * @param string|callable $string String to repeat, or if it's callable - then
+	 *                                this callable will be repeated for an every iteration
+	 * @param int|string      $amount Amount of copies (by default is 1, so no copies).
+	 *                                If string is not numeric supplied - it's length
+	 *                                will be used (really commonly used in CLI UI)
+	 *                                If negative supplied - then it's being turned into
+	 *                                a positive number. If 0 is supplied, then return will
+	 *                                be empty (empty string)
+	 * @param string          $glue   The value in between each copy (by default is empty)
+	 *
+	 * @return string
+	 * @see \spaf\simputils\Str::mul()
+	 */
+	#[Shortcut('static::mul()')]
+	static function dup(
+		string|callable $string,
+		int|string $amount = 1,
+		string $glue = ''
+	): string {
+		return static::mul($string, $amount, $glue);
 	}
 }

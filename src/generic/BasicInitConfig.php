@@ -188,7 +188,7 @@ abstract class BasicInitConfig extends SimpleObject {
 	 */
 	public null|array|Box $redefinitions = [];
 
-	public function __construct(?array $args = null) {
+	public function __construct(null|array|Box $args = null) {
 //		$this->___setup($args ?? []);
 		PHP::metaMagicSpell($this, 'setup', $args ?? []);
 	}
@@ -240,12 +240,12 @@ abstract class BasicInitConfig extends SimpleObject {
 	 *
 	 * TODO Changed the modifier to "public" maybe another solution?
 	 *
-	 * @param array $data Arguments for the object
+	 * @param array|Box $data Arguments for the object
 	 *
 	 * @return $this
 	 * @throws \spaf\simputils\exceptions\InitConfigAlreadyInitialized Already initialized
 	 */
-	public function ___setup(array $data): static {
+	public function ___setup(array|Box $data): static {
 		if (!$this->_is_already_setup) {
 			foreach ($data as $key => $item) {
 				if (is_numeric($key)) {
@@ -259,6 +259,11 @@ abstract class BasicInitConfig extends SimpleObject {
 				} else {
 					$this->$key = $item;
 				}
+			}
+			if (isset($data['default_tz'])) {
+				// NOTE Important to do it so, because otherwise the "l10n" value will
+				//      override it depending on the order of the config array
+				$this->default_tz = $data['default_tz'];
 			}
 		} else {
 			throw new InitConfigAlreadyInitialized( // @codeCoverageIgnore

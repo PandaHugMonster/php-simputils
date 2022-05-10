@@ -1,6 +1,4 @@
 <?php
-
-
 namespace spaf\simputils\models;
 
 use DateTimeInterface;
@@ -14,6 +12,7 @@ use spaf\simputils\Str;
 use spaf\simputils\traits\ForOutputsTrait;
 use function date_interval_create_from_date_string;
 use function is_null;
+use function is_string;
 use function json_encode;
 use function trim;
 
@@ -32,7 +31,7 @@ use function trim;
  * @property-read \spaf\simputils\models\Date|string $date Date part (stringifiable object)
  *
  * @property-read \spaf\simputils\models\Time|string $time Time part
- * @property-read \spaf\simputils\models\DateTimeZone $tz
+ * @property \spaf\simputils\models\DateTimeZone|string $tz Timezone change
  *
  * @property int $week ISO 8601 week number of year, weeks starting on Monday
  * @property-read int $doy The day of the year (starting from 0)
@@ -148,13 +147,22 @@ class DateTime extends FixUpDateTime {
 		return new DateTimeZone(parent::getTimezone()->getName());
 	}
 
+	/**
+	 * @param \spaf\simputils\models\DateTimeZone|string $timezone Time zone
+	 *
+	 * @return static
+	 */
 	#[Property('tz')]
 	#[\ReturnTypeWillChange]
-	public function setTimezone($timezone) {
+	public function setTimezone($timezone): static {
 		// IMP  This method is original native PHP method, and it expects to return something,
 		//      And when it's used as a method it works exactly the same, but in case of
 		//      property - it will be used ONLY for setting, without returning anything.
 		//      This is why return-type signature has no definition!
+		$class_tz = PHP::redef(DateTimeZone::class);
+		if (is_string($timezone)) {
+			$timezone = new $class_tz($timezone);
+		}
 		return parent::setTimezone($timezone);
 	}
 
@@ -348,6 +356,18 @@ class DateTime extends FixUpDateTime {
 			$step = $left->diff($right);
 		}
 		return $left->walk($right, $step);
+	}
+
+	/**
+	 * Shortcut for "format"
+	 *
+	 * @param string $format Output format
+	 *
+	 * @return string
+	 */
+	#[Shortcut('static::format()')]
+	function f($format) {
+		return $this->format($format);
 	}
 
 	public function toJson(?bool $pretty = null, bool $with_class = false): string {

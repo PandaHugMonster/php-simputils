@@ -163,6 +163,9 @@ class DateTime extends FixUpDateTime {
 		if (is_string($timezone)) {
 			$timezone = new $class_tz($timezone);
 		}
+		if (empty($timezone)) {
+			$timezone = 'UTC';
+		}
 		return parent::setTimezone($timezone);
 	}
 

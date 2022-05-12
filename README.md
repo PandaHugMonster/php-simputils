@@ -58,9 +58,9 @@ so documentation will come after that in the very nearest time. My apologies.
 
 Minimal PHP version: **8.0**
 
-Current framework version: **1.0.0**
+Current framework version: **1.0.3**
 ```shell
-composer require spaf/simputils "~1"
+composer require spaf/simputils "^1"
 ```
 
 Keep in mind that the library development suppose to follow the semantic versioning,

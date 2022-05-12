@@ -59,6 +59,7 @@ I will be really happy hearing from you.
    [Nuances of l10n and default_tz](docs/notes.md#Nuances-of-l10n-and-default_tz)
  * List of days of the week (UNDONE)
  * List of months of the year (UNDONE)
+ * 
  * Incorporated all the previous minor-version patches
    * To set the timezone for "DateTime" object now can be done by "strings" instead of
      creation of "DateTimeZone" object every single time

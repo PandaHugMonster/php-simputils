@@ -106,7 +106,7 @@ class PHP {
 	 */
 	public static function simpUtilsVersion(): Version|string {
 		$class = static::redef(Version::class);
-		return new $class('1.0.4', 'SimpUtils');
+		return new $class('1.1.0', 'SimpUtils');
 	}
 
 	/**
@@ -201,6 +201,16 @@ class PHP {
 
 	public static function getInitConfig(?string $name = null): ?BasicInitConfig {
 		return CodeBlocksCacheIndex::getInitBlock($name);
+	}
+
+	/**
+	 * @param string|null $name Name of the init config. If empty, used the main "app" InitConfig
+	 *
+	 * @return \spaf\simputils\generic\BasicInitConfig|null
+	 */
+	#[Shortcut('static::getInitConfig()')]
+	public static function ic(?string $name = null): ?BasicInitConfig {
+		return static::getInitConfig($name);
 	}
 
 	/**

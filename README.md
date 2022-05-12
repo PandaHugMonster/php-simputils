@@ -53,6 +53,17 @@ I will be really happy hearing from you.
  * In `BasicInitConfig` introduced component-aware `$allowed_data_dirs` for specifying
    allowed data-dirs
  * New exception is introduced: `DataDirectoryIsNotAllowed`
+ * Implemented the shortcut for the "InitConfig". Now instead of 
+   `$config = PHP::getInitConfig()` you can use a shortcut `$config = ic()`
+ * Fixed some of the logic related to "l10n" and "default_tz" more you can find here:
+   [Nuances of l10n and default_tz](docs/notes.md#Nuances-of-l10n-and-default_tz)
+ * List of days of the week (UNDONE)
+ * List of months of the year (UNDONE)
+ * 
+ * Incorporated all the previous minor-version patches
+   * To set the timezone for "DateTime" object now can be done by "strings" instead of
+     creation of "DateTimeZone" object every single time
+   * Other minimal changes
 
 
 ----
@@ -68,6 +79,7 @@ so documentation will come after that in the very nearest time. My apologies.
 ### Some:
  1. [Glossary](docs/glossary.md)
  2. [Structure](docs/structure.md)
+ 3. [Important notes](docs/notes.md) - this can help with troubleshooting
 
 ----
 
@@ -75,7 +87,7 @@ so documentation will come after that in the very nearest time. My apologies.
 
 Minimal PHP version: **8.0**
 
-Current framework version: **1.0.4**
+Current framework version: **1.1.0**
 ```shell
 composer require spaf/simputils "^1"
 ```

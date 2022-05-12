@@ -62,6 +62,8 @@ abstract class BasicInitConfig extends SimpleObject {
 
 	public null|array|Box $allowed_data_dirs = [];
 
+	protected bool $_is_timezone_changed = false;
+
 	#[DebugHide]
 	protected null|string $_l10n_name = null;
 	#[DebugHide]
@@ -82,6 +84,7 @@ abstract class BasicInitConfig extends SimpleObject {
 	#[Shortcut('DT::setDefaultTimeZone()')]
 	protected function setDefaultTimeZone(string|DateTimeZone $tz) {
 		DT::setDefaultTimeZone($tz);
+		$this->_is_timezone_changed = true;
 	}
 
 	#[Property('l10n')]
@@ -92,6 +95,10 @@ abstract class BasicInitConfig extends SimpleObject {
 	/** @noinspection PhpUndefinedMethodInspection */
 	#[Property('l10n')]
 	protected function setL10n(null|string|L10n $val): void {
+		$preserved_tz = null;
+		if ($this->_is_timezone_changed) {
+			$preserved_tz = $this->default_tz;
+		}
 		if (empty($val)) {
 			$this->_l10n_name = $val; // @codeCoverageIgnore
 		} else {
@@ -99,6 +106,7 @@ abstract class BasicInitConfig extends SimpleObject {
 
 				$class = PHP::redef(L10n::class);
 				$l10n_name = Str::upper($val);
+				// MARK Implement through the newly introduced "FS::data"
 				$path = FS::path(PHP::frameworkDir(), 'data', 'l10n', "{$l10n_name}.json");
 				/** @var L10n $val */
 				$val = $class::createFrom($path);
@@ -120,6 +128,9 @@ abstract class BasicInitConfig extends SimpleObject {
 			}
 		}
 		$this->_l10n = $val;
+		if (!empty($preserved_tz)) {
+			$this->default_tz = $preserved_tz;
+		}
 	}
 
 	/**
@@ -260,6 +271,10 @@ abstract class BasicInitConfig extends SimpleObject {
 					$this->$key = $item;
 				}
 			}
+
+			// This is important to do not consider default l10n setting of tz as "tz changed"
+			$this->_is_timezone_changed = false;
+
 			if (isset($data['default_tz'])) {
 				// NOTE Important to do it so, because otherwise the "l10n" value will
 				//      override it depending on the order of the config array

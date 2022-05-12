@@ -10,11 +10,13 @@ use spaf\simputils\attributes\markers\Shortcut;
 use spaf\simputils\Data;
 use spaf\simputils\DT;
 use spaf\simputils\FS;
+use spaf\simputils\generic\BasicInitConfig;
 use spaf\simputils\models\Box;
 use spaf\simputils\models\DataUnit;
 use spaf\simputils\models\DateTime;
 use spaf\simputils\models\Dir;
 use spaf\simputils\models\File;
+use spaf\simputils\models\InitConfig;
 use spaf\simputils\models\StackFifo;
 use spaf\simputils\models\StackLifo;
 use spaf\simputils\PHP;
@@ -176,4 +178,16 @@ function path(?string ...$args): ?string {
 #[Shortcut('Data::du()')]
 function du(null|int|string|DataUnit $value = null, ?string $format = null): DataUnit {
 	return Data::du($value, $format);
+}
+
+/**
+ * Shortcut for InitConfig object
+ *
+ * @param string|null $name Name of the init config. If empty, used the main "app" InitConfig
+ *
+ * @return \spaf\simputils\models\InitConfig|\spaf\simputils\generic\BasicInitConfig|null
+ */
+#[Shortcut('PHP::ic()')]
+function ic(?string $name = null): null|InitConfig|BasicInitConfig {
+	return PHP::ic($name);
 }

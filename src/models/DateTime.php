@@ -160,11 +160,13 @@ class DateTime extends FixUpDateTime {
 		//      property - it will be used ONLY for setting, without returning anything.
 		//      This is why return-type signature has no definition!
 		$class_tz = PHP::redef(DateTimeZone::class);
-		if (is_string($timezone)) {
-			$timezone = new $class_tz($timezone);
-		}
+
 		if (empty($timezone)) {
 			$timezone = 'UTC';
+		}
+
+		if (is_string($timezone)) {
+			$timezone = new $class_tz($timezone);
 		}
 		return parent::setTimezone($timezone);
 	}

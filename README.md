@@ -58,7 +58,7 @@ so documentation will come after that in the very nearest time. My apologies.
 
 Minimal PHP version: **8.0**
 
-Current framework version: **1.0.3**
+Current framework version: **1.0.4**
 ```shell
 composer require spaf/simputils "^1"
 ```

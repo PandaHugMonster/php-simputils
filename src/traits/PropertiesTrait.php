@@ -277,16 +277,19 @@ trait PropertiesTrait {
 			$attr_instance = $attr->newInstance();
 			$valid = $attr_instance?->valid ?? false;
 
+			$t = null;
+			if ($item instanceof ReflectionProperty) {
+				$t = $item?->getType();
+			} else if ($item instanceof ReflectionMethod) {
+				$param = $item->getParameters()[0] ?? null;
+				/** @var \ReflectionParameter $param */
+				$t = $param?->getType();
+			}
+			$_method = $t && $t->allowsNull()?'whenNullAllowed':'process';
+
 			if ($valid === true &&
 				$validators_enabled === CommonMemoryCacheIndex::PROPERTY_VALIDATOR_ENABLED
 			) {
-				if ($item instanceof ReflectionProperty) {
-					$t = $item?->getType();
-				} else if ($item instanceof ReflectionMethod) {
-					$param = $item->getParameters()[0] ?? null;
-					/** @var \ReflectionParameter $param */
-					$t = $param?->getType();
-				}
 				if ($t instanceof ReflectionUnionType) {
 					// NOTE Union-Types are not supported due to unpredictable nature
 					return null; // @codeCoverageIgnore
@@ -304,7 +307,7 @@ trait PropertiesTrait {
 						}
 					}
 					if (!empty($validators[$class]) && PHP::isClass($validators[$class])) {
-						$closure = Closure::fromCallable([$validators[$class], 'process']);
+						$closure = Closure::fromCallable([$validators[$class], $_method]);
 						return $closure;
 					}
 				}
@@ -312,10 +315,10 @@ trait PropertiesTrait {
 				$validators_enabled >= CommonMemoryCacheIndex::PROPERTY_VALIDATOR_LIMITED
 			) {
 				if (!empty($validators[$valid])) {
-					$closure = Closure::fromCallable([$validators[$valid], 'process']);
+					$closure = Closure::fromCallable([$validators[$valid], $_method]);
 					return $closure;
 				} else if (PHP::isClass($valid)) {
-					$closure = Closure::fromCallable([$valid, 'process']);
+					$closure = Closure::fromCallable([$valid, $_method]);
 					return $closure;
 				}
 			}

@@ -3,6 +3,7 @@
 namespace spaf\simputils;
 
 use spaf\simputils\attributes\markers\Shortcut;
+use spaf\simputils\models\Box;
 use function intval;
 use function is_callable;
 use function is_integer;
@@ -249,6 +250,41 @@ class Str {
 	#[Shortcut('static::contains()')]
 	static function has(string $target, string $sub_string, bool $is_case_sensitive = true): bool {
 		return static::contains($target, $sub_string, $is_case_sensitive);
+	}
+
+	/**
+	 * Iterate through string as generator (for foreach)
+	 *
+	 * Basically you can't iterate through string "as an array", because it's not an array
+	 * and is not being iterable. So for that purpose this method is needed.
+	 *
+	 * @param string $string String that should be walked through
+	 *
+	 * @return \Generator
+	 */
+	static function iter($string) {
+		foreach (Math::range(0, static::len($string) - 1) as $i) {
+			yield $string[$i];
+		}
+	}
+
+	static function div($string, int $every): null|array|Box {
+		$sub_res = '';
+		$res = PHP::box();
+		foreach (static::iter($string) as $i => $symbol) {
+			$k = $i + 1;
+			$sub_res .= $symbol;
+			if ($k % $every === 0) {
+				$res[] = $sub_res;
+				$sub_res = '';
+			}
+		}
+
+		return $res;
+	}
+
+	static function cut() {
+
 	}
 
 	/**

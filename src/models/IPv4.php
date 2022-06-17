@@ -2,19 +2,25 @@
 
 namespace spaf\simputils\models;
 
+use Exception;
 use spaf\simputils\attributes\DebugHide;
 use spaf\simputils\attributes\Extract;
 use spaf\simputils\attributes\Property;
 use spaf\simputils\components\BaseIP;
 use spaf\simputils\exceptions\IPParsingException;
 use spaf\simputils\Math;
+use spaf\simputils\PHP;
 use spaf\simputils\Str;
+use spaf\simputils\traits\ComparablesTrait;
+use spaf\simputils\traits\UrlCompatibleTrait;
 use function chr;
 use function intval;
 use function ord;
 use function preg_match;
 
 /**
+ * IP version 4 class
+ *
  * @property-read int $octet1 First octet
  * @property-read int $octet2 Second octet
  * @property-read int $octet3 Third octet
@@ -23,6 +29,8 @@ use function preg_match;
  * @property-read ?int $mask_cidr Mask CIDR if available
  */
 class IPv4 extends BaseIP {
+	use ComparablesTrait;
+	use UrlCompatibleTrait;
 
 	#[DebugHide(false)]
 	#[Extract(false)]
@@ -134,5 +142,83 @@ class IPv4 extends BaseIP {
 			$res .= '/'.$mask;
 		}
 		return $res;
+	}
+
+	static function getOctetNames(): Box|array {
+		return PHP::box(['octet1', 'octet2', 'octet3', 'octet4']);
+	}
+
+	/**
+	 * @param ...$args
+	 *
+	 * @throws \spaf\simputils\exceptions\IPParsingException
+	 */
+	private function getLeftAndRight(...$args) {
+		/** @var static $right */
+		$right = $args[0];
+		$left = $this;
+
+		if (Str::is($right)) {
+			$right = new static($right);
+		}
+		if (!$right instanceof static) {
+			// FIX  Exception type is wrong
+			throw new Exception('Wrong type');
+		}
+
+		return [$left, $right];
+	}
+
+	function equalsTo(...$args): bool {
+		/** @var static $left */
+		/** @var static $right */
+		[$left, $right] = $this->getLeftAndRight(...$args);
+
+		$res = true;
+		foreach (static::getOctetNames() as $key) {
+			$res = $res && $left->$key === $right->$key;
+			if (!$res) {
+				break;
+			}
+		}
+
+		return $res;
+	}
+
+	function greaterThan(...$args): bool {
+		/** @var static $left */
+		/** @var static $right */
+		[$left, $right] = $this->getLeftAndRight(...$args);
+
+		foreach (static::getOctetNames() as $key) {
+			if ($left->$key > $right->$key) {
+				return true;
+			} else if ($left->$key < $right->$key) {
+				break;
+			}
+		}
+
+		return false;
+	}
+
+	function lessThan(...$args): bool {
+		/** @var static $left */
+		/** @var static $right */
+		[$left, $right] = $this->getLeftAndRight(...$args);
+
+		foreach (static::getOctetNames() as $key) {
+			if ($left->$key < $right->$key) {
+				return true;
+			} else if ($left->$key > $right->$key) {
+				break;
+			}
+		}
+
+		return false;
+	}
+
+	function range(IPv4|string $ip2) {
+		// FIX  proper dynamic class!
+		return new IPv4Range($this, $ip2);
 	}
 }

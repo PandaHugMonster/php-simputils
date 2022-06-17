@@ -7,18 +7,22 @@ namespace spaf\simputils\basic;
 
 use DateTimeZone;
 use spaf\simputils\attributes\markers\Shortcut;
+use spaf\simputils\components\BaseIP;
 use spaf\simputils\Data;
 use spaf\simputils\DT;
 use spaf\simputils\FS;
 use spaf\simputils\generic\BasicInitConfig;
+use spaf\simputils\interfaces\UrlCompatible;
 use spaf\simputils\models\Box;
 use spaf\simputils\models\DataUnit;
 use spaf\simputils\models\DateTime;
 use spaf\simputils\models\Dir;
 use spaf\simputils\models\File;
 use spaf\simputils\models\InitConfig;
+use spaf\simputils\models\IPv4;
 use spaf\simputils\models\StackFifo;
 use spaf\simputils\models\StackLifo;
+use spaf\simputils\models\UrlObject;
 use spaf\simputils\PHP;
 
 /**
@@ -190,4 +194,17 @@ function du(null|int|string|DataUnit $value = null, ?string $format = null): Dat
 #[Shortcut('PHP::ic()')]
 function ic(?string $name = null): null|InitConfig|BasicInitConfig {
 	return PHP::ic($name);
+}
+
+function url(
+	UrlObject|UrlCompatible|string|Box|array $host = null,
+	Box|array|string $path = null,
+	Box|array $params = null,
+	string $protocol = null
+): UrlObject {
+	return PHP::url($host, $path, $params, $protocol);
+}
+
+function ip(string|BaseIP $ip): IPv4 {
+	return PHP::ip($ip);
 }

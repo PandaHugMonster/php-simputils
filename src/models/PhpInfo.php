@@ -9,7 +9,6 @@ use spaf\simputils\PHP;
 use spaf\simputils\special\CommonMemoryCacheIndex;
 use spaf\simputils\Str;
 use spaf\simputils\System;
-use spaf\simputils\traits\ArrayReadOnlyAccessTrait;
 use spaf\simputils\traits\RedefinableComponentTrait;
 use ValueError;
 use function in_array;
@@ -57,8 +56,7 @@ use function in_array;
  * @property-read Version $zend_extension_version
  *
  */
-class PhpInfo extends Box {
-	use ArrayReadOnlyAccessTrait;
+class PhpInfo extends BoxRO {
 	use RedefinableComponentTrait;
 
 	public static bool $to_string_format_json = true;

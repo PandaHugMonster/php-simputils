@@ -52,11 +52,13 @@ I will be really happy hearing from you.
    object with path: "{working-dir}/part1/part2/file.txt"
  * In `BasicInitConfig` introduced component-aware `$allowed_data_dirs` for specifying
    allowed data-dirs
- * New exception is introduced: `DataDirectoryIsNotAllowed`
+ * Introduced new exceptions: `DataDirectoryIsNotAllowed`, `IPParsingException`
  * Implemented the shortcut for the "InitConfig". Now instead of 
    `$config = PHP::getInitConfig()` you can use a shortcut `$config = ic()`
  * Fixed some of the logic related to "l10n" and "default_tz" more you can find here:
    [Nuances of l10n and default_tz](docs/notes.md#Nuances-of-l10n-and-default_tz)
+ * 
+ * [//]: # ( FIX  undone stuff! )
  * List of days of the week (UNDONE)
  * List of months of the year (UNDONE)
  * 
@@ -64,6 +66,23 @@ I will be really happy hearing from you.
    * To set the timezone for "DateTime" object now can be done by "strings" instead of
      creation of "DateTimeZone" object every single time
    * Other minimal changes
+ * Implemented trait `\spaf\simputils\traits\ComparablesTrait` which enables to implement 
+   common set of comparing functionality (`equalsTo`, `greaterThan`, `lessThan`, 
+   `greaterThanEqual`, `lessThanEqual`) and their shortcuts (`e`, `gt`, `lt`, 
+   `gte`, `lte`). Currently used in `Version` and `IPv4` models
+ * Implemented `\spaf\simputils\models\IPv4` and `\spaf\simputils\models\IPv4Range` models
+   with minimal but nice functionality
+ * Implemented `\spaf\simputils\models\UrlObject` model
+ * Implemented `listOfExecPhpMimeTypes()` method of `\spaf\simputils\PHP` helper
+ * Implemented `\spaf\simputils\System::localIp()` that gets the local IP
+ * Implemented shortcuts `url()` for `\spaf\simputils\models\UrlObject` model and
+   `ip()` for `\spaf\simputils\models\IPv4`
+ * Implementation of `\spaf\simputils\PHP::bro()` method (`\spaf\simputils\models\BoxRO`)
+   which is basically "immutable Box"
+ * Implemented shortcuts for getting `POST` and `GET` data as bros (BoxRO). Please keep 
+   in mind that they are immutable due to best-practices:
+   * `\spaf\simputils\PHP::POST()`
+   * `\spaf\simputils\PHP::GET()`
 
 
 ----

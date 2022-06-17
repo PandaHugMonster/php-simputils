@@ -14,17 +14,22 @@ use Generator;
 use Iterator;
 use ReflectionClass;
 use spaf\simputils\attributes\markers\Shortcut;
+use spaf\simputils\components\BaseIP;
 use spaf\simputils\exceptions\RedefUnimplemented;
 use spaf\simputils\exceptions\RedefWrongReference;
 use spaf\simputils\exceptions\SerializationProblem;
 use spaf\simputils\exceptions\UnBoxable;
 use spaf\simputils\generic\BasicInitConfig;
+use spaf\simputils\interfaces\UrlCompatible;
 use spaf\simputils\models\Box;
+use spaf\simputils\models\BoxRO;
 use spaf\simputils\models\InitConfig;
+use spaf\simputils\models\IPv4;
 use spaf\simputils\models\PhpInfo;
 use spaf\simputils\models\Set;
 use spaf\simputils\models\StackFifo;
 use spaf\simputils\models\StackLifo;
+use spaf\simputils\models\UrlObject;
 use spaf\simputils\models\Version;
 use spaf\simputils\special\CodeBlocksCacheIndex;
 use spaf\simputils\special\CommonMemoryCacheIndex;
@@ -682,7 +687,15 @@ class PHP {
 	 */
 	public static function box(mixed $array = null, mixed ...$merger): Box|array {
 		$class = static::redef(Box::class);
+		return static::_boxAndRo($class, $array, $merger);
+	}
 
+	public static function bro(mixed $array = null, mixed ...$merger): Box|array {
+		$class = static::redef(BoxRO::class);
+		return static::_boxAndRo($class, $array, $merger);
+	}
+
+	protected static function _boxAndRo($class, $array, $merger) {
 		if ($array instanceof Box) {
 			$res = $array;
 		} else if (is_null($array)) {
@@ -722,7 +735,6 @@ class PHP {
 			}
 			$res->mergeFrom(...$sub_res);
 		}
-
 		return $res;
 	}
 
@@ -858,6 +870,32 @@ class PHP {
 		return static::isConsole();
 	}
 
+	static function url(
+		UrlObject|UrlCompatible|string|Box|array $host = null,
+		Box|array|string $path = null,
+		Box|array $params = null,
+		string $protocol = null
+	) {
+		// FIX  Implement proper dynamic class
+		if ($host instanceof UrlObject) {
+			// FIX  Maybe redefine values?
+			return $host;
+		}
+		$model = new UrlObject($host, $path, $params, $protocol);
+
+		return $model;
+	}
+
+	static function ip(string|IPv4 $ip) {
+		// FIX  Implement proper dynamic class
+		if ($ip instanceof BaseIP) {
+			return $ip;
+		}
+
+		$model = new IPv4($ip);
+		return $model;
+	}
+
 	/**
 	 * Quick and improved version of getting class string of redefinable components
 	 *
@@ -938,6 +976,51 @@ class PHP {
 	 */
 	public static function getPropertyValidatorLevel(): int {
 		return CommonMemoryCacheIndex::$property_validators_enabled;
+	}
+
+	private static $_get = null;
+	private static $_post = null;
+
+	/**
+	 * Returns $_POST data wrapped into a Box
+	 *
+	 * Important: It's caching. Every call will return the same object
+	 *
+	 * It's name is beyond of the common convention of the library on purpose, to increase
+	 * intuitive usage and distinct between "get" methods
+	 *
+	 * @param bool $refresh If set to true, the new object will be created (be careful, data
+	 *                      in old object will be lost)
+	 *
+	 * @return \spaf\simputils\models\Box|array
+	 */
+	#[Shortcut('$_POST')]
+	static function POST($refresh = false): Box|array {
+		if (is_null(static::$_post) || $refresh) {
+			static::$_post = static::bro($_POST);
+		}
+		return static::$_post;
+	}
+
+	/**
+	 * Returns $_GET data wrapped into a Box
+	 *
+	 * Important: It's caching. Every call will return the same object
+	 *
+	 * It's name is beyond of the common convention of the library on purpose, to increase
+	 * intuitive usage and distinct between "get" methods
+	 *
+	 * @param bool $refresh If set to true, the new object will be created (be careful, data
+	 *                      in old object will be lost)
+	 *
+	 * @return \spaf\simputils\models\Box|array
+	 */
+	#[Shortcut('$_GET')]
+	static function GET($refresh = false): Box|array {
+		if (is_null(static::$_get) || $refresh) {
+			static::$_get = static::bro($_GET);
+		}
+		return static::$_get;
 	}
 
 	public static function classShortName(string $val): string {

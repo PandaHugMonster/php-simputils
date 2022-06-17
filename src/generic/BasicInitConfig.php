@@ -35,6 +35,7 @@ abstract class BasicInitConfig extends SimpleObject {
 	const REDEF_PD = 'pd';
 	const REDEF_PR = 'pr';
 	const REDEF_BOX = 'Box';
+	const REDEF_BRO = 'BoxRO';
 	const REDEF_DATE_TIME = 'DateTime';
 	const REDEF_DATE_TIME_ZONE = 'DateTimeZone';
 	const REDEF_DATE_INTERVAL = 'DateInterval';

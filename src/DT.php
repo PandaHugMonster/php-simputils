@@ -255,6 +255,31 @@ class DT {
 		return static::normalize($start)->walk(static::normalize($end), $step);
 	}
 
+	static function getListOfDaysOfWeek($is_iso = false) {
+		// TODO Should be translated somehow
+		if (!$is_iso) {
+			return PHP::box([
+				'Sunday',
+				'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday',
+				'Saturday'
+			]);
+		}
+
+		return PHP::box([
+			1 => 'Monday', 2 => 'Tuesday', 3 => 'Wednesday', 4 => 'Thursday', 5 => 'Friday',
+			6 => 'Saturday', 7 => 'Sunday'
+		]);
+	}
+
+	static function getListOfMonths() {
+		// TODO Should be translated somehow
+		return PHP::box([
+			1 => 'January', 2 => 'February', 3 => 'March', 4 => 'April', 5 => 'May',
+			6 => 'June', 7 => 'July', 8 => 'August', 9 => 'September', 10 => 'October',
+			11 => 'November', 12 => 'December',
+		]);
+	}
+
 	public static function getDefaultTimeZone(): DateTimeZone {
 		$class = PHP::redef(DateTimeZone::class);
 		$tz = new $class(date_default_timezone_get());

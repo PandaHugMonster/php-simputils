@@ -4,5 +4,11 @@ namespace spaf\simputils\interfaces;
 
 interface UrlCompatible {
 
-	function forUrl($protocol): string;
+	function getHost($protocol): ?string;
+
+	function getPath($protocol): ?string;
+
+	function getParams($protocol): ?string;
+
+	function getData($protocol): ?string;
 }

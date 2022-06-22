@@ -18,8 +18,6 @@ trait ComparablesTrait {
 		return $this->equalsTo(...$args) || $this->lessThan(...$args);
 	}
 
-	// Shortcuts
-
 	function e(...$args): bool {
 		return $this->equalsTo(...$args);
 	}

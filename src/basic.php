@@ -7,11 +7,11 @@ namespace spaf\simputils\basic;
 
 use DateTimeZone;
 use spaf\simputils\attributes\markers\Shortcut;
-use spaf\simputils\components\BaseIP;
 use spaf\simputils\Data;
 use spaf\simputils\DT;
 use spaf\simputils\FS;
 use spaf\simputils\generic\BasicInitConfig;
+use spaf\simputils\generic\BasicIP;
 use spaf\simputils\interfaces\UrlCompatible;
 use spaf\simputils\models\Box;
 use spaf\simputils\models\DataUnit;
@@ -196,15 +196,18 @@ function ic(?string $name = null): null|InitConfig|BasicInitConfig {
 	return PHP::ic($name);
 }
 
+#[Shortcut('PHP::url()')]
 function url(
 	UrlObject|UrlCompatible|string|Box|array $host = null,
 	Box|array|string $path = null,
 	Box|array $params = null,
-	string $protocol = null
+	string $protocol = null,
+	mixed ...$data,
 ): UrlObject {
-	return PHP::url($host, $path, $params, $protocol);
+	return PHP::url($host, $path, $params, $protocol, ...$data);
 }
 
-function ip(string|BaseIP $ip): IPv4 {
+#[Shortcut('PHP::ip()')]
+function ip(string|BasicIP $ip): IPv4 {
 	return PHP::ip($ip);
 }

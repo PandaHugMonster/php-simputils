@@ -4,6 +4,7 @@ namespace spaf\simputils;
 
 use spaf\simputils\attributes\markers\Shortcut;
 use spaf\simputils\models\Box;
+use function explode;
 use function intval;
 use function is_callable;
 use function is_integer;
@@ -285,6 +286,24 @@ class Str {
 
 	static function cut() {
 
+	}
+
+	/**
+	 * @param string $str String to split
+	 * @param string $sep Separator by which to split
+	 *
+	 * @return Box|array
+	 * @see Box::implode()
+	 * @see \explode()
+	 */
+	#[Shortcut('\explode()')]
+	static function explode(string $str, string $sep = ', '): Box|array {
+		return PHP::box(explode($sep, $str));
+	}
+
+	#[Shortcut('\explode()')]
+	static function split(string $str, string $sep = ', '): Box|array {
+		return static::explode($str, $sep);
 	}
 
 	/**

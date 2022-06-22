@@ -2,17 +2,18 @@
 
 namespace spaf\simputils\models;
 
-use Exception;
 use spaf\simputils\attributes\DebugHide;
 use spaf\simputils\attributes\Extract;
 use spaf\simputils\attributes\Property;
-use spaf\simputils\components\BaseIP;
 use spaf\simputils\exceptions\IPParsingException;
+use spaf\simputils\generic\BasicIP;
+use spaf\simputils\interfaces\UrlCompatible;
 use spaf\simputils\Math;
 use spaf\simputils\PHP;
 use spaf\simputils\Str;
 use spaf\simputils\traits\ComparablesTrait;
-use spaf\simputils\traits\UrlCompatibleTrait;
+use spaf\simputils\traits\RedefinableComponentTrait;
+use ValueError;
 use function chr;
 use function intval;
 use function ord;
@@ -28,9 +29,9 @@ use function preg_match;
  * @property-read ?string $mask Mask if available
  * @property-read ?int $mask_cidr Mask CIDR if available
  */
-class IPv4 extends BaseIP {
+class IPv4 extends BasicIP implements UrlCompatible {
 	use ComparablesTrait;
-	use UrlCompatibleTrait;
+	use RedefinableComponentTrait;
 
 	#[DebugHide(false)]
 	#[Extract(false)]
@@ -145,15 +146,15 @@ class IPv4 extends BaseIP {
 	}
 
 	static function getOctetNames(): Box|array {
-		return PHP::box(['octet1', 'octet2', 'octet3', 'octet4']);
+		return PHP::box(['octet1', 'octet2', 'octet3', 'octet4']); // @codeCoverageIgnore
 	}
 
 	/**
-	 * @param ...$args
+	 * @param mixed ...$args Arguments
 	 *
-	 * @throws \spaf\simputils\exceptions\IPParsingException
+	 * @throws \spaf\simputils\exceptions\IPParsingException IP parsing error
 	 */
-	private function getLeftAndRight(...$args) {
+	private function getLeftAndRight(mixed ...$args) {
 		/** @var static $right */
 		$right = $args[0];
 		$left = $this;
@@ -162,8 +163,7 @@ class IPv4 extends BaseIP {
 			$right = new static($right);
 		}
 		if (!$right instanceof static) {
-			// FIX  Exception type is wrong
-			throw new Exception('Wrong type');
+			throw new ValueError('Wrong object type');
 		}
 
 		return [$left, $right];
@@ -218,7 +218,30 @@ class IPv4 extends BaseIP {
 	}
 
 	function range(IPv4|string $ip2) {
-		// FIX  proper dynamic class!
-		return new IPv4Range($this, $ip2);
+		$class = PHP::redef(IPv4Range::class);
+		return new $class($this, $ip2);
+	}
+
+	function getHost($protocol): ?string {
+		return "{$this}"; // @codeCoverageIgnore
+	}
+
+	function getPath($protocol): ?string {
+		return null; // @codeCoverageIgnore
+	}
+
+	function getParams($protocol): ?string {
+		return null; // @codeCoverageIgnore
+	}
+
+	function getData($protocol): ?string {
+		return null; // @codeCoverageIgnore
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public static function redefComponentName(): string {
+		return InitConfig::REDEF_IPV4;
 	}
 }

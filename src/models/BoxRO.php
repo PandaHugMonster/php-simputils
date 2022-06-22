@@ -18,6 +18,6 @@ class BoxRO extends Box {
 	use RedefinableComponentTrait;
 
 	static function redefComponentName(): string {
-		return InitConfig::REDEF_BRO;
+		return InitConfig::REDEF_BRO; // @codeCoverageIgnore
 	}
 }

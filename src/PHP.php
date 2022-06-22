@@ -14,12 +14,12 @@ use Generator;
 use Iterator;
 use ReflectionClass;
 use spaf\simputils\attributes\markers\Shortcut;
-use spaf\simputils\components\BaseIP;
 use spaf\simputils\exceptions\RedefUnimplemented;
 use spaf\simputils\exceptions\RedefWrongReference;
 use spaf\simputils\exceptions\SerializationProblem;
 use spaf\simputils\exceptions\UnBoxable;
 use spaf\simputils\generic\BasicInitConfig;
+use spaf\simputils\generic\BasicIP;
 use spaf\simputils\interfaces\UrlCompatible;
 use spaf\simputils\models\Box;
 use spaf\simputils\models\BoxRO;
@@ -227,8 +227,7 @@ class PHP {
 	 *
 	 * @return ?string
 	 *
-	 * FIX  Important
-	 * TODO Implement recursive toJson control to objects (So object can decide,
+	 * TODO Important:: Implement recursive toJson control to objects (So object can decide,
 	 *      whether it wants to be a string, an array or a number).
 	 *
 	 */
@@ -874,25 +873,29 @@ class PHP {
 		UrlObject|UrlCompatible|string|Box|array $host = null,
 		Box|array|string $path = null,
 		Box|array $params = null,
-		string $protocol = null
+		string $protocol = null, // Important - ignored if first argument is an object
+		mixed ...$data,
 	) {
-		// FIX  Implement proper dynamic class
-		if ($host instanceof UrlObject) {
-			// FIX  Maybe redefine values?
+		$class = PHP::redef(UrlObject::class);
+		if ($host instanceof $class) {
+			/** @var UrlObject $host */
+			$host->addPath($path);
+			$host->addParams($params);
 			return $host;
 		}
-		$model = new UrlObject($host, $path, $params, $protocol);
+
+		$model = new $class($host, $path, $params, $protocol, ...$data);
 
 		return $model;
 	}
 
 	static function ip(string|IPv4 $ip) {
-		// FIX  Implement proper dynamic class
-		if ($ip instanceof BaseIP) {
+		$class = PHP::redef(IPv4::class);
+		if ($ip instanceof BasicIP) {
 			return $ip;
 		}
 
-		$model = new IPv4($ip);
+		$model = new $class($ip);
 		return $model;
 	}
 
@@ -1026,5 +1029,21 @@ class PHP {
 	public static function classShortName(string $val): string {
 		$class_reflection = new ReflectionClass($val);
 		return $class_reflection->getShortName();
+	}
+
+	static function objToNaiveString($self, $fields = null) {
+		$class = static::classShortName($self::class);
+
+		$res = "Object <{$class}#{$self->obj_id}";
+
+		if (!empty($fields)) {
+			$res .= ':';
+			foreach ($fields as $k => $v) {
+				$res .= " {$k}={$v}";
+			}
+		}
+		$res .= '>';
+
+		return $res;
 	}
 }

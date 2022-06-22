@@ -4,13 +4,16 @@ namespace spaf\simputils\models;
 
 use spaf\simputils\attributes\Property;
 use spaf\simputils\generic\SimpleObject;
+use spaf\simputils\PHP;
 use spaf\simputils\Str;
+use spaf\simputils\traits\RedefinableComponentTrait;
 
 /**
  * @property-read IPv4 $start
  * @property-read IPv4 $end
  */
 class IPv4Range extends SimpleObject {
+	use RedefinableComponentTrait;
 
 	#[Property]
 	protected ?IPv4 $_start = null;
@@ -19,12 +22,13 @@ class IPv4Range extends SimpleObject {
 	protected ?IPv4 $_end = null;
 
 	function __construct(string|IPv4 $ip1, string|IPv4 $ip2) {
-		// FIX  Implement dynamic class!
+		$class = PHP::redef(IPv4::class);
+
 		if (Str::is($ip1)) {
-			$ip1 = new IPv4($ip1);
+			$ip1 = new $class($ip1); // @codeCoverageIgnore
 		}
 		if (Str::is($ip2)) {
-			$ip2 = new IPv4($ip2);
+			$ip2 = new $class($ip2);
 		}
 		$ip1->output_with_mask = false;
 		$ip2->output_with_mask = false;
@@ -40,5 +44,12 @@ class IPv4Range extends SimpleObject {
 
 	public function __toString(): string {
 		return "{$this->_start} - {$this->_end}";
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public static function redefComponentName(): string {
+		return InitConfig::REDEF_IPV4_RANGE;
 	}
 }

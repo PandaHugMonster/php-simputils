@@ -73,6 +73,6 @@ trait SimpleObjectTrait {
 			return $this->toJson();
 		}
 
-		return PHP::objToNaiveString($this);
+		return PHP::objToNaiveString($this); // @codeCoverageIgnore
 	}
 }

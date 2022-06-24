@@ -37,12 +37,12 @@ class L10n extends SimpleObject {
 
 	#[Property('settings_date_time')]
 	protected function getDateTime(): Box {
-		return PHP::box($this->DateTime);
+		return PHP::box($this->DateTime); // @codeCoverageIgnore
 	}
 
 	#[Property('settings_data_unit')]
 	protected function getDataUnit(): Box {
-		return PHP::box($this->DataUnit);
+		return PHP::box($this->DataUnit); // @codeCoverageIgnore
 	}
 
 	protected $DateTime = [

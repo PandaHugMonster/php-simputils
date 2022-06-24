@@ -75,7 +75,7 @@ class UrlObject extends SimpleObject {
 
 	#[Property('processor')]
 	protected function setProcessor(BasicProtocolProcessor $val) {
-		$this->_processor = $val;
+		$this->_processor = $val; // @codeCoverageIgnore
 	}
 
 	/**
@@ -119,6 +119,7 @@ class UrlObject extends SimpleObject {
 		$this->addPath($path);
 		$this->addParams($params);
 		$this->addData($data);
+		$this->_path->pathAlike();
 	}
 
 	protected function parseHost(
@@ -143,6 +144,7 @@ class UrlObject extends SimpleObject {
 
 				$this->_path->mergeFrom($host->only_numeric);
 				$this->_params->mergeFrom($host->only_assoc);
+				$host = null;
 			}
 		}
 
@@ -183,7 +185,8 @@ class UrlObject extends SimpleObject {
 			}
 		}
 
-		$r = PHP::box();
+		// TODO Re-implement properly without creating a new object every single time
+		$r = PHP::box()->pathAlike();
 		foreach ($this->_path as $item) {
 			$sub = preg_replace('#\s+#S', '', $item);
 			if (!empty($sub)) {

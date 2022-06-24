@@ -124,7 +124,7 @@ class File extends BasicResource {
 	) {
 
 		if (is_array($file) || $file instanceof Box) {
-			$file = FS::locate(...$file);
+			$file = FS::locate(...$file); // @codeCoverageIgnore
 		}
 
 		if (is_null($file)) {

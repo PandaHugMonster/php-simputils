@@ -2,6 +2,10 @@
 
 namespace spaf\simputils\traits;
 
+/**
+ *
+ * @codeCoverageIgnore
+ */
 trait ComparablesTrait {
 
 	abstract function equalsTo(...$args): bool;

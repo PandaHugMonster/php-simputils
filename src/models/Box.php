@@ -30,7 +30,6 @@ use function is_null;
 use function is_numeric;
 use function is_object;
 use function is_string;
-use function method_exists;
 use function shuffle;
 use function uasort;
 
@@ -881,10 +880,7 @@ class Box extends ArrayObject {
 			return $this->join();
 		}
 
-		if (method_exists($this, 'toJson')) {
-			return $this->toJson();
-		}
-		return PHP::objToNaiveString($this);
+		return $this->toJson();
 	}
 }
 

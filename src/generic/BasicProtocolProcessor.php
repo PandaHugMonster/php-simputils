@@ -28,8 +28,6 @@ abstract class BasicProtocolProcessor extends SimpleObject {
 	abstract function generateRelative($host, $path, $params, $data): string;
 
 	function __toString(): string {
-		return PHP::objToNaiveString($this, [
-			'protocol' => $this->_protocol,
-		]);
+		return PHP::objToNaiveString($this, ['protocol' => $this->_protocol]);//@codeCoverageIgnore
 	}
 }

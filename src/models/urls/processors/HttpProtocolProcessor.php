@@ -55,9 +55,7 @@ class HttpProtocolProcessor extends BasicProtocolProcessor {
 			$value = preg_replace('#/+#', '/', $value);
 		} else {
 			$value = preg_replace('#/+#', '/', $value);
-			if (Str::startsWith($value, '/')) {
-				$value = Str::removeStarting($value, '/');
-			}
+			$value = Str::removeStarting($value, '/');
 		}
 
 		$pre_res = Str::split($value, '?');

@@ -35,6 +35,7 @@ abstract class BasicInitConfig extends SimpleObject {
 	const REDEF_PD = 'pd';
 	const REDEF_PR = 'pr';
 	const REDEF_BOX = 'Box';
+	const REDEF_BRO = 'BoxRO';
 	const REDEF_DATE_TIME = 'DateTime';
 	const REDEF_DATE_TIME_ZONE = 'DateTimeZone';
 	const REDEF_DATE_INTERVAL = 'DateInterval';
@@ -54,6 +55,9 @@ abstract class BasicInitConfig extends SimpleObject {
 	const REDEF_SYSTEM_FINGERPRINT = 'SystemFingerprint';
 	const REDEF_STR_OBJ = 'StrObj';
 	const REDEF_SET = 'Set';
+	const REDEF_IPV4_RANGE = 'IPv4Range';
+	const REDEF_IPV4 = 'IPv4';
+	const REDEF_URL = 'UrlObject';
 
 	public ?string $name = null;
 	public ?string $code_root = null;

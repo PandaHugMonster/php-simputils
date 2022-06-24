@@ -485,6 +485,7 @@ class FS {
 	 * @return string|null
 	 */
 	public static function path(?string ...$parts): ?string {
+		// FIX  Refactor mechanics to use new one
 		$sep = DIRECTORY_SEPARATOR;
 		if ($parts) {
 			$res = PHP::box($parts)->join($sep);

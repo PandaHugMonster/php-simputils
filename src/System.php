@@ -5,6 +5,10 @@ namespace spaf\simputils;
 
 
 
+use spaf\simputils\models\IPv4;
+use function gethostbyname;
+use function gethostname;
+
 /**
  *
  */
@@ -66,5 +70,9 @@ class System {
 	 */
 	public static function serverApi(): string {
 		return PHP_SAPI;
+	}
+
+	static function localIp(): IPv4 {
+		return PHP::ip(gethostbyname(gethostname()));
 	}
 }

@@ -52,18 +52,55 @@ I will be really happy hearing from you.
    object with path: "{working-dir}/part1/part2/file.txt"
  * In `BasicInitConfig` introduced component-aware `$allowed_data_dirs` for specifying
    allowed data-dirs
- * New exception is introduced: `DataDirectoryIsNotAllowed`
+ * Introduced new exceptions: `DataDirectoryIsNotAllowed`, `IPParsingException`
  * Implemented the shortcut for the "InitConfig". Now instead of 
    `$config = PHP::getInitConfig()` you can use a shortcut `$config = ic()`
  * Fixed some of the logic related to "l10n" and "default_tz" more you can find here:
    [Nuances of l10n and default_tz](docs/notes.md#Nuances-of-l10n-and-default_tz)
- * List of days of the week (UNDONE)
- * List of months of the year (UNDONE)
- * 
+ * Implemented list of **days of the week**: `\spaf\simputils\DT::getListOfDaysOfWeek()`
+ * Implemented list of **months**: `\spaf\simputils\DT::getListOfMonths()`
  * Incorporated all the previous minor-version patches
    * To set the timezone for "DateTime" object now can be done by "strings" instead of
      creation of "DateTimeZone" object every single time
    * Other minimal changes
+ * Implemented trait `\spaf\simputils\traits\ComparablesTrait` which enables to implement 
+   common set of comparing functionality (`equalsTo`, `greaterThan`, `lessThan`, 
+   `greaterThanEqual`, `lessThanEqual`) and their shortcuts (`e`, `gt`, `lt`, 
+   `gte`, `lte`). Currently used in `Version` and `IPv4` models
+ * Implemented `\spaf\simputils\models\IPv4` and `\spaf\simputils\models\IPv4Range` models
+   with minimal but nice functionality
+ * Implemented `\spaf\simputils\models\UrlObject` model 
+   and `\spaf\simputils\models\urls\processors\HttpProtocolProcessor`
+   * The most of the stuff should work out of the box except lack 
+     of "to punycode" conversion. Cyrillic and other non-latin domains are 
+     not converted to punycode.
+ * Implemented `\spaf\simputils\System::localIp()` that gets the local IP
+ * Implemented shortcuts `url()` for `\spaf\simputils\models\UrlObject` model and
+   `ip()` for `\spaf\simputils\models\IPv4`
+ * Added `\spaf\simputils\components\normalizers\IPNormalizer` property normalizer
+ * Implementation of `\spaf\simputils\PHP::bro()` method (`\spaf\simputils\models\BoxRO`)
+   which is basically "immutable Box"
+ * Implemented shortcuts for getting `POST` and `GET` data as bros (BoxRO). Please keep 
+   in mind that they are immutable due to best-practices:
+   * `\spaf\simputils\PHP::POST()`
+   * `\spaf\simputils\PHP::GET()`
+ * Implemented `\spaf\simputils\PHP::objToNaiveString()` method to generate simple/naive
+   object representation
+ * Implemented some relevant tests
+ * Important: Functionality of the Box is slightly extended. Now you can re-define static
+   `\spaf\simputils\models\Box::$default_separator` variable value to string that should be used
+   during `\spaf\simputils\models\Box::join()` and `\spaf\simputils\models\Box::implode()` as 
+   a separator by default (initially default is ", " as it was before).
+   Additionally you can specify `\spaf\simputils\models\Box::$separator` on per object basis
+   that will be used in the object in case of "join" or "implode" without the first argument.
+   That functionality allows to create "path-ready" Box-arrays, that can by default 
+   be automatically converted into a "unix" path.
+   `\spaf\simputils\models\Box::$joined_to_str` per object variable allows to define that
+   this Box-object needs to be converted in `__toString()` method 
+   through `\spaf\simputils\models\Box::join()` method, which is really useful for "path-ready"
+   Box-arrays. See example here: [Path-alike Box-array](#Path-alike-Box-array)
+ * For convenience create method-shortcut 
+   to set Box as "Path-alike": `\spaf\simputils\models\Box::pathAlike()`
 
 
 ----
@@ -104,6 +141,8 @@ Just a few tini-tiny examples of very condensed functionality :)
 1. [Properties](#Properties)
 2. [Date Times](#Date-Times)
 3. [Advanced PHP Info Object](#Advanced-PHP-Info-Object)
+4. [IPv4 model](#IPv4-model)
+5. [Path-alike Box-array](#Path-alike-Box-array)
 
 ### Properties
 
@@ -524,6 +563,77 @@ You can access top-level fields (those that directly on the object):
        }
    }
    ```
+
+### IPv4 model
+
+Simple example:
+```php
+
+$ic = PHP::init([
+	'l10n' => 'AT',
+]);
+
+/**
+ * @property ?string $name
+ * @property ?IPv4 $my_ip
+ */
+class Totoro extends SimpleObject {
+
+	#[Property]
+	protected ?string $_name = null;
+
+	#[Property]
+	protected ?IPv4 $_my_ip = null;
+
+}
+
+$t = new Totoro;
+
+$t->name = 'Totoro';
+$t->my_ip = '127.0.0.1/16';
+$t->my_ip->output_with_mask = false;
+
+pr("I am {$t->name} and my address is {$t->my_ip} (and ip-mask is {$t->my_ip->mask})");
+
+```
+
+The output would be:
+```
+I am Totoro and my address is 127.0.0.1 (and ip-mask is 255.255.0.0)
+```
+
+### Path-alike Box-array
+
+This is a new feature for `Box` model/
+
+```php
+$b = new Box(['TEST', 'PATH', 'alike', 'box']);
+
+pr("{$b}"); // In this case JSON
+
+$b->joined_to_str = true;
+
+pr("{$b}");
+
+$b->separator = '/';
+
+pr("{$b}");
+
+$b->separator = ' ## ';
+
+pr("{$b}");
+
+```
+
+The output would be:
+```
+
+["TEST","PATH","alike","box"]
+TEST, PATH, alike, box
+TEST/PATH/alike/box
+TEST ## PATH ## alike ## box
+
+```
 
 ## Additional benefits
 1. All the versions are wrapped into `Version` class (out of the box version comparison, etc.)

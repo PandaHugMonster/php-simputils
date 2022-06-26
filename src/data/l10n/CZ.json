@@ -1,0 +1,13 @@
+{
+  "DateTime": {
+    "user_date_format": "j.n.Y",
+    "user_time_format": "H:i",
+    "user_datetime_format": "j.n.Y H:i",
+    "user_default_tz": "Europe/Prague",
+
+    "user_time_ext_format": "H:i:s",
+    "user_time_full_format": "H:i:s.u",
+    "user_datetime_ext_format": "j.n.Y H:i:s",
+    "user_datetime_full_format": "j.n.Y H:i:s.u"
+  }
+}

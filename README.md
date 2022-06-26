@@ -101,6 +101,7 @@ I will be really happy hearing from you.
    Box-arrays. See example here: [Path-alike Box-array](#Path-alike-Box-array)
  * For convenience create method-shortcut 
    to set Box as "Path-alike": `\spaf\simputils\models\Box::pathAlike()`
+ * Added missing data-blocks for different locales
 
 
 ----

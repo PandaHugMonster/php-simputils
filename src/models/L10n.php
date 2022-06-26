@@ -37,12 +37,12 @@ class L10n extends SimpleObject {
 
 	#[Property('settings_date_time')]
 	protected function getDateTime(): Box {
-		return PHP::box($this->DateTime);
+		return PHP::box($this->DateTime); // @codeCoverageIgnore
 	}
 
 	#[Property('settings_data_unit')]
 	protected function getDataUnit(): Box {
-		return PHP::box($this->DataUnit);
+		return PHP::box($this->DataUnit); // @codeCoverageIgnore
 	}
 
 	protected $DateTime = [
@@ -72,6 +72,7 @@ class L10n extends SimpleObject {
 		$class = PHP::redef(DateTime::class);
 		PHP::metaMagicSpell($class, 'l10n', $this->DateTime);
 		if (!empty($this?->DateTime['user_default_tz'])) {
+			// MARK Maybe sync it with DT::
 			date_default_timezone_set($this->DateTime['user_default_tz']);
 		}
 

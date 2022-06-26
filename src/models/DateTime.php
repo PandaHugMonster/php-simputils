@@ -160,11 +160,13 @@ class DateTime extends FixUpDateTime {
 		//      property - it will be used ONLY for setting, without returning anything.
 		//      This is why return-type signature has no definition!
 		$class_tz = PHP::redef(DateTimeZone::class);
-		if (is_string($timezone)) {
-			$timezone = new $class_tz($timezone);
-		}
+
 		if (empty($timezone)) {
 			$timezone = 'UTC';
+		}
+
+		if (is_string($timezone)) {
+			$timezone = new $class_tz($timezone);
 		}
 		return parent::setTimezone($timezone);
 	}
@@ -333,12 +335,20 @@ class DateTime extends FixUpDateTime {
 	}
 
 	/**
+	 * Period is a partial shortcut for "walk"
+	 *
+	 * If third argument is "false", then expect the exact shortcut of "walk".
+	 * In the case when it's "true" (default one), it will make sure that the "start" is lower,
+	 * than the "end" (in this case it can guarantee that the period goes from lower to
+	 * higher date-time).
+	 *
 	 * @param string|static|int        $to_date        Second date
 	 * @param string|DateInterval|null $step           Interval for iterations
 	 * @param bool                     $is_direct_only If true (default) - start date
 	 *                                                 will be always lower than the ending.
 	 *
 	 * @return DatePeriod
+	 *
 	 */
 	#[Shortcut('walk')]
 	public function period(
@@ -370,7 +380,7 @@ class DateTime extends FixUpDateTime {
 	 */
 	#[Shortcut('static::format()')]
 	function f($format) {
-		return $this->format($format);
+		return $this->format($format); //@codeCoverageIgnore
 	}
 
 	public function toJson(?bool $pretty = null, bool $with_class = false): string {

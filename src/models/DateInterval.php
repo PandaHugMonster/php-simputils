@@ -41,8 +41,8 @@ class DateInterval extends FixUpDateInterval {
 	public function __construct(string $duration) {
 		$is_inverted = false;
 		if (Str::startsWith($duration, '-')) {
-			$duration = Str::removeStarting($duration, '-');
-			$is_inverted = true;
+			$duration = Str::removeStarting($duration, '-');  // @codeCoverageIgnore
+			$is_inverted = true;  // @codeCoverageIgnore
 		}
 		parent::__construct($duration);
 
@@ -51,7 +51,7 @@ class DateInterval extends FixUpDateInterval {
 
 	#[Property('specification_string')]
 	protected function getSpecificationString() {
-		return DT::dateIntervalSpecificationString($this);
+		return DT::dateIntervalSpecificationString($this); // @codeCoverageIgnore
 	}
 
 	public function __toString(): string {

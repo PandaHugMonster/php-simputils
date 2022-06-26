@@ -16,11 +16,14 @@ use spaf\simputils\models\DateTimeZone;
 use spaf\simputils\models\Dir;
 use spaf\simputils\models\File;
 use spaf\simputils\models\InitConfig;
+use spaf\simputils\models\IPv4;
+use spaf\simputils\models\IPv4Range;
 use spaf\simputils\models\L10n;
 use spaf\simputils\models\PhpInfo;
 use spaf\simputils\models\Set;
 use spaf\simputils\models\StackFifo;
 use spaf\simputils\models\StackLifo;
+use spaf\simputils\models\UrlObject;
 use spaf\simputils\models\Version;
 
 /**
@@ -59,6 +62,9 @@ class CodeBlocksCacheIndex {
 			// InitConfig::REDEF_SYSTEM_FINGERPRINT => SystemFingerprint::class,
 			// InitConfig::REDEF_STR_OBJ => StrObj::class,
 			InitConfig::REDEF_SET => Set::class,
+			InitConfig::REDEF_IPV4_RANGE => IPv4Range::class,
+			InitConfig::REDEF_IPV4 => IPv4::class,
+			InitConfig::REDEF_URL => UrlObject::class,
 		]);
 	}
 

@@ -24,7 +24,7 @@ abstract class BasicValidator extends SimpleObject implements ValidatorInterface
 	 *      "properties" attributes pre-processing. When more advanced reference
 	 *      storage will be built, this could be done differently.
 	 *
-	 * @param mixed $value
+	 * @param mixed $value Value
 	 *
 	 * @return mixed|null
 	 */

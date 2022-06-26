@@ -6,6 +6,7 @@ use spaf\simputils\models\Box;
 use spaf\simputils\models\Set;
 use spaf\simputils\models\Version;
 use spaf\simputils\PHP;
+use function spaf\simputils\basic\bx;
 
 /**
  * @covers \spaf\simputils\models\Box
@@ -67,8 +68,50 @@ class BoxTest extends TestCase {
 
 	/**
 	 * @uses \spaf\simputils\PHP::box
+	 * @uses \spaf\simputils\Boolean
+	 * @uses \spaf\simputils\Str
+	 * @uses \spaf\simputils\basic\bx
+	 * @uses \spaf\simputils\components\normalizers\BooleanNormalizer
+	 * @uses \spaf\simputils\components\normalizers\StringNormalizer
+	 * @uses \spaf\simputils\traits\PropertiesTrait::__set
+	 * @return void
+	 */
+	function testBoxExtended() {
+		$bx = bx(['1', 2, 3, 'k1' => 'g1', 'k2' => 'g2', 'k3' => 'g3']);
+
+		$bx->apply('test', separator: '(Q)');
+		$this->assertEquals('(Q)', $bx->separator);
+
+		$this->assertEquals(bx(['k1' => 'g1', 'k2' => 'g2', 'k3' => 'g3']), $bx->only_assoc);
+		$this->assertEquals(bx(['1', 2, 3]), $bx->only_numeric);
+	}
+
+	/**
+	 * @uses \spaf\simputils\PHP::box
+	 * @uses \spaf\simputils\Boolean
+	 * @uses \spaf\simputils\Str
+	 * @uses \spaf\simputils\basic\bx
+	 * @uses \spaf\simputils\components\normalizers\BooleanNormalizer
+	 * @uses \spaf\simputils\components\normalizers\StringNormalizer
+	 * @uses \spaf\simputils\traits\PropertiesTrait::__set
+	 * @return void
+	 * @runInSeparateProcess
+	 */
+	function testBoxExtendedException() {
+		$this->expectException(ValueError::class);
+		$bx = bx(['1', 2, 3]);
+
+		$bx->apply(totoro: 'goooo');
+	}
+
+	/**
+	 * @uses \spaf\simputils\PHP::box
 	 * @uses \spaf\simputils\Str
 	 * @uses \spaf\simputils\models\Set
+	 * @uses \spaf\simputils\Boolean
+	 * @uses \spaf\simputils\components\normalizers\BooleanNormalizer
+	 * @uses \spaf\simputils\components\normalizers\StringNormalizer
+	 * @uses \spaf\simputils\traits\PropertiesTrait::__set
 	 *
 	 * @return void
 	 */
@@ -156,8 +199,13 @@ class BoxTest extends TestCase {
 			['t3' => 'test3', 't4' => 'test4']
 		);
 
+		$_bx = $bx;
 		$bx = $bx->join(' - ');
 		$this->assertEquals('test1 - test2 - test3 - test4', $bx);
+
+		/** @var Box $_bx */
+		$_bx->pathAlike();
+		$this->assertEquals('test1/test2/test3/test4', $_bx);
 
 		$bx = PHP::box([1, 2, 3, 4, 5, 6]);
 		$this->assertEquals(21, $bx->sum());

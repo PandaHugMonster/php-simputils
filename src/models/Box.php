@@ -142,6 +142,10 @@ use function uasort;
  * @property-read int $size
  * @property-read Box|array $keys
  * @property-read Box|array $values
+ * @property-read Box|array $only_numeric
+ * @property-read Box|array $only_assoc
+ * @property ?string $separator
+ * @property ?string $joined_to_str
  */
 class Box extends ArrayObject {
 	use SimpleObjectTrait;
@@ -149,6 +153,14 @@ class Box extends ArrayObject {
 
 	public static bool $to_string_format_json = true;
 	public static bool $is_json_pretty = false;
+
+	static string $default_separator = ', ';
+
+	#[Property]
+	protected ?string $_separator = null;
+
+	#[Property]
+	protected bool $_joined_to_str = false;
 
 	#[Extract(false)]
 	protected mixed $_stash = null;
@@ -742,13 +754,86 @@ class Box extends ArrayObject {
 		return $this;
 	}
 
-	public function implode($sep = ', ') {
-		return implode($sep, (array) $this);
+	/**
+	 * @param ?string  $sep Separator
+	 *
+	 * @return string
+	 * @see Str::explode()
+	 * @see \implode()
+	 *
+	 * @see static::$default_separator
+	 * @see static::$separator
+	 */
+	#[Shortcut('\implode()')]
+	public function implode(?string $sep = null): string {
+		return implode(
+			$sep ?? $this->_separator ?? static::$default_separator,
+			(array) $this
+		);
 	}
 
+	/**
+	 * @param ?string $sep Separator
+	 *
+	 * @return string
+	 *
+	 * @see static::$default_separator
+	 * @see static::$separator
+	 */
 	#[Shortcut('\implode()')]
-	public function join($sep = ', ') {
+	public function join(?string $sep = null): string {
 		return $this->implode($sep);
+	}
+
+	private function _splitAssocAndNumeric(bool $numeric = true) {
+		$res = new static();
+		foreach ($this as $k => $v) {
+			if ($numeric) {
+				if (is_numeric($k)) {
+					$res[$k] = $v;
+				}
+			} else {
+				if (!is_numeric($k)) {
+					$res[$k] = $v;
+				}
+			}
+		}
+		return $res;
+	}
+
+	#[Property('only_numeric')]
+	protected function getOnlyNumeric() {
+		return $this->_splitAssocAndNumeric(true);
+	}
+
+	#[Property('only_assoc')]
+	protected function getOnlyAssociative() {
+		return $this->_splitAssocAndNumeric(false);
+	}
+
+	function apply(...$properties) {
+		$permitted_properties = new static([
+			'separator', 'joined_to_str' // For now only those are permitted params
+		]);
+		$permitted_properties->joined_to_str = true;
+
+		foreach ($properties as $k => $v) {
+			if (is_numeric($k)) {
+				continue;
+			}
+
+			if (!$permitted_properties->containsValue($k)) {
+				throw new ValueError("This property ({$k}) is not allowed to set " .
+					"through this method. Permitted properties are: {$permitted_properties}");
+			}
+
+			$this->$k = $v;
+		}
+	}
+
+	function pathAlike(): self {
+		$this->apply(separator: '/', joined_to_str: true);
+		return $this;
 	}
 
 	/**
@@ -788,6 +873,14 @@ class Box extends ArrayObject {
 	 */
 	public function __debugInfo(): array {
 		return $this->toArray();
+	}
+
+	function __toString(): string {
+		if ($this->_joined_to_str) {
+			return $this->join();
+		}
+
+		return $this->toJson();
 	}
 }
 

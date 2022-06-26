@@ -143,6 +143,7 @@ class DateTimeTest extends TestCase {
 	}
 
 	/**
+	 * @covers \spaf\simputils\models\DateTime
 	 *
 	 * @return void
 	 * @runInSeparateProcess

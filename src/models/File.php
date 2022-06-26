@@ -23,6 +23,7 @@ use function file_exists;
 use function file_put_contents;
 use function fopen;
 use function fstat;
+use function is_array;
 use function is_null;
 use function rewind;
 use function stat;
@@ -121,6 +122,10 @@ class File extends BasicResource {
 		null|string|Closure|callable $app = null,
 		?string $mime_type = null
 	) {
+
+		if (is_array($file) || $file instanceof Box) {
+			$file = FS::locate(...$file); // @codeCoverageIgnore
+		}
 
 		if (is_null($file)) {
 			// Temp file, created in memory

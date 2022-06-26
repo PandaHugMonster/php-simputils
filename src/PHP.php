@@ -19,12 +19,17 @@ use spaf\simputils\exceptions\RedefWrongReference;
 use spaf\simputils\exceptions\SerializationProblem;
 use spaf\simputils\exceptions\UnBoxable;
 use spaf\simputils\generic\BasicInitConfig;
+use spaf\simputils\generic\BasicIP;
+use spaf\simputils\interfaces\UrlCompatible;
 use spaf\simputils\models\Box;
+use spaf\simputils\models\BoxRO;
 use spaf\simputils\models\InitConfig;
+use spaf\simputils\models\IPv4;
 use spaf\simputils\models\PhpInfo;
 use spaf\simputils\models\Set;
 use spaf\simputils\models\StackFifo;
 use spaf\simputils\models\StackLifo;
+use spaf\simputils\models\UrlObject;
 use spaf\simputils\models\Version;
 use spaf\simputils\special\CodeBlocksCacheIndex;
 use spaf\simputils\special\CommonMemoryCacheIndex;
@@ -106,7 +111,38 @@ class PHP {
 	 */
 	public static function simpUtilsVersion(): Version|string {
 		$class = static::redef(Version::class);
-		return new $class('1.0.5', 'SimpUtils');
+		return new $class('1.1.0', 'SimpUtils');
+	}
+
+	/**
+	 * List of mime-types of PHP executables
+	 *
+	 * Only PHP-related mime-types!
+	 *
+	 * @return \spaf\simputils\models\Box
+	 */
+	static function listOfExecPhpMimeTypes(): Box {
+		return static::box([
+			'application/x-php', // This one usually preferable
+
+			'text/x-php',
+			'application/x-httpd-php', 'application/x-httpd-php-source', // Debian-related
+
+			'application/php', 'text/php' // if to follow IANA - those are not correct
+		]);
+	}
+
+	/**
+	 * List of file extensions of PHP executables
+	 *
+	 * @return \spaf\simputils\models\Box
+	 */
+	static function listOfExecPhpFileExtensions(): Box {
+		return static::box([
+			'php', // normal
+
+			'phps', 'php5', 'php4', 'php3', 'phtml' // just a few, list might be extended later
+		]);
 	}
 
 	/**
@@ -173,6 +209,16 @@ class PHP {
 	}
 
 	/**
+	 * @param string|null $name Name of the init config. If empty, used the main "app" InitConfig
+	 *
+	 * @return \spaf\simputils\generic\BasicInitConfig|null
+	 */
+	#[Shortcut('static::getInitConfig()')]
+	public static function ic(?string $name = null): ?BasicInitConfig {
+		return static::getInitConfig($name);
+	}
+
+	/**
 	 * Serialize any data
 	 *
 	 * @param mixed $data          Data to serialize
@@ -181,8 +227,7 @@ class PHP {
 	 *
 	 * @return ?string
 	 *
-	 * FIX  Important
-	 * TODO Implement recursive toJson control to objects (So object can decide,
+	 * TODO Important:: Implement recursive toJson control to objects (So object can decide,
 	 *      whether it wants to be a string, an array or a number).
 	 *
 	 */
@@ -641,7 +686,15 @@ class PHP {
 	 */
 	public static function box(mixed $array = null, mixed ...$merger): Box|array {
 		$class = static::redef(Box::class);
+		return static::_boxAndRo($class, $array, $merger);
+	}
 
+	public static function bro(mixed $array = null, mixed ...$merger): Box|array {
+		$class = static::redef(BoxRO::class);
+		return static::_boxAndRo($class, $array, $merger);
+	}
+
+	protected static function _boxAndRo($class, $array, $merger) {
 		if ($array instanceof Box) {
 			$res = $array;
 		} else if (is_null($array)) {
@@ -681,7 +734,6 @@ class PHP {
 			}
 			$res->mergeFrom(...$sub_res);
 		}
-
 		return $res;
 	}
 
@@ -817,6 +869,36 @@ class PHP {
 		return static::isConsole();
 	}
 
+	static function url(
+		UrlObject|UrlCompatible|string|Box|array $host = null,
+		Box|array|string $path = null,
+		Box|array $params = null,
+		string $protocol = null, // Important - ignored if first argument is an object
+		mixed ...$data,
+	) {
+		$class = PHP::redef(UrlObject::class);
+		if ($host instanceof $class) {
+			/** @var UrlObject $host */
+			$host->addPath($path);
+			$host->addParams($params);
+			return $host;
+		}
+
+		$model = new $class($host, $path, $params, $protocol, ...$data);
+
+		return $model;
+	}
+
+	static function ip(string|IPv4 $ip) {
+		$class = PHP::redef(IPv4::class);
+		if ($ip instanceof BasicIP) {
+			return $ip;
+		}
+
+		$model = new $class($ip);
+		return $model;
+	}
+
 	/**
 	 * Quick and improved version of getting class string of redefinable components
 	 *
@@ -899,8 +981,69 @@ class PHP {
 		return CommonMemoryCacheIndex::$property_validators_enabled;
 	}
 
+	private static $_get = null;
+	private static $_post = null;
+
+	/**
+	 * Returns $_POST data wrapped into a Box
+	 *
+	 * Important: It's caching. Every call will return the same object
+	 *
+	 * It's name is beyond of the common convention of the library on purpose, to increase
+	 * intuitive usage and distinct between "get" methods
+	 *
+	 * @param bool $refresh If set to true, the new object will be created (be careful, data
+	 *                      in old object will be lost)
+	 *
+	 * @return \spaf\simputils\models\Box|array
+	 */
+	#[Shortcut('$_POST')]
+	static function POST($refresh = false): Box|array {
+		if (is_null(static::$_post) || $refresh) {
+			static::$_post = static::bro($_POST);
+		}
+		return static::$_post;
+	}
+
+	/**
+	 * Returns $_GET data wrapped into a Box
+	 *
+	 * Important: It's caching. Every call will return the same object
+	 *
+	 * It's name is beyond of the common convention of the library on purpose, to increase
+	 * intuitive usage and distinct between "get" methods
+	 *
+	 * @param bool $refresh If set to true, the new object will be created (be careful, data
+	 *                      in old object will be lost)
+	 *
+	 * @return \spaf\simputils\models\Box|array
+	 */
+	#[Shortcut('$_GET')]
+	static function GET($refresh = false): Box|array {
+		if (is_null(static::$_get) || $refresh) {
+			static::$_get = static::bro($_GET);
+		}
+		return static::$_get;
+	}
+
 	public static function classShortName(string $val): string {
 		$class_reflection = new ReflectionClass($val);
 		return $class_reflection->getShortName();
+	}
+
+	static function objToNaiveString($self, $fields = null) {
+		$class = static::classShortName($self::class);
+
+		$res = "Object <{$class}#{$self->obj_id}";
+
+		if (!empty($fields)) {
+			$res .= ':';
+			foreach ($fields as $k => $v) {
+				$res .= " {$k}={$v}";
+			}
+		}
+		$res .= '>';
+
+		return $res;
 	}
 }

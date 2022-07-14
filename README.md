@@ -42,6 +42,10 @@ I will be really happy hearing from you.
 
 ## Changelog
 
+### 1.1.1
+ * Added `$separator` optional parameter to `\spaf\simputils\models\Box::pathAlike()` method
+ * Added `\spaf\simputils\models\Box::$is_joined_to_str` static field
+
 ### 1.1.0
 
  * Implemented `FS::require()`, `FS::include()` and `FS::data()`

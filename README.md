@@ -42,6 +42,11 @@ I will be really happy hearing from you.
 
 ## Changelog
 
+### 1.1.1
+
+ * Implemented `\spaf\simputils\components\normalizers\BoxNormalizer` To normalize simple
+   arrays when assigned to Properties
+
 ### 1.1.0
 
  * Implemented `FS::require()`, `FS::include()` and `FS::data()`
@@ -125,7 +130,7 @@ so documentation will come after that in the very nearest time. My apologies.
 
 Minimal PHP version: **8.0**
 
-Current framework version: **1.1.0**
+Current framework version: **1.1.1**
 ```shell
 composer require spaf/simputils "^1"
 ```

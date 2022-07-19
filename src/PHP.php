@@ -111,7 +111,7 @@ class PHP {
 	 */
 	public static function simpUtilsVersion(): Version|string {
 		$class = static::redef(Version::class);
-		return new $class('1.1.0', 'SimpUtils');
+		return new $class('1.1.1', 'SimpUtils');
 	}
 
 	/**

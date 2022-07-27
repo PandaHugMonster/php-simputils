@@ -755,7 +755,7 @@ class Box extends ArrayObject {
 	}
 
 	/**
-	 * @param ?string  $sep Separator
+	 * @param ?string $sep Separator
 	 *
 	 * @return string
 	 * @see Str::explode()

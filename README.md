@@ -9,6 +9,8 @@ https://bank.gov.ua/en/news/all/natsionalniy-bank-vidkriv-spetsrahunok-dlya-zbor
 
 # SimpUtils
 
+Those badges are outdated for now :(
+
 [![Build Status](https://app.travis-ci.com/PandaHugMonster/php-simputils.svg?branch=main)](https://app.travis-ci.com/PandaHugMonster/php-simputils)
 [![codecov](https://codecov.io/gh/PandaHugMonster/php-simputils/branch/main/graph/badge.svg)](https://codecov.io/gh/PandaHugMonster/php-simputils)
 
@@ -41,6 +43,11 @@ I will be really happy hearing from you.
 ----
 
 ## Changelog
+
+### 1.1.2
+
+ * Implemented `\spaf\simputils\basic\with` functionality of a transactional style like
+   python `with` command. Really useful for DB and other connection types.
 
 ### 1.1.1
 
@@ -130,7 +137,7 @@ so documentation will come after that in the very nearest time. My apologies.
 
 Minimal PHP version: **8.0**
 
-Current framework version: **1.1.1**
+Current framework version: **1.1.2**
 ```shell
 composer require spaf/simputils "^1"
 ```
@@ -149,6 +156,7 @@ Just a few tini-tiny examples of very condensed functionality :)
 3. [Advanced PHP Info Object](#Advanced-PHP-Info-Object)
 4. [IPv4 model](#IPv4-model)
 5. [Path-alike Box-array](#Path-alike-Box-array)
+5. ["with" love](#with-love)
 
 ### Properties
 
@@ -570,6 +578,21 @@ You can access top-level fields (those that directly on the object):
    }
    ```
 
+## Additional benefits
+1. All the versions are wrapped into `Version` class (out of the box version comparison, etc.)
+2. The object is created once, and can be accessed through `PHP::info()`
+   (manually possible to have multiple)
+3. The object is being derivative from Box, that means that it has all the benefits (
+   all the underlying arrays are Boxed as well, so the whole content of the php info
+   is available through Box functionality)
+4. Contains lots of information, and probably will be extended in the future with more
+   relevant information.
+
+## Reasoning to use Advanced PHP Info Object
+The native `phpinfo()` returns just a static text representation, which is incredibly
+uncomfortable to use.
+Info about native one you can find here: https://www.php.net/manual/ru/function.phpinfo.php
+
 ### IPv4 model
 
 Simple example:
@@ -641,20 +664,72 @@ TEST ## PATH ## alike ## box
 
 ```
 
-## Additional benefits
-1. All the versions are wrapped into `Version` class (out of the box version comparison, etc.)
-2. The object is created once, and can be accessed through `PHP::info()`
-   (manually possible to have multiple)
-3. The object is being derivative from Box, that means that it has all the benefits (
-   all the underlying arrays are Boxed as well, so the whole content of the php info
-   is available through Box functionality)
-4. Contains lots of information, and probably will be extended in the future with more
-   relevant information.
 
-## Reasoning to use Advanced PHP Info Object
-The native `phpinfo()` returns just a static text representation, which is incredibly
-uncomfortable to use.
-Info about native one you can find here: https://www.php.net/manual/ru/function.phpinfo.php
+### "with" love
+
+Python specific command `with` can be easily implemented through meta-magic and callables.
+
+Simple example:
+```php
+
+PHP::init();
+
+class Totoro extends SimpleObject {
+
+	protected function ___withStart($obj, $callback) {
+		pr('PREPARED! %)');
+//		$callback($obj);
+//		return true;
+	}
+
+	protected function ___withEnd($obj) {
+		pr('POST DONE %_%');
+	}
+
+}
+
+$obj = new Totoro;
+
+with($obj, function () {
+	pr('HEY! :)');
+});
+```
+
+You can access the target object easily from the callable:
+```php
+$obj = new Totoro;
+
+with($obj, function ($obj) {
+	pr('HEY! :)', $obj);
+});
+
+// or less elegant way:
+with($obj, function () use ($obj) {
+	pr('HEY! :)', $obj);
+});
+
+```
+
+The example above can be combined if you want to use more from the outer scope,
+but to keep the elegant way :)
+
+```php
+$obj = new Totoro;
+
+$var1 = 1;
+$var2 = 0.2;
+$var3 = 'CooCoo';
+
+with($obj, function ($obj) use ($var1, $var2, $var3) {
+	pr('HEY! :)', $obj, $var1, $var2, $var3);
+});
+
+```
+
+The syntax obviously is not that cute as in python, but functionally it's the same thing.
+
+P.S. Keep in mind that the `with()` functionality relies on "MetaMagic" trait, and object
+should use either the trait or implement 2 methods of `___withStart()` and `___withEnd()`
 
 
 ----

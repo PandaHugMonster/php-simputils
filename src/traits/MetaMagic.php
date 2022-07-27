@@ -7,6 +7,7 @@ use spaf\simputils\exceptions\InfiniteLoopPreventionExceptions;
 use spaf\simputils\exceptions\MetaMagicStrictInheritanceProblem;
 use spaf\simputils\FS;
 use spaf\simputils\generic\BasicPrism;
+use spaf\simputils\generic\SimpleObject;
 use spaf\simputils\models\Box;
 use spaf\simputils\models\File;
 use spaf\simputils\PHP;
@@ -517,6 +518,32 @@ trait MetaMagic {
 	}
 
 	/**
+	 * Meta-magic start for "with"
+	 *
+	 * @param object|SimpleObject $obj      Object
+	 * @param callable            $callback Callback
+	 *
+	 * @return bool
+	 *
+	 * @see \spaf\simputils\basic\with()
+	 * @see PHP::with()
+	 */
+	protected function ___withStart($obj, $callback) {
+		return false;
+	}
+
+	/**
+	 * Meta-magic end for "with"
+	 *
+	 * @param $obj
+	 *
+	 * @return void
+	 */
+	protected function ___withEnd($obj) {
+
+	}
+
+	/**
 	 * MetaMagic controlling method
 	 *
 	 * This method in the most cases is not needed for you. It does "MetaMagic" possible.
@@ -558,6 +585,8 @@ trait MetaMagic {
 	 * @see MetaMagic::___deserialize() Deserialization meta-magic
 	 * @see MetaMagic::___setup() Object fulfilling meta-magic
 	 * @see MetaMagic::___l10n() Object fulfilling meta-magic
+	 * @see MetaMagic::___withStart() With starting
+	 * @see MetaMagic::___withEnd() With ending
 	 *
 	 * @see https://www.php.net/manual/en/language.oop5.visibility.php#language.oop5.visibility-other-objects
 	 *      Visibility of the "relatives"
@@ -574,6 +603,8 @@ trait MetaMagic {
 			'___deserialize' => $context->___deserialize(...$spell),
 			'___setup' => $context->___setup(...$spell),
 			'___extractFields' => $context->___extractFields(...$spell),
+			'___withStart' => $context->___withStart(...$spell),
+			'___withEnd' => $context->___withEnd(...$spell),
 
 			'___l10n' => $context::___l10n(...$spell),
 		};

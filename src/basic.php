@@ -12,6 +12,7 @@ use spaf\simputils\DT;
 use spaf\simputils\FS;
 use spaf\simputils\generic\BasicInitConfig;
 use spaf\simputils\generic\BasicIP;
+use spaf\simputils\generic\SimpleObject;
 use spaf\simputils\interfaces\UrlCompatible;
 use spaf\simputils\models\Box;
 use spaf\simputils\models\DataUnit;
@@ -210,4 +211,50 @@ function url(
 #[Shortcut('PHP::ip()')]
 function ip(string|BasicIP $ip): IPv4 {
 	return PHP::ip($ip);
+}
+
+/**
+ * Run code block in a transaction style like in python
+ *
+ * Resources are temporarily unsupported, it will be added later
+ *
+ * Keep in mind, if true is returned from the `___withStart()` method,
+ * it will prevent further execution of "callback". This is done, so
+ * you could execute the callback right inside of the `___withStart()`
+ * wrapped into a "try-catch". It's done exactly for the purpose of
+ * exception processing in case of need. Just don't forget to execute
+ * the callable int this case.
+ *
+ * Example:
+ * ```php
+ *  class Totoro extends SimpleObject {
+ *      protected function ___withStart($obj, $callback) {
+ *          pr('PREPARED! %)');
+ *          //		$callback($obj);
+ *          //		return true;
+ *      }
+ *
+ *      protected function ___withEnd($obj) {
+ *          pr('POST DONE %_%');
+ *      }
+ * }
+ *
+ * $obj = new Totoro;
+ *
+ *
+ * with($obj, function () {
+ *      pr('HEY! :)');
+ * });
+ *
+ * ```
+ *
+ * @param object|SimpleObject $obj      Object on which start and end
+ *                                      methods should be ran
+ * @param callable            $callback Code block that should be run in between
+ *
+ * @return void
+ */
+#[Shortcut('PHP::with()')]
+function with($obj, callable $callback): void {
+	PHP::with($obj, $callback);
 }

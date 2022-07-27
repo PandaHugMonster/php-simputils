@@ -27,7 +27,7 @@ class DatePeriod extends FixUpDatePeriod {
 	 * So prefrably use this one instead of native "interval" property.
 	 *
 	 * @return \spaf\simputils\models\DateInterval
-	 * @throws \spaf\simputils\exceptions\RedefUnimplemented
+	 * @throws \spaf\simputils\exceptions\RedefUnimplemented Redefinition is not implemented
 	 */
 	#[Property('extended_interval')]
 	#[Shortcut('interval')]

@@ -837,6 +837,85 @@ class Box extends ArrayObject {
 	}
 
 	/**
+	 * Just extract and batch values to be imported in code scope
+	 *
+	 * Keep in mind that the items returned in the order of specified `$keys` param!
+	 *
+	 * **In the most cases "extract" syntax is the most preferable**, just be careful with it!
+	 *
+	 * Quick import example 1 (extract):
+	 * ```php
+	 *  // PHP Extract style of assignment
+	 *  extract($b->batch(['var1', 'var2', 'var3']));
+	 * ```
+	 *
+	 * Quick import example 2 (list):
+	 * ```php
+	 *  // List style of assignment
+	 *  [$var1, $var2, $var3] = $b->batch(['var1', 'var2', 'var3'], true);
+	 * ```
+	 *
+	 * Bigger example:
+	 * ```php
+	 *  PHP::init();
+	 *  // Important, but the third value will be skipped, only assoc values are allowed for
+	 *  // batch assignment/extraction
+	 *  $b = bx([
+	 *      'var1' => 'value 1',
+	 *      'value 2',
+	 *      'var3' => 'value 3',
+	 *      'var4' => 'value 4',
+	 *  ]);
+	 *
+	 *  // Creating variables and assigning null to them
+	 *  $var1 = $var2 = $var3 = $var4 = null;
+	 *
+	 *  // Both code-lines bellow will do the same!
+	 *  // List style of assignment
+	 *  [$var1, $var2, $var3] = $b->batch(['var1', 'var2', 'var3'], true);
+	 *  // PHP Extract style of assignment (slightly more elegant and easy to use)
+	 *  extract($b->batch(['var1', 'var2', 'var3']));
+	 *
+	 *  pd($var1, $var2, $var3, $var4);
+	 * ```
+	 *
+	 * Output:
+	 * ```
+	 *  value 1
+	 *
+	 *  value 3
+	 *
+	 * ```
+	 *
+	 * **Important**: For the "extract" method, never specify uncontrollably the keys like
+	 * `PHP::POST()->keys` or `PHP::GET()->keys` - You will compromise your code,
+	 * it's a huge security issue. Always specify controlled keys!
+	 * [https://www.php.net/manual/en/function.extract.php](https://www.php.net/manual/en/function.extract.php)
+	 *
+	 * @param static|array $keys          Keys of items to be extracted in batch
+	 * @param bool         $is_list_ready If set to true, will replace the keys with
+	 *                                    numeric sequential values (Order will be preserved
+	 *                                    as specified in the $keys)
+	 *
+	 * @return array
+	 *
+	 * @see https://www.php.net/manual/en/function.extract.php
+	 */
+	function batch($keys, $is_list_ready = false): array {
+		$res = [];
+
+		foreach ($keys as $key) {
+			if ($is_list_ready) {
+				$res[] = $this->get($key);
+			} else {
+				$res[$key] = $this->get($key);
+			}
+		}
+
+		return $res;
+	}
+
+	/**
 	 * @codeCoverageIgnore
 	 * @return string
 	 */

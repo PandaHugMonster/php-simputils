@@ -112,7 +112,7 @@ class PHP {
 	 */
 	public static function simpUtilsVersion(): Version|string {
 		$class = static::redef(Version::class);
-		return new $class('1.1.2', 'SimpUtils');
+		return new $class('1.1.3', 'SimpUtils');
 	}
 
 	/**
@@ -629,6 +629,10 @@ class PHP {
 		if (static::$allow_dying && $res) {
 			die(); // @codeCoverageIgnore
 		}
+	}
+
+	public static function print_r($value, $return = false) {
+
 	}
 
 	public static function pr(...$args): void {

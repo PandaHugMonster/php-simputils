@@ -391,4 +391,26 @@ class DateTime extends FixUpDateTime {
 	public static function redefComponentName(): string {
 		return InitConfig::REDEF_DATE_TIME;
 	}
+
+	function setFromStr($str, $tz = null): static {
+		$this->__construct();
+		$tmp = DT::ts($str, $tz);
+		$this->tz = $tmp->tz;
+		$this->setTimestamp($tmp->getTimestamp());
+		$this->setMicro($tmp->getMicro());
+		$tmp = null;
+		return $this;
+	}
+
+	function ___serialize(): Box|array {
+		return [
+			'for_system' => $this->for_system,
+			'tz' => Str::ing($this->tz),
+		];
+	}
+
+	protected function ___deserialize(array|Box $data): static {
+		$this->setFromStr($data['for_system'], $data['tz']);
+		return $this;
+	}
 }

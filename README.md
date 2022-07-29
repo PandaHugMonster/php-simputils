@@ -42,7 +42,34 @@ I will be really happy hearing from you.
 
 ----
 
+## Important notes
+ 1. Currently JSON serialization and deserialization does not work properly. 
+    Please do not rely on it for now! **IMPORTANT!**
+    When fix for this problem comes, and you are using current logic - you might get 
+    into a broken code logic. Please do not use `\spaf\simputils\PHP::serialize()` and 
+    `\spaf\simputils\PHP::deserialize()` code with JSON mechanics, you can switch the
+    mechanics to native PHP like this (workaround):
+    ```php
+      PHP::$serialization_mechanism = PHP::SERIALIZATION_TYPE_PHP;
+      PHP::init();
+    ```
+    That will use native PHP mechanics for serialization, which should work properly 
+    starting from this release (1.1.3)
+
 ## Changelog
+
+### 1.1.3
+
+ * Implemented method `\spaf\simputils\models\Box::batch` that allows to easily export items
+   of specified keys to the local variable scope
+ * Implemented method `\spaf\simputils\models\DateTime::setFromStr()`
+ * Fixed broken native PHP serialization/deserialization, it is fixed through meta-magic of 
+   `\spaf\simputils\models\DateTime::___serialize()` and 
+   `\spaf\simputils\models\DateTime::___deserialize()`
+ * Implemented `\spaf\simputils\PHP::print_r()` to display objects and other entities correctly
+   * IN PROGRESS
+ * Code Sniffer is removed from the project (got really annoyed, and it does not work correctly)
+   * IN PROGRESS
 
 ### 1.1.2
 
@@ -137,13 +164,14 @@ so documentation will come after that in the very nearest time. My apologies.
 
 Minimal PHP version: **8.0**
 
-Current framework version: **1.1.2**
+Current framework version: **1.1.3**
 ```shell
 composer require spaf/simputils "^1"
 ```
 
 Keep in mind that the library development suppose to follow the semantic versioning,
-so the functionality within the same major version - should be backward-compatible.
+so the functionality within the same major version - should be backward-compatible (Except 
+cases of bugs and issues).
 
 More about semantic versioning: [Semantic Versioning Explanation](https://semver.org).
 

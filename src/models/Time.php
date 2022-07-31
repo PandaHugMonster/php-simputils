@@ -79,8 +79,8 @@ class Time extends FixUpDateTimePrism {
 		return $this->_object->milli;
 	}
 
-	function setFromStr($str, $tz = null): static {
-		$this->__construct($str, $tz);
+	function setFromData($data): static {
+		$this->__construct($data['for_system'], $data['tz']);
 		return $this;
 	}
 
@@ -92,6 +92,6 @@ class Time extends FixUpDateTimePrism {
 	}
 
 	protected function ___deserialize(array|Box $data): static {
-		return $this->setFromStr($data['for_system'], $data['tz']);
+		return $this->setFromData($data);
 	}
 }

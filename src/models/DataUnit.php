@@ -543,8 +543,8 @@ class DataUnit extends SimpleObject {
 		return new static($res);
 	}
 
-	function setFromStr($str): static {
-		$this->__construct($str);
+	function setFromData($data): static {
+		$this->__construct($data['value']);
 		return $this;
 	}
 
@@ -555,7 +555,7 @@ class DataUnit extends SimpleObject {
 	}
 
 	protected function ___deserialize(array|Box $data): static {
-		return $this->setFromStr($data['value']);
+		return $this->setFromData($data);
 	}
 
 	/**

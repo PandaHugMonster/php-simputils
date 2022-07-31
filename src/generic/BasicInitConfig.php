@@ -36,8 +36,6 @@ use function is_string;
  */
 abstract class BasicInitConfig extends SimpleObject {
 
-	const REDEF_EXEC_ENV_HANDLER = 'ExecEnvHandler';
-
 	const REDEF_PD = 'pd';
 	const REDEF_PR = 'pr';
 	const REDEF_BOX = 'Box';
@@ -79,15 +77,14 @@ abstract class BasicInitConfig extends SimpleObject {
 
 	#[Property('ee')]
 	protected function setEe(null|ExecEnvHandlerInterface|array|Box|string $val) {
-		$class_exec_env_handler = PHP::redef(BasicExecEnvHandler::class);
 		$obj = null;
 
 		if ($val instanceof ExecEnvHandlerInterface) {
 			$obj = $val;
 		} else if (is_string($val)) {
-			$obj = new $class_exec_env_handler($val);
+			$obj = new BasicExecEnvHandler($val);
 		} else if ($val instanceof Box || is_array($val)) {
-			$obj = new $class_exec_env_handler(...$val);
+			$obj = new BasicExecEnvHandler(...$val);
 		}
 
 		$this->_ee_handler = $obj;

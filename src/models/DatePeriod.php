@@ -42,10 +42,10 @@ class DatePeriod extends FixUpDatePeriod {
 		return $this->_cached_extended_interval;
 	}
 
-	function setFromData($start, $end, $interval): static {
-		$this->start = $start;
-		$this->end = $end;
-		$this->interval = $interval;
+	function setFromData($data): static {
+		$this->start = $data['start'];
+		$this->end = $data['end'];
+		$this->interval = $data['interval'];
 		return $this;
 	}
 
@@ -58,7 +58,7 @@ class DatePeriod extends FixUpDatePeriod {
 	}
 
 	protected function ___deserialize(array|Box $data): static {
-		return $this->setFromData($data['start'], $data['end'], $data['interval']);
+		return $this->setFromData($data);
 	}
 
 	/**

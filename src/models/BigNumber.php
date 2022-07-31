@@ -510,8 +510,8 @@ class BigNumber extends SimpleObject {
 		return $val;
 	}
 
-	function setFromStr($str, $is_mutable, $ext): static {
-		$this->__construct($str, $is_mutable, $ext);
+	function setFromData($data): static {
+		$this->__construct($data['value'], $data['is_mutable'], $data['extension']);
 		return $this;
 	}
 
@@ -524,7 +524,7 @@ class BigNumber extends SimpleObject {
 	}
 
 	protected function ___deserialize(array|Box $data): static {
-		return $this->setFromStr($data['value'], $data['is_mutable'], $data['extension']);
+		return $this->setFromData($data);
 	}
 
 	public function __toString(): string {

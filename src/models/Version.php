@@ -360,8 +360,8 @@ class Version extends SimpleObject {
 		return json_encode("{$this}");
 	}
 
-	function setFromStr($str, $software_name): static {
-		$this->__construct($str, $software_name);
+	function setFromData($data): static {
+		$this->__construct($data['value'], $data['software']);
 		return $this;
 	}
 
@@ -375,7 +375,7 @@ class Version extends SimpleObject {
 	}
 
 	protected function ___deserialize(array|Box $data): static {
-		$this->setFromStr($data['value'], $data['software']);
+		$this->setFromData($data);
 		return $this;
 	}
 

@@ -54,8 +54,8 @@ class DateInterval extends FixUpDateInterval {
 		return DT::dateIntervalSpecificationString($this); // @codeCoverageIgnore
 	}
 
-	function setFromStr($str): static {
-		$this->__construct($str);
+	function setFromData($data): static {
+		$this->__construct($data['value']);
 		return $this;
 	}
 
@@ -66,7 +66,7 @@ class DateInterval extends FixUpDateInterval {
 	}
 
 	protected function ___deserialize(array|Box $data): static {
-		return $this->setFromStr($data['value']);
+		return $this->setFromData($data);
 	}
 
 	public function __toString(): string {

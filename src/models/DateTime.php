@@ -417,9 +417,9 @@ class DateTime extends FixUpDateTime {
 		return InitConfig::REDEF_DATE_TIME;
 	}
 
-	function setFromStr($str, $tz = null): static {
+	function setFromData($data): static {
 		$this->__construct();
-		$tmp = DT::ts($str, $tz);
+		$tmp = DT::ts($data['for_system'], $data['tz']);
 		$this->tz = $tmp->tz;
 		$this->setTimestamp($tmp->getTimestamp());
 		$this->setMicro($tmp->getMicro());
@@ -435,7 +435,7 @@ class DateTime extends FixUpDateTime {
 	}
 
 	protected function ___deserialize(array|Box $data): static {
-		$this->setFromStr($data['for_system'], $data['tz']);
+		$this->setFromData($data);
 		return $this;
 	}
 }

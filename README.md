@@ -60,19 +60,66 @@ I will be really happy hearing from you.
 
 ### 1.1.3
 
- * Implemented method `\spaf\simputils\models\Box::batch` that allows to easily export items
+ * Implemented method `\spaf\simputils\models\Box::batch()` that allows to easily export items
    of specified keys to the local variable scope
- * Implemented method `\spaf\simputils\models\DateTime::setFromStr()`
- * Fixed broken native PHP serialization/deserialization, it is fixed through meta-magic of 
-   `\spaf\simputils\models\DateTime::___serialize()` and 
-   `\spaf\simputils\models\DateTime::___deserialize()`
+ * Implemented methods `setFromData()` and meta-magic methods `___serialize()` and 
+   `___deserialize()` to fix PHP native serialization/deserialization for the 
+   following classes:
+   * `\spaf\simputils\models\Version`
+   * `\spaf\simputils\models\UrlObject`
+   * `\spaf\simputils\models\Time`
+   * `\spaf\simputils\models\L10n`
+   * `\spaf\simputils\models\IPv4Range`
+   * `\spaf\simputils\models\IPv4`
+   * `\spaf\simputils\models\File`
+   * `\spaf\simputils\models\Dir`
+   * `\spaf\simputils\models\DateTimeZone`
+   * `\spaf\simputils\models\DateTime`
+   * `\spaf\simputils\models\DatePeriod`
+   * `\spaf\simputils\models\DateInterval`
+   * `\spaf\simputils\models\Date`
+   * `\spaf\simputils\models\DataUnit`
+   * `\spaf\simputils\models\BigNumber`
  * Code Sniffer is removed from the project (got really annoyed, and it does not work correctly)
-   * IN PROGRESS
  * `\spaf\simputils\models\Time` and `\spaf\simputils\models\Date` have been refactored a bit.
    The caching mechanics has been fixed.
-    * Additionally have been added the properties for time like `hour`, etc.
-    * Time result of `for_system` now returns the whole DateTime string value of UTC, 
-      not only the time component.
+   * Additionally have been added the properties for `\spaf\simputils\models\Date`
+     and `\spaf\simputils\models\Time` from the target `DateTime` object
+   * `\spaf\simputils\models\Date` and `\spaf\simputils\models\Time` result of `for_system` 
+     now returns the whole DateTime string value of UTC, not only the date or time component.
+ * Implemented `\spaf\simputils\generic\BasicExecEnvHandler` Execution-Environment (aka stages),
+   besides that implemented `\spaf\simputils\generic\BasicInitConfig::@$ee` property that 
+   automatically will be assigned during `PHP::init()`, the object or params could be 
+   adjusted in the incoming config, example:
+   ```php
+      $ic = PHP::init([
+        'l10n' => 'AT',
+        //	'ee' => new DummyExecEnvHandler(false, ee_name: 'TOO'),
+        'ee' => [
+            'ee' => 'test3-local',
+            'is_hierarchical' => true,
+            'permitted_values' => [
+                'test1',
+                'test2',
+                'test3',
+                'test4',
+            ]
+        ]
+      ]);
+      pd("{$ic->ee}", Boolean::to($ic->ee->is('test4-local')));
+   ```
+   For now not much of documentation is provided, but you always can define your own
+   implementation of the class like `\spaf\simputils\components\execenvs\DummyExecEnvHandler`
+   to handle your Exec-Env/stages implementation! More documentation and example will follow.
+ * Additionally implemented `\spaf\simputils\components\execenvs\DummyExecEnvHandler`
+   which is a dummy handler that just returns the predefined value. Should not be used 
+   on production.
+ * Implemented `\spaf\simputils\exceptions\ExecEnvException` exception for Exec-Env cases
+ * Implemented `\spaf\simputils\models\Box::popFromStart()` and 
+   `\spaf\simputils\models\Box::popFromEnd()` methods to get value from the box, return
+   and remove it from the box.
+ * Implemented tests for:
+   * Exec-Env
 
 ### 1.1.2
 

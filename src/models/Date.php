@@ -101,8 +101,8 @@ class Date extends FixUpDateTimePrism {
 		$this->_object->setDate($this->year, $this->month, $day);
 	}
 
-	function setFromStr($str, $tz = null): static {
-		$this->__construct($str, $tz);
+	function setFromData($data): static {
+		$this->__construct($data['for_system'], $data['tz']);
 		return $this;
 	}
 
@@ -114,6 +114,6 @@ class Date extends FixUpDateTimePrism {
 	}
 
 	protected function ___deserialize(array|Box $data): static {
-		return $this->setFromStr($data['for_system'], $data['tz']);
+		return $this->setFromData($data);
 	}
 }

@@ -513,8 +513,8 @@ class File extends BasicResource {
 		return null;
 	}
 
-	function setFromStr($str, $content_hash): static {
-		$this->__construct($str);
+	function setFromData($data): static {
+		$this->__construct($data['value']);
 		return $this;
 	}
 
@@ -526,7 +526,7 @@ class File extends BasicResource {
 	}
 
 	protected function ___deserialize(array|Box $data): static {
-		return $this->setFromStr($data['value'], $data['content_hash']);
+		return $this->setFromData($data);
 	}
 
 	//// Some Magic and MetaMagic

@@ -238,8 +238,11 @@ class IPv4 extends BasicIP implements UrlCompatible {
 		return null; // @codeCoverageIgnore
 	}
 
-	function setFromStr($str, $mask_cidr, $output_with_mask): static {
-		$this->__construct("{$str}/{$mask_cidr}", $output_with_mask);
+	function setFromData($data): static {
+		$this->__construct(
+			"{$data['value']}/{$data['mask_cidr']}",
+			$data['output_with_mask']
+		);
 		return $this;
 	}
 
@@ -256,7 +259,7 @@ class IPv4 extends BasicIP implements UrlCompatible {
 	}
 
 	protected function ___deserialize(array|Box $data): static {
-		return $this->setFromStr($data['value'], $data['mask_cidr'], $data['output_with_mask']);
+		return $this->setFromData($data);
 	}
 
 	/**

@@ -254,8 +254,8 @@ class UrlObject extends SimpleObject {
 		);
 	}
 
-	function setFromStr(string $for_system): static {
-		$this->__construct($for_system);
+	function setFromData($data): static {
+		$this->__construct($data['for_system']);
 		return $this;
 	}
 
@@ -266,7 +266,7 @@ class UrlObject extends SimpleObject {
 	}
 
 	protected function ___deserialize(array|Box $data): static {
-		$this->setFromStr($data['for_system']);
+		$this->setFromData($data);
 		return $this;
 	}
 

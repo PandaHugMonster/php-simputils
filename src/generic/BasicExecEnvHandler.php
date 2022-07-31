@@ -6,9 +6,7 @@ use spaf\simputils\attributes\Property;
 use spaf\simputils\exceptions\ExecEnvException;
 use spaf\simputils\interfaces\ExecEnvHandlerInterface;
 use spaf\simputils\models\Box;
-use spaf\simputils\models\InitConfig;
 use spaf\simputils\PHP;
-use spaf\simputils\traits\RedefinableComponentTrait;
 use function intval;
 use function is_null;
 use function is_numeric;
@@ -24,7 +22,6 @@ use function preg_match;
  * @property Box $permitted_values
  */
 class BasicExecEnvHandler extends SimpleObject implements ExecEnvHandlerInterface {
-	use RedefinableComponentTrait;
 
 	const EE_UNKNOWN = 'unknown';
 
@@ -150,10 +147,4 @@ class BasicExecEnvHandler extends SimpleObject implements ExecEnvHandlerInterfac
 		return "{$res}";
 	}
 
-	/**
-	 * @inheritDoc
-	 */
-	public static function redefComponentName(): string {
-		return InitConfig::REDEF_EXEC_ENV_HANDLER;
-	}
 }

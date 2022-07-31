@@ -25,6 +25,7 @@ use function fopen;
 use function fstat;
 use function is_array;
 use function is_null;
+use function md5;
 use function rewind;
 use function stat;
 use function stream_get_contents;
@@ -510,6 +511,22 @@ class File extends BasicResource {
 		}
 
 		return null;
+	}
+
+	function setFromStr($str, $content_hash): static {
+		$this->__construct($str);
+		return $this;
+	}
+
+	function ___serialize(): Box|array {
+		return [
+			'value' => "{$this->name_full}",
+			'content_hash' => md5($this->content),
+		];
+	}
+
+	protected function ___deserialize(array|Box $data): static {
+		return $this->setFromStr($data['value'], $data['content_hash']);
 	}
 
 	//// Some Magic and MetaMagic

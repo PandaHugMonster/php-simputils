@@ -9,7 +9,9 @@ use spaf\simputils\attributes\Property;
 use spaf\simputils\components\versions\parsers\DefaultVersionParser;
 use spaf\simputils\generic\SimpleObject;
 use spaf\simputils\interfaces\VersionParserInterface;
+use spaf\simputils\Str;
 use spaf\simputils\traits\RedefinableComponentTrait;
+use function is_null;
 use function json_encode;
 
 /**
@@ -356,6 +358,25 @@ class Version extends SimpleObject {
 
 	public function toJson(?bool $pretty = null, bool $with_class = false): string {
 		return json_encode("{$this}");
+	}
+
+	function setFromStr($str, $software_name): static {
+		$this->__construct($str, $software_name);
+		return $this;
+	}
+
+	function ___serialize(): Box|array {
+		return [
+			'value' => Str::ing($this),
+			'software' => !is_null($this->software_name)
+				?Str::ing($this->software_name)
+				:null,
+		];
+	}
+
+	protected function ___deserialize(array|Box $data): static {
+		$this->setFromStr($data['value'], $data['software']);
+		return $this;
 	}
 
 	/**

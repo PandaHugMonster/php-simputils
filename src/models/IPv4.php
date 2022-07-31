@@ -238,6 +238,27 @@ class IPv4 extends BasicIP implements UrlCompatible {
 		return null; // @codeCoverageIgnore
 	}
 
+	function setFromStr($str, $mask_cidr, $output_with_mask): static {
+		$this->__construct("{$str}/{$mask_cidr}", $output_with_mask);
+		return $this;
+	}
+
+	function ___serialize(): Box|array {
+		$owm = $this->output_with_mask;
+		$this->output_with_mask = false;
+		$res = [
+			'value' => "{$this}",
+			'mask_cidr' => "{$this->mask_cidr}",
+			'output_with_mask' => $owm
+		];
+		$this->output_with_mask = $owm;
+		return $res;
+	}
+
+	protected function ___deserialize(array|Box $data): static {
+		return $this->setFromStr($data['value'], $data['mask_cidr'], $data['output_with_mask']);
+	}
+
 	/**
 	 * @inheritDoc
 	 */

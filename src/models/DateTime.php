@@ -73,6 +73,31 @@ class DateTime extends FixUpDateTime {
 	// NOTE Is not used anywhere, just a reference for the JSON files
 	public static $l10n_user_default_tz = 'UTC';
 
+	public function __construct(
+		DateTime|string $datetime = 'now',
+		null|string|DateTimeZone $timezone = null
+	) {
+		$class_tz = PHP::redef(DateTimeZone::class);
+
+		if ($datetime instanceof DateTime) {
+			$_tmp = $datetime;
+			$datetime = $_tmp->for_system;
+			if (is_null($timezone)) {
+				$timezone = $_tmp->tz;
+			}
+		}
+
+		if (empty($timezone)) {
+			$timezone = 'UTC';
+		}
+
+		if (is_string($timezone)) {
+			$timezone = new $class_tz($timezone);
+		}
+
+		parent::__construct($datetime, $timezone);
+	}
+
 	/**
 	 * Stores the copy of value before any of "modify", "add" or "sub" performed.
 	 * @var static $_orig_value
@@ -152,7 +177,7 @@ class DateTime extends FixUpDateTime {
 	 *
 	 * @return static
 	 */
-	#[Property('tz')]
+	#[Property('tz', type: 'set')]
 	#[\ReturnTypeWillChange]
 	public function setTimezone($timezone): static {
 		// IMP  This method is original native PHP method, and it expects to return something,

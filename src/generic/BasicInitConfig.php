@@ -8,6 +8,7 @@ use spaf\simputils\attributes\Property;
 use spaf\simputils\DT;
 use spaf\simputils\exceptions\InitConfigAlreadyInitialized;
 use spaf\simputils\FS;
+use spaf\simputils\interfaces\ExecEnvHandlerInterface;
 use spaf\simputils\interfaces\InitBlockInterface;
 use spaf\simputils\models\BigNumber;
 use spaf\simputils\models\Box;
@@ -18,8 +19,10 @@ use spaf\simputils\PHP;
 use spaf\simputils\special\CommonMemoryCacheIndex;
 use spaf\simputils\Str;
 use ValueError;
+use function is_array;
 use function is_null;
 use function is_numeric;
+use function is_string;
 
 /**
  *
@@ -29,8 +32,11 @@ use function is_numeric;
  *
  * @property string $big_number_extension
  * @property bool $data_unit_long
+ * @property null|ExecEnvHandlerInterface|\spaf\simputils\generic\BasicExecEnvHandler $ee Exec-Environment
  */
 abstract class BasicInitConfig extends SimpleObject {
+
+	const REDEF_EXEC_ENV_HANDLER = 'ExecEnvHandler';
 
 	const REDEF_PD = 'pd';
 	const REDEF_PR = 'pr';
@@ -67,6 +73,25 @@ abstract class BasicInitConfig extends SimpleObject {
 	public null|array|Box $allowed_data_dirs = [];
 
 	protected bool $_is_timezone_changed = false;
+
+	#[Property('ee', type: 'get')]
+	protected ?ExecEnvHandlerInterface $_ee_handler = null;
+
+	#[Property('ee')]
+	protected function setEe(null|ExecEnvHandlerInterface|array|Box|string $val) {
+		$class_exec_env_handler = PHP::redef(BasicExecEnvHandler::class);
+		$obj = null;
+
+		if ($val instanceof ExecEnvHandlerInterface) {
+			$obj = $val;
+		} else if (is_string($val)) {
+			$obj = new $class_exec_env_handler($val);
+		} else if ($val instanceof Box || is_array($val)) {
+			$obj = new $class_exec_env_handler(...$val);
+		}
+
+		$this->_ee_handler = $obj;
+	}
 
 	#[DebugHide]
 	protected null|string $_l10n_name = null;

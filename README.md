@@ -66,10 +66,13 @@ I will be really happy hearing from you.
  * Fixed broken native PHP serialization/deserialization, it is fixed through meta-magic of 
    `\spaf\simputils\models\DateTime::___serialize()` and 
    `\spaf\simputils\models\DateTime::___deserialize()`
- * Implemented `\spaf\simputils\PHP::print_r()` to display objects and other entities correctly
-   * IN PROGRESS
  * Code Sniffer is removed from the project (got really annoyed, and it does not work correctly)
    * IN PROGRESS
+ * `\spaf\simputils\models\Time` and `\spaf\simputils\models\Date` have been refactored a bit.
+   The caching mechanics has been fixed.
+    * Additionally have been added the properties for time like `hour`, etc.
+    * Time result of `for_system` now returns the whole DateTime string value of UTC, 
+      not only the time component.
 
 ### 1.1.2
 

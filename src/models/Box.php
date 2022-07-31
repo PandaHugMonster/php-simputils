@@ -18,6 +18,7 @@ use ValueError;
 use function array_combine;
 use function array_flip;
 use function array_keys;
+use function array_pop;
 use function array_values;
 use function arsort;
 use function count;
@@ -912,6 +913,28 @@ class Box extends ArrayObject {
 			}
 		}
 
+		return $res;
+	}
+
+	/**
+	 * Get value from the ending side and remove it from the storage
+	 *
+	 * @return mixed
+	 */
+	function popFromEnd(): mixed {
+		$stash = (array) $this->shift(from_start: false)->stash;
+		$res = array_pop($stash);
+		return $res;
+	}
+
+	/**
+	 * Get value from the starting side and remove it from the storage
+	 *
+	 * @return mixed
+	 */
+	function popFromStart(): mixed {
+		$stash = (array) $this->shift(from_start: true)->stash;
+		$res = array_pop($stash);
 		return $res;
 	}
 

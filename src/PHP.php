@@ -18,6 +18,7 @@ use spaf\simputils\exceptions\RedefUnimplemented;
 use spaf\simputils\exceptions\RedefWrongReference;
 use spaf\simputils\exceptions\SerializationProblem;
 use spaf\simputils\exceptions\UnBoxable;
+use spaf\simputils\generic\BasicExecEnvHandler;
 use spaf\simputils\generic\BasicInitConfig;
 use spaf\simputils\generic\BasicIP;
 use spaf\simputils\generic\SimpleObject;
@@ -178,6 +179,10 @@ class PHP {
 //		$config->___setup($args ?? []);
 		static::metaMagicSpell($config, 'setup', $args ?? []);
 
+		if (empty($config->ee)) {
+			$config->ee = BasicExecEnvHandler::EE_UNKNOWN;
+		}
+
 		// TODO Implement code below into config through Properties
 		if (!is_dir($config->code_root)) {
 			$config->code_root = dirname($config->code_root);
@@ -192,6 +197,7 @@ class PHP {
 		} else {
 			// TODO Exception here?
 		}
+
 		return $config;
 	}
 
@@ -618,7 +624,7 @@ class PHP {
 	 * @see \print_r()
 	 * @return void
 	 */
-	public static function pd(mixed ...$args) {
+	static function pd(mixed ...$args) {
 		$callback = CodeBlocksCacheIndex::getRedefinition(InitConfig::REDEF_PD);
 		if ($callback && $callback !== InitConfig::REDEF_PD) {
 			$res = (bool) $callback(...$args);
@@ -629,10 +635,6 @@ class PHP {
 		if (static::$allow_dying && $res) {
 			die(); // @codeCoverageIgnore
 		}
-	}
-
-	public static function print_r($value, $return = false) {
-
 	}
 
 	public static function pr(...$args): void {

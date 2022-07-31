@@ -33,8 +33,8 @@ class PrismsTest extends TestCase {
 		$prism_d = $dt->date;
 		$prism_t = $dt->time;
 
-		$this->assertEquals('2020-03-04', "{$prism_d->for_system}");
-		$this->assertEquals('05:06:07', "{$prism_t->for_system}");
+		$this->assertEquals('2020-03-04 05:06:07.000000', "{$prism_d->for_system}");
+		$this->assertEquals('2020-03-04 05:06:07.000000', "{$prism_t->for_system}");
 		$this->assertEquals($dt, $prism_d->object);
 		$this->assertEquals($dt, $prism_t->object);
 
@@ -48,7 +48,7 @@ class PrismsTest extends TestCase {
 		$this->assertInstanceOf(Date::class, $prism_d2);
 		$this->assertInstanceOf(Time::class, $prism_t2);
 
-		$this->assertEquals('2020-03-04', "{$prism_d2->for_system}");
-		$this->assertEquals('05:06:07', "{$prism_t2->for_system}");
+		$this->assertEquals('2020-03-04 05:06:07.000000', "{$prism_d2->for_system}");
+		$this->assertEquals('2020-03-04 05:06:07.000000', "{$prism_t2->for_system}");
 	}
 }

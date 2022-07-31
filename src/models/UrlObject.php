@@ -11,6 +11,7 @@ use spaf\simputils\generic\SimpleObject;
 use spaf\simputils\interfaces\UrlCompatible;
 use spaf\simputils\models\urls\processors\HttpProtocolProcessor;
 use spaf\simputils\PHP;
+use spaf\simputils\Str;
 use spaf\simputils\traits\ForOutputsTrait;
 use spaf\simputils\traits\RedefinableComponentTrait;
 use function is_array;
@@ -251,6 +252,22 @@ class UrlObject extends SimpleObject {
 		return $this->_processor->generateRelative(
 			$host, $this->_path, $this->_params, $this->_data
 		);
+	}
+
+	function setFromStr(string $for_system): static {
+		$this->__construct($for_system);
+		return $this;
+	}
+
+	function ___serialize(): Box|array {
+		return [
+			'for_system' => Str::ing($this->for_system),
+		];
+	}
+
+	protected function ___deserialize(array|Box $data): static {
+		$this->setFromStr($data['for_system']);
+		return $this;
 	}
 
 	/**

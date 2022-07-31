@@ -543,6 +543,21 @@ class DataUnit extends SimpleObject {
 		return new static($res);
 	}
 
+	function setFromData($data): static {
+		$this->__construct($data['value']);
+		return $this;
+	}
+
+	function ___serialize(): Box|array {
+		return [
+			'value' => $this->_value,
+		];
+	}
+
+	protected function ___deserialize(array|Box $data): static {
+		return $this->setFromData($data);
+	}
+
 	/**
 	 * @return string
 	 * @codeCoverageIgnore

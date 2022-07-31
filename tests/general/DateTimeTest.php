@@ -45,6 +45,7 @@ use function spaf\simputils\basic\ts;
  * @uses \spaf\simputils\models\files\apps\JsonProcessor
  * @uses \spaf\simputils\models\files\apps\TextProcessor
  * @uses \spaf\simputils\models\files\apps\settings\DotEnvSettings
+ *
  */
 class DateTimeTest extends TestCase {
 
@@ -227,16 +228,23 @@ class DateTimeTest extends TestCase {
 		$dt = DT::ts('2022-03-31 00:47:58.123456', 'UTC');
 
 		// Simple check
-		$this->assertEquals('2022-03-31', $dt->date->for_system);
-		$this->assertEquals('00:47:58', $dt->time->for_system);
+		$this->assertEquals('2022-03-31 00:47:58.123456', $dt->date->for_system);
+		$this->assertEquals('2022-03-31 00:47:58.123456', $dt->time->for_system);
 
 		// Modifying the main object, results are seen on the prisms
 		$dt->add('-200 minutes');
-		$this->assertEquals('2022-03-30', $dt->date->for_system);
-		$this->assertEquals('21:27:58', $dt->time->for_system);
+		$this->assertEquals('2022-03-30 21:27:58.123456', $dt->date->for_system);
+		$this->assertEquals('2022-03-30 21:27:58.123456', $dt->time->for_system);
 	}
 
+	/**
+	 * @runInSeparateProcess
+	 * @return void
+	 */
 	function testOther() {
+		PHP::init([
+			'l10n' => 'AT'
+		]);
 		$tz_default = DT::getDefaultTimeZone();
 
 		$dt = DT::ts('2022-12-25 05:04:03');
@@ -255,7 +263,8 @@ class DateTimeTest extends TestCase {
 			$dt->getForSystemObj()->format(DateTime::$l10n_user_datetime_format)
 		);
 
-		$dt = DT::ts('2022-12-25 05:04:03', true);
+		$dt = DT::ts('2022-12-25 05:04:03', null);
+//		pd($dt);
 		$this->assertNotEquals(
 			$dt->for_user,
 			$dt->getForSystemObj()->format(DateTime::$l10n_user_datetime_format)

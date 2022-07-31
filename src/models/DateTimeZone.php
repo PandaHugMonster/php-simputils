@@ -7,6 +7,21 @@ use spaf\simputils\Str;
 
 class DateTimeZone extends FixUpDateTimeZone {
 
+	function setFromData($data): static {
+		$this->__construct($data['value']);
+		return $this;
+	}
+
+	function ___serialize(): Box|array {
+		return [
+			'value' => "{$this}",
+		];
+	}
+
+	protected function ___deserialize(array|Box $data): static {
+		return $this->setFromData($data);
+	}
+
 	public function __toString(): string {
 		return $this->getName(); // @codeCoverageIgnore
 	}

@@ -510,6 +510,23 @@ class BigNumber extends SimpleObject {
 		return $val;
 	}
 
+	function setFromData($data): static {
+		$this->__construct($data['value'], $data['is_mutable'], $data['extension']);
+		return $this;
+	}
+
+	function ___serialize(): Box|array {
+		return [
+			'value' => $this->_value,
+			'is_mutable' => $this->_is_mutable,
+			'extension' => $this->_ext,
+		];
+	}
+
+	protected function ___deserialize(array|Box $data): static {
+		return $this->setFromData($data);
+	}
+
 	public function __toString(): string {
 		return "{$this->_value}";
 	}

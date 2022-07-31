@@ -42,6 +42,22 @@ class IPv4Range extends SimpleObject {
 		}
 	}
 
+	function setFromData($data): static {
+		$this->__construct($data['start'], $data['end']);
+		return $this;
+	}
+
+	function ___serialize(): Box|array {
+		return [
+			'start' => "{$this->start}",
+			'end' => "{$this->end}",
+		];
+	}
+
+	protected function ___deserialize(array|Box $data): static {
+		return $this->setFromData($data);
+	}
+
 	public function __toString(): string {
 		return "{$this->_start} - {$this->_end}";
 	}

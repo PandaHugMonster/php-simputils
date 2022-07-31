@@ -42,6 +42,25 @@ class DatePeriod extends FixUpDatePeriod {
 		return $this->_cached_extended_interval;
 	}
 
+	function setFromData($data): static {
+		$this->start = $data['start'];
+		$this->end = $data['end'];
+		$this->interval = $data['interval'];
+		return $this;
+	}
+
+	function ___serialize(): Box|array {
+		return [
+			'start' => "{$this->start->for_system}",
+			'end' => "{$this->end->for_system}",
+			'interval' => "{$this->extended_interval->specification_string}",
+		];
+	}
+
+	protected function ___deserialize(array|Box $data): static {
+		return $this->setFromData($data);
+	}
+
 	/**
 	 *
 	 * TODO Add "interval" part to the string

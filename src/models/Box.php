@@ -18,6 +18,7 @@ use ValueError;
 use function array_combine;
 use function array_flip;
 use function array_keys;
+use function array_pop;
 use function array_values;
 use function arsort;
 use function count;
@@ -30,6 +31,7 @@ use function is_null;
 use function is_numeric;
 use function is_object;
 use function is_string;
+use function preg_replace;
 use function shuffle;
 use function uasort;
 
@@ -834,6 +836,125 @@ class Box extends ArrayObject {
 	function pathAlike(): self {
 		$this->apply(separator: '/', joined_to_str: true);
 		return $this;
+	}
+
+	/**
+	 * Just extract and batch values to be imported in code scope
+	 *
+	 * Keep in mind that the items returned in the order of specified `$keys` param!
+	 *
+	 * **In the most cases "extract" syntax is the most preferable**, just be careful with it!
+	 *
+	 * Quick import example 1 (extract):
+	 * ```php
+	 *  // PHP Extract style of assignment
+	 *  extract($b->batch(['var1', 'var2', 'var3']));
+	 * ```
+	 *
+	 * Quick import example 2 (list):
+	 * ```php
+	 *  // List style of assignment
+	 *  [$var1, $var2, $var3] = $b->batch(['var1', 'var2', 'var3'], true);
+	 * ```
+	 *
+	 * Bigger example:
+	 * ```php
+	 *  PHP::init();
+	 *  // Important, but the third value will be skipped, only assoc values are allowed for
+	 *  // batch assignment/extraction
+	 *  $b = bx([
+	 *      'var1' => 'value 1',
+	 *      'value 2',
+	 *      'var3' => 'value 3',
+	 *      'var4' => 'value 4',
+	 *  ]);
+	 *
+	 *  // Creating variables and assigning null to them
+	 *  $var1 = $var2 = $var3 = $var4 = null;
+	 *
+	 *  // Both code-lines bellow will do the same!
+	 *  // List style of assignment
+	 *  [$var1, $var2, $var3] = $b->batch(['var1', 'var2', 'var3'], true);
+	 *  // PHP Extract style of assignment (slightly more elegant and easy to use)
+	 *  extract($b->batch(['var1', 'var2', 'var3']));
+	 *
+	 *  pd($var1, $var2, $var3, $var4);
+	 * ```
+	 *
+	 * Output:
+	 * ```
+	 *  value 1
+	 *
+	 *  value 3
+	 *
+	 * ```
+	 *
+	 * **Important**: For the "extract" method, never specify uncontrollably the keys like
+	 * `PHP::POST()->keys` or `PHP::GET()->keys` - You will compromise your code,
+	 * it's a huge security issue. Always specify controlled keys!
+	 * [https://www.php.net/manual/en/function.extract.php](https://www.php.net/manual/en/function.extract.php)
+	 *
+	 * Important that the key names might be modified before extraction if they contain
+	 * non-acceptable var symbols. If the key start from a number - the var name will be
+	 * prefixed by the underscore, because PHP variables cannot start from numbers.
+	 *
+	 * But keep in mind, that keys should be provided as-is in the box/array!
+	 *
+	 * @param static|array $keys          Keys of items to be extracted in batch
+	 * @param bool         $is_list_ready If set to true, will replace the keys with
+	 *                                    numeric sequential values (Order will be preserved
+	 *                                    as specified in the $keys)
+	 *
+	 * @return array
+	 *
+	 * @see https://www.php.net/manual/en/function.extract.php
+	 */
+	function batch($keys, $is_list_ready = false): array {
+		$res = [];
+
+		foreach ($keys as $key) {
+			if ($is_list_ready) {
+				$res[] = $this->get($key);
+			} else {
+				$clean_key = $this->_cleanKeyVar($key);
+				$res[$clean_key] = $this->get($key);
+			}
+		}
+
+		return $res;
+	}
+
+	private function _cleanKeyVar($key): string {
+		// NOTE It must strip out all the impossible symbols for the variable
+		$res = preg_replace('#[-\s/\\\]#i', '_', $key);
+		$res = preg_replace('#[^a-z0-9_]#i', '', $res);
+		$res = preg_replace('#[^a-z0-9_]#i', '', $res);
+		if (is_numeric($res[0])) {
+			$res = "_{$res}";
+		}
+		return $res;
+	}
+
+	/**
+	 * Get value from the ending side and remove it from the storage
+	 *
+	 * @return mixed
+	 */
+	function popFromEnd(): mixed {
+		$stash = (array) $this->shift(from_start: false)->stash;
+		$res = array_pop($stash);
+		return $res;
+	}
+
+	/**
+	 * Get value from the starting side and remove it from the storage
+	 *
+	 * @return mixed
+	 */
+	function popFromStart(): mixed {
+		$stash = (array) $this->shift(from_start: true)->stash;
+		$res = array_pop($stash);
+		return $res;
 	}
 
 	/**

@@ -120,6 +120,7 @@ I will be really happy hearing from you.
    and remove it from the box.
  * Implemented tests for:
    * Exec-Env
+   * Box batch functionality
 
 ### 1.1.2
 

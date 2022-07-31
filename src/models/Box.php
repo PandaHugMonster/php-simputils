@@ -31,6 +31,7 @@ use function is_null;
 use function is_numeric;
 use function is_object;
 use function is_string;
+use function preg_replace;
 use function shuffle;
 use function uasort;
 
@@ -893,6 +894,12 @@ class Box extends ArrayObject {
 	 * it's a huge security issue. Always specify controlled keys!
 	 * [https://www.php.net/manual/en/function.extract.php](https://www.php.net/manual/en/function.extract.php)
 	 *
+	 * Important that the key names might be modified before extraction if they contain
+	 * non-acceptable var symbols. If the key start from a number - the var name will be
+	 * prefixed by the underscore, because PHP variables cannot start from numbers.
+	 *
+	 * But keep in mind, that keys should be provided as-is in the box/array!
+	 *
 	 * @param static|array $keys          Keys of items to be extracted in batch
 	 * @param bool         $is_list_ready If set to true, will replace the keys with
 	 *                                    numeric sequential values (Order will be preserved
@@ -909,10 +916,22 @@ class Box extends ArrayObject {
 			if ($is_list_ready) {
 				$res[] = $this->get($key);
 			} else {
-				$res[$key] = $this->get($key);
+				$clean_key = $this->_cleanKeyVar($key);
+				$res[$clean_key] = $this->get($key);
 			}
 		}
 
+		return $res;
+	}
+
+	private function _cleanKeyVar($key): string {
+		// NOTE It must strip out all the impossible symbols for the variable
+		$res = preg_replace('#[-\s/\\\]#i', '_', $key);
+		$res = preg_replace('#[^a-z0-9_]#i', '', $res);
+		$res = preg_replace('#[^a-z0-9_]#i', '', $res);
+		if (is_numeric($res[0])) {
+			$res = "_{$res}";
+		}
 		return $res;
 	}
 

@@ -58,6 +58,10 @@ I will be really happy hearing from you.
 
 ## Changelog
 
+### 1.1.4
+
+ * Fixed the ".env" autoload respect of the "working_dir" which was not working
+
 ### 1.1.3
 
  * Implemented method `\spaf\simputils\models\Box::batch()` that allows to easily export items
@@ -215,7 +219,7 @@ so documentation will come after that in the very nearest time. My apologies.
 
 Minimal PHP version: **8.0**
 
-Current framework version: **1.1.3**
+Current framework version: **1.1.4**
 ```shell
 composer require spaf/simputils "^1"
 ```

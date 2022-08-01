@@ -8,6 +8,7 @@ use spaf\simputils\generic\SimpleObject;
 use spaf\simputils\interfaces\InitBlockInterface;
 use spaf\simputils\models\File;
 use spaf\simputils\PHP;
+use const DIRECTORY_SEPARATOR;
 
 /**
  * @property-read ?File $default_file The default file reference (.env) or null if file does
@@ -39,7 +40,10 @@ class DotEnvInitBlock extends SimpleObject implements InitBlockInterface {
 		$class_file = PHP::redef(File::class);
 		$res = true;
 
-		$file = new $class_file(static::DEFAULT_FILE_NAME);
+		/** @var File $file */
+		$file = new $class_file(
+			$config->working_dir.DIRECTORY_SEPARATOR.static::DEFAULT_FILE_NAME
+		);
 		$this->_default_file = $file->exists
 			?$file
 			:null; // @codeCoverageIgnore

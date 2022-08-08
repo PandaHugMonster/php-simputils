@@ -47,9 +47,6 @@
     ],
     "tests-html": [
       "XDEBUG_MODE=coverage phpunit tests --coverage-html html-coverage/"
-    ],
-    "code-sniff": [
-      "phpcs src/"
     ]
   }
 }

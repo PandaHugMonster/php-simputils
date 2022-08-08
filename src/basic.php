@@ -333,8 +333,86 @@ function bx(mixed $array = null, mixed ...$merger): Box|array {
 }
 
 /**
- * Create a stack object
+ * Create a stack object (FIFO and LIFO)
  *
+ * Stack is a Box/Array object with pop/push functionality. Keys are not supported for now,
+ * so please use indexed arrays.
+ *
+ * By default LIFO stack is created, if named parameter `type: 'fifo'` specified, then
+ * FIFO stack is created.
+ *
+ * Simple example of mechanics:
+ * ```php
+ *  PHP::init([
+ *      'l10n' => 'AT',
+ *  ]);
+ *
+ *  $stack_lifo = stack(['test1', 'test2', 'test3']);
+ *  $stack_fifo = stack(['test1', 'test2', 'test3'], type: 'fifo');
+ *
+ *  $str = 'My new value';
+ *  $stack_lifo->append($str);
+ *  $stack_fifo->append($str);
+ *
+ *
+ *  $str = 'My last val';
+ *  $stack_lifo->append($str);
+ *  $stack_fifo->append($str);
+ *
+ *  pr($stack_lifo, $stack_fifo);
+ *
+ *  $popped_lifo_val = $stack_lifo->pop();
+ *  $popped_fifo_val = $stack_fifo->pop();
+ *
+ *  pr("LIFO popped val: {$popped_lifo_val}");
+ *  pr("FIFO popped val: {$popped_fifo_val}");
+ *
+ *  pr($stack_lifo, $stack_fifo);
+ * ```
+ *
+ * Output:
+ * ```
+ *  spaf\simputils\models\StackLifo Object
+ *  (
+ *      [0] => test1
+ *      [1] => test2
+ *      [2] => test3
+ *      [3] => My new value
+ *      [4] => My last val
+ *  )
+ *
+ *  spaf\simputils\models\StackFifo Object
+ *  (
+ *      [0] => test1
+ *      [1] => test2
+ *      [2] => test3
+ *      [3] => My new value
+ *      [4] => My last val
+ *  )
+ *
+ *  LIFO popped val: My last val
+ *  FIFO popped val: test1
+ *  spaf\simputils\models\StackLifo Object
+ *  (
+ *      [0] => test1
+ *      [1] => test2
+ *      [2] => test3
+ *      [3] => My new value
+ *  )
+ *
+ *  spaf\simputils\models\StackFifo Object
+ *  (
+ *      [1] => test2
+ *      [2] => test3
+ *      [3] => My new value
+ *      [4] => My last val
+ *  )
+ *
+ * ```
+ *
+ * Functionality is pretty straight-forward:
+ *  * **LIFO** - Last Input First Output
+ *  * **FIFO** - First Input First Output
  *
  * @param Box|StackLifo|StackFifo|array|null $items              Items
  * @param mixed                              ...$merger_and_conf All the items that should be pushed
@@ -357,7 +435,106 @@ function stack(
 }
 
 /**
- * Short and quick getting "now" `DateTime` object
+ * Current time "now" object DateTime
+ *
+ * This method returns DateTime object of the current moment time.
+ *
+ * ```php
+ *  PHP::init([
+ *      'l10n' => 'AT',
+ *  ]);
+ *
+ *  $now = now();
+ *
+ *  // You can use the object as string (user timezone and format)
+ *  pr("This is string conversion of DateTime for user: {$now} ({$now->tz})");
+ *  pr("This is string conversion of DateTime for DB: {$now->for_system} (UTC)");
+ *
+ *  // Or as object
+ *  pr("DateTime object: ", $now);
+ *
+ *  $now->tz = 'America/Toronto';
+ *  pr("This is string conversion of DateTime for user: {$now} ({$now->tz})");
+ *
+ *  pr("DateTime object in new time-zone: ", $now);
+ *
+ * ```
+ *
+ * Output:
+ * ```
+ *  This is string conversion of DateTime for user: 08.08.2022 20:30 (Europe/Vienna)
+ *  This is string conversion of DateTime for DB: 2022-08-08 18:30:58.673357 (UTC)
+ *  DateTime object:
+ *  spaf\simputils\models\DateTime Object
+ *  (
+ *      [_simp_utils_property_batch_storage] => Array
+ *      (
+ *      )
+ *
+ *      [_orig_value:protected] =>
+ *      [date] => 2022-08-08 20:30:58.673357
+ *      [timezone_type] => 3
+ *      [timezone] => Europe/Vienna
+ *  )
+ *
+ *  This is string conversion of DateTime for user: 08.08.2022 14:30 (America/Toronto)
+ *  DateTime object in new time-zone:
+ *  spaf\simputils\models\DateTime Object
+ *  (
+ *      [_simp_utils_property_batch_storage] => Array
+ *      (
+ *      )
+ *
+ *      [_orig_value:protected] =>
+ *      [date] => 2022-08-08 14:30:58.673357
+ *      [timezone_type] => 3
+ *      [timezone] => America/Toronto
+ *  )
+ * ```
+ *
+ * Keep in mind that timezone for "user" format is specified globally in `PHP::init()`.
+ *
+ * In this case used default Austrian timezone. But separately could be specified globally
+ * different timezone from l10n/locale value:
+ *
+ * ```php
+ *
+ *  PHP::init([
+ *      'l10n' => 'AT',
+ *      'default_tz' => 'Asia/Novosibirsk'
+ *  ]);
+ *
+ *  $now = now();
+ *
+ *  pr("{$now} ({$now->tz})");
+ * ```
+ *
+ * Output:
+ * ```
+ *  09.08.2022 01:38 (Asia/Novosibirsk)
+ * ```
+ *
+ * Locally on the object timezone easily could be changed by assigning
+ * value to `tz` property.
+ *
+ * ```php
+ *  PHP::init([
+ *      'l10n' => 'AT',
+ *  ]);
+ *
+ *  $now = now();
+ *
+ *  $now->tz = 'Europe/Kiev';
+ *
+ *  pd("{$now} ({$now->tz})");
+ * ```
+ *
+ * Output:
+ * ```
+ *  08.08.2022 21:48 (Europe/Kiev)
+ * ```
+ *
+ * @see \spaf\simputils\basic\ts() Gives DateTime object for the specified time
  *
  * @param DateTimeZone|bool|string|null $tz TimeZone
  *

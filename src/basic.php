@@ -326,7 +326,7 @@ function pd(mixed ...$args) {
  * @param null|Box|array $array     Array that should be wrapped into a box
  * @param mixed          ...$merger Arrays/Boxes to merge into first one
  *
- * @return Box|array
+ * @return Box|array Ready to use Box-object that is being array-alike
  */
 #[Shortcut('PHP::box()')]
 function bx(mixed $array = null, mixed ...$merger): Box|array {
@@ -424,7 +424,7 @@ function bx(mixed $array = null, mixed ...$merger): Box|array {
  *                                                               Should contain "fifo" or "lifo",
  *                                                               by default is "lifo".
  *
- * @return \spaf\simputils\models\StackFifo|\spaf\simputils\models\StackLifo
+ * @return StackFifo|StackLifo Stack object, either LIFO or FIFO (Box-inherited)
  * @noinspection PhpDocSignatureInspection
  */
 #[Shortcut('PHP::stack()')]
@@ -436,7 +436,7 @@ function stack(
 }
 
 /**
- * Current time "now" object DateTime
+ * Current time/now object of `DateTime`
  *
  * This method returns DateTime object of the current moment time.
  *
@@ -539,7 +539,7 @@ function stack(
  *
  * @param DateTimeZone|bool|string|null $tz TimeZone
  *
- * @return DateTime|null
+ * @return ?DateTime Current date-time in form of `DateTime` object
  */
 #[Shortcut('DT::now()')]
 function now(DateTimeZone|bool|string|null $tz = null): ?DateTime {
@@ -549,12 +549,111 @@ function now(DateTimeZone|bool|string|null $tz = null): ?DateTime {
 /**
  * Short and quick getting `DateTime` object of specified date and time
  *
- * @param DateTime|string|int $dt  Any date-time representation (DateTime object, string, int)
- * @param \DateTimeZone|null  $tz  TimeZone
- * @param string|null         $fmt FROM Format, usually not needed, just if you are using
- *                                 a special date-time format to parse
+ * All the examples form {@see \spaf\simputils\basic\now()} are applicable (and vice-versa),
+ * because both functions return the same data-type object
+ * `\spaf\simputils\models\DateTime` (NOT PHP NATIVE `\DateTime` OBJECT!)
  *
- * @return DateTime|null
+ * Function is idempotent.
+ *
+ * #### There are a few ways to specify the datetime data, and meaning of it.
+ *
+ *
+ * The datetime data could be specified in the following formats/data-types:
+ *  * `\spaf\simputils\models\DateTime` object - in this case it will be immediately
+ *    returned without any modifications.
+ *  * **String** - the datetime can be specified in form of the string, any parsable
+ *    native PHP format for specifying datetime is supported, example
+ *    the most common/suggested: "2022-08-09 20:15:02". This datetime string will
+ *    be parsed and `\spaf\simputils\models\DateTime` object returned
+ *  * **Integer** - basically a timestamp, amount of seconds that have elapsed since
+ *    January 1st 1970, 00:00:00 UTC. Specified data in this format does not support
+ *    microseconds.
+ *
+ * In the most cases "string" is preferred format to store and use, or the object itself.
+ *
+ * When "string" format is used for datetime, other parameters such as `$tz`, etc. start playing
+ * their roles. `$tz` in this case can be specified in the following formats:
+ *
+ * 1. `$tz` is not specified or null - in this case the input datetime string will be
+ *    parsed in "UTC" timezone but the returning DateTime object will be switched to the
+ *    `$default_tz` (user's default) timezone. This way the value can be supplied right from a
+ *    DB or storage in "for_system" format. And the final object will be displayed for user
+ *    in the correct time-offset.
+ * 2. `$tz` is specified to `true` - in this case datetime string will be parsed in
+ *    the `$default_tz` (user's default) timezone and DateTime object will be
+ *    returned with the same `$default_tz` (user's default) timezone.
+ * 3. `$tz` is specified to `false` - in this case datetime string will be parsed in
+ *    'UTC' timezone and DateTime object will be returned with the same 'UTC' timezone.
+ * 4. `$tz` as non-empty string with the value from the native PHP list of timezones
+ *    {@see https://www.php.net/manual/en/timezones.php}. This timezone will be used for both
+ *    parsing the datetime string and for returned DateTime object.
+ * 5. `$tz` as a `\DateTimeZone` or `\spaf\simputils\models\DateTimeZone` object.
+ *    This timezone will be used for both parsing the string and the returned DateTime object.
+ *
+ * Maybe this amount of the documentation about Timezones topic is an overkill, but this
+ * topic is the least understood and the most underestimated across the globe.
+ *
+ * So all the above looks difficult, but in fact is not that difficult. When you will
+ * understand the reasoning for those complexities, you might agree that they are necessary.
+ *
+ * The framework has generally a concept of 2 outputting states like `for_user` and `for_system`.
+ * Some objects, and especially DateTime object has 2 fields with very the same names.
+ * This duality suppose to decouple purposes of "displaying for user" and "storing in
+ * the storage" (DB, Caching, Serialization, etc.)
+ *
+ * And that's basically it, `for_user` is used to display the value in the most readable
+ * for a user format (even loss of some portion of data during displaying might be
+ * totally fine), when the string returned by the `for_system` field must be totally lossless,
+ * and contain the full representation of the data (Full datetime format in UTC, json,
+ * or whatever, etc.).
+ *
+ * For the case of DateTime object `for_system` **always has to return maximum of the info
+ * in the same parsable format always and only in UTC timezone.**
+ * Like this: `2020-12-24 03:16:05.123456`
+ *
+ * So in this case it's easy to understand now, than if you process this `for_system` value
+ * of the DateTime object through `ts('2020-12-24 03:16:05.123456')` you will get 2 good
+ * things from it:
+ * 1. It will be converted into a DateTime object which you can use as "string" for user
+ * 2. It will create object with a true UTC value, and adjust it's user output
+ *    to a proper timezoned value.
+ *
+ * This is why it's so twisted and weird with DateTime stuff.
+ *
+ * #### Short recap:
+ *  * Incoming string in UTC timezone, out-coming object is in "Default TZ" timezone
+ *    ```php
+ *      $dt = ts('2020-12-24 03:16:05.123456');
+ *    ```
+ *  * Incoming string in UTC timezone, out-coming object is in UTC timezone
+ *    ```php
+ *      $dt = ts('2020-12-24 03:16:05.123456', false);
+ *    ```
+ *  * Incoming string in "Default TZ" timezone, out-coming object is
+ *    in "Default TZ" timezone
+ *    ```php
+ *      $dt = ts('2020-12-24 03:16:05.123456', true);
+ *    ```
+ *  * Incoming string in **Europe/Vienna** timezone, out-coming object is
+ *    in **Europe/Vienna** timezone
+ *    ```php
+ *      $dt = ts('2020-12-24 03:16:05.123456', 'Europe/Vienna');
+ *    ```
+ *
+ * All the 4 cases above allows you to keep control over how to generate ready to use
+ * DateTime object.
+ *
+ * @todo Add more documentation and examples here with DateTime object
+ *
+ * @see \spaf\simputils\basic\now() Gives current time object (now)
+ *
+ * @param DateTime|string|int           $dt  Any date-time representation (DateTime object,
+ *                                           string, int)
+ * @param null|bool|DateTimeZone|string $tz  TimeZone
+ * @param string|null                   $fmt FROM Format, usually not needed, just if you are using
+ *                                           a special date-time format to parse
+ *
+ * @return ?DateTime Specified date-time in form of `DateTime` object
  *
  */
 #[Shortcut('DT::ts()')]

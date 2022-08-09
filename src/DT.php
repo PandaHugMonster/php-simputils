@@ -4,6 +4,7 @@
 namespace spaf\simputils;
 
 
+use Exception;
 use spaf\simputils\attributes\markers\Shortcut;
 use spaf\simputils\models\DateInterval;
 use spaf\simputils\models\DateTime;
@@ -12,6 +13,7 @@ use function date;
 use function date_default_timezone_get;
 use function date_default_timezone_set;
 use function intval;
+use function is_null;
 use function is_numeric;
 use function is_string;
 
@@ -91,21 +93,22 @@ class DT {
 	 * but you have to make sure you understand all the risks, and strongly recommended to avoid
 	 * using this param, when possible
 	 *
-	 * @param DateTime|string|int           $dt               You datetime data you want
+	 * @param DateTime|string|int $dt You datetime data you want
 	 *                                                        to normalize
-	 * @param bool|DateTimeZone|string|null $tz               Your TimeZone if applicable
-	 * @param string|null                   $fmt              Allows to enforce datetime format,
+	 * @param bool|DateTimeZone|string|null $tz Your TimeZone if applicable
+	 * @param string|null $fmt Allows to enforce datetime format,
 	 *                                                        though it's usually not needed.
 	 *                                                        This parameter plays role only
 	 *                                                        in case of the input datetime in
 	 *                                                        string type.
-	 * @param bool                          $is_clone_allowed If false and DateTime object supplied,
+	 * @param bool $is_clone_allowed If false and DateTime object supplied,
 	 *                                                        the same object is returned, instead
 	 *                                                        of the cloned one (instead of
 	 *                                                        a new object). Default is true.
 	 *
 	 * @return DateTime|null
 	 * @throws \spaf\simputils\exceptions\RedefUnimplemented Redefinable component is not defined
+	 * @throws \Exception Empty string as timezone is not allowed
 	 * @noinspection PhpUndefinedMethodInspection
 	 */
 	public static function normalize(
@@ -123,35 +126,47 @@ class DT {
 		$class = PHP::redef(DateTime::class);
 		$tz_class = PHP::redef(DateTimeZone::class);
 
-		$from_utc = false;
+		$tz_in = null;
+		$tz_out = null;
 
 		// Incoming
-		if ($tz === true) {
+		if (is_string($tz)) {
+			if (Str::len($tz) === 0) {
+				throw new Exception('Empty string as timezone is not allowed.');
+			}
 			// Zoned input
-			$tz = null;
-		} else if (is_string($tz)) {
+			$tz_in = new $tz_class($tz);
+			$tz_out = new $tz_class($tz);
+
+		} else if ($tz instanceof \DateTimeZone) {
 			// Zoned input
-			$tz = new $tz_class($tz);
-		} else if (empty($tz)) {
+			$tz_in = $tz;
+			$tz_out = $tz;
+
+		} else if ($tz === false) {
 			// Un-zoned input!
-			$tz = new $tz_class('UTC');
-			$from_utc = true;
+			$tz_in = new $tz_class('UTC');
+			$tz_out = new $tz_class('UTC');
+
+		} else if (is_null($tz) || $tz === true) {
+			// Zoned input
+			$tz_in = new $tz_class('UTC');
+			$tz_out = static::getDefaultTimeZone();
+
 		}
+
 		/** @var DateTime $res */
 		// Resulting
 		if (Str::is($dt)) {
-//			if (Str::lower($dt) != 'now') {
-//				$dt = date($dt);
-//			}
 			$res = !empty($fmt)
-				?$class::createFromFormat($fmt, $dt, $tz)
-				:new $class($dt, $tz);
+				?$class::createFromFormat($fmt, $dt, $tz_in)
+				:new $class($dt, $tz_in);
 		} else if (is_numeric($dt)) {
-			$res = new $class(date(DATE_ATOM, intval($dt)), $tz);
+			$res = new $class(date(DATE_ATOM, intval($dt)), $tz_in);
 		}
 
-		if ($from_utc) {
-			$res->setTimezone(static::getDefaultTimeZone());
+		if ($res->tz->getName() !== $tz_out->getName()) {
+			$res->tz = $tz_out;
 		}
 
 		return $res;

@@ -80,6 +80,25 @@ class L10n extends SimpleObject {
 		PHP::metaMagicSpell($class, 'l10n', $this->DataUnit);
 	}
 
+	function setFromData($data): static {
+		$this->name = $data['name'];
+		$this->DateTime = $data['DateTime'];
+		$this->DataUnit = $data['DataUnit'];
+		return $this;
+	}
+
+	function ___serialize(): Box|array {
+		return [
+			'name' => $this->name,
+			'DateTime' => $this->DateTime,
+			'DataUnit' => $this->DataUnit,
+		];
+	}
+
+	protected function ___deserialize(array|Box $data): static {
+		return $this->setFromData($data);
+	}
+
 	public static function redefComponentName(): string {
 		return InitConfig::REDEF_L10N; // @codeCoverageIgnore
 	}

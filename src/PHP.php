@@ -18,8 +18,10 @@ use spaf\simputils\exceptions\RedefUnimplemented;
 use spaf\simputils\exceptions\RedefWrongReference;
 use spaf\simputils\exceptions\SerializationProblem;
 use spaf\simputils\exceptions\UnBoxable;
+use spaf\simputils\generic\BasicExecEnvHandler;
 use spaf\simputils\generic\BasicInitConfig;
 use spaf\simputils\generic\BasicIP;
+use spaf\simputils\generic\SimpleObject;
 use spaf\simputils\interfaces\UrlCompatible;
 use spaf\simputils\models\Box;
 use spaf\simputils\models\BoxRO;
@@ -111,7 +113,7 @@ class PHP {
 	 */
 	public static function simpUtilsVersion(): Version|string {
 		$class = static::redef(Version::class);
-		return new $class('1.1.0', 'SimpUtils');
+		return new $class('1.1.4', 'SimpUtils');
 	}
 
 	/**
@@ -176,6 +178,10 @@ class PHP {
 
 		static::metaMagicSpell($config, 'setup', $args ?? []);
 
+		if (empty($config->ee)) {
+			$config->ee = BasicExecEnvHandler::EE_UNKNOWN;
+		}
+
 		// TODO Implement code below into config through Properties
 		if (!is_dir($config->code_root)) {
 			$config->code_root = dirname($config->code_root);
@@ -190,6 +196,7 @@ class PHP {
 		} else {
 			// TODO Exception here?
 		}
+
 		return $config;
 	}
 
@@ -616,7 +623,7 @@ class PHP {
 	 * @see \print_r()
 	 * @return void
 	 */
-	public static function pd(mixed ...$args) {
+	static function pd(mixed ...$args) {
 		$callback = CodeBlocksCacheIndex::getRedefinition(InitConfig::REDEF_PD);
 		if ($callback && $callback !== InitConfig::REDEF_PD) {
 			$res = (bool) $callback(...$args);
@@ -1044,5 +1051,64 @@ class PHP {
 		$res .= '>';
 
 		return $res;
+	}
+
+	/**
+	 * Run code block in a transaction style like in python
+	 *
+	 * Resources are temporarily unsupported, it will be added later
+	 *
+	 * Keep in mind, if true is returned from the `___withStart()` method,
+	 * it will prevent further execution of "callback". This is done, so
+	 * you could execute the callback right inside of the `___withStart()`
+	 * wrapped into a "try-catch". It's done exactly for the purpose of
+	 * exception processing in case of need. Just don't forget to execute
+	 * the callable int this case.
+	 *
+	 * Example:
+	 * ```php
+	 *  class Totoro extends SimpleObject {
+	 *      protected function ___withStart($obj, $callback) {
+	 *          pr('PREPARED! %)');
+	 *          //		$callback($obj);
+	 *          //		return true;
+	 *      }
+	 *
+	 *      protected function ___withEnd($obj) {
+	 *          pr('POST DONE %_%');
+	 *      }
+	 * }
+	 *
+	 * $obj = new Totoro;
+	 *
+	 *
+	 * with($obj, function () {
+	 *      pr('HEY! :)');
+	 * });
+	 *
+	 * ```
+	 *
+	 * @param object|SimpleObject $obj      Object on which start and end
+	 *                                      methods should be ran
+	 * @param callable            $callback Code block that should be run in between
+	 *
+	 * @return void
+	 */
+	static function with($obj, callable $callback): void {
+		if (static::classUsesTrait($obj, MetaMagic::class)) {
+			$res = (bool) static::metaMagicSpell($obj, 'withStart', $obj, $callback);
+		} else {
+			$res = (bool) $obj->___withStart($obj, $callback);
+		}
+
+		if (!$res) {
+			$callback($obj);
+		}
+
+		if (static::classUsesTrait($obj, MetaMagic::class)) {
+			static::metaMagicSpell($obj, 'withEnd', $obj);
+		} else {
+			$obj->___withEnd($obj);
+		}
 	}
 }

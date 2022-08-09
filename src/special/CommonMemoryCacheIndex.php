@@ -3,6 +3,7 @@
 namespace spaf\simputils\special;
 
 use spaf\simputils\components\normalizers\BooleanNormalizer;
+use spaf\simputils\components\normalizers\BoxNormalizer;
 use spaf\simputils\components\normalizers\DataUnitNormalizer;
 use spaf\simputils\components\normalizers\DateTimeNormalizer;
 use spaf\simputils\components\normalizers\FloatNormalizer;
@@ -53,6 +54,7 @@ class CommonMemoryCacheIndex {
 		'DataUnit' => DataUnitNormalizer::class,
 		'IPv4' => IPNormalizer::class,
 		'UrlObject' => UrlNormalizer::class,
+		'Box' => BoxNormalizer::class,
 
 		'lower' => LowerCaseNormalizer::class,
 		'upper' => UpperCaseNormalizer::class,

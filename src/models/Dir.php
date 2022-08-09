@@ -198,6 +198,21 @@ class Dir extends Box {
 		return new ArrayIterator($this->walk(false));  // @codeCoverageIgnore
 	}
 
+	function setFromData($data): static {
+		$this->__construct($data['value']);
+		return $this;
+	}
+
+	function ___serialize(): Box|array {
+		return [
+			'value' => "{$this->name_full}",
+		];
+	}
+
+	protected function ___deserialize(array|Box $data): static {
+		return $this->setFromData($data);
+	}
+
 	public function __toString(): string {
 		return $this->name_full;  // @codeCoverageIgnore
 	}

@@ -54,6 +54,21 @@ class DateInterval extends FixUpDateInterval {
 		return DT::dateIntervalSpecificationString($this); // @codeCoverageIgnore
 	}
 
+	function setFromData($data): static {
+		$this->__construct($data['value']);
+		return $this;
+	}
+
+	function ___serialize(): Box|array {
+		return [
+			'value' => "{$this->specification_string}",
+		];
+	}
+
+	protected function ___deserialize(array|Box $data): static {
+		return $this->setFromData($data);
+	}
+
 	public function __toString(): string {
 		return $this->format($this->formatForString());
 	}

@@ -56,8 +56,24 @@ I will be really happy hearing from you.
     ```
     That will use native PHP mechanics for serialization, which should work properly 
     starting from this release (1.1.3)
+ 2. Starting from the release 1.1.6 fixed the bug with timezones indirect params (this
+    partially changes the logic, but initial logic before that release was broken).
 
 ## Changelog
+
+### 1.1.6
+
+ * Implemented extensive PHPDOC with examples to `\spaf\simputils\basic` (in progress)
+ * Fixed ticket #116 (Weird bug of "tz" on DateTime)
+ * Fixed bug with incorrect interpretation of TZ parameter 
+   in `\spaf\simputils\DT::normalize`. Previously `false` and `true` params for `$tz`
+   were returning incorrect values.
+
+[//]: # (FIX   Don't forget to implement proper tests for the fixed timezone machanics)
+
+### 1.1.5
+
+ * 
 
 ### 1.1.4
 
@@ -220,7 +236,7 @@ so documentation will come after that in the very nearest time. My apologies.
 
 Minimal PHP version: **8.0**
 
-Current framework version: **1.1.4**
+Current framework version: **1.1.6**
 ```shell
 composer require spaf/simputils "^1"
 ```

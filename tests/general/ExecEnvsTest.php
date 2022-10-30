@@ -145,7 +145,7 @@ class ExecEnvsTest extends TestCase {
 		$ic->ee = $ee;
 		$ic->ee->is_hierarchical = $is_hierarchical;
 
-		$this->assertEquals($expected_bool, $ic->ee->is($check_ee));
+		$this->assertEquals($expected_bool, $ic->ee->is($check_ee), "Of values: $ee, $check_ee, $is_hierarchical, $expected_bool");
 	}
 
 }

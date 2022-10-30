@@ -2,6 +2,7 @@
 
 namespace spaf\simputils\generic;
 
+use spaf\simputils\attributes\DebugHide;
 use spaf\simputils\attributes\Property;
 use spaf\simputils\exceptions\ExecEnvException;
 use spaf\simputils\interfaces\ExecEnvHandlerInterface;
@@ -18,6 +19,8 @@ use function preg_match;
  * If you want to modify it, just extend from it, or implement
  * `\spaf\simputils\interfaces\ExecEnvHandlerInterface` interface
  *
+ * @property-read ?string $value
+ * @property bool $is_local
  * @property bool $is_hierarchical
  * @property Box $permitted_values
  */
@@ -33,8 +36,16 @@ class BasicExecEnvHandler extends SimpleObject implements ExecEnvHandlerInterfac
 	const EE_DEMO_LOCAL = 'demo-local';
 	const EE_PROD_LOCAL = 'prod-local';
 
+	#[Property]
 	protected ?bool $_is_local = false;
+
+	#[DebugHide]
 	protected ?string $_ee = null;
+
+	#[Property('value')]
+	protected function getValue(): ?string {
+		return $this->_ee;
+	}
 
 	#[Property]
 	protected bool $_is_hierarchical = false;
@@ -106,10 +117,16 @@ class BasicExecEnvHandler extends SimpleObject implements ExecEnvHandlerInterfac
 	 *
 	 * By default hierarchical model is disabled
 	 *
+	 * @param string $val
+	 * @param bool $is_hierarchical
+	 * @param bool $is_local
+	 *
+	 * @return bool
+	 * @throws \spaf\simputils\exceptions\ExecEnvException
 	 */
-	function is(string $val): bool {
+	function is(string $val, bool $is_hierarchical = false, bool $is_local = false): bool {
 		[$expected_ee, $expected_is_local] = $this->parse($val);
-		$expected_is_local = (bool) $expected_is_local;
+		$is_local = $expected_is_local || $is_local;
 
 		if ($expected_ee === static::EE_UNKNOWN || $this->_ee === static::EE_UNKNOWN) {
 			$p = $this->_permitted_values->clone();
@@ -118,14 +135,16 @@ class BasicExecEnvHandler extends SimpleObject implements ExecEnvHandlerInterfac
 				"Please set the proper exec-env value: {$p}");
 		}
 
-		$check = $this->_is_local || $expected_is_local === false;
+		$check = $this->_is_local || $is_local === false;
+
+		$is_hierarchical = (bool) $this->is_hierarchical || $is_hierarchical;
 
 		if ($this->_ee === $expected_ee) {
 			if ($check) {
 				// NOTE Then does not matter if local or not
 				return true;
 			}
-		} else if ($this->is_hierarchical) {
+		} else if ($is_hierarchical) {
 			// NOTE Hierarchical
 			$flipped = $this->permitted_values->flipped();
 			if (isset($flipped[$expected_ee]) && isset($flipped[$this->_ee])) {

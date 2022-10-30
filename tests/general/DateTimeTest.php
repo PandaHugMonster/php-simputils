@@ -97,6 +97,7 @@ class DateTimeTest extends TestCase {
 			'2022-03-21', '2022-03-22', '2022-03-23', '2022-03-24', '2022-03-25',
 			'2022-03-26', '2022-03-27', '2022-03-28', '2022-03-29', '2022-03-30',
 		];
+//		FIX https://github.com/PandaHugMonster/php-simputils/issues/121
 //		$dt_period = DT::walk('2022-02-24', '2022-03-30', '1 day');
 //		// IMP  Stop the war! Save Ukraine! Slava Ukraini!
 //		foreach ($dt_period as $day) {

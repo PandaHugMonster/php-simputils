@@ -153,10 +153,11 @@ class Box extends ArrayObject {
 	use SimpleObjectTrait;
 	use RedefinableComponentTrait;
 
-	public static bool $to_string_format_json = true;
-	public static bool $is_json_pretty = false;
+	static bool $to_string_format_json = true;
+	static bool $is_json_pretty = false;
 
 	static string $default_separator = ', ';
+	static bool $is_joined_to_str = false;
 
 	#[Property]
 	protected ?string $_separator = null;
@@ -476,8 +477,12 @@ class Box extends ArrayObject {
 		foreach ($boxes as $item) {
 			foreach ($item as $k => $v) {
 				if (is_numeric($k)) {
-					// Numerical, then add
-					$this[] = $v;
+					if (isset($this[$k])) {
+						// Numerical and key already exist, then add
+						$this[] = $v;
+					} else {
+						$this[$k] = $v;
+					}
 				} else {
 					// String, then replace if exists
 					if (!is_null($v)) {
@@ -833,8 +838,8 @@ class Box extends ArrayObject {
 		}
 	}
 
-	function pathAlike(): self {
-		$this->apply(separator: '/', joined_to_str: true);
+	function pathAlike(string $separator = '/'): self {
+		$this->apply(separator: $separator, joined_to_str: true);
 		return $this;
 	}
 
@@ -997,7 +1002,7 @@ class Box extends ArrayObject {
 	}
 
 	function __toString(): string {
-		if ($this->_joined_to_str) {
+		if ($this->_joined_to_str || static::$is_joined_to_str) {
 			return $this->join();
 		}
 

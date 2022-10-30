@@ -176,7 +176,6 @@ class PHP {
 		$config->code_root = $config->code_root ?? debug_backtrace()[0]['file'];
 		$config->working_dir = $config->working_dir ?? $config->code_root;
 
-//		$config->___setup($args ?? []);
 		static::metaMagicSpell($config, 'setup', $args ?? []);
 
 		if (empty($config->ee)) {

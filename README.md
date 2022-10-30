@@ -57,18 +57,34 @@ I will be really happy hearing from you.
     starting from this release (1.1.3)
  2. Starting from the release 1.1.6 fixed the bug with timezones indirect params (this
     partially changes the logic, but initial logic before that release was broken).
+ 3. Even though logic of `\spaf\simputils\models\DateTime::period()` and
+    `\spaf\simputils\models\DateTime::walk()` in version 1.1.6 has been changed, but it 
+    should be fully backwards compatible with the previous logic.
 
 ## Changelog
 
 ### 1.1.6
 
- * Implemented extensive PHPDOC with examples to `\spaf\simputils\basic` (in progress)
+ * Implemented extensive PHPDOC with examples to `\spaf\simputils\basic`
  * Fixed ticket #116 (Weird bug of "tz" on DateTime)
  * Fixed bug with incorrect interpretation of TZ parameter 
    in `\spaf\simputils\DT::normalize`. Previously `false` and `true` params for `$tz`
    were returning incorrect values.
+ * No method `\spaf\simputils\models\DateTime::period()` is no longer a partial shortcut of
+   `\spaf\simputils\models\DateTime::walk()`, and the `walk()` method is now a full 
+   shortcut of the `period()` method with only one difference: In "walk" the `$step` parameter
+   is mandatory, when in "period" it's optional. Keep in mind - those are now full "clones".
+   **Important: ** The iterations are always incremental. The decremental solution is not
+   implemented.
+ * Method `\spaf\simputils\models\DateTime::modify()` now returns the object itself.
+ * Added support for `UrlObject` as a file parameter to `\spaf\simputils\basic\fl()` and 
+   Files.
+ * Implemented property `\spaf\simputils\models\File::@$storage_type` that "indicates" if
+   the file is located on hard-drive `file-system` or in RAM `ram`.
+   In case if path specified, but file does not exist yet `unknown` is returned.
 
 [//]: # (FIX   Don't forget to implement proper tests for the fixed timezone machanics)
+[//]: # (FIX   MArk as obsolete $use_box_instead_of_array in PHP)
 
 ### 1.1.5
 

@@ -65,6 +65,7 @@ use function stream_get_contents;
  * @property-read ?int $group_id
  * @property-read ?int $file_mode
  * @property-read ?int $links_number
+ * @property-read string $storage_type
  */
 class File extends BasicResource {
 	use RedefinableComponentTrait;
@@ -107,7 +108,7 @@ class File extends BasicResource {
 	 *      descriptors which it didn't open! So responsibility on opening in this case on
 	 *      shoulders of users of the objects.
 	 *
-	 * IMP  All the mime-less files would be processing by default `TextProcessor`.
+	 * IMP  All the mimeless files would be processing by default `TextProcessor`.
 	 *
 	 * @param mixed                         $file      File reference
 	 * @param string|\Closure|callable|null $app       Callable/Closure or Class string that
@@ -123,6 +124,10 @@ class File extends BasicResource {
 		null|string|Closure|callable $app = null,
 		?string $mime_type = null
 	) {
+
+		if ($file instanceof UrlObject) {
+
+		}
 
 		if (is_array($file) || $file instanceof Box) {
 			$file = FS::locate(...$file); // @codeCoverageIgnore
@@ -152,7 +157,8 @@ class File extends BasicResource {
 			[$this->_path, $this->_name, $this->_ext] = FS::splitFullFilePath($file);
 			$this->_mime_type = $mime_type ?? FS::getFileMimeType($file);
 		} else {
-			throw new ValueError('File object can receive only null|string|resource|File argument');
+			throw new ValueError('File object can receive only ' .
+				'null|string|resource|File|UrlObject argument');
 		}
 
 
@@ -523,6 +529,29 @@ class File extends BasicResource {
 			'value' => "{$this->name_full}",
 			'content_hash' => md5($this->content),
 		];
+	}
+
+	const STORAGE_TYPE_FS = 'file-system';
+	const STORAGE_TYPE_RAM = 'ram';
+	const STORAGE_TYPE_UNKNOWN = 'unknown';
+
+	#[Property('storage_type')]
+	protected function getStorageType(): string {
+		$stat = $this->stat;
+
+		if ($stat->size === 0) {
+			return static::STORAGE_TYPE_UNKNOWN;
+		}
+
+		$rdev = $stat['rdev'] ?? null;
+		$blksize = $stat['blksize'] ?? null;
+		$blocks = $stat['blocks'] ?? null;
+		if ($rdev === -1 && $blksize === -1 && $blocks === -1) {
+			// TODO This might be not the best implementation...
+			return static::STORAGE_TYPE_RAM;
+		}
+
+		return static::STORAGE_TYPE_FS;
 	}
 
 	protected function ___deserialize(array|Box $data): static {

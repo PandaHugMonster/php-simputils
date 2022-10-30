@@ -640,10 +640,287 @@ function now(DateTimeZone|bool|string|null $tz = null): ?DateTime {
  *      $dt = ts('2020-12-24 03:16:05.123456', 'Europe/Vienna');
  *    ```
  *
- * All the 4 cases above allows you to keep control over how to generate ready to use
- * DateTime object.
+ * All the 4 cases above allow you to keep control over how to generate ready-to-use
+ * DateTime objects.
  *
- * @todo Add more documentation and examples here with DateTime object
+ * #### Different perks
+ *
+ * ##### Date Period or a walk through the date-time range
+ * There are 2 methods that allow to iterate easily through date range and are almost
+ * full clones of each other.
+ *  * `\spaf\simputils\models\DateTime::period()`
+ *  * `\spaf\simputils\models\DateTime::walk()`
+ *
+ * The only difference is that the "walk" is a shortcut of "period", and the "walk" method
+ * has mandatory `$step` method, when the "period" method has it optional.
+ *
+ * Examples:
+ * ```php
+ *  PHP::init([
+ *      'l10n' => 'AT',
+ *  ]);
+ *
+ *  $dt = ts('2020-01-01 15:10:05');
+ *
+ *  $p = $dt->period('2021-01-01 00:00:00');
+ *  pr("Period: {$p}");
+ *  pr("Start: [ {$p->start} ] and End: [ {$p->end} ]");
+ *
+ *  pr("\n============\n");
+ *
+ *  $p = $dt->period('1999-01-01 00:00:00');
+ *
+ *  pr("Period: {$p}");
+ *  pr("Start: [ {$p->start} ] and End: [ {$p->end} ]");
+ *
+ *  pr("\n============\n");
+ *
+ *  foreach ($dt->period('2017-01-01') as $i => $item) {
+ *      pr("Period. Iteration {$i}: {$item} ({$item->tz}) | Item type: ".PHP::type($item));
+ *  }
+ *
+ *  pr("\n============\n");
+ *
+ *  foreach ($dt->walk('2017-01-01', '6 months') as $i => $item) {
+ *      pr("Walk. Iteration {$i}: {$item} ({$item->tz}) | Item type: ".PHP::type($item));
+ *  }
+ *
+ * ```
+ * and the output would be:
+ * ```
+ *  Period: 01.01.2020 16:10 - 01.01.2021 01:00
+ *  Start: [ 01.01.2020 16:10 ] and End: [ 01.01.2021 01:00 ]
+ *
+ *  ============
+ *
+ *  Period: 01.01.1999 01:00 - 01.01.2020 16:10
+ *  Start: [ 01.01.1999 01:00 ] and End: [ 01.01.2020 16:10 ]
+ *
+ *  ============
+ *
+ *  Period. Iteration 0: 01.01.2017 01:00 (Europe/Vienna)
+ *  Item type: spaf\simputils\models\DateTime
+ *
+ *  ============
+ *
+ *  Walk. Iteration 0: 01.01.2017 01:00 (Europe/Vienna)
+ *  Walk. Iteration 1: 01.07.2017 01:00 (Europe/Vienna)
+ *  Walk. Iteration 2: 01.01.2018 01:00 (Europe/Vienna)
+ *  Walk. Iteration 3: 01.07.2018 01:00 (Europe/Vienna)
+ *  Walk. Iteration 4: 01.01.2019 01:00 (Europe/Vienna)
+ *  Walk. Iteration 5: 01.07.2019 01:00 (Europe/Vienna)
+ *  Walk. Iteration 6: 01.01.2020 01:00 (Europe/Vienna)
+ *
+ * ```
+ *
+ *
+ * ##### DateTime modification
+ *
+ * Simple example:
+ * ```php
+ *
+ *  PHP::init([
+ *      'l10n' => 'AT',
+ *  ]);
+ *
+ *
+ *  $dt = ts('2020-01-01 15:10:05')
+ *      ->add('20 days')
+ *      ->sub('10 hours')
+ *      ->modify('-1 year +6 months -100 years');
+ *
+ *  pr("DT: {$dt->for_user} | {$dt->for_system}");
+ *
+ * ```
+ * Output:
+ * ```
+ *  DT: 21.07.1919 06:10 | 1919-07-21 05:10:05.000000
+ * ```
+ *
+ * The changes are done in "chain". `add()` and `sub()` methods are working exactly
+ * the same as `modify()` method.
+ *
+ * `echo "dt: {$dt->for_user}";` and `echo "dt: {$dt}";` - are the same in the string.
+ *
+ *
+ * ##### TimeZone switching
+ *
+ * Examples:
+ * ```php
+ *  PHP::init([
+ *      'l10n' => 'AT',
+ *  ]);
+ *
+ *  $dt = now();
+ *
+ *  pr("Current time (timezoned): {$dt} | tz: {$dt->tz}");
+ *  pr("Current time (utc): {$dt->for_system}");
+ *  pr(" ------ ");
+ *
+ *  $dt->tz = 'America/Toronto';
+ *
+ *  pr("Current time (timezoned): {$dt} | tz: {$dt->tz}");
+ *  pr("Current time (utc): {$dt->for_system}");
+ *  pr(" ------ ");
+ *
+ *  $dt->tz = 'UTC';
+ *
+ *  pr("Current time (timezoned): {$dt} | tz: {$dt->tz}");
+ *  pr("Current time (utc): {$dt->for_system}");
+ *
+ * ```
+ * Output:
+ * ```
+ *  Current time (timezoned): 11.08.2022 00:49 | tz: Europe/Vienna
+ *  Current time (utc): 2022-08-10 22:49:26.351408
+ *  ------
+ *  Current time (timezoned): 10.08.2022 18:49 | tz: America/Toronto
+ *  Current time (utc): 2022-08-10 22:49:26.351408
+ *  ------
+ *  Current time (timezoned): 10.08.2022 22:49 | tz: UTC
+ *  Current time (utc): 2022-08-10 22:49:26.351408
+ * ```
+ *
+ * ##### Parts of DateTime
+ * Different datetime parts can be accessed through properties:
+ * ```php
+ *
+ *  PHP::init([
+ *      'l10n' => 'AT',
+ *  ]);
+ *
+ *  // true in second param means that "in" string is in default timezone and
+ *  // "out" object should be in the default timezone as well.
+ *  $dt = ts('2020-05-13 15:10:05.123098', true);
+ *
+ *  pr("DT:                {$dt->f(DT::FMT_DATETIME_FULL)}");
+ *  pr("Timezone:          {$dt->tz}");
+ *  pr(" ------------------------------------------- ");
+ *  pr("Week:              {$dt->week}");
+ *  pr("Day of year:       {$dt->doy}");
+ *  pr("Year:              {$dt->year}");
+ *  pr("Month:             {$dt->month}");
+ *  pr("Day:               {$dt->day}");
+ *  pr("Day of week:       {$dt->dow}");
+ *  pr("Day of week (iso): {$dt->dow_iso}");
+ *  pr("Hours:             {$dt->hour}");
+ *  pr("Minutes:           {$dt->minute}");
+ *  pr("Seconds:           {$dt->second}");
+ *  pr("Milli:             {$dt->milli}");
+ *  pr("Micro:             {$dt->micro}");
+ *  pr("Is weekend:        ".Str::from($dt->is_weekend));
+ *  pr("Is weekday:        ".Str::from($dt->is_weekday));
+ *
+ * ```
+ * Output:
+ * ```
+ *  DT:                2020-05-13 15:10:05.123098
+ *  Timezone:          Europe/Vienna
+ *   -------------------------------------------
+ *  Week:              20
+ *  Day of year:       133
+ *  Year:              2020
+ *  Month:             5
+ *  Day:               13
+ *  Day of week:       3
+ *  Day of week (iso): 3
+ *  Hours:             15
+ *  Minutes:           10
+ *  Seconds:           5
+ *  Milli:             123
+ *  Micro:             123098
+ *  Is weekend:        false
+ *  Is weekday:        true
+ * ```
+ *
+ * ##### Prisms Date and Time
+ * Prisms are really simple concepts. Prism is being an object, that uses the
+ * underlying original object from which prism is dependent.
+ *
+ * In this particular case DateTime - is the original datetime object,
+ * and it has prism `date` and prism `time`. Both of those properties return
+ * prisms of own type, and any actions on those prisms - in fact modifying
+ * the original DateTime object. The key necessity for them is to use in strings,
+ * especially considering that they behave almost exactly the same as DateTime.
+ *
+ * Example bellow shows how to work with them, and what will happen if you modify
+ * the prism:
+ * ```php
+ *  PHP::init([
+ *      'l10n' => 'AT',
+ *  ]);
+ *
+ *
+ *  $dt = ts('2020-05-13 15:10:05.123098', true);
+ *
+ *  $prism_date = $dt->date;
+ *
+ *  pr("DT:   {$dt}");
+ *  pr(" ========= ");
+ *  pr("Date: {$prism_date}");
+ *  pr("Time: {$dt->time}");
+ *  pr(" ========= ");
+ *  $dt->date->add('105 years');
+ *
+ *  pr("DT:   {$dt}");
+ *
+ * ```
+ * Output:
+ * ```
+ *  DT:   13.05.2020 15:10
+ *   =========
+ *  Date: 13.05.2020
+ *  Time: 15:10
+ *   =========
+ *  DT:   13.05.2125 15:10
+ * ```
+ *
+ *
+ * ##### DateTime difference
+ *
+ * Example:
+ * ```php
+ *
+ *  PHP::init([
+ *      'l10n' => 'AT',
+ *  ]);
+ *
+ *
+ *  $dt = ts('2020-05-13 15:10:05.123098', true);
+ *
+ *  $res = $dt->diff('2021-01-01');
+ *
+ *  pr("Diff:      {$res}");
+ *  pr("Data type: ".PHP::type($res));
+ *
+ * ```
+ * Output:
+ * ```
+ *  Diff:      + 7 months 18 days 9 hours 49 minutes 54 seconds 876902 microseconds
+ *  Data type: spaf\simputils\models\DateInterval
+ * ```
+ *
+ * And opposite variant:
+ * ```php
+ *  PHP::init([
+ *      'l10n' => 'AT',
+ *  ]);
+ *
+ *
+ *  $dt = ts('2020-05-13 15:10:05.123098', true);
+ *
+ *  $res = $dt->diff('2010-01-01');
+ *
+ *  pr("Diff:      {$res}");
+ *  pr("Data type: ".PHP::type($res));
+ *
+ * ```
+ * Output:
+ * ```
+ *  Diff:      - 10 years 4 months 12 days 14 hours 10 minutes 5 seconds 123098 microseconds
+ *  Data type: spaf\simputils\models\DateInterval
+ * ```
+ *
  *
  * @see \spaf\simputils\basic\now() Gives current time object (now)
  *
@@ -668,13 +945,13 @@ function ts(
 /**
  * Creating File object
  *
- * @param string|Box|array|File|null $file
+ * @param string|Box|array|File|null|UrlObject $file
  * @param $app
  *
  * @return File|null
  */
 #[Shortcut('FS::file()')]
-function fl(null|string|Box|array|File $file = null, $app = null): ?File {
+function fl(null|string|Box|array|File|UrlObject $file = null, $app = null): ?File {
 	return FS::file($file, $app);
 }
 

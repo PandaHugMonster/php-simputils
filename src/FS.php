@@ -10,6 +10,7 @@ use spaf\simputils\generic\BasicResourceApp;
 use spaf\simputils\models\Box;
 use spaf\simputils\models\Dir;
 use spaf\simputils\models\File;
+use spaf\simputils\models\UrlObject;
 use function file_exists;
 use function is_array;
 use function is_dir;
@@ -445,10 +446,10 @@ class FS {
 	/**
 	 * Returns File instance for the provided argument
 	 *
-	 * @param null|string|Box|array|File $file Can be a string - then it's a path to a file, or
-	 *                                         a File instance, then it's just provided back
-	 *                                         transparently
-	 * @param mixed|null                 $app  Read/Write processor
+	 * @param null|string|Box|array|File|UrlObject $file Can be a string - then it's a path to
+	 *                                                   a file, or a File instance, then it's just
+	 *                                                   provided back transparently
+	 * @param mixed|null                           $app  Read/Write processor
 	 *
 	 * @return \spaf\simputils\models\File|null
 	 */

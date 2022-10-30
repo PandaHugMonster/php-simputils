@@ -7,6 +7,7 @@ https://bank.gov.ua/en/news/all/natsionalniy-bank-vidkriv-spetsrahunok-dlya-zbor
 -----
 -----
 
+
 # SimpUtils
 
 Those badges are outdated for now :(

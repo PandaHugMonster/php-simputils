@@ -11,6 +11,7 @@ use spaf\simputils\models\DataUnit;
 use spaf\simputils\models\files\apps\CsvProcessor;
 use spaf\simputils\models\files\apps\DotEnvProcessor;
 use spaf\simputils\models\files\apps\JsonProcessor;
+use spaf\simputils\models\files\apps\PHPFileProcessor;
 use spaf\simputils\models\files\apps\TextProcessor;
 
 /**
@@ -31,6 +32,7 @@ use spaf\simputils\models\files\apps\TextProcessor;
  * @property-read ?string $md5
  * @property-read ?resource $fd
  * @property-read BasicResourceApp|callable|null $app
+ * @property-read bool $is_executable_processing_enabled
  *
  */
 abstract class BasicResource extends SimpleObject {
@@ -49,6 +51,14 @@ abstract class BasicResource extends SimpleObject {
 		// DotEnv processor
 		'text/dotenv' => DotEnvProcessor::class,
 		'application/dotenv' => DotEnvProcessor::class,
+
+		// PHP Files should be caught and not displayed by the default text/plain processor
+		'application/x-php' => PHPFileProcessor::class,
+		'text/x-php' => PHPFileProcessor::class,
+		'application/x-httpd-php' => PHPFileProcessor::class,
+		'application/x-httpd-php-source' => PHPFileProcessor::class,
+		'application/php' => PHPFileProcessor::class,
+		'text/php' => PHPFileProcessor::class,
 	];
 
 	protected static $processors_index = null;
@@ -100,7 +110,8 @@ abstract class BasicResource extends SimpleObject {
 	): BasicResourceApp|TextProcessor {
 		$mime = $mime ?? (!empty($file_name)?FS::getFileMimeType($file_name):null);
 
-		$class = $enforced_class ?? static::$processors[$mime] ?? TextProcessor::class;
+		$class = $enforced_class ?? static::$processors[$mime]
+			?? static::$processors['text/plain'] ?? TextProcessor::class;
 
 		if (empty(static::$processors_index[$class])) {
 			static::$processors_index[$class] = new $class();
@@ -189,6 +200,20 @@ abstract class BasicResource extends SimpleObject {
 	#[Property('is_local')]
 	protected function getIsLocal(): bool {
 		return $this->_is_local;
+	}
+
+	#[Property(type: 'get')]
+	protected bool $_is_executable_processing_enabled = false;
+
+	/**
+	 * This method is special. Try to do not use it!
+	 *
+	 * @param $val
+	 *
+	 * @return void
+	 */
+	private function setIsExecutableProcessingEnabled($val) {
+		$this->_is_executable_processing_enabled = $val; // @codeCoverageIgnore
 	}
 
 	/**

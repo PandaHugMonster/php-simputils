@@ -3,10 +3,16 @@
 namespace spaf\simputils\generic;
 
 
+use spaf\simputils\attributes\Property;
+
 /**
  *
+ * @property-read bool $is_fd_supported
  */
 abstract class BasicResourceApp extends SimpleObject {
+
+	#[Property]
+	protected bool $_is_fd_supported = true;
 
 	/**
 	 * Getting content at once

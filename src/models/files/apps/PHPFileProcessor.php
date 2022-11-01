@@ -20,7 +20,7 @@ use spaf\simputils\PHP;
 class PHPFileProcessor extends BasicResourceApp {
 
 	#[Property]
-	protected bool $_is_box_wrapped = true;
+	protected bool $_is_box_wrapped = false;
 
 	#[Property(type: 'get')]
 	protected bool $_is_fd_supported = false;

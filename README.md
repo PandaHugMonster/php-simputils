@@ -21,7 +21,7 @@ Those badges are outdated for now :(
 for development and prototyping. Additionally there are tools for comfortable and efficient
 optimization and debugging.
 
-The framework does not have much of composer dependencies (on purpose), to make sure that 
+The framework does not have much of composer dependencies (on purpose), to make sure that
 it does not bloat your `vendor` folder.
 
 The main purpose of the framework is to improve development experience, and it does not oppose
@@ -38,10 +38,13 @@ All the components and features are designed to be intuitive and transparent for
 but really flexible in case of need.
 
 P.S. The framework I develop for my own projects, but I'm really happy to share it with
-anyone who is interested in it. Feel free to participate! Suggestions, bug-reports. 
+anyone who is interested in it. Feel free to participate! Suggestions, bug-reports.
 I will be really happy hearing from you.
 
+
 ----
+
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -49,194 +52,196 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+
 ----
 
 ## Important notes
- 1. Currently JSON serialization and deserialization does not work properly. 
-    Please do not rely on it for now! **IMPORTANT!**
-    When fix for this problem comes, and you are using current logic - you might get 
-    into a broken code logic. Please do not use `\spaf\simputils\PHP::serialize()` and 
-    `\spaf\simputils\PHP::deserialize()` code with JSON mechanics, you can switch the
-    mechanics to native PHP like this (workaround):
-    ```php
-      PHP::$serialization_mechanism = PHP::SERIALIZATION_TYPE_PHP;
-      PHP::init();
-    ```
-    That will use native PHP mechanics for serialization, which should work properly 
-    starting from this release (1.1.3)
- 2. Starting from the release 1.1.6 fixed the bug with timezones indirect params (this
-    partially changes the logic, but initial logic before that release was broken).
+1. Currently JSON serialization and deserialization does not work properly.
+   Please do not rely on it for now! **IMPORTANT!**
+   When fix for this problem comes, and you are using current logic - you might get
+   into a broken code logic. Please do not use `\spaf\simputils\PHP::serialize()` and
+   `\spaf\simputils\PHP::deserialize()` code with JSON mechanics, you can switch the
+   mechanics to native PHP like this (workaround):
+   ```php
+     PHP::$serialization_mechanism = PHP::SERIALIZATION_TYPE_PHP;
+     PHP::init();
+   ```
+   That will use native PHP mechanics for serialization, which should work properly
+   starting from this release (1.1.3)
+2. Starting from the release 1.1.6 fixed the bug with timezones indirect params (this
+   partially changes the logic, but initial logic before that release was broken).
 
 ## Changelog
 
 ### 1.1.6
 
- * Implemented extensive PHPDOC with examples to `\spaf\simputils\basic` (in progress)
- * Fixed ticket #116 (Weird bug of "tz" on DateTime)
- * Fixed bug with incorrect interpretation of TZ parameter 
-   in `\spaf\simputils\DT::normalize`. Previously `false` and `true` params for `$tz`
-   were returning incorrect values.
+* Implemented extensive PHPDOC with examples to `\spaf\simputils\basic` (in progress)
+* Fixed ticket #116 (Weird bug of "tz" on DateTime)
+* Fixed bug with incorrect interpretation of TZ parameter
+  in `\spaf\simputils\DT::normalize`. Previously `false` and `true` params for `$tz`
+  were returning incorrect values.
 
 [//]: # (FIX   Don't forget to implement proper tests for the fixed timezone machanics)
 
 ### 1.1.5
 
- * 
+*
 
 ### 1.1.4
 
- * Fixed the ".env" autoload respect of the "working_dir" which was not working
+* Fixed the ".env" autoload respect of the "working_dir" which was not working
 
 ### 1.1.3
 
- * Implemented method `\spaf\simputils\models\Box::batch()` that allows to easily export items
-   of specified keys to the local variable scope
- * Implemented methods `setFromData()` and meta-magic methods `___serialize()` and 
-   `___deserialize()` to fix PHP native serialization/deserialization for the 
-   following classes:
-   * `\spaf\simputils\models\Version`
-   * `\spaf\simputils\models\UrlObject`
-   * `\spaf\simputils\models\Time`
-   * `\spaf\simputils\models\L10n`
-   * `\spaf\simputils\models\IPv4Range`
-   * `\spaf\simputils\models\IPv4`
-   * `\spaf\simputils\models\File`
-   * `\spaf\simputils\models\Dir`
-   * `\spaf\simputils\models\DateTimeZone`
-   * `\spaf\simputils\models\DateTime`
-   * `\spaf\simputils\models\DatePeriod`
-   * `\spaf\simputils\models\DateInterval`
-   * `\spaf\simputils\models\Date`
-   * `\spaf\simputils\models\DataUnit`
-   * `\spaf\simputils\models\BigNumber`
- * Code Sniffer is removed from the project (got really annoyed, and it does not work correctly)
- * `\spaf\simputils\models\Time` and `\spaf\simputils\models\Date` have been refactored a bit.
-   The caching mechanics has been fixed.
-   * Additionally have been added the properties for `\spaf\simputils\models\Date`
-     and `\spaf\simputils\models\Time` from the target `DateTime` object
-   * `\spaf\simputils\models\Date` and `\spaf\simputils\models\Time` result of `for_system` 
-     now returns the whole DateTime string value of UTC, not only the date or time component.
- * Implemented `\spaf\simputils\generic\BasicExecEnvHandler` Execution-Environment (aka stages),
-   besides that implemented `\spaf\simputils\generic\BasicInitConfig::@$ee` property that 
-   automatically will be assigned during `PHP::init()`, the object or params could be 
-   adjusted in the incoming config, example:
-   ```php
-      $ic = PHP::init([
-        'l10n' => 'AT',
-        //	'ee' => new DummyExecEnvHandler(false, ee_name: 'TOO'),
-        'ee' => [
-            'ee' => 'test3-local',
-            'is_hierarchical' => true,
-            'permitted_values' => [
-                'test1',
-                'test2',
-                'test3',
-                'test4',
-            ]
-        ]
-      ]);
-      pd("{$ic->ee}", Boolean::to($ic->ee->is('test4-local')));
-   ```
-   For now not much of documentation is provided, but you always can define your own
-   implementation of the class like `\spaf\simputils\components\execenvs\DummyExecEnvHandler`
-   to handle your Exec-Env/stages implementation! More documentation and example will follow.
- * Additionally implemented `\spaf\simputils\components\execenvs\DummyExecEnvHandler`
-   which is a dummy handler that just returns the predefined value. Should not be used 
-   on production.
- * Implemented `\spaf\simputils\exceptions\ExecEnvException` exception for Exec-Env cases
- * Implemented `\spaf\simputils\models\Box::popFromStart()` and 
-   `\spaf\simputils\models\Box::popFromEnd()` methods to get value from the box, return
-   and remove it from the box.
- * Implemented tests for:
-   * Exec-Env
-   * Box batch functionality
+* Implemented method `\spaf\simputils\models\Box::batch()` that allows to easily export items
+  of specified keys to the local variable scope
+* Implemented methods `setFromData()` and meta-magic methods `___serialize()` and
+  `___deserialize()` to fix PHP native serialization/deserialization for the
+  following classes:
+    * `\spaf\simputils\models\Version`
+    * `\spaf\simputils\models\UrlObject`
+    * `\spaf\simputils\models\Time`
+    * `\spaf\simputils\models\L10n`
+    * `\spaf\simputils\models\IPv4Range`
+    * `\spaf\simputils\models\IPv4`
+    * `\spaf\simputils\models\File`
+    * `\spaf\simputils\models\Dir`
+    * `\spaf\simputils\models\DateTimeZone`
+    * `\spaf\simputils\models\DateTime`
+    * `\spaf\simputils\models\DatePeriod`
+    * `\spaf\simputils\models\DateInterval`
+    * `\spaf\simputils\models\Date`
+    * `\spaf\simputils\models\DataUnit`
+    * `\spaf\simputils\models\BigNumber`
+* Code Sniffer is removed from the project (got really annoyed, and it does not work correctly)
+* `\spaf\simputils\models\Time` and `\spaf\simputils\models\Date` have been refactored a bit.
+  The caching mechanics has been fixed.
+    * Additionally have been added the properties for `\spaf\simputils\models\Date`
+      and `\spaf\simputils\models\Time` from the target `DateTime` object
+    * `\spaf\simputils\models\Date` and `\spaf\simputils\models\Time` result of `for_system`
+      now returns the whole DateTime string value of UTC, not only the date or time component.
+* Implemented `\spaf\simputils\generic\BasicExecEnvHandler` Execution-Environment (aka stages),
+  besides that implemented `\spaf\simputils\generic\BasicInitConfig::@$ee` property that
+  automatically will be assigned during `PHP::init()`, the object or params could be
+  adjusted in the incoming config, example:
+  ```php
+     $ic = PHP::init([
+       'l10n' => 'AT',
+       //	'ee' => new DummyExecEnvHandler(false, ee_name: 'TOO'),
+       'ee' => [
+           'ee' => 'test3-local',
+           'is_hierarchical' => true,
+           'permitted_values' => [
+               'test1',
+               'test2',
+               'test3',
+               'test4',
+           ]
+       ]
+     ]);
+     pd("{$ic->ee}", Boolean::to($ic->ee->is('test4-local')));
+  ```
+  For now not much of documentation is provided, but you always can define your own
+  implementation of the class like `\spaf\simputils\components\execenvs\DummyExecEnvHandler`
+  to handle your Exec-Env/stages implementation! More documentation and example will follow.
+* Additionally implemented `\spaf\simputils\components\execenvs\DummyExecEnvHandler`
+  which is a dummy handler that just returns the predefined value. Should not be used
+  on production.
+* Implemented `\spaf\simputils\exceptions\ExecEnvException` exception for Exec-Env cases
+* Implemented `\spaf\simputils\models\Box::popFromStart()` and
+  `\spaf\simputils\models\Box::popFromEnd()` methods to get value from the box, return
+  and remove it from the box.
+* Implemented tests for:
+    * Exec-Env
+    * Box batch functionality
 
 ### 1.1.2
 
- * Implemented `\spaf\simputils\basic\with` functionality of a transactional style like
-   python `with` command. Really useful for DB and other connection types.
+* Implemented `\spaf\simputils\basic\with` functionality of a transactional style like
+  python `with` command. Really useful for DB and other connection types.
 
 ### 1.1.1
 
- * Implemented `\spaf\simputils\components\normalizers\BoxNormalizer` To normalize simple
-   arrays when assigned to Properties
+* Implemented `\spaf\simputils\components\normalizers\BoxNormalizer` To normalize simple
+  arrays when assigned to Properties
 
 ### 1.1.0
 
- * Implemented `FS::require()`, `FS::include()` and `FS::data()`
- * Implemented `PHP::listOfExecPhpFileExtensions()`, `PHP::listOfExecPhpMimeTypes()`
- * Now array/box argument for `File` constructor is allowed (like for `FS::locate()`)
- * Added support of `FS::locate()` alike array/box of path components for `fl()`, 
-   `FS::file()` and `File`. So now `fl(['part1', 'part2', 'file.txt'])` will make a file
-   object with path: "{working-dir}/part1/part2/file.txt"
- * In `BasicInitConfig` introduced component-aware `$allowed_data_dirs` for specifying
-   allowed data-dirs
- * Introduced new exceptions: `DataDirectoryIsNotAllowed`, `IPParsingException`
- * Implemented the shortcut for the "InitConfig". Now instead of 
-   `$config = PHP::getInitConfig()` you can use a shortcut `$config = ic()`
- * Fixed some of the logic related to "l10n" and "default_tz" more you can find here:
-   [Nuances of l10n and default_tz](docs/notes.md#Nuances-of-l10n-and-default_tz)
- * Implemented list of **days of the week**: `\spaf\simputils\DT::getListOfDaysOfWeek()`
- * Implemented list of **months**: `\spaf\simputils\DT::getListOfMonths()`
- * Incorporated all the previous minor-version patches
-   * To set the timezone for "DateTime" object now can be done by "strings" instead of
-     creation of "DateTimeZone" object every single time
-   * Other minimal changes
- * Implemented trait `\spaf\simputils\traits\ComparablesTrait` which enables to implement 
-   common set of comparing functionality (`equalsTo`, `greaterThan`, `lessThan`, 
-   `greaterThanEqual`, `lessThanEqual`) and their shortcuts (`e`, `gt`, `lt`, 
-   `gte`, `lte`). Currently used in `Version` and `IPv4` models
- * Implemented `\spaf\simputils\models\IPv4` and `\spaf\simputils\models\IPv4Range` models
-   with minimal but nice functionality
- * Implemented `\spaf\simputils\models\UrlObject` model 
-   and `\spaf\simputils\models\urls\processors\HttpProtocolProcessor`
-   * The most of the stuff should work out of the box except lack 
-     of "to punycode" conversion. Cyrillic and other non-latin domains are 
-     not converted to punycode.
- * Implemented `\spaf\simputils\System::localIp()` that gets the local IP
- * Implemented shortcuts `url()` for `\spaf\simputils\models\UrlObject` model and
-   `ip()` for `\spaf\simputils\models\IPv4`
- * Added `\spaf\simputils\components\normalizers\IPNormalizer` property normalizer
- * Implementation of `\spaf\simputils\PHP::bro()` method (`\spaf\simputils\models\BoxRO`)
-   which is basically "immutable Box"
- * Implemented shortcuts for getting `POST` and `GET` data as bros (BoxRO). Please keep 
-   in mind that they are immutable due to best-practices:
-   * `\spaf\simputils\PHP::POST()`
-   * `\spaf\simputils\PHP::GET()`
- * Implemented `\spaf\simputils\PHP::objToNaiveString()` method to generate simple/naive
-   object representation
- * Implemented some relevant tests
- * Important: Functionality of the Box is slightly extended. Now you can re-define static
-   `\spaf\simputils\models\Box::$default_separator` variable value to string that should be used
-   during `\spaf\simputils\models\Box::join()` and `\spaf\simputils\models\Box::implode()` as 
-   a separator by default (initially default is ", " as it was before).
-   Additionally you can specify `\spaf\simputils\models\Box::$separator` on per object basis
-   that will be used in the object in case of "join" or "implode" without the first argument.
-   That functionality allows to create "path-ready" Box-arrays, that can by default 
-   be automatically converted into a "unix" path.
-   `\spaf\simputils\models\Box::$joined_to_str` per object variable allows to define that
-   this Box-object needs to be converted in `__toString()` method 
-   through `\spaf\simputils\models\Box::join()` method, which is really useful for "path-ready"
-   Box-arrays. See example here: [Path-alike Box-array](#Path-alike-Box-array)
- * For convenience create method-shortcut 
-   to set Box as "Path-alike": `\spaf\simputils\models\Box::pathAlike()`
- * Added missing data-blocks for different locales
+* Implemented `FS::require()`, `FS::include()` and `FS::data()`
+* Implemented `PHP::listOfExecPhpFileExtensions()`, `PHP::listOfExecPhpMimeTypes()`
+* Now array/box argument for `File` constructor is allowed (like for `FS::locate()`)
+* Added support of `FS::locate()` alike array/box of path components for `fl()`,
+  `FS::file()` and `File`. So now `fl(['part1', 'part2', 'file.txt'])` will make a file
+  object with path: "{working-dir}/part1/part2/file.txt"
+* In `BasicInitConfig` introduced component-aware `$allowed_data_dirs` for specifying
+  allowed data-dirs
+* Introduced new exceptions: `DataDirectoryIsNotAllowed`, `IPParsingException`
+* Implemented the shortcut for the "InitConfig". Now instead of
+  `$config = PHP::getInitConfig()` you can use a shortcut `$config = ic()`
+* Fixed some of the logic related to "l10n" and "default_tz" more you can find here:
+  [Nuances of l10n and default_tz](docs/notes.md#Nuances-of-l10n-and-default_tz)
+* Implemented list of **days of the week**: `\spaf\simputils\DT::getListOfDaysOfWeek()`
+* Implemented list of **months**: `\spaf\simputils\DT::getListOfMonths()`
+* Incorporated all the previous minor-version patches
+    * To set the timezone for "DateTime" object now can be done by "strings" instead of
+      creation of "DateTimeZone" object every single time
+    * Other minimal changes
+* Implemented trait `\spaf\simputils\traits\ComparablesTrait` which enables to implement
+  common set of comparing functionality (`equalsTo`, `greaterThan`, `lessThan`,
+  `greaterThanEqual`, `lessThanEqual`) and their shortcuts (`e`, `gt`, `lt`,
+  `gte`, `lte`). Currently used in `Version` and `IPv4` models
+* Implemented `\spaf\simputils\models\IPv4` and `\spaf\simputils\models\IPv4Range` models
+  with minimal but nice functionality
+* Implemented `\spaf\simputils\models\UrlObject` model
+  and `\spaf\simputils\models\urls\processors\HttpProtocolProcessor`
+    * The most of the stuff should work out of the box except lack
+      of "to punycode" conversion. Cyrillic and other non-latin domains are
+      not converted to punycode.
+* Implemented `\spaf\simputils\System::localIp()` that gets the local IP
+* Implemented shortcuts `url()` for `\spaf\simputils\models\UrlObject` model and
+  `ip()` for `\spaf\simputils\models\IPv4`
+* Added `\spaf\simputils\components\normalizers\IPNormalizer` property normalizer
+* Implementation of `\spaf\simputils\PHP::bro()` method (`\spaf\simputils\models\BoxRO`)
+  which is basically "immutable Box"
+* Implemented shortcuts for getting `POST` and `GET` data as bros (BoxRO). Please keep
+  in mind that they are immutable due to best-practices:
+    * `\spaf\simputils\PHP::POST()`
+    * `\spaf\simputils\PHP::GET()`
+* Implemented `\spaf\simputils\PHP::objToNaiveString()` method to generate simple/naive
+  object representation
+* Implemented some relevant tests
+* Important: Functionality of the Box is slightly extended. Now you can re-define static
+  `\spaf\simputils\models\Box::$default_separator` variable value to string that should be used
+  during `\spaf\simputils\models\Box::join()` and `\spaf\simputils\models\Box::implode()` as
+  a separator by default (initially default is ", " as it was before).
+  Additionally you can specify `\spaf\simputils\models\Box::$separator` on per object basis
+  that will be used in the object in case of "join" or "implode" without the first argument.
+  That functionality allows to create "path-ready" Box-arrays, that can by default
+  be automatically converted into a "unix" path.
+  `\spaf\simputils\models\Box::$joined_to_str` per object variable allows to define that
+  this Box-object needs to be converted in `__toString()` method
+  through `\spaf\simputils\models\Box::join()` method, which is really useful for "path-ready"
+  Box-arrays. See example here: [Path-alike Box-array](#Path-alike-Box-array)
+* For convenience create method-shortcut
+  to set Box as "Path-alike": `\spaf\simputils\models\Box::pathAlike()`
+* Added missing data-blocks for different locales
 
 
 ----
 
 ## Documentation
 
-**Important note about the documentation**: Due to urgent need of the stable release, 
-I had to strip out all the documentation (it was really outdated because of my architecture 
+**Important note about the documentation**: Due to urgent need of the stable release,
+I had to strip out all the documentation (it was really outdated because of my architecture
 revisions). So please, wait just a bit, __with patches after the stable release I will provide
 more documentation__. The very first stable release must be polished in matter of architecture,
 so documentation will come after that in the very nearest time. My apologies.
 
 ### Some:
- 1. [Glossary](docs/glossary.md)
- 2. [Structure](docs/structure.md)
- 3. [Important notes](docs/notes.md) - this can help with troubleshooting
+1. [Glossary](docs/glossary.md)
+2. [Structure](docs/structure.md)
+3. [Important notes](docs/notes.md) - this can help with troubleshooting
 
 ----
 
@@ -250,7 +255,7 @@ composer require spaf/simputils "^1"
 ```
 
 Keep in mind that the library development suppose to follow the semantic versioning,
-so the functionality within the same major version - should be backward-compatible (Except 
+so the functionality within the same major version - should be backward-compatible (Except
 cases of bugs and issues).
 
 More about semantic versioning: [Semantic Versioning Explanation](https://semver.org).
@@ -262,7 +267,7 @@ without packaging it every single time.
 Just keep in mind, even though it should be stable, it's still "unreleased" and might be even
 unfinished concepts. Please avoid using it without serious reasons.
 
-**Important**: DO NOT USE THIS VERSION, IF YOU ARE NOT SURE WHAT IT DOES. 
+**Important**: DO NOT USE THIS VERSION, IF YOU ARE NOT SURE WHAT IT DOES.
 For production always use the installation method above!
 ```shell
 composer require spaf/simputils "dev-dev"
@@ -284,7 +289,7 @@ Just a few tini-tiny examples of very condensed functionality :)
 
 ### Files, Data Files and executables processing
 #### Files Infrastructure
-Working with files can be really easy: 
+Working with files can be really easy:
 ```php
 use spaf\simputils\Boolean;
 use spaf\simputils\PHP;
@@ -323,7 +328,7 @@ pr("File {$new_file} | content: \"{$new_file->content}\"");
 //            So please if you need to use it multiple times in code - please store it in a var
 ```
 
-**IMPORTANT**: "content" read or write **DOES REAL READING/WRITING EVERY SINGLE CALL**! 
+**IMPORTANT**: "content" read or write **DOES REAL READING/WRITING EVERY SINGLE CALL**!
 So please if you need to use it multiple times in code - please store it in a var
 
 The output would be:
@@ -340,11 +345,11 @@ File /tmp/LOCAL_FILE_SYSTEM_FILE_random_name.txt | size: 28 B
 File /tmp/LOCAL_FILE_SYSTEM_FILE_random_name.txt | content: "A secret data string :)))) !"
 ```
 
-Cool feature is to have ram files without real HD file created, and then moved/saved from 
+Cool feature is to have ram files without real HD file created, and then moved/saved from
 the RAM to the HD file-system.
 
-P.S. Currently there is no explicit property to tell which file is RAM and which is HD, 
-but this feature should appear in the future releases. 
+P.S. Currently there is no explicit property to tell which file is RAM and which is HD,
+but this feature should appear in the future releases.
 
 ----
 
@@ -352,11 +357,11 @@ In the example above there is a simple textual data is used. The processing capa
 depend on the Resource App Processor and can be customized in any way you want.
 
 Currently there are a few of them:
- * `\spaf\simputils\models\files\apps\CsvProcessor` - CSV file processing
- * `\spaf\simputils\models\files\apps\DotEnvProcessor` - ".env" file processing
- * `\spaf\simputils\models\files\apps\JsonProcessor` - JSON files processing
- * `\spaf\simputils\models\files\apps\TextProcessor` - Default used for any non-recognized file types
- * `\spaf\simputils\models\files\apps\PHPFileProcessor` - Special processor, **it is not allowed to be use directly** for security reasons!
+* `\spaf\simputils\models\files\apps\CsvProcessor` - CSV file processing
+* `\spaf\simputils\models\files\apps\DotEnvProcessor` - ".env" file processing
+* `\spaf\simputils\models\files\apps\JsonProcessor` - JSON files processing
+* `\spaf\simputils\models\files\apps\TextProcessor` - Default used for any non-recognized file types
+* `\spaf\simputils\models\files\apps\PHPFileProcessor` - Special processor, **it is not allowed to be use directly** for security reasons!
 
 By default if file is not recognized then `TextProcessor` is used.
 
@@ -389,7 +394,7 @@ pr("Textual content of the file: ", $fl->content);
 
 ```
 
-It's really nice way to work with files, when the processing/parsing/generation of 
+It's really nice way to work with files, when the processing/parsing/generation of
 the content of the file depends on the app.
 
 P.S. Found a tiny bug in using one file object for different file types, please avoid for now
@@ -451,7 +456,7 @@ pr($file->content);
 
 ```
 
-**Important**: `PHP::redef(File::class)` is an easy way to refer to the `File` class, 
+**Important**: `PHP::redef(File::class)` is an easy way to refer to the `File` class,
 it is safer than using just a `File` class directly, because in your system you might redefine some
 models/classes - and then in this case you might break compatibility.
 The `PHP::redef(File::class)` is used to avoid such a problem.
@@ -591,7 +596,7 @@ Process finished with exit code 255
      ]);
    ```
 2. **ALL THE ENV VARS MUST BE REFERRED IN UPPER CASE!!!** So if you have the .env vars like this:
-   "test_1" - then in `env('TEST_1')` always use the UPPER CASE! It's mandatory due 
+   "test_1" - then in `env('TEST_1')` always use the UPPER CASE! It's mandatory due
    to best practices.
 
 ### Properties
@@ -667,8 +672,8 @@ MyObjectOne Object
 )
 ```
 
-**Important**: Ignore some additional fields like "_orig_value" and 
-"_simp_utils_property_batch_storage" in DateTime object, it's due to really nasty bug of 
+**Important**: Ignore some additional fields like "_orig_value" and
+"_simp_utils_property_batch_storage" in DateTime object, it's due to really nasty bug of
 the PHP engine, that seems to be really ignored by the PHP engine developers.
 
 ----
@@ -1170,7 +1175,7 @@ should use either the trait or implement 2 methods of `___withStart()` and `___w
 
 ----
 
-Really important to note - all above is really minimal description, 
+Really important to note - all above is really minimal description,
 basically a tip of the iceberg! There are lots of useful functionality description will be
 added in upcoming weeks.
 

@@ -213,6 +213,9 @@ class PHP {
 			$serv = $info->server_var;
 			$protocol = $serv['HTTPS']?'https':'http';
 			$server_name = "{$serv['SERVER_NAME']}";
+			if (empty($server_name)) {
+				$server_name = "{$serv['HTTP_HOST']}";
+			}
 			$server_port = $serv['SERVER_PORT']
 				?intval($serv['SERVER_PORT'])
 				:null;

@@ -39,7 +39,9 @@ use spaf\simputils\traits\MetaMagic;
 use Throwable;
 use function class_exists;
 use function class_parents;
+use function defined;
 use function dirname;
+use function intval;
 use function is_array;
 use function is_dir;
 use function is_null;
@@ -198,6 +200,32 @@ class PHP {
 		}
 
 		return $config;
+	}
+
+	private static $_cached_current_url = null;
+
+	static function currentUrl($refresh = false) {
+		if (static::isCLI() && !defined('CURRENT_URL_PRETEND_NOT_CLI')) {
+			return null;
+		}
+		if (!static::$_cached_current_url || $refresh) {
+			$info = static::info();
+			$serv = $info->server_var;
+			$protocol = $serv['HTTPS']?'https':'http';
+			$server_name = "{$serv['SERVER_NAME']}";
+			$server_port = $serv['SERVER_PORT']
+				?intval($serv['SERVER_PORT'])
+				:null;
+			if ($server_port === 80) {
+				$server_port = null;
+			}
+			$uri = $serv['REQUEST_URI'];
+
+			$host = $server_port?"{$server_name}:{$server_port}":"{$server_name}";
+			static::$_cached_current_url = static::url($host, $uri, protocol: $protocol);
+		}
+
+		return static::$_cached_current_url;
 	}
 
 	public static function metaMagicSpell(string|object $ref, $spell, ...$args) {

@@ -204,28 +204,34 @@ class PHP {
 
 	private static $_cached_current_url = null;
 
+	/**
+	 * @param $refresh
+	 *
+	 * @return ?UrlObject
+	 */
 	static function currentUrl($refresh = false) {
 		if (static::isCLI() && !defined('CURRENT_URL_PRETEND_NOT_CLI')) {
 			return null;
 		}
 		if (!static::$_cached_current_url || $refresh) {
-			$info = static::info();
-			$serv = $info->server_var;
-			$protocol = $serv['HTTPS']?'https':'http';
-			$server_name = "{$serv['SERVER_NAME']}";
+//			$info = static::info();
+//			$serv = $info->server_var;
+//			$protocol = $_SERVER['HTTPS']?'https':'http';
+			$server_name = $_SERVER['SERVER_NAME'] ?? null;
 			if (empty($server_name)) {
-				$server_name = "{$serv['HTTP_HOST']}";
+				$server_name = $_SERVER['HTTP_HOST'] ?? null;
 			}
-			$server_port = $serv['SERVER_PORT']
-				?intval($serv['SERVER_PORT'])
+			$server_port = $_SERVER['SERVER_PORT'] ?? null
+				?intval($_SERVER['SERVER_PORT'])
 				:null;
 			if ($server_port === 80) {
 				$server_port = null;
 			}
-			$uri = $serv['REQUEST_URI'];
+			$uri = $_SERVER['REQUEST_URI'] ?? null;
 
 			$host = $server_port?"{$server_name}:{$server_port}":"{$server_name}";
-			static::$_cached_current_url = static::url($host, $uri, protocol: $protocol);
+			static::$_cached_current_url = static::url($host, $uri);
+//			static::$_cached_current_url = static::url($host, $uri, protocol: $protocol);
 		}
 
 		return static::$_cached_current_url;

@@ -19,7 +19,7 @@ abstract class BasicProtocolProcessor extends SimpleObject {
 		$this->_protocol = $protocol;
 	}
 
-	abstract function parse(UrlCompatible|string|Box|array $value, bool $is_preparsed = false);
+	abstract function parse(UrlCompatible|string|Box|array $value, bool $is_preparsed = false, $data = null);
 
 	abstract function generateForSystem($host, $path, $params, $data): string;
 

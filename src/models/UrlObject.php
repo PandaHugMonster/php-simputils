@@ -2,6 +2,7 @@
 
 namespace spaf\simputils\models;
 
+use Exception;
 use spaf\simputils\attributes\DebugHide;
 use spaf\simputils\attributes\Extract;
 use spaf\simputils\attributes\Property;
@@ -16,7 +17,6 @@ use spaf\simputils\traits\ForOutputsTrait;
 use spaf\simputils\traits\RedefinableComponentTrait;
 use function is_array;
 use function is_string;
-use function preg_match;
 use function preg_replace;
 
 /**
@@ -32,6 +32,7 @@ use function preg_replace;
  * @property Box|array|null $data
  * @property BasicProtocolProcessor $processor
  * @property string $relative
+ * @property ?int $port
  */
 class UrlObject extends SimpleObject {
 	use ForOutputsTrait;
@@ -59,6 +60,16 @@ class UrlObject extends SimpleObject {
 
 	#[Property]
 	protected Box|array|null $_data = null;
+
+	#[Property('port')]
+	protected function getPort(): ?int {
+		return $this->_processor->getPort($this);
+	}
+
+	#[Property('port')]
+	protected function setPort(?int $val) {
+		$this->_processor->setPort($this, $val);
+	}
 
 	#[Extract(false)]
 	#[DebugHide]
@@ -131,15 +142,25 @@ class UrlObject extends SimpleObject {
 		if (!empty($host)) {
 			if (is_string($host)) {
 				$m = [];
-				/** @noinspection RegExpUnnecessaryNonCapturingGroup */
-				preg_match('#^(?:([a-zA-Z0-9 ]+):)(.*)$#S', $host ?? '', $m);
-				$host = !empty($m[2])?$m[2]:$host;
+				if (!Str::startsWith($host, 'http://') && !Str::startsWith($host, 'https://')) {
+					// NOTE We need to check whether it's a valid http url without protocol part,
+					//      or it's something else.
+					$processor_class = static::$processors['http'] ?? null;
+					if (empty($processor_class)) {
+						throw new Exception('HTTP Protocol does not have a proper Processor Class specified for it!');
+					}
+					/** @var HttpProtocolProcessor $http_processor */
+					$protocol = empty($protocol) && $processor_class::isValid($host, $protocol)?'http':$protocol;
 
-				if (!$protocol) {
-					$protocol = !empty($m[1])
-						?preg_replace('#\s+#S', '', $m[1])
-						:null;
+					[$protocol, $user, $pass, $host, $port] = $processor_class::preParsing($host, $protocol);
+					$this->data['user'] = $user;
+					$this->data['pass'] = $pass;
+					$this->data['port'] = $port;
 				}
+
+//				pd($protocol);
+				// FIX  Parse here!
+
 			} else if (is_array($host) || $host instanceof Box) {
 				$host = PHP::box($host);
 
@@ -158,7 +179,7 @@ class UrlObject extends SimpleObject {
 				$this->_path,
 				$this->_params,
 				$this->_data
-			] = $this->_processor->parse($host, true);
+			] = $this->_processor->parse($host, true, $this->data);
 		}
 	}
 

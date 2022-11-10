@@ -8,11 +8,78 @@ use spaf\simputils\models\Box;
 use spaf\simputils\PHP;
 use spaf\simputils\Str;
 use function is_string;
+use function preg_match;
 use function preg_replace;
+use function spaf\simputils\basic\bx;
 use function urldecode;
 use function urlencode;
 
 class HttpProtocolProcessor extends BasicProtocolProcessor {
+
+	static function preParsing($host, $protocol = null): array {
+		$m = bx();
+		preg_match('#^([a-zA-Z0-9:*~@._-]*):(?:([0-9]{0,5}))$#S', $host ?? '', $m);
+
+		$port = null;
+		if ($m) {
+			$host = $m[1] ?? null;
+			$port = $m[2] ?? null;
+		}
+
+		$user = null;
+		$pass = null;
+
+		$host_tmp = null;
+		if ($host) {
+			$m2 = bx();
+			preg_match('#(?:^([a-zA-Z0-9:_-]*)(?:@(.*)))$#S', $host ?? '', $m2);
+
+			$host_tmp = $m2[2] ?? null;
+			$creds = $m2[1] ?? null;
+			if ($creds) {
+				$m3 = bx();
+				preg_match('#(?:^([a-zA-Z0-9_-]*)(?::(.*)))$#S', $creds ?? '', $m3);
+				$user = $m3[1] ?? null;
+				$pass = $m3[2] ?? null;
+				if (empty($user) && empty($pass)) {
+					$user = $creds;
+				}
+			}
+		}
+		if ($host_tmp) {
+			$host = $host_tmp;
+		}
+		return [$protocol, $user, $pass, $host, $port];
+	}
+
+	static function isValid($host, $protocol = null): bool {
+		$supported = bx(['http', 'https']);
+		[$protocol, $user, $pass, $host, $port] = static::preParsing($host, $protocol);
+
+//		pr("user: {$user}");
+//		pr("pass: {$pass}");
+//		pr("host: {$host}");
+//		pr("port: {$port}");
+//		pr("proto: {$protocol}");
+//		pd('C');
+//						/** @noinspection RegExpUnnecessaryNonCapturingGroup */
+////				preg_match('#(?:^(.*)(?::([0-9]{1,5})))$#S', $host ?? '', $m);
+////				preg_match('#(?:^([a-zA-Z0-9 ]+):)(.*)$#S', $host ?? '', $m);
+////				preg_match('#(?:^([a-zA-Z0-9 ]+):)([a-zA-Z0-9@_-]+)(?:([:0-9]{1,5}))$#S', $host ?? '', $m);
+//				$host = !empty($m[2])?$m[2]:$host;
+//
+////				pd($host, $m);
+//
+//				if (!$protocol) {
+//					$protocol = !empty($m[1])
+//						?preg_replace('#\s+#S', '', $m[1])
+//						:null;
+//				}
+//				$port = !empty($m[3])
+//					?preg_replace('#\s+#S', '', $m[3])
+//					:null;
+		return (!empty($protocol) && $supported->containsValue(Str::lower($protocol))) || !empty($host) || !empty($port);
+	}
 
 	/**
 	 *
@@ -22,7 +89,7 @@ class HttpProtocolProcessor extends BasicProtocolProcessor {
 	 *
 	 * @return array
 	 */
-	function parse(UrlCompatible|string|Box|array $value, bool $is_preparsed = false) {
+	function parse(UrlCompatible|string|Box|array $value, bool $is_preparsed = false, $data = null) {
 		// host, path, params, data
 		$proto = $this->_protocol;
 
@@ -46,7 +113,7 @@ class HttpProtocolProcessor extends BasicProtocolProcessor {
 		$host = null;
 		$path = null;
 		$params = PHP::box();
-		$data = PHP::box();
+		$data = $data ?? PHP::box();
 
 		$with_domain = $is_preparsed;
 		if (Str::startsWith($value, '//')) {
@@ -124,5 +191,14 @@ class HttpProtocolProcessor extends BasicProtocolProcessor {
 
 	function generateRelative($host, $path, $params, $data): string {
 		return $this->generateCommonUrl($host, $path, $params, $data, true);
+	}
+
+	function getPort($obj): ?int {
+		return $obj?->data['port'] ?? 80;
+	}
+
+	function setPort($obj, ?int $val) {
+		/** @var \spaf\simputils\models\UrlObject $obj */
+		$obj->data['port'] = $val;
 	}
 }

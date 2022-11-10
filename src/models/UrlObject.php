@@ -17,7 +17,9 @@ use spaf\simputils\traits\ForOutputsTrait;
 use spaf\simputils\traits\RedefinableComponentTrait;
 use function is_array;
 use function is_string;
+use function preg_match;
 use function preg_replace;
+use function spaf\simputils\basic\bx;
 
 /**
  * @property-read UrlCompatible|string|Box|array|null $orig Contains original value of the "host".
@@ -142,7 +144,14 @@ class UrlObject extends SimpleObject {
 		if (!empty($host)) {
 			if (is_string($host)) {
 				$m = [];
-				if (!Str::startsWith($host, 'http://') && !Str::startsWith($host, 'https://')) {
+				preg_match('#^([a-zA-Z]?[a-zA-Z0-9_-]*):(.*)$#S', $host, $m);
+				if ($m) {
+					$protocol = $protocol ?? $m[1] ?? null;
+					$host = $m[2] ?? null;
+				}
+
+				// Str::startsWith($host, '//') || (!Str::startsWith($host, 'http://') && !Str::startsWith($host, 'https://'))
+				if (!$protocol || bx(['http', 'https'])->containsValue($protocol)) {
 					// NOTE We need to check whether it's a valid http url without protocol part,
 					//      or it's something else.
 					$processor_class = static::$processors['http'] ?? null;

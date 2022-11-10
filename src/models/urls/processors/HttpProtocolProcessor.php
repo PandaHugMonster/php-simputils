@@ -18,7 +18,7 @@ class HttpProtocolProcessor extends BasicProtocolProcessor {
 
 	static function preParsing($host, $protocol = null): array {
 		$m = bx();
-		preg_match('#^([a-zA-Z0-9:*~@._-]*):(?:([0-9]{0,5}))$#S', $host ?? '', $m);
+		preg_match('#^(?:/*)([a-zA-Z0-9:*~@._-]*):(?:([0-9]{0,5}))$#S', $host ?? '', $m);
 
 		$port = null;
 		if ($m) {
@@ -44,7 +44,9 @@ class HttpProtocolProcessor extends BasicProtocolProcessor {
 				if (empty($user) && empty($pass)) {
 					$user = $creds;
 				}
+//				pd($m3);
 			}
+//			pd($m2, $host);
 		}
 		if ($host_tmp) {
 			$host = $host_tmp;

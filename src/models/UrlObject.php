@@ -18,6 +18,7 @@ use function explode;
 use function is_array;
 use function is_string;
 use function preg_match;
+use function spaf\simputils\basic\ic;
 
 /**
  * @property-read UrlCompatible|string|Box|array|null $orig Contains original value of the "host".
@@ -118,6 +119,10 @@ class UrlObject extends SimpleObject {
 		$this->_processor = $processor ?: static::$default_processor;
 		$this->_orig = $host;
 		$this->_data = PHP::box();
+
+		if (!$host) {
+			$host = ic()?->default_host ?? '';
+		}
 
 		$parsed = $this->parseHost($host);
 

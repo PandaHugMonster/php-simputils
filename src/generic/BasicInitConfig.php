@@ -64,6 +64,7 @@ abstract class BasicInitConfig extends SimpleObject {
 	const REDEF_URL = 'UrlObject';
 
 	public ?string $name = null;
+	public ?string $default_host = 'localhost';
 	public ?string $code_root = null;
 	public ?string $working_dir = null;
 	public array|Box $disable_init_for = [];

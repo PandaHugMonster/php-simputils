@@ -926,12 +926,12 @@ class PHP {
 		mixed ...$data,
 	) {
 		$class = PHP::redef(UrlObject::class);
-		if ($host instanceof $class) {
-			/** @var UrlObject $host */
-			$host->addPath($path);
-			$host->addParams($params);
-			return $host;
-		}
+//		if ($host instanceof $class) {
+//			/** @var UrlObject $host */
+//			$host->addPath($path);
+//			$host->addParams($params);
+//			return $host;
+//		}
 
 		$model = new $class(
 			$host, $path, $params, $protocol, $processor,

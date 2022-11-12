@@ -216,7 +216,7 @@ class PHP {
 		if (!static::$_cached_current_url || $refresh) {
 			$info = static::info();
 			$serv = $info->server_var;
-			$protocol = $serv['HTTPS']?'https':'http';
+			$protocol = empty($serv['HTTPS']) || $serv['HTTPS']?'https':'http';
 			$host = $serv['SERVER_NAME'] ?? null;
 			if (empty($host)) {
 				$host = $serv['HTTP_HOST'] ?? null;

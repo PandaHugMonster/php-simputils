@@ -8,14 +8,13 @@ use spaf\simputils\exceptions\NotImplementedYet;
 use spaf\simputils\generic\SimpleObject;
 use spaf\simputils\interfaces\UrlCompatible;
 use spaf\simputils\models\urls\processors\HttpProtocolProcessor;
-use spaf\simputils\models\urls\UrlPartParamsNormalizer;
-use spaf\simputils\models\urls\UrlPartPathNormalizer;
 use spaf\simputils\PHP;
 use spaf\simputils\Str;
 use spaf\simputils\traits\ForOutputsTrait;
 use spaf\simputils\traits\RedefinableComponentTrait;
 use function explode;
 use function is_array;
+use function is_null;
 use function is_string;
 use function preg_match;
 use function spaf\simputils\basic\ic;
@@ -102,6 +101,56 @@ class UrlObject extends SimpleObject {
 	#[Property('sharpy')]
 	protected function setSharpy($val) {
 		$this->data['sharpy'] = $val;
+	}
+
+	function isCurrent(
+		$with_path = true,
+		$with_params = true,
+		$with_port = false,
+		$with_host = false,
+		$with_sharpy = false
+	): bool {
+		return $this->isSimilar(
+			PHP::currentUrl(),
+			$with_path, $with_params, $with_port,
+			$with_host, $with_sharpy
+		);
+	}
+
+	function isSimilar(
+		?UrlObject $url,
+		$with_path = true,
+		$with_params = true,
+		$with_port = false,
+		$with_host = false,
+		$with_sharpy = false
+	): bool {
+		if (is_null($url)) {
+			return false;
+		}
+		$res = true;
+
+		if ($with_path) {
+			$res = $res && ($this->path == $url->path);
+		}
+
+		if ($with_params) {
+			$res = $res && ($this->params == $url->params);
+		}
+
+		if ($with_port) {
+			$res = $res && ($this->port === $url->port);
+		}
+
+		if ($with_host) {
+			$res = $res && ($this->host === $url->host);
+		}
+
+		if ($with_sharpy) {
+			$res = $res && ($this->sharpy === $url->sharpy);
+		}
+
+		return $res;
 	}
 
 	function __construct(

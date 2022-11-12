@@ -214,24 +214,26 @@ class PHP {
 			return null;
 		}
 		if (!static::$_cached_current_url || $refresh) {
-//			$info = static::info();
-//			$serv = $info->server_var;
-//			$protocol = $_SERVER['HTTPS']?'https':'http';
-			$server_name = $_SERVER['SERVER_NAME'] ?? null;
-			if (empty($server_name)) {
-				$server_name = $_SERVER['HTTP_HOST'] ?? null;
+			$info = static::info();
+			$serv = $info->server_var;
+			$protocol = $serv['HTTPS']?'https':'http';
+			$host = $serv['SERVER_NAME'] ?? null;
+			if (empty($host)) {
+				$host = $serv['HTTP_HOST'] ?? null;
 			}
-			$server_port = $_SERVER['SERVER_PORT'] ?? null
-				?intval($_SERVER['SERVER_PORT'])
-				:null;
-			if ($server_port === 80) {
-				$server_port = null;
-			}
-			$uri = $_SERVER['REQUEST_URI'] ?? null;
 
-			$host = $server_port?"{$server_name}:{$server_port}":"{$server_name}";
-			static::$_cached_current_url = static::url($host, $uri);
-//			static::$_cached_current_url = static::url($host, $uri, protocol: $protocol);
+			$server_port = $serv['SERVER_PORT'] ?? null
+				?intval($serv['SERVER_PORT'])
+				:null;
+
+			$uri = $serv['REQUEST_URI'] ?? null;
+
+			static::$_cached_current_url = static::url(
+				host: $host,
+				path: $uri,
+				protocol: $protocol,
+				port: $server_port
+			);
 		}
 
 		return static::$_cached_current_url;
@@ -913,10 +915,14 @@ class PHP {
 	}
 
 	static function url(
-		UrlObject|UrlCompatible|string|Box|array $host = null,
-		Box|array|string $path = null,
-		Box|array $params = null,
-		string $protocol = null, // Important - ignored if first argument is an object
+		null|UrlCompatible|string|Box|array $host = null,
+		null|Box|array|string $path = null,
+		null|Box|array $params = null,
+		?string $protocol = null,
+		?string $processor = null,
+		?string $port = null,
+		?string $user = null,
+		?string $pass = null,
 		mixed ...$data,
 	) {
 		$class = PHP::redef(UrlObject::class);
@@ -927,7 +933,10 @@ class PHP {
 			return $host;
 		}
 
-		$model = new $class($host, $path, $params, $protocol, ...$data);
+		$model = new $class(
+			$host, $path, $params, $protocol, $processor,
+			$port, $user, $pass, ...$data
+		);
 
 		return $model;
 	}

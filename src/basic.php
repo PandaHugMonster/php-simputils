@@ -771,13 +771,17 @@ function ic(?string $name = null): null|InitConfig|BasicInitConfig {
  */
 #[Shortcut('PHP::url()')]
 function url(
-	UrlObject|UrlCompatible|string|Box|array $host = null,
-	Box|array|string $path = null,
-	Box|array $params = null,
-	string $protocol = null,
+	null|UrlCompatible|string|Box|array $host = null,
+	null|Box|array|string $path = null,
+	null|Box|array $params = null,
+	?string $protocol = null,
+	?string $processor = null,
+	?string $port = null,
+	?string $user = null,
+	?string $pass = null,
 	mixed ...$data,
 ): UrlObject {
-	return PHP::url($host, $path, $params, $protocol, ...$data);
+	return PHP::url($host, $path, $params, $protocol, $processor, $port, $user, $pass, ...$data);
 }
 
 /**

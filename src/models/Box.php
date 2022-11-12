@@ -147,7 +147,8 @@ use function uasort;
  * @property-read Box|array $only_numeric
  * @property-read Box|array $only_assoc
  * @property ?string $separator
- * @property ?string $joined_to_str
+ * @property bool $joined_to_str
+ * @property bool $stretcher
  */
 class Box extends ArrayObject {
 	use SimpleObjectTrait;
@@ -164,6 +165,9 @@ class Box extends ArrayObject {
 
 	#[Property]
 	protected bool $_joined_to_str = false;
+
+	#[Property]
+	protected null|string|bool $_stretcher = false;
 
 	#[Extract(false)]
 	protected mixed $_stash = null;
@@ -772,10 +776,28 @@ class Box extends ArrayObject {
 	 * @see static::$separator
 	 */
 	#[Shortcut('\implode()')]
-	public function implode(?string $sep = null): string {
+	public function implode(?string $sep = null, null|string|bool $stretcher = null): string {
+		$stretcher = $stretcher ?? $this->_stretcher;
+		if (!is_null($stretcher) && $stretcher !== false) {
+			$res = new static();
+			if ($stretcher === true) {
+				$stretcher = '=';
+			}
+			foreach ($this as $key => $val) {
+				$res->append("{$key}{$stretcher}{$val}");
+			}
+
+		} else {
+			$res = $this;
+		}
+
+		$sep = !is_null($sep)
+			?$sep
+			:($this->_separator ?? static::$default_separator);
+
 		return implode(
-			$sep ?? $this->_separator ?? static::$default_separator,
-			(array) $this
+			$sep,
+			(array) $res
 		);
 	}
 
@@ -788,7 +810,7 @@ class Box extends ArrayObject {
 	 * @see static::$separator
 	 */
 	#[Shortcut('\implode()')]
-	public function join(?string $sep = null): string {
+	public function join(?string $sep = null, null|string|bool $stretcher = null): string {
 		return $this->implode($sep);
 	}
 
@@ -818,9 +840,16 @@ class Box extends ArrayObject {
 		return $this->_splitAssocAndNumeric(false);
 	}
 
+	/**
+	 * @param string $separator
+	 * @param bool $joined_to_str
+	 * @param null|bool|string $stretcher
+	 *
+	 * @return $this
+	 */
 	function apply(...$properties) {
 		$permitted_properties = new static([
-			'separator', 'joined_to_str' // For now only those are permitted params
+			'separator', 'joined_to_str', 'stretcher' // For now only those are permitted params
 		]);
 		$permitted_properties->joined_to_str = true;
 
@@ -836,10 +865,26 @@ class Box extends ArrayObject {
 
 			$this->$k = $v;
 		}
+
+		return $this;
 	}
 
 	function pathAlike(string $separator = '/'): self {
 		$this->apply(separator: $separator, joined_to_str: true);
+		return $this;
+	}
+
+	function paramsAlike(): self {
+		$this->stretched('=', '&');
+		return $this;
+	}
+
+	function stretched($stretcher = true, ?string $separator = null): self {
+		if (!is_null($separator)) {
+			$this->apply(stretcher: $stretcher, separator: $separator, joined_to_str: true);
+		} else {
+			$this->apply(stretcher: $stretcher, joined_to_str: true);
+		}
 		return $this;
 	}
 

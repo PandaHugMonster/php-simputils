@@ -285,7 +285,8 @@ Just a few tini-tiny examples of very condensed functionality :)
 4. [Advanced PHP Info Object](#Advanced-PHP-Info-Object)
 5. [IPv4 model](#IPv4-model)
 6. [Path-alike Box-array](#Path-alike-Box-array)
-7. ["with" love](#with-love)
+7. [Stretchable feature of Box-array](#Stretchable-feature-of-Box-array) (`paramsAlike()`)
+8. ["with" love](#with-love)
 
 ### Files, Data Files and executables processing
 #### Files Infrastructure
@@ -1074,10 +1075,36 @@ I am Totoro and my address is 127.0.0.1 (and ip-mask is 255.255.0.0)
 
 ### Path-alike Box-array
 
-This is a new feature for `Box` model/
+This is a new feature for `Box` model.
+
+The new short version `Box::pathAlike()` method is available:
+```php
+PHP::init();
+
+$bx = bx(['TEST', 'PATH', 'alike', 'box'])->pathAlike();
+
+pd($bx, "{$bx}");
+```
+
+Output would be:
+```text
+spaf\simputils\models\Box Object
+(
+    [0] => TEST
+    [1] => PATH
+    [2] => alike
+    [3] => box
+)
+
+TEST/PATH/alike/box
+```
+
+Here is the manual way with different examples:
 
 ```php
-$b = new Box(['TEST', 'PATH', 'alike', 'box']);
+PHP::init();
+
+$b = bx(['TEST', 'PATH', 'alike', 'box']);
 
 pr("{$b}"); // In this case JSON
 
@@ -1105,6 +1132,82 @@ TEST ## PATH ## alike ## box
 
 ```
 
+### Stretchable feature of Box-array
+
+It works almost exactly as "Path-Alike", but it stringifies boxes including "keys".
+
+Example 1:
+```php
+
+PHP::init();
+
+$bx = bx([
+    'key1' => 'val1',
+    'key2' => 'val2',
+    'key3' => 'val3',
+    'key4' => 'val4',
+])->stretched('=');
+
+pd($bx, "{$bx}");
+
+```
+
+Output would be:
+```text
+spaf\simputils\models\Box Object
+(
+    [key1] => val1
+    [key2] => val2
+    [key3] => val3
+    [key4] => val4
+)
+
+key1=val1, key2=val2, key3=val3, key4=val4
+```
+
+And as it might be obvious already, there is a really good potential to use it 
+for url params.
+
+Example 2:
+```php
+PHP::init();
+
+$bx = bx([
+	'key1' => 'val1',
+	'key2' => 'val2',
+	'key3' => 'val3',
+	'key4' => 'val4',
+])->stretched('=', '&');
+
+// or shorter and more intuitive:
+
+$bx = bx([
+	'key1' => 'val1',
+	'key2' => 'val2',
+	'key3' => 'val3',
+	'key4' => 'val4',
+])->paramsAlike();
+
+pd($bx, "{$bx}");
+
+```
+
+Output would be:
+```text
+spaf\simputils\models\Box Object
+(
+    [key1] => val1
+    [key2] => val2
+    [key3] => val3
+    [key4] => val4
+)
+
+key1=val1&key2=val2&key3=val3&key4=val4
+```
+
+Important to note, this methods does not turn the objects directly to strings!
+They store in the object special configuration, that when you start 
+to stringify this Box - it will use the saved settings for that.
 
 ### "with" love
 

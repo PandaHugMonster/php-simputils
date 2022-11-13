@@ -17,6 +17,7 @@ use function is_array;
 use function is_null;
 use function is_string;
 use function preg_match;
+use function preg_replace;
 use function spaf\simputils\basic\ic;
 
 /**
@@ -227,7 +228,27 @@ class UrlObject extends SimpleObject {
 				$pre_data = PHP::box((array) $_def_pre);
 			}
 			if ($pre) {
-				$this->_path = PHP::box($this->_path, $pre);
+				if (!$pre_params) {
+					$pre_params = PHP::box()->paramsAlike();
+				}
+				$new_pre = PHP::box()->pathAlike();
+				foreach ($pre as $k => $p_item) {
+					if (!preg_match('#^[+-]?[\d]*$#', $k)) {
+						$pre_params[$k] = $p_item;
+					} else {
+						if (Str::contains($p_item, '/')) {
+							$p_item = preg_replace('#/{2,}#', '/', $p_item);
+							foreach (explode('/', $p_item) as $sub_p_item) {
+								$new_pre->append("{$sub_p_item}");
+							}
+						} else {
+							$new_pre->append("{$p_item}");
+						}
+					}
+				}
+				$this->_path = PHP::box($this->_path, $new_pre);
+
+				//$pre_params
 			}
 			if ($pre_params) {
 				$this->_params = PHP::box($this->_params, $pre_params);

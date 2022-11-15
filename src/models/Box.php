@@ -25,6 +25,7 @@ use function count;
 use function implode;
 use function in_array;
 use function is_array;
+use function is_callable;
 use function is_float;
 use function is_int;
 use function is_null;
@@ -149,6 +150,7 @@ use function uasort;
  * @property ?string $separator
  * @property bool $joined_to_str
  * @property bool $stretcher
+ * @property null|string|callable $value_wrap
  */
 class Box extends ArrayObject {
 	use SimpleObjectTrait;
@@ -168,6 +170,9 @@ class Box extends ArrayObject {
 
 	#[Property]
 	protected null|string|bool $_stretcher = false;
+
+	#[Property]
+	protected null|string|Closure $_value_wrap = null;
 
 	#[Extract(false)]
 	protected mixed $_stash = null;
@@ -784,6 +789,13 @@ class Box extends ArrayObject {
 				$stretcher = '=';
 			}
 			foreach ($this as $key => $val) {
+				if ($wrap = $this->_value_wrap) {
+					if (is_callable($wrap)) {
+						$val = $wrap($val, $key, $this);
+					} else if (is_string($wrap)) {
+						$val = "{$wrap}{$val}{$wrap}";
+					}
+				}
 				$res->append("{$key}{$stretcher}{$val}");
 			}
 
@@ -844,12 +856,14 @@ class Box extends ArrayObject {
 	 * @param string $separator
 	 * @param bool $joined_to_str
 	 * @param null|bool|string $stretcher
+	 * @param null|callable|string $value_wrap
 	 *
 	 * @return $this
 	 */
 	function apply(...$properties) {
 		$permitted_properties = new static([
-			'separator', 'joined_to_str', 'stretcher' // For now only those are permitted params
+			'separator', 'joined_to_str',
+			'stretcher', 'value_wrap' // For now only those are permitted params
 		]);
 		$permitted_properties->joined_to_str = true;
 
@@ -879,12 +893,27 @@ class Box extends ArrayObject {
 		return $this;
 	}
 
-	function stretched($stretcher = true, ?string $separator = null): self {
-		if (!is_null($separator)) {
-			$this->apply(stretcher: $stretcher, separator: $separator, joined_to_str: true);
-		} else {
-			$this->apply(stretcher: $stretcher, joined_to_str: true);
+	function htmlAttrAlike(callable|string $wrap = '"'): self {
+		$this->stretched('=', ' ', $wrap);
+		return $this;
+	}
+
+	function stretched(
+		$stretcher = true,
+		?string $separator = null,
+		null|callable|string $value_wrap = null
+	): self {
+		$params = [
+			'stretcher' => $stretcher,
+			'joined_to_str' => true,
+		];
+		if ($separator) {
+			$params['separator'] = $separator;
 		}
+		if ($value_wrap) {
+			$params['value_wrap'] = $value_wrap;
+		}
+		$this->apply(...$params);
 		return $this;
 	}
 

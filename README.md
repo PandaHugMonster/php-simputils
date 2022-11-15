@@ -1523,6 +1523,39 @@ Important to note, this methods does not turn the objects directly to strings!
 They store in the object special configuration, that when you start 
 to stringify this Box - it will use the saved settings for that.
 
+#### Value wrappers and htmlAttrAlike()
+
+For html attrs alike just use this method:
+```php
+$bx = bx([
+	'data-my-attr-1' => 'test',
+	'data-my-attr-2' => 'test2',
+])->htmlAttrAlike();
+// You can specify first argument " or ' to control which wrapper symbols are used.
+// Or you could even specify callable to pre-process and wrap value automatically!
+```
+
+Output would be:
+```text
+data-my-attr-1="test" data-my-attr-2="test2"
+```
+
+But if you would want to do "value-processing" instead of just wrapping, you could use
+stretched functionality:
+```php
+$bx = bx([
+	'data-my-attr-1' => 'test',
+	'data-my-attr-2' => 'test2',
+])->stretched(' = ', ' ', function ($val, $key, $bx) {
+	return "(`{$val}`)";
+});
+```
+
+Output would be:
+```text
+data-my-attr-1 = (`test`) data-my-attr-2 = (`test2`)
+```
+
 ### "with" love
 
 Python specific command `with` can be easily implemented through meta-magic and callables.

@@ -23,11 +23,11 @@ class HttpProtocolProcessor extends BasicProtocolProcessor {
 	static ?string $default_protocol = self::PROTO_HTTPS;
 	static string $initial_parser_regexp_full =
 		'#(?:([\w\d:_-]*)@)?(?:((?:[\w\d_.-]*)|(?:\[[a-f\d:]{3,40}\]))/?)?' .
-		'(?::(\w{0,5}))?/?([\w\d/_.,+%-]*)(?:\?([\w\d/.,_&=+%-]*))?(?:\#([\w\d/_&=+%-]*))?$#S';
+		'(?::(\w{0,5}))?/?([\w\d/_.,+%!~^$\(\)"\'-]*)(?:\?([\w\d/.,_&=+%!~^$\(\)"\'-]*))?(?:\#([\w\d/_&=+%!~^$\(\)"\'-]*))?$#S';
 	static string $initial_parser_regexp_path =
-		'#/?([\w\d/_.,+%-]*)(?:\?([\w\d/.,_&=+%-]*))?(?:\#([\w\d/_&=+%-]*))?$#S';
+		'#/?([\w\d/_.,+%~^$\(\)"\'-]*)(?:\?([\w\d/.,_&=+%!~^$\(\)"\'-]*))?(?:\#([\w\d/_&=+%!~^$\(\)"\'-]*))?$#S';
 	static string $initial_parser_regexp_params =
-		'#(?:\?([\w\d/_&=+%-]*))?(?:\#([\w\d/_&=+%-]*))?$#S';
+		'#(?:\?([\w\d/_&=+%!~^$\(\)"\'-]*))?(?:\#([\w\d/_&=+%!~^$\(\)"\'-]*))?$#S';
 	static string $default_host = 'localhost';
 	static int $default_port = 80;
 

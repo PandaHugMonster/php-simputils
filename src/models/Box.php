@@ -22,6 +22,7 @@ use function array_pop;
 use function array_values;
 use function arsort;
 use function count;
+use function htmlspecialchars;
 use function implode;
 use function in_array;
 use function is_array;
@@ -883,18 +884,75 @@ class Box extends ArrayObject {
 		return $this;
 	}
 
+	/**
+	 * Apply settings for stringification to unix-path
+	 *
+	 * @param string $separator
+	 *
+	 * @return $this
+	 */
 	function pathAlike(string $separator = '/'): self {
 		$this->apply(separator: $separator, joined_to_str: true);
 		return $this;
 	}
 
+	/**
+	 * Apply settings for stringification to get request params
+	 *
+	 * @return $this
+	 */
 	function paramsAlike(): self {
 		$this->stretched('=', '&');
 		return $this;
 	}
 
+	/**
+	 * Apply settings for stringification to html-attrs
+	 *
+	 * Values pre-processing/encoding/normalization is included.
+	 *
+	 * Stretching the box into the textual representation of html attributes,
+	 * encoding and wrapping of the value (preprocessing) if no arguments or null provided.
+	 *
+	 * By default internal function-callback is used to pre-process and encode the string.
+	 * If another callable is supplied to $wrap parameter, pre-processing will be replaced
+	 * by your callable, so no additional pre-processing is performed. Be careful about that!
+	 *
+	 * Usage example:
+	 * ```php
+	 *  $bx = bx([
+	 *      'data-my-attr-1' => 'te"st',
+	 *      'data-my-attr-2' => 'test2',
+	 *  ])->htmlAttrAlike();
+	 *
+	 *  $bx['data-new_attr'] = 'My special \' / " value';
+	 *
+	 *  pr("$bx");
+	 *
+	 * ```
+	 *
+	 * Output example:
+	 * ```text
+	 * data-my-attr-1="te&quot;st" data-my-attr-2="test2" data-new_attr="My special &#039; / &quot; value"
+	 * ```
+	 *
+	 *
+	 * @param callable|string $wrap If string provided - pre-processing and encoding will take
+	 *                              place, but if callable is provided, pre-processing will not
+	 *                              take place, and your callable have to take care of that.
+	 *
+	 * @return $this
+	 */
 	function htmlAttrAlike(callable|string $wrap = '"'): self {
-		$this->stretched('=', ' ', $wrap);
+		if (is_callable($wrap)) {
+			$clbk = $wrap;
+		} else {
+			$clbk = function ($val) use ($wrap) {
+				$res = htmlspecialchars($val);
+				return "{$wrap}{$res}{$wrap}";
+			};
+		}
+		$this->stretched('=', ' ', $clbk);
 		return $this;
 	}
 

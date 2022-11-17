@@ -170,10 +170,13 @@ class Box extends ArrayObject {
 	protected bool $_joined_to_str = false;
 
 	#[Property]
-	protected null|string|bool $_stretcher = false;
+	protected null|Closure|string|bool $_stretcher = false;
 
 	#[Property]
 	protected null|string|Closure $_value_wrap = null;
+
+	#[Property]
+	protected null|string|Closure $_key_wrap = null;
 
 	#[Extract(false)]
 	protected mixed $_stash = null;
@@ -773,6 +776,7 @@ class Box extends ArrayObject {
 
 	/**
 	 * @param ?string $sep Separator
+	 * @param callable|string|bool|null $stretcher
 	 *
 	 * @return string
 	 * @see Str::explode()
@@ -782,7 +786,7 @@ class Box extends ArrayObject {
 	 * @see static::$separator
 	 */
 	#[Shortcut('\implode()')]
-	public function implode(?string $sep = null, null|string|bool $stretcher = null): string {
+	public function implode(?string $sep = null, null|callable|string|bool $stretcher = null): string {
 		$stretcher = $stretcher ?? $this->_stretcher;
 		if (!is_null($stretcher) && $stretcher !== false) {
 			$res = new static();
@@ -797,7 +801,19 @@ class Box extends ArrayObject {
 						$val = "{$wrap}{$val}{$wrap}";
 					}
 				}
-				$res->append("{$key}{$stretcher}{$val}");
+				if ($wrap = $this->_key_wrap) {
+					if (is_callable($wrap)) {
+						$key = $wrap($key, $val, $this);
+					} else if (is_string($wrap)) {
+						$key = "{$wrap}{$key}{$wrap}";
+					}
+				}
+				if (is_callable($stretcher)) {
+					$sub_res = $stretcher($val, $key, $this);
+					$res->append("{$sub_res}");
+				} else {
+					$res->append("{$key}{$stretcher}{$val}");
+				}
 			}
 
 		} else {
@@ -823,8 +839,8 @@ class Box extends ArrayObject {
 	 * @see static::$separator
 	 */
 	#[Shortcut('\implode()')]
-	public function join(?string $sep = null, null|string|bool $stretcher = null): string {
-		return $this->implode($sep);
+	public function join(?string $sep = null, null|callable|string|bool $stretcher = null): string {
+		return $this->implode($sep, $stretcher);
 	}
 
 	private function _splitAssocAndNumeric(bool $numeric = true) {
@@ -856,15 +872,17 @@ class Box extends ArrayObject {
 	/**
 	 * @param string $separator
 	 * @param bool $joined_to_str
-	 * @param null|bool|string $stretcher
+	 * @param bool|callable|string $stretcher
 	 * @param null|callable|string $value_wrap
+	 * @param null|callable|string $key_wrap
 	 *
 	 * @return $this
 	 */
 	function apply(...$properties) {
 		$permitted_properties = new static([
+			// NOTE For now only those are permitted params
 			'separator', 'joined_to_str',
-			'stretcher', 'value_wrap' // For now only those are permitted params
+			'stretcher', 'value_wrap', 'key_wrap'
 		]);
 		$permitted_properties->joined_to_str = true;
 
@@ -957,9 +975,10 @@ class Box extends ArrayObject {
 	}
 
 	function stretched(
-		$stretcher = true,
+		bool|callable|string $stretcher = true,
 		?string $separator = null,
-		null|callable|string $value_wrap = null
+		null|callable|string $value_wrap = null,
+		null|callable|string $key_wrap = null,
 	): self {
 		$params = [
 			'stretcher' => $stretcher,
@@ -970,6 +989,9 @@ class Box extends ArrayObject {
 		}
 		if ($value_wrap) {
 			$params['value_wrap'] = $value_wrap;
+		}
+		if ($key_wrap) {
+			$params['key_wrap'] = $key_wrap;
 		}
 		$this->apply(...$params);
 		return $this;

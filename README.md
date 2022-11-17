@@ -260,9 +260,14 @@ cases of bugs and issues).
 
 More about semantic versioning: [Semantic Versioning Explanation](https://semver.org).
 
-### Dev Stable version
-From this point, I decided to have stable version with a recent updates that I need in a first order
-without packaging it every single time.
+-----
+
+### "dev-main" Stable version
+From this point, I decided to have stable version with some recent updates that I need
+before the final release. Consider it "ALPHA" release.
+
+**Though, avoid using it on production, it would be times better if you would 
+just poke me with a ticket so I would release the stable version quicker!**
 
 Just keep in mind, even though it should be stable, it's still "unreleased" and might be even
 unfinished concepts. Please avoid using it without serious reasons.
@@ -270,10 +275,31 @@ unfinished concepts. Please avoid using it without serious reasons.
 **Important**: DO NOT USE THIS VERSION, IF YOU ARE NOT SURE WHAT IT DOES.
 For production always use the installation method above!
 ```shell
+composer require spaf/simputils "dev-main"
+```
+
+All the features of this branch will be properly packaged and released, don't worry about that!
+
+-----
+
+### "dev-dev" Unstable version
+Additionally I've decided to have unstable version with much more recent updates that 
+I need in a first row with unfinished and broken concepts.
+
+Just keep in mind, it can completely break your code, unfinished concepts or 
+even broken code could be here very common thing. 
+
+I strongly recommend to avoid using this code, except cases 
+when you are very totally sure what you are doing!
+
+**Important**: DO NOT USE THIS VERSION, IF YOU ARE NOT SURE WHAT IT DOES.
+```shell
 composer require spaf/simputils "dev-dev"
 ```
 
 All the features of this branch will be properly packaged and released, don't worry about that!
+
+-----
 
 ## Quick highlights and examples
 
@@ -1554,6 +1580,33 @@ $bx = bx([
 Output would be:
 ```text
 data-my-attr-1 = (`test`) data-my-attr-2 = (`test2`)
+```
+
+#### Wrap, wrap, wrap
+
+For stretching functionality you can wrap each part separately 
+with `$value_wrap` and `$key_wrap`. They work in the same way, but wrap their each 
+corresponding part. After that or instead of that if for the `$stretcher` argument
+provided the function/callable/closure then it will be used for wrapping the whole pair.
+
+Keep in mind, that if you specify wrappers for `key` or `value` they already will 
+be applied before the `stretcher` callable is called!
+
+Example bellow will help to understand the logic.
+
+```php
+$bx = bx([
+	'key1' => 'val1',
+	'key2' => 'val2',
+	'key3' => 'val3',
+])->stretched(fn($v, $k) => "(\"{$k}\": \"{$v}\")",  ' || ', '!', '?');
+
+pd("$bx");
+```
+
+Output would be:
+```text
+("?key1?": "!val1!") || ("?key2?": "!val2!") || ("?key3?": "!val3!")
 ```
 
 ### "with" love

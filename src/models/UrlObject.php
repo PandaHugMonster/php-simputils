@@ -3,6 +3,7 @@
 namespace spaf\simputils\models;
 
 use spaf\simputils\attributes\DebugHide;
+use spaf\simputils\attributes\markers\Shortcut;
 use spaf\simputils\attributes\Property;
 use spaf\simputils\exceptions\NotImplementedYet;
 use spaf\simputils\generic\SimpleObject;
@@ -21,6 +22,11 @@ use function preg_replace;
 use function spaf\simputils\basic\ic;
 
 /**
+ *
+ * **Important**: `cs` prefixed methods here are "chaining setting methods" to be used
+ * instead of properties of the same name. For changing multiple aspects of your URL properties
+ * might be not the most comfortable solution.
+ *
  * @property-read UrlCompatible|string|Box|array|null $orig Contains original value of the "host".
  *                                                          really useful in case of parsing of
  *                                                          an url.
@@ -48,6 +54,177 @@ class UrlObject extends SimpleObject {
 		'https' => HttpProtocolProcessor::class,
 	];
 
+	/**
+	 * Chained Setting of Protocol
+	 *
+	 * CS - in this context stands for `Chained Setting`
+	 *
+	 * This naming is done for compatibility reasons, due to possibility of `set` prefixed
+	 * methods might collide with other frameworks "getter/setter" functionality, and cause
+	 * unexpected behaviour.
+	 *
+	 * This method can be used the same way as the property,
+	 * but allows chaining due to native functions/methods nature.
+	 *
+	 * @param ?string $protocol
+	 *
+	 * @return $this
+	 */
+	#[Shortcut('$this->protocol')]
+	function csProto(?string $protocol): self {
+		$this->protocol = $protocol;
+		return $this;
+	}
+
+	/**
+	 * Chained Setting of Host
+	 *
+	 * CS - in this context stands for `Chained Setting`
+	 *
+	 * This naming is done for compatibility reasons, due to possibility of `set` prefixed
+	 * methods might collide with other frameworks "getter/setter" functionality, and cause
+	 * unexpected behaviour.
+	 *
+	 * This method can be used the same way as the property,
+	 * but allows chaining due to native functions/methods nature.
+	 *
+	 * @param ?string $host
+	 *
+	 * @return $this
+	 */
+	#[Shortcut('$this->host')]
+	function csHost(?string $host): self {
+		$this->host = $host;
+		return $this;
+	}
+
+	/**
+	 * Chained Setting of Port
+	 *
+	 * CS - in this context stands for `Chained Setting`
+	 *
+	 * This naming is done for compatibility reasons, due to possibility of `set` prefixed
+	 * methods might collide with other frameworks "getter/setter" functionality, and cause
+	 * unexpected behaviour.
+	 *
+	 * This method can be used the same way as the property,
+	 * but allows chaining due to native functions/methods nature.
+	 *
+	 * @param ?int $port
+	 *
+	 * @return $this
+	 */
+	#[Shortcut('$this->port')]
+	function csPort(?int $port): self {
+		$this->port = $port;
+		return $this;
+	}
+
+	/**
+	 * Chained Setting of User
+	 *
+	 * CS - in this context stands for `Chained Setting`
+	 *
+	 * This naming is done for compatibility reasons, due to possibility of `set` prefixed
+	 * methods might collide with other frameworks "getter/setter" functionality, and cause
+	 * unexpected behaviour.
+	 *
+	 * This method can be used the same way as the property,
+	 * but allows chaining due to native functions/methods nature.
+	 *
+	 * @param ?string $user
+	 *
+	 * @return $this
+	 */
+	#[Shortcut('$this->user')]
+	function csUser(?string $user): self {
+		$this->user = $user;
+		return $this;
+	}
+
+	/**
+	 * Chained Setting of Password
+	 *
+	 * CS - in this context stands for `Chained Setting`
+	 *
+	 * This naming is done for compatibility reasons, due to possibility of `set` prefixed
+	 * methods might collide with other frameworks "getter/setter" functionality, and cause
+	 * unexpected behaviour.
+	 *
+	 * This method can be used the same way as the property,
+	 * but allows chaining due to native functions/methods nature.
+	 *
+	 * @param ?string $password
+	 *
+	 * @return $this
+	 */
+	#[Shortcut('$this->password')]
+	function csPass(?string $password): self {
+		$this->password = $password;
+		return $this;
+	}
+
+	/**
+	 * Chained Setting of Sharpy
+	 *
+	 * CS - in this context stands for `Chained Setting`
+	 *
+	 * This naming is done for compatibility reasons, due to possibility of `set` prefixed
+	 * methods might collide with other frameworks "getter/setter" functionality, and cause
+	 * unexpected behaviour.
+	 *
+	 * This method can be used the same way as the property,
+	 * but allows chaining due to native functions/methods nature.
+	 *
+	 * @param ?string $sharpy
+	 *
+	 * @return $this
+	 */
+	#[Shortcut('$this->sharpy')]
+	function csSharpy(?string $sharpy): self {
+		$this->sharpy = $sharpy;
+		return $this;
+	}
+
+	/**
+	 * Chained Setting of Path
+	 *
+	 * CS - in this context stands for `Chained Setting`
+	 *
+	 * This naming is done for compatibility reasons, due to possibility of `set` prefixed
+	 * methods might collide with other frameworks "getter/setter" functionality, and cause
+	 * unexpected behaviour.
+	 *
+	 * This method can be used the same way as the property,
+	 * but allows chaining due to native functions/methods nature.
+	 *
+	 * @param null|Box|array|string $path
+	 * @param bool $extend
+	 *
+	 * @return $this
+	 */
+	#[Shortcut('$this->sharpy')]
+	function csPath(null|Box|array|string $path, $extend = true): self {
+		$this->path = $path;
+		return $this;
+	}
+
+	/**
+	 * Chain set method for PArams
+	 *
+	 * This method can be used the same way as property,
+	 * but allows chaining due to native functions/methods nature.
+	 *
+	 * @param \spaf\simputils\models\Box|array|null $params
+	 * @param bool $extend Extend (by default) or Replace
+	 *
+	 * @return $this
+	 */
+	function setParams(null|Box|array $params, $extend = true): self {
+		$this->params = $params;
+		return $this;
+	}
+
 	#[Property]
 	protected ?string $_processor = null;
 
@@ -74,7 +251,7 @@ class UrlObject extends SimpleObject {
 	protected ?Box $_params = null;
 
 	#[Property('path')]
-	protected function setPath($val) {
+	protected function setPathProperty($val) {
 		if ($val instanceof Box) {
 			$val->pathAlike();
 			$this->_path = $val;
@@ -100,7 +277,7 @@ class UrlObject extends SimpleObject {
 	}
 
 	#[Property('sharpy')]
-	protected function setSharpy($val) {
+	protected function setSharpyProperty($val) {
 		$this->data['sharpy'] = $val;
 	}
 

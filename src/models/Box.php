@@ -22,9 +22,11 @@ use function array_pop;
 use function array_values;
 use function arsort;
 use function count;
+use function htmlspecialchars;
 use function implode;
 use function in_array;
 use function is_array;
+use function is_callable;
 use function is_float;
 use function is_int;
 use function is_null;
@@ -147,7 +149,9 @@ use function uasort;
  * @property-read Box|array $only_numeric
  * @property-read Box|array $only_assoc
  * @property ?string $separator
- * @property ?string $joined_to_str
+ * @property bool $joined_to_str
+ * @property bool $stretcher
+ * @property null|string|callable $value_wrap
  */
 class Box extends ArrayObject {
 	use SimpleObjectTrait;
@@ -164,6 +168,15 @@ class Box extends ArrayObject {
 
 	#[Property]
 	protected bool $_joined_to_str = false;
+
+	#[Property]
+	protected null|Closure|string|bool $_stretcher = false;
+
+	#[Property]
+	protected null|string|Closure $_value_wrap = null;
+
+	#[Property]
+	protected null|string|Closure $_key_wrap = null;
 
 	#[Extract(false)]
 	protected mixed $_stash = null;
@@ -763,6 +776,7 @@ class Box extends ArrayObject {
 
 	/**
 	 * @param ?string $sep Separator
+	 * @param callable|string|bool|null $stretcher
 	 *
 	 * @return string
 	 * @see Str::explode()
@@ -772,10 +786,47 @@ class Box extends ArrayObject {
 	 * @see static::$separator
 	 */
 	#[Shortcut('\implode()')]
-	public function implode(?string $sep = null): string {
+	public function implode(?string $sep = null, null|callable|string|bool $stretcher = null): string {
+		$stretcher = $stretcher ?? $this->_stretcher;
+		if (!is_null($stretcher) && $stretcher !== false) {
+			$res = new static();
+			if ($stretcher === true) {
+				$stretcher = '=';
+			}
+			foreach ($this as $key => $val) {
+				if ($wrap = $this->_value_wrap) {
+					if (is_callable($wrap)) {
+						$val = $wrap($val, $key, $this);
+					} else if (is_string($wrap)) {
+						$val = "{$wrap}{$val}{$wrap}";
+					}
+				}
+				if ($wrap = $this->_key_wrap) {
+					if (is_callable($wrap)) {
+						$key = $wrap($key, $val, $this);
+					} else if (is_string($wrap)) {
+						$key = "{$wrap}{$key}{$wrap}";
+					}
+				}
+				if (is_callable($stretcher)) {
+					$sub_res = $stretcher($val, $key, $this);
+					$res->append("{$sub_res}");
+				} else {
+					$res->append("{$key}{$stretcher}{$val}");
+				}
+			}
+
+		} else {
+			$res = $this;
+		}
+
+		$sep = !is_null($sep)
+			?$sep
+			:($this->_separator ?? static::$default_separator);
+
 		return implode(
-			$sep ?? $this->_separator ?? static::$default_separator,
-			(array) $this
+			$sep,
+			(array) $res
 		);
 	}
 
@@ -788,8 +839,8 @@ class Box extends ArrayObject {
 	 * @see static::$separator
 	 */
 	#[Shortcut('\implode()')]
-	public function join(?string $sep = null): string {
-		return $this->implode($sep);
+	public function join(?string $sep = null, null|callable|string|bool $stretcher = null): string {
+		return $this->implode($sep, $stretcher);
 	}
 
 	private function _splitAssocAndNumeric(bool $numeric = true) {
@@ -818,9 +869,20 @@ class Box extends ArrayObject {
 		return $this->_splitAssocAndNumeric(false);
 	}
 
+	/**
+	 * @param string $separator
+	 * @param bool $joined_to_str
+	 * @param bool|callable|string $stretcher
+	 * @param null|callable|string $value_wrap
+	 * @param null|callable|string $key_wrap
+	 *
+	 * @return $this
+	 */
 	function apply(...$properties) {
 		$permitted_properties = new static([
-			'separator', 'joined_to_str' // For now only those are permitted params
+			// NOTE For now only those are permitted params
+			'separator', 'joined_to_str',
+			'stretcher', 'value_wrap', 'key_wrap'
 		]);
 		$permitted_properties->joined_to_str = true;
 
@@ -836,10 +898,102 @@ class Box extends ArrayObject {
 
 			$this->$k = $v;
 		}
+
+		return $this;
 	}
 
+	/**
+	 * Apply settings for stringification to unix-path
+	 *
+	 * @param string $separator
+	 *
+	 * @return $this
+	 */
 	function pathAlike(string $separator = '/'): self {
 		$this->apply(separator: $separator, joined_to_str: true);
+		return $this;
+	}
+
+	/**
+	 * Apply settings for stringification to get request params
+	 *
+	 * @return $this
+	 */
+	function paramsAlike(): self {
+		$this->stretched('=', '&');
+		return $this;
+	}
+
+	/**
+	 * Apply settings for stringification to html-attrs
+	 *
+	 * Values pre-processing/encoding/normalization is included.
+	 *
+	 * Stretching the box into the textual representation of html attributes,
+	 * encoding and wrapping of the value (preprocessing) if no arguments or null provided.
+	 *
+	 * By default internal function-callback is used to pre-process and encode the string.
+	 * If another callable is supplied to $wrap parameter, pre-processing will be replaced
+	 * by your callable, so no additional pre-processing is performed. Be careful about that!
+	 *
+	 * Usage example:
+	 * ```php
+	 *  $bx = bx([
+	 *      'data-my-attr-1' => 'te"st',
+	 *      'data-my-attr-2' => 'test2',
+	 *  ])->htmlAttrAlike();
+	 *
+	 *  $bx['data-new_attr'] = 'My special \' / " value';
+	 *
+	 *  pr("$bx");
+	 *
+	 * ```
+	 *
+	 * Output example:
+	 * ```text
+	 * data-my-attr-1="te&quot;st" data-my-attr-2="test2" data-new_attr="My special &#039; / &quot; value"
+	 * ```
+	 *
+	 *
+	 * @param callable|string $wrap If string provided - pre-processing and encoding will take
+	 *                              place, but if callable is provided, pre-processing will not
+	 *                              take place, and your callable have to take care of that.
+	 *
+	 * @return $this
+	 */
+	function htmlAttrAlike(callable|string $wrap = '"'): self {
+		if (is_callable($wrap)) {
+			$clbk = $wrap;
+		} else {
+			$clbk = function ($val) use ($wrap) {
+				$res = htmlspecialchars($val);
+				return "{$wrap}{$res}{$wrap}";
+			};
+		}
+		$this->stretched('=', ' ', $clbk);
+		return $this;
+	}
+
+	function stretched(
+		bool|callable|string $stretcher = true,
+		?string $separator = null,
+		null|callable|string $value_wrap = null,
+		null|callable|string $key_wrap = null,
+	): self {
+		$params = [
+			'stretcher' => $stretcher,
+			'joined_to_str' => true,
+		];
+		if ($separator) {
+			$params['separator'] = $separator;
+		}
+		if ($value_wrap) {
+			$params['value_wrap'] = $value_wrap;
+		}
+		if ($key_wrap) {
+			$params['key_wrap'] = $key_wrap;
+		}
+		$this->apply(...$params);
 		return $this;
 	}
 

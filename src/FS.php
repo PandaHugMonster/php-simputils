@@ -3,17 +3,22 @@
 namespace spaf\simputils;
 
 use finfo;
+use ReflectionMethod;
 use spaf\simputils\attributes\markers\Shortcut;
 use spaf\simputils\exceptions\CannotDeleteDirectory;
 use spaf\simputils\exceptions\DataDirectoryIsNotAllowed;
+use spaf\simputils\generic\BasicInitConfig;
+use spaf\simputils\generic\BasicResource;
 use spaf\simputils\generic\BasicResourceApp;
 use spaf\simputils\models\Box;
 use spaf\simputils\models\Dir;
 use spaf\simputils\models\File;
 use spaf\simputils\models\UrlObject;
+use spaf\simputils\models\files\apps\PHPFileProcessor;
 use function file_exists;
 use function is_array;
 use function is_dir;
+use function spaf\simputils\basic\ic;
 use const DIRECTORY_SEPARATOR;
 
 /**
@@ -104,16 +109,21 @@ class FS {
 	 * @see FS::locate()
 	 * @see FS::require()
 	 */
-	static function data(array|Box|File $file, ?string $ic = 'app') {
+	static function data(array|Box|File $file, null|string|BasicInitConfig $ic = null) {
+		return static::dataFile($file, $ic)?->content ?? null;
+	}
+
+	static function dataFile(array|Box|File $file, null|string|BasicInitConfig $ic = null): ?File {
 		$file = FS::file($file);
 
 		if (empty($ic)) {
-			$ic = 'app';
+			$ic = ic();
+		} else if (Str::is($ic)) {
+			$ic = ic($ic);
 		}
-		$config = PHP::getInitConfig($ic);
 
 		$is_allowed = false;
-		foreach ($config->allowed_data_dirs as $dir) {
+		foreach ($ic->allowed_data_dirs as $dir) {
 			$dir = FS::locate($dir);
 			if (Str::startsWith($file, $dir)) {
 				$is_allowed = true;
@@ -131,10 +141,14 @@ class FS {
 			if (!$file->exists) {
 				return null;
 			}
-			return static::require($file);
+			$reflection = new ReflectionMethod(BasicResource::class, 'setIsExecutableProcessingEnabled');
+			$reflection->setAccessible(true);
+			$reflection->invoke($file, true);
+			$reflection->setAccessible(false);
+			$file->app = new PHPFileProcessor();
 		}
-		// NOTE Non-php file
-		return $file?->content ?? null;
+
+		return $file;
 	}
 
 	/**
@@ -396,6 +410,10 @@ class FS {
 			}
 			if (in_array($ext, ['xml'])) {
 				return 'text/xml'; // @codeCoverageIgnore
+			}
+			$php_exts = PHP::listOfExecPhpFileExtensions();
+			if ($php_exts->containsValue($ext)) {
+				return 'application/x-php'; // @codeCoverageIgnore
 			}
 		}
 		return $orig_mime;

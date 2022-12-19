@@ -36,6 +36,8 @@ use spaf\simputils\PHP;
 #[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_CLASS | Attribute::TARGET_PROPERTY)]
 class DebugHide extends BasicOutputControlAttribute {
 
+	static $default_placeholder = '****';
+
 	public function __construct(
 		public bool $hide_all = true,
 		public ?string $show_instead = '****',
@@ -48,7 +50,7 @@ class DebugHide extends BasicOutputControlAttribute {
 		if ($this->hide_all) {
 			return PHP::box();
 		}
-		return PHP::box([$this->show_instead ?? '****']);
+		return PHP::box([$this->show_instead ?? static::$default_placeholder]);
 	}
 
 	/**

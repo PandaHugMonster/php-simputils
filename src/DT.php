@@ -148,15 +148,11 @@ class DT {
 			$tz_in = new $tz_class('UTC');
 			$tz_out = new $tz_class('UTC');
 
-		} else if ($tz === true) {
-			// Zoned input
-			$tz_in = static::getDefaultTimeZone();
-			$tz_out = static::getDefaultTimeZone();
-
-		} else if (is_null($tz)) {
+		} else if (is_null($tz) || $tz === true) {
 			// Zoned input
 			$tz_in = new $tz_class('UTC');
 			$tz_out = static::getDefaultTimeZone();
+
 		}
 
 		/** @var DateTime $res */

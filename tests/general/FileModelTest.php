@@ -115,6 +115,11 @@ class FileModelTest extends TestCase {
 		$file->copy($file->name_full);
 	}
 
+	/**
+	 * @uses \spaf\simputils\models\Box
+	 * @return void
+	 * @throws \spaf\simputils\exceptions\CannotDeleteDirectory
+	 */
 	function testAdditionalFileStuff() {
 		$file = FS::file();
 		$file->content = 'totoro';

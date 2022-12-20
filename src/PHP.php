@@ -44,6 +44,7 @@ use function dirname;
 use function intval;
 use function is_array;
 use function is_dir;
+use function is_file;
 use function is_null;
 use function is_object;
 use function is_resource;
@@ -176,8 +177,9 @@ class PHP {
 		$config = $config ?? new InitConfig;
 
 		$config->code_root = $config->code_root ?? debug_backtrace()[0]['file'];
-		$config->working_dir = $config->working_dir ?? $config->code_root;
-
+		if (empty($config->working_dir)) {
+			$config->working_dir = $config->code_root;
+		}
 		static::metaMagicSpell($config, 'setup', $args ?? []);
 
 		if (empty($config->ee)) {
@@ -188,7 +190,7 @@ class PHP {
 		if (!is_dir($config->code_root)) {
 			$config->code_root = dirname($config->code_root);
 		}
-		if (!is_dir($config->working_dir)) {
+		if (is_file($config->working_dir)) {
 			$config->working_dir = dirname($config->working_dir);
 		}
 		////

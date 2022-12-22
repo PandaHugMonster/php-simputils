@@ -1038,10 +1038,14 @@ function ic(?string $name = null): null|InitConfig|BasicInitConfig {
 /**
  * Creating URL object
  *
- * @param UrlObject|UrlCompatible|string|Box|array|null $host
+ * @param \spaf\simputils\interfaces\UrlCompatible|string|\spaf\simputils\models\Box|array|null $host
  * @param Box|array|string|null $path
  * @param Box|array|null $params
  * @param string|null $protocol
+ * @param string|null $processor
+ * @param string|null $port
+ * @param string|null $user
+ * @param string|null $pass
  * @param mixed ...$data
  *
  * @return \spaf\simputils\models\UrlObject

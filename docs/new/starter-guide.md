@@ -816,6 +816,51 @@ important to note that `local` exec-env will return true for all non `local` of 
 stage. For example `dev` stage will not return true for `dev-local` conditions,
 but `dev-local` stage will return true for both `dev` and `dev-local` conditions!
 
+### DotEnv and Environmental Variables
+The framework has in-house functionality to support `.env` (DotEnv) and 
+Environmental Variables, moreover - by default it's automatically enabled.
+
+The default functionality of DotEnv reads `.env` from the "working-dir".
+
+Example `.env`:
+```dotenv
+DENV_VAR_1="My variable 1"
+DENV_VAR_2="My variable 2"
+#DENV_VAR_3="My variable 3"
+DENV_VAR_4="My variable 4"
+```
+
+**Important**: Despite unclear specification of the DotEnv,
+this framework supports commenting out of DotEnv variables in files (Through `#` symbol).
+Beside that there is an advanced (and partially unfinished) functionality
+related to "inclusion" of DotEnv files to each-other. This topic is out of scope
+of this guide, and will be described in the advanced guide when functionality is finalized.
+
+Example of code:
+```php
+
+$val = env('DENV_VAR_1');
+pr("Value: {$val}");
+
+$val = env('DENV_VAR_2');
+pr("Value: {$val}");
+
+$val = env('DENV_VAR_3', 'I was never defined :(');
+pr("Value: {$val}");
+
+$val = env('DENV_VAR_4', 'I was defined, so you would not see this string');
+pr("Value: {$val}");
+```
+
+Output:
+```text
+Value: My variable 1
+Value: Redefined by EnvVars
+Value: I was never defined :(
+Value: My variable 4
+```
+
+
 
 ## Part 2 - Advanced
 

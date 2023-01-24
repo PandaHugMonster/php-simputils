@@ -134,10 +134,10 @@ trait MetaMagic {
 	 */
 	public function toJson(?bool $pretty = null, bool $with_class = false): string {
 		$res = [];
-		$box_class = PHP::redef(Box::class);
+//		$box_class = PHP::redef(Box::class);
 		foreach ($this->toArray() as $k => $v) {
 			if (is_array($v)) {
-				$v = new $box_class($v);
+				$v = PHP::box($v);
 			}
 			if (is_object($v) && method_exists($v, 'toJson')) {
 				// TODO Hack to convert it back
@@ -335,7 +335,7 @@ trait MetaMagic {
 
 		$sub = [];
 		$is_box_already = $this instanceof Box;
-		$res = $is_box_already?$this:new $box_class;
+		$res = $is_box_already?$this:PHP::box();
 		/** @var Box $res */
 
 		if ($this instanceof Box) {
@@ -345,7 +345,7 @@ trait MetaMagic {
 				);
 
 				if (PHP::classUsesTrait($this, ArrayReadOnlyAccessTrait::class)) {
-					$res = new $box_class;
+					$res = PHP::box();
 				}
 			} else {
 				return $this;
@@ -373,9 +373,9 @@ trait MetaMagic {
 		bool $with_class,
 		bool $use_box = true,
 	): Box|array {
-		$box_class = PHP::redef(Box::class);
+//		$box_class = PHP::redef(Box::class);
 		$res = $use_box
-			?new $box_class
+			?PHP::box()
 			:[];
 		foreach ($fields as $k => $v) {
 			if (is_object($v) && method_exists($v, 'toBox')) {

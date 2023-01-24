@@ -9,6 +9,7 @@ use spaf\simputils\attributes\markers\Shortcut;
 use spaf\simputils\models\DateInterval;
 use spaf\simputils\models\DateTime;
 use spaf\simputils\models\DateTimeZone;
+use spaf\simputils\models\TimeDuration;
 use function date;
 use function date_default_timezone_get;
 use function date_default_timezone_set;
@@ -79,6 +80,11 @@ class DT {
 		string $fmt = null
 	): ?DateTime {
 		return DT::normalize($dt, $tz, $fmt);
+	}
+
+	static function duration(int|float|DateInterval $value = 0): TimeDuration {
+		$class = PHP::redef(TimeDuration::class);
+		return new $class($value);
 	}
 
 	/**

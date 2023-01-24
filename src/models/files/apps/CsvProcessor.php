@@ -56,12 +56,12 @@ class CsvProcessor extends TextProcessor {
 		/** @var CsvSettings $s */
 		$s = static::getSettings($file);
 
-		$box_class = PHP::redef(Box::class);
+//		$box_class = PHP::redef(Box::class);
 
 		$callback = !empty($s->postprocessing_callback)
 			?Closure::fromCallable($s->postprocessing_callback)
 			:null;
-		$res = new $box_class();
+		$res = PHP::box();
 		$header = null;
 		while (($line = fgetcsv($fd, 0, $s->separator, $s->enclosure, $s->escape)) !== false) {
 			if ($s->first_line_header && empty($header)) {
@@ -74,7 +74,7 @@ class CsvProcessor extends TextProcessor {
 			}
 
 			if (!empty($line)) {
-				$res[] = new $box_class($line);
+				$res[] = PHP::box($line);
 			}
 		}
 
@@ -140,15 +140,15 @@ class CsvProcessor extends TextProcessor {
 	 * Picks up all the keys of the array/matrix for CSV
 	 */
 	public static function prepareHeader(array|Box $data): null|Box {
-		$class_box = PHP::redef(Box::class);
+//		$class_box = PHP::redef(Box::class);
 
 		$is_box_used = $data instanceof Box && PHP::$use_box_instead_of_array;
 		$is_assoc_used = false;
 		$is_index_used = false;
-		$box_class = PHP::redef(Box::class);
+//		$box_class = PHP::redef(Box::class);
 
 		$res = $is_box_used
-			?new $box_class()
+			?PHP::box()
 			:[];
 		// NOTE CSV array - basically means matrix
 		foreach ($data as $row) {
@@ -170,7 +170,7 @@ class CsvProcessor extends TextProcessor {
 			?null
 			:($res instanceof Box
 				?$res->values
-				:new $class_box(array_values($res)));
+				:PHP::box(array_values($res)));
 	}
 
 	protected static function _checkMixUpOfKeys($key, &$is_index_used, &$is_assoc_used) {

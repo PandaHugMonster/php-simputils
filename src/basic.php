@@ -16,6 +16,7 @@ use spaf\simputils\generic\SimpleObject;
 use spaf\simputils\interfaces\UrlCompatible;
 use spaf\simputils\models\Box;
 use spaf\simputils\models\DataUnit;
+use spaf\simputils\models\DateInterval;
 use spaf\simputils\models\DateTime;
 use spaf\simputils\models\Dir;
 use spaf\simputils\models\File;
@@ -23,6 +24,7 @@ use spaf\simputils\models\InitConfig;
 use spaf\simputils\models\IPv4;
 use spaf\simputils\models\StackFifo;
 use spaf\simputils\models\StackLifo;
+use spaf\simputils\models\TimeDuration;
 use spaf\simputils\models\UrlObject;
 use spaf\simputils\PHP;
 
@@ -663,6 +665,11 @@ function ts(
 	string $fmt = null
 ): ?DateTime {
 	return DT::ts($dt, $tz, $fmt);
+}
+
+#[Shortcut('DT::duration()')]
+function dur(int|float|DateInterval $value = 0): TimeDuration {
+	return DT::duration($value);
 }
 
 /**

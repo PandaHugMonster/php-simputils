@@ -36,7 +36,7 @@ class BoxTest extends TestCase {
 	public function testBasics() {
 		$box_class = PHP::redef(Box::class);
 
-		$b1 = new $box_class();
+		$b1 = PHP::box();
 		$version_class = PHP::redef(Version::class);
 
 		$b1[] = 'one';
@@ -50,7 +50,7 @@ class BoxTest extends TestCase {
 		$this->assertEquals(2, $b1->slice(1)->size);
 		$this->assertEquals(1, $b1->slice([2])->size);
 
-		$b2 = new $box_class();
+		$b2 = PHP::box();
 		$b2['key1'] = new $version_class('1.2.3');
 		$b2['key2'] = new $version_class('2.0.0');
 		$b2['key3'] = new $version_class('3.0.0');

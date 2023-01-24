@@ -403,16 +403,16 @@ class File extends BasicResource {
 
 	#[Property('stat')]
 	protected function getStat(): Box {
-		$class_box = PHP::redef(Box::class);
+//		$class_box = PHP::redef(Box::class);
 		if (!empty($this->_fd)) {
-			return new $class_box(fstat($this->_fd));
+			return PHP::box(fstat($this->_fd));
 		}
 
 		if ($this->exists) {
-			return new $class_box(stat($this->name_full));
+			return PHP::box(stat($this->name_full));
 		}
 
-		return new $class_box(); // @codeCoverageIgnore
+		return PHP::box(); // @codeCoverageIgnore
 	}
 
 	#[Property('size')]

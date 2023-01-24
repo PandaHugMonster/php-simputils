@@ -34,6 +34,7 @@ use function trim;
  * @property-read int $seconds
  * @property-read int $milliseconds
  * @property-read int $microseconds
+ * @property-read string $max_name
  *
  * @property bool $is_always_microseconds
  */
@@ -243,7 +244,7 @@ class TimeDuration extends SimpleObject {
 
 	function numeric(?string $unit = null) {
 		if (is_null($unit)) {
-			$unit = $this->maxName();
+			$unit = $this->max_name;
 		}
 		if (!$this->cached_coefs->containsKey($unit)) {
 			throw new Exception("Unsupported unit {$unit}");
@@ -252,7 +253,8 @@ class TimeDuration extends SimpleObject {
 		return $this->value / $coef;
 	}
 
-	function maxName() {
+	#[Property('max_name')]
+	protected function getMaxName(): string {
 		$unit = null;
 		$c = $this->_cachedValue();
 		foreach ($c as $name => $value) {

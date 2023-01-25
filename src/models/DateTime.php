@@ -416,6 +416,12 @@ class DateTime extends FixUpDateTime {
 		return $this->getTimestamp();
 	}
 
+	public function format(string $format): string {
+		$res = parent::format($format);
+		return $res;
+	}
+
+
 	public function toJson(?bool $pretty = null, bool $with_class = false): string {
 		// TODO Implement optional choice of "for_*"
 		return json_encode($this->for_system);

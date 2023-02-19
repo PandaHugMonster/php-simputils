@@ -23,6 +23,7 @@ use spaf\simputils\models\PhpInfo;
 use spaf\simputils\models\Set;
 use spaf\simputils\models\StackFifo;
 use spaf\simputils\models\StackLifo;
+use spaf\simputils\models\TimeDuration;
 use spaf\simputils\models\UrlObject;
 use spaf\simputils\models\Version;
 
@@ -52,6 +53,7 @@ class CodeBlocksCacheIndex {
 
 			InitConfig::REDEF_DATE_INTERVAL => DateInterval::class,
 			InitConfig::REDEF_DATE_PERIOD => DatePeriod::class,
+			InitConfig::REDEF_TIME_DURATION => TimeDuration::class,
 			InitConfig::REDEF_DATA_UNIT => DataUnit::class,
 			InitConfig::REDEF_STACK_FIFO => StackFifo::class,
 			InitConfig::REDEF_STACK_LIFO => StackLifo::class,

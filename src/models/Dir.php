@@ -128,11 +128,11 @@ class Dir extends Box {
 		bool $recursively = false,
 		null|string|WalkThroughFilterInterface ...$filters,
 	): Box|array {
-		$class_box = PHP::redef(Box::class);
+//		$class_box = PHP::redef(Box::class);
 		$class_file = PHP::redef(File::class);
 		$class_dir = PHP::redef(Dir::class);
 
-		$res = new $class_box();
+		$res = PHP::box();
 		if ($dir = scandir($this->name_full)) {
 			foreach ($dir as $item) {
 				if ($item === '.' || $item === '..') {

@@ -142,21 +142,21 @@ class PhpInfo extends BoxRO {
 	protected static function compose(): array|Box {
 		$reg_exps = static::getPhpInfoRegExpArray();
 		$version_class = PHP::redef(Version::class);
-		$box_class = PHP::redef(Box::class);
+//		$box_class = PHP::redef(Box::class);
 
-		$data = new $box_class();
+		$data = PHP::box();
 
 		$data[constants::KEY_PHP_VERSION] = PHP::version();
 		$data[constants::KEY_SIMP_UTILS_VERSION] = PHP::simpUtilsVersion();
 		$data[constants::KEY_SIMP_UTILS_LICENSE] = PHP::simpUtilsLicense();
-		$data[constants::KEY_INI_CONFIG] = new $box_class(ini_get_all(details: false));
+		$data[constants::KEY_INI_CONFIG] = PHP::box(ini_get_all(details: false));
 		$data[constants::KEY_MAIN_INI_FILE] = php_ini_loaded_file();
-		$data[constants::KEY_EXTRA_INI_FILES] = new $box_class(explode(
+		$data[constants::KEY_EXTRA_INI_FILES] = PHP::box(explode(
 			',', preg_replace('/\n*/', '', php_ini_scanned_files())
 		));
-		$data[constants::KEY_STREAM_WRAPPERS] = new $box_class(stream_get_wrappers());
-		$data[constants::KEY_STREAM_TRANSPORTS] = new $box_class(stream_get_transports());
-		$data[constants::KEY_STREAM_FILTERS] = new $box_class(stream_get_filters());
+		$data[constants::KEY_STREAM_WRAPPERS] = PHP::box(stream_get_wrappers());
+		$data[constants::KEY_STREAM_TRANSPORTS] = PHP::box(stream_get_transports());
+		$data[constants::KEY_STREAM_FILTERS] = PHP::box(stream_get_filters());
 		$data[constants::KEY_ZEND_VERSION] = new $version_class(zend_version(), 'Zend');
 		$data[constants::KEY_XDEBUG_VERSION] = !empty($v = phpversion('xdebug'))
 			?new $version_class($v, 'xdebug')
@@ -164,10 +164,10 @@ class PhpInfo extends BoxRO {
 		// IMP  Due to weird and volatile $_ENV, for PhpInfo `getenv()` is used,
 		//      what is thread-unsafe.
 		$data[constants::KEY_ENV_VARS] = PHP::allEnvs();
-		$data[constants::KEY_SERVER_VAR] = new $box_class($_SERVER);
+		$data[constants::KEY_SERVER_VAR] = PHP::box($_SERVER);
 
-		$loaded_extensions = new $box_class(get_loaded_extensions());
-		$data[constants::KEY_EXTENSIONS] = new $box_class();
+		$loaded_extensions = PHP::box(get_loaded_extensions());
+		$data[constants::KEY_EXTENSIONS] = PHP::box();
 
 		foreach ($loaded_extensions as $ext) {
 			$data[constants::KEY_EXTENSIONS][$ext] = new $version_class(phpversion($ext), $ext);

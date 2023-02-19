@@ -124,8 +124,8 @@ class DataUnit extends SimpleObject {
 	 *                   values representing powers
 	 */
 	protected static function unitToPowerMap(): array|Box {
-		$class = PHP::redef(Box::class);
-		return new $class([
+//		$class = PHP::redef(Box::class);
+		return PHP::box([
 			DataUnit::BYTE => 0,
 			DataUnit::KILOBYTE => 1,
 			DataUnit::MEGABYTE => 2,
@@ -507,10 +507,10 @@ class DataUnit extends SimpleObject {
 	 * @return false|mixed
 	 */
 	protected static function translator(string $name, bool $reversed = false) {
-		$class_box = PHP::redef(Box::class);
+//		$class_box = PHP::redef(Box::class);
 
 		$name = Str::upper($name);
-		$check = new $class_box(static::$l10n_translations ?? []);
+		$check = PHP::box(static::$l10n_translations ?? []);
 		if (!$reversed) {
 			if ($check->containsValue($name)) {
 				return $check->getKeyByValue($name);

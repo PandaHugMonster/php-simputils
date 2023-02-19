@@ -44,6 +44,7 @@ abstract class BasicInitConfig extends SimpleObject {
 	const REDEF_DATE_TIME_ZONE = 'DateTimeZone';
 	const REDEF_DATE_INTERVAL = 'DateInterval';
 	const REDEF_DATE_PERIOD = 'DatePeriod';
+	const REDEF_TIME_DURATION = 'TimeDuration';
 	const REDEF_DATA_UNIT = 'DataUnit';
 	const REDEF_FILE = 'File';
 	const REDEF_DIR = 'Dir';
@@ -167,8 +168,7 @@ abstract class BasicInitConfig extends SimpleObject {
 	 */
 	#[Property('successful_init_blocks')]
 	protected function getSuccessfulInitBlocks(): Box|array {
-		$class_box = PHP::redef(Box::class);
-		return new $class_box($this->_successful_init_blocks);
+		return PHP::box($this->_successful_init_blocks);
 	}
 
 	/**

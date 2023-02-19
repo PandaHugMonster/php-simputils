@@ -57,6 +57,8 @@ use function trim;
  *                                     or manually snapshot
  * @property-read bool $is_weekend Is day a weekend
  * @property-read bool $is_weekday Is day a week-day
+ *
+ * @property-read int $timestamp Amount of seconds since 1970-01-01 00:00:00 (can be negative)
  */
 class DateTime extends FixUpDateTime {
 	use ForOutputsTrait;
@@ -407,6 +409,18 @@ class DateTime extends FixUpDateTime {
 	function f($format) {
 		return $this->format($format); //@codeCoverageIgnore
 	}
+
+	#[Property('timestamp')]
+	#[Shortcut('static::getTimestamp()')]
+	protected function getTimestampProperty(): int {
+		return $this->getTimestamp();
+	}
+
+	public function format(string $format): string {
+		$res = parent::format($format);
+		return $res;
+	}
+
 
 	public function toJson(?bool $pretty = null, bool $with_class = false): string {
 		// TODO Implement optional choice of "for_*"

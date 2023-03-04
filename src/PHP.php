@@ -202,41 +202,36 @@ class PHP {
 		return $config;
 	}
 
-	private static $_cached_current_url = null;
-
 	/**
-	 * @param $refresh
+	 *
 	 *
 	 * @return ?UrlObject
 	 */
-	static function currentUrl($refresh = false) {
+	static function currentUrl() {
 		if (static::isCLI() && !defined('CURRENT_URL_PRETEND_NOT_CLI')) {
 			return null;
 		}
-		if (!static::$_cached_current_url || $refresh) {
-			$info = static::info();
-			$serv = $info->server_var;
-			$protocol = empty($serv['HTTPS']) || $serv['HTTPS']?'https':'http';
-			$host = $serv['SERVER_NAME'] ?? null;
-			if (empty($host)) {
-				$host = $serv['HTTP_HOST'] ?? null;
-			}
 
-			$server_port = $serv['SERVER_PORT'] ?? null
-				?intval($serv['SERVER_PORT'])
-				:null;
-
-			$uri = $serv['REQUEST_URI'] ?? null;
-
-			static::$_cached_current_url = static::url(
-				host: $host,
-				path: $uri,
-				protocol: $protocol,
-				port: $server_port
-			);
+		$info = static::info();
+		$serv = $info->server_var;
+		$protocol = empty($serv['HTTPS']) || $serv['HTTPS']?'https':'http';
+		$host = $serv['SERVER_NAME'] ?? null;
+		if (empty($host)) {
+			$host = $serv['HTTP_HOST'] ?? null;
 		}
 
-		return static::$_cached_current_url;
+		$server_port = $serv['SERVER_PORT'] ?? null
+			?intval($serv['SERVER_PORT'])
+			:null;
+
+		$uri = $serv['REQUEST_URI'] ?? null;
+
+		return static::url(
+			host: $host,
+			path: $uri,
+			protocol: $protocol,
+			port: $server_port
+		);
 	}
 
 	public static function metaMagicSpell(string|object $ref, $spell, ...$args) {

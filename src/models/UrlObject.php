@@ -16,6 +16,7 @@ use spaf\simputils\traits\RedefinableComponentTrait;
 use function explode;
 use function is_array;
 use function is_null;
+use function is_numeric;
 use function is_string;
 use function preg_match;
 use function preg_replace;
@@ -46,6 +47,22 @@ use function spaf\simputils\basic\ic;
 class UrlObject extends SimpleObject {
 	use ForOutputsTrait;
 	use RedefinableComponentTrait;
+
+
+	/**
+	 * CS operation "prepend", will cause to add elements to the left of the group
+	 */
+	const CS_OP_PREPEND = 'prepend';
+
+	/**
+	 * CS operation "append", will cause to add elements to the right of the group
+	 */
+	const CS_OP_APPEND = 'append';
+
+	/**
+	 * CS operation "replace", will cause to replace all the elements of the group
+	 */
+	const CS_OP_REPLACE = 'replace';
 
 	static string $default_processor = HttpProtocolProcessor::class;
 
@@ -199,29 +216,85 @@ class UrlObject extends SimpleObject {
 	 * but allows chaining due to native functions/methods nature.
 	 *
 	 * @param null|Box|array|string $path
-	 * @param bool $extend
+	 * @param string $operation
 	 *
 	 * @return $this
 	 */
-	#[Shortcut('$this->sharpy')]
-	function csPath(null|Box|array|string $path, $extend = true): self {
-		$this->path = $path;
+	#[Shortcut('$this->path')]
+	function csPath(null|Box|array|string $path, string $operation = self::CS_OP_REPLACE): self {
+		$path_new = static::preProcessPathData($path);
+		$path_old = $this->path ?: PHP::box()->pathAlike();
+
+		$res = match ($operation) {
+			static::CS_OP_REPLACE => $path_new,
+			static::CS_OP_PREPEND => static::addPathElements($path_new, $path_old),
+			static::CS_OP_APPEND => static::addPathElements($path_old, $path_new),
+		};
+
+		$this->path = $res;
+		return $this;
+	}
+
+	private static function addPathElements($to, $from) {
+		foreach ($from as $k => $val) {
+			if (is_numeric($k)) {
+				$to[] = $val;
+			} else {
+				$to[$k] = $val;
+			}
+		}
+		return $to;
+	}
+
+	/**
+	 * Chained Setting of Path
+	 *
+	 * CS - in this context stands for `Chained Setting`
+	 *
+	 * This naming is done for compatibility reasons, due to possibility of `set` prefixed
+	 * methods might collide with other frameworks "getter/setter" functionality, and cause
+	 * unexpected behaviour.
+	 *
+	 * This method can be used the same way as the property,
+	 * but allows chaining due to native functions/methods nature.
+	 *
+	 * @param Box|array|null $params
+	 * @param string $operation
+	 *
+	 * @return $this
+	 */
+	#[Shortcut('$this->params')]
+	function csParams(null|Box|array $params, string $operation = self::CS_OP_REPLACE): self {
+		$this->params = $params;
 		return $this;
 	}
 
 	/**
-	 * Chain set method for PArams
-	 *
-	 * This method can be used the same way as property,
-	 * but allows chaining due to native functions/methods nature.
-	 *
-	 * @param \spaf\simputils\models\Box|array|null $params
-	 * @param bool $extend Extend (by default) or Replace
+	 * @param UrlCompatible|string|Box|array|null $host
+	 * @param Box|array|string|null $path
+	 * @param Box|array|null $params
+	 * @param string|null $protocol
+	 * @param string|null $processor
+	 * @param string|null $port
+	 * @param string|null $user
+	 * @param string|null $pass
+	 * @param mixed ...$data
 	 *
 	 * @return $this
 	 */
-	function setParams(null|Box|array $params, $extend = true): self {
-		$this->params = $params;
+	function update(
+		null|UrlCompatible|string|Box|array $host = null,
+		null|Box|array|string $path = null,
+		null|Box|array $params = null,
+		?string $protocol = null,
+		?string $processor = null,
+		?string $port = null,
+		?string $user = null,
+		?string $pass = null,
+		mixed ...$data,
+	): static {
+		// MARK Proceed here!
+
 		return $this;
 	}
 
@@ -250,17 +323,23 @@ class UrlObject extends SimpleObject {
 	#[Property]
 	protected ?Box $_params = null;
 
-	#[Property('path')]
-	protected function setPathProperty($val) {
+	static function preProcessPathData($val) {
+		$res = null;
 		if ($val instanceof Box) {
 			$val->pathAlike();
-			$this->_path = $val;
+			$res = $val;
 		} else if (is_array($val)) {
-			$this->_path = PHP::box($val)->pathAlike();
+			$res = PHP::box($val)->pathAlike();
 		} else if (is_string($val)) {
 			$val = Str::removeStarting($val, '/');
-			$this->_path = PHP::box(explode('/', $val))->pathAlike();
+			$res = PHP::box(explode('/', $val))->pathAlike();
 		}
+		return $res;
+	}
+
+	#[Property('path')]
+	protected function setPathProperty($val) {
+		$this->_path = static::preProcessPathData($val);
 	}
 
 	#[Property]

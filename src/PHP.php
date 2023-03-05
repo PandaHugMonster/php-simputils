@@ -107,6 +107,13 @@ class PHP {
 		return __DIR__;
 	}
 
+	static function getSerializationMechanismName() {
+		return match (static::$serialization_mechanism) {
+			static::SERIALIZATION_TYPE_JSON => 'json',
+			static::SERIALIZATION_TYPE_PHP => 'php',
+			default => null,
+		};
+	}
 	/**
 	 * Framework/lib version
 	 *

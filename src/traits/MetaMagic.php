@@ -265,6 +265,8 @@ trait MetaMagic {
 					static::_ilpRegisterObjIdUsage($v);
 				}
 				if ($is_object && method_exists($v, 'toArray')) {
+//					$res[$k] = $v->toArray($recursively, $with_class, $exclude_fields);
+					// FIX  Something wrong with those mechanisms
 					$res[$k] = $v->toArray();
 				} else {
 					$res[$k] = $v;

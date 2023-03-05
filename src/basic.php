@@ -27,6 +27,7 @@ use spaf\simputils\models\StackLifo;
 use spaf\simputils\models\TimeDuration;
 use spaf\simputils\models\UrlObject;
 use spaf\simputils\PHP;
+use stdClass;
 
 /**
  * Please Die function
@@ -847,4 +848,24 @@ function ip(string|BasicIP $ip): IPv4 {
 #[Shortcut('PHP::with()')]
 function with($obj, callable $callback): void {
 	PHP::with($obj, $callback);
+}
+
+#[Shortcut('PHP::int()')]
+function int(mixed $val): int {
+	return PHP::int($val);
+}
+
+#[Shortcut('PHP::float()')]
+function float(mixed $val): float {
+	return PHP::float($val);
+}
+
+#[Shortcut('PHP::bool()')]
+function bool(mixed $val): bool {
+	return PHP::bool($val);
+}
+
+#[Shortcut('PHP::obj()')]
+function obj(mixed $val, $is_std_class = false): SimpleObject|stdClass {
+	return PHP::obj($val, $is_std_class);
 }

@@ -5,6 +5,10 @@ namespace spaf\simputils\traits;
 use JsonException;
 use spaf\simputils\exceptions\InfiniteLoopPreventionExceptions;
 use spaf\simputils\exceptions\MetaMagicStrictInheritanceProblem;
+use spaf\simputils\exceptions\types\NonBoolObjException;
+use spaf\simputils\exceptions\types\NonFloatObjException;
+use spaf\simputils\exceptions\types\NonIntObjException;
+use spaf\simputils\exceptions\types\NonObjObjException;
 use spaf\simputils\FS;
 use spaf\simputils\generic\BasicPrism;
 use spaf\simputils\generic\SimpleObject;
@@ -12,6 +16,7 @@ use spaf\simputils\models\Box;
 use spaf\simputils\models\File;
 use spaf\simputils\PHP;
 use spaf\simputils\special\CommonMemoryCacheIndex;
+use stdClass;
 use function get_object_vars;
 use function in_array;
 use function is_array;
@@ -606,6 +611,11 @@ trait MetaMagic {
 			'___withStart' => $context->___withStart(...$spell),
 			'___withEnd' => $context->___withEnd(...$spell),
 
+			'___int' => $context->___int(...$spell),
+			'___float' => $context->___float(...$spell),
+			'___bool' => $context->___bool(...$spell),
+			'___obj' => $context->___obj(...$spell),
+
 			'___l10n' => $context::___l10n(...$spell),
 		};
 		return $res;
@@ -640,5 +650,21 @@ trait MetaMagic {
 	 */
 	public function __unserialize(array $data): void {
 		PHP::metaMagicSpell($this, 'deserialize', $data);
+	}
+
+	protected function ___int(): int {
+		throw new NonIntObjException();
+	}
+
+	protected function ___float(): float {
+		throw new NonFloatObjException();
+	}
+
+	protected function ___bool(): bool {
+		throw new NonBoolObjException();
+	}
+
+	protected function ___obj($is_std_class = false): SimpleObject|stdClass {
+		return $this;
 	}
 }

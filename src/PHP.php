@@ -36,6 +36,7 @@ use spaf\simputils\models\Version;
 use spaf\simputils\special\CodeBlocksCacheIndex;
 use spaf\simputils\special\CommonMemoryCacheIndex;
 use spaf\simputils\traits\MetaMagic;
+use stdClass;
 use Throwable;
 use function class_exists;
 use function class_parents;
@@ -1156,5 +1157,47 @@ class PHP {
 		} else {
 			$obj->___withEnd($obj);
 		}
+	}
+
+	static function int(mixed $val): int {
+		if (is_object($val)) {
+			if (static::classUsesTrait($val, MetaMagic::class)) {
+				return static::metaMagicSpell($val, 'int', $val);
+			}
+		}
+		return (int) $val;
+	}
+
+	static function float(mixed $val): float {
+		if (is_object($val)) {
+			if (static::classUsesTrait($val, MetaMagic::class)) {
+				return static::metaMagicSpell($val, 'float', $val);
+			}
+		}
+		return (float) $val;
+	}
+
+	static function bool(mixed $val): bool {
+		if (is_object($val)) {
+			if (static::classUsesTrait($val, MetaMagic::class)) {
+				return static::metaMagicSpell($val, 'bool', $val);
+			}
+		}
+		return (bool) $val;
+	}
+
+	// todo Use Str helper inside
+	static function str(mixed $val): string {
+		return (string) $val;
+	}
+
+	static function obj(mixed $val, $is_std_class = false): SimpleObject|stdClass {
+		if (is_object($val)) {
+			if (static::classUsesTrait($val, MetaMagic::class)) {
+				return static::metaMagicSpell($val, 'obj', $val, $is_std_class);
+			}
+		}
+		// FIX  Unfinished
+//		return (obj) $val;
 	}
 }

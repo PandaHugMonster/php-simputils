@@ -869,3 +869,8 @@ function bool(mixed $val): bool {
 function obj(mixed $val, $is_std_class = false): SimpleObject|stdClass {
 	return PHP::obj($val, $is_std_class);
 }
+
+#[Shortcut('PHP::arr()')]
+function arr(mixed $val): array {
+	return PHP::arr($val);
+}

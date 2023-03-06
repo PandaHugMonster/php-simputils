@@ -1200,4 +1200,13 @@ class PHP {
 		// FIX  Unfinished
 //		return (obj) $val;
 	}
+
+	static function arr(mixed $val): array {
+		if (is_object($val)) {
+			if (static::classUsesTrait($val, MetaMagic::class)) {
+				return static::metaMagicSpell($val, 'array', $val);
+			}
+		}
+		return (array) $val;
+	}
 }

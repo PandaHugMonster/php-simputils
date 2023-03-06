@@ -5,10 +5,10 @@ namespace spaf\simputils\traits;
 use JsonException;
 use spaf\simputils\exceptions\InfiniteLoopPreventionExceptions;
 use spaf\simputils\exceptions\MetaMagicStrictInheritanceProblem;
+use spaf\simputils\exceptions\types\NonArrayObjException;
 use spaf\simputils\exceptions\types\NonBoolObjException;
 use spaf\simputils\exceptions\types\NonFloatObjException;
 use spaf\simputils\exceptions\types\NonIntObjException;
-use spaf\simputils\exceptions\types\NonObjObjException;
 use spaf\simputils\FS;
 use spaf\simputils\generic\BasicPrism;
 use spaf\simputils\generic\SimpleObject;
@@ -666,5 +666,9 @@ trait MetaMagic {
 
 	protected function ___obj($is_std_class = false): SimpleObject|stdClass {
 		return $this;
+	}
+
+	protected function ___array(): array {
+		throw new NonArrayObjException();
 	}
 }

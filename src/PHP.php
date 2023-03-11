@@ -58,6 +58,7 @@ use function serialize;
 use function str_contains;
 use function unserialize;
 use const JSON_ERROR_NONE;
+use const JSON_PRETTY_PRINT;
 
 
 /**
@@ -1156,5 +1157,73 @@ class PHP {
 		} else {
 			$obj->___withEnd($obj);
 		}
+	}
+
+	static function int(mixed $val): int {
+		if (is_object($val)) {
+			if (static::classUsesTrait($val, MetaMagic::class)) {
+				return static::metaMagicSpell($val, 'int');
+			}
+		}
+		return (int) $val;
+	}
+
+	static function float(mixed $val): float {
+		if (is_object($val)) {
+			if (static::classUsesTrait($val, MetaMagic::class)) {
+				return static::metaMagicSpell($val, 'float');
+			}
+		}
+		return (float) $val;
+	}
+
+	static function bool(mixed $val): bool {
+		if (is_object($val)) {
+			if (static::classUsesTrait($val, MetaMagic::class)) {
+				return static::metaMagicSpell($val, 'bool');
+			}
+		}
+		return (bool) $val;
+	}
+
+	// todo Use Str helper inside
+	static function str(mixed $val): string {
+		return (string) $val;
+	}
+
+//	static function obj(mixed $val, $is_std_class = false): SimpleObject|stdClass {
+//		if (is_object($val)) {
+//			if (static::classUsesTrait($val, MetaMagic::class)) {
+//				return static::metaMagicSpell($val, 'obj', $val, $is_std_class);
+//			}
+//		}
+//		// FIX  Unfinished
+////		return (obj) $val;
+//	}
+
+	static function arr(mixed $val): array {
+		if (is_object($val)) {
+			if (static::classUsesTrait($val, MetaMagic::class)) {
+				return static::metaMagicSpell($val, 'array');
+			}
+		}
+		return (array) $val;
+	}
+
+	static function json(mixed $val, ?bool $pretty = null, bool $with_class = false): string {
+		if (is_object($val)) {
+			if (static::classUsesTrait($val, MetaMagic::class)) {
+				return static::metaMagicSpell($val, 'json', $pretty, $with_class);
+			}
+		}
+		return json_encode($val, PHP::flagsForJson($pretty));
+	}
+
+	static function flagsForJson(bool $pretty) {
+		$flags = 0;
+		if ($pretty) {
+			$flags |= JSON_PRETTY_PRINT;
+		}
+		return $flags;
 	}
 }

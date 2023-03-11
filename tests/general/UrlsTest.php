@@ -14,7 +14,6 @@ use function spaf\simputils\basic\url;
  * @covers \spaf\simputils\generic\BasicProtocolProcessor
  *
  * @uses \spaf\simputils\models\Box
- * @uses \spaf\simputils\traits\MetaMagic::_jsonFlags
  * @uses \spaf\simputils\traits\MetaMagic::toJson
  * @uses \spaf\simputils\Boolean
  * @uses \spaf\simputils\components\normalizers\BooleanNormalizer

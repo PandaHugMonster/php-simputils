@@ -3,6 +3,7 @@ namespace spaf\simputils\models;
 
 use DateTimeInterface;
 use spaf\simputils\attributes\DebugHide;
+use spaf\simputils\attributes\Extract;
 use spaf\simputils\attributes\markers\Shortcut;
 use spaf\simputils\attributes\Property;
 use spaf\simputils\DT;
@@ -105,8 +106,10 @@ class DateTime extends FixUpDateTime {
 	 * @var static $_orig_value
 	 */
 	#[DebugHide]
+	#[Extract(false)]
 	protected $_orig_value;
 
+	#[Extract(false)]
 	#[Property('orig_value')]
 	protected function getOrigValue(): static|null {
 		return $this->_orig_value;
@@ -123,6 +126,7 @@ class DateTime extends FixUpDateTime {
 	 * TODO Implement caching of the value
 	 * @return \spaf\simputils\models\Date|string
 	 */
+	#[Extract(false)]
 	#[Property('date')]
 	protected function getDateExt(): Date|string {
 		return new Date($this);
@@ -133,36 +137,43 @@ class DateTime extends FixUpDateTime {
 	 * TODO Implement caching of the value
 	 * @return \spaf\simputils\models\Time|string
 	 */
+	#[Extract(false)]
 	#[Property('time')]
 	protected function getTime(): Time|string {
 		return new Time($this);
 	}
 
+	#[Extract(false)]
 	#[Property('week')]
 	protected function getWeek(): int {
 		return (int) $this->format('W');
 	}
 
+	#[Extract(false)]
 	#[Property('dow')]
 	protected function getDow(): int {
 		return (int) $this->format('w');
 	}
 
+	#[Extract(false)]
 	#[Property('dow_iso')]
 	protected function getDowIso(): int {
 		return (int) $this->format('N');
 	}
 
+	#[Extract(false)]
 	#[Property('is_weekend')]
 	protected function getIsWeekend(): bool {
 		return $this->dow_iso > 5;
 	}
 
+	#[Extract(false)]
 	#[Property('is_weekday')]
 	protected function getIsWeekday(): bool {
 		return !$this->is_weekend;
 	}
 
+	#[Extract(false)]
 	#[Property('doy')]
 	protected function getDoy(): int {
 		return (int) $this->format('z');
@@ -198,6 +209,7 @@ class DateTime extends FixUpDateTime {
 		return parent::setTimezone($timezone);
 	}
 
+	#[Extract(false)]
 	#[Property('year')]
 	protected function getYear(): int {
 		return (int) $this->format('Y');
@@ -208,6 +220,7 @@ class DateTime extends FixUpDateTime {
 		$this->setDate($year, $this->month, $this->day);
 	}
 
+	#[Extract(false)]
 	#[Property('month')]
 	protected function getMonth(): int {
 		return (int) $this->format('n');
@@ -218,6 +231,7 @@ class DateTime extends FixUpDateTime {
 		$this->setDate($this->year, $month, $this->day);
 	}
 
+	#[Extract(false)]
 	#[Property('day')]
 	protected function getDay(): int {
 		return (int) $this->format('j');
@@ -228,6 +242,7 @@ class DateTime extends FixUpDateTime {
 		$this->setDate($this->year, $this->month, $day);
 	}
 
+	#[Extract(false)]
 	#[Property('hour')]
 	protected function getHour(): int {
 		return (int) $this->format('G');
@@ -238,6 +253,7 @@ class DateTime extends FixUpDateTime {
 		$this->setTime($hour, $this->minute, $this->second, $this->micro);
 	}
 
+	#[Extract(false)]
 	#[Property('minute')]
 	protected function getMinute(): int {
 		return (int) $this->format('i');
@@ -248,6 +264,7 @@ class DateTime extends FixUpDateTime {
 		$this->setTime($this->hour, $minute, $this->second, $this->micro);
 	}
 
+	#[Extract(false)]
 	#[Property('second')]
 	protected function getSecond(): int {
 		return (int) $this->format('s');
@@ -258,6 +275,7 @@ class DateTime extends FixUpDateTime {
 		$this->setTime($this->hour, $this->minute, $second, $this->micro);
 	}
 
+	#[Extract(false)]
 	#[Property('micro')]
 	protected function getMicro(): int {
 		return (int) $this->format('u');
@@ -268,6 +286,7 @@ class DateTime extends FixUpDateTime {
 		$this->setTime($this->hour, $this->minute, $this->second, $micro);
 	}
 
+	#[Extract(false)]
 	#[Property('milli')]
 	protected function getMilli(): int {
 		return (int) $this->format('v');
@@ -289,6 +308,7 @@ class DateTime extends FixUpDateTime {
 		return $this->getForSystemObj()->format(DT::FMT_DATETIME_FULL);
 	}
 
+	#[Extract(false)]
 	#[Property('for_user')]
 	protected function getForUser(): string {
 		return $this->format(static::$l10n_user_datetime_format);
@@ -410,6 +430,7 @@ class DateTime extends FixUpDateTime {
 		return $this->format($format); //@codeCoverageIgnore
 	}
 
+	#[Extract(false)]
 	#[Property('timestamp')]
 	#[Shortcut('static::getTimestamp()')]
 	protected function getTimestampProperty(): int {
@@ -422,8 +443,10 @@ class DateTime extends FixUpDateTime {
 	}
 
 
-	public function toJson(?bool $pretty = null, bool $with_class = false): string {
-		// TODO Implement optional choice of "for_*"
+	protected function ___json(?bool $pretty = null, bool $with_class = false): string {
+		if ($with_class) {
+			return parent::___json($pretty, $with_class);
+		}
 		return json_encode($this->for_system);
 	}
 
@@ -451,5 +474,9 @@ class DateTime extends FixUpDateTime {
 	protected function ___deserialize(array|Box $data): static {
 		$this->setFromData($data);
 		return $this;
+	}
+
+	protected function ___int(): int {
+		return $this->timestamp;
 	}
 }

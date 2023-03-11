@@ -36,7 +36,6 @@ use spaf\simputils\models\Version;
 use spaf\simputils\special\CodeBlocksCacheIndex;
 use spaf\simputils\special\CommonMemoryCacheIndex;
 use spaf\simputils\traits\MetaMagic;
-use stdClass;
 use Throwable;
 use function class_exists;
 use function class_parents;
@@ -59,6 +58,7 @@ use function serialize;
 use function str_contains;
 use function unserialize;
 use const JSON_ERROR_NONE;
+use const JSON_PRETTY_PRINT;
 
 
 /**
@@ -1162,7 +1162,7 @@ class PHP {
 	static function int(mixed $val): int {
 		if (is_object($val)) {
 			if (static::classUsesTrait($val, MetaMagic::class)) {
-				return static::metaMagicSpell($val, 'int', $val);
+				return static::metaMagicSpell($val, 'int');
 			}
 		}
 		return (int) $val;
@@ -1171,7 +1171,7 @@ class PHP {
 	static function float(mixed $val): float {
 		if (is_object($val)) {
 			if (static::classUsesTrait($val, MetaMagic::class)) {
-				return static::metaMagicSpell($val, 'float', $val);
+				return static::metaMagicSpell($val, 'float');
 			}
 		}
 		return (float) $val;
@@ -1180,7 +1180,7 @@ class PHP {
 	static function bool(mixed $val): bool {
 		if (is_object($val)) {
 			if (static::classUsesTrait($val, MetaMagic::class)) {
-				return static::metaMagicSpell($val, 'bool', $val);
+				return static::metaMagicSpell($val, 'bool');
 			}
 		}
 		return (bool) $val;
@@ -1191,22 +1191,39 @@ class PHP {
 		return (string) $val;
 	}
 
-	static function obj(mixed $val, $is_std_class = false): SimpleObject|stdClass {
-		if (is_object($val)) {
-			if (static::classUsesTrait($val, MetaMagic::class)) {
-				return static::metaMagicSpell($val, 'obj', $val, $is_std_class);
-			}
-		}
-		// FIX  Unfinished
-//		return (obj) $val;
-	}
+//	static function obj(mixed $val, $is_std_class = false): SimpleObject|stdClass {
+//		if (is_object($val)) {
+//			if (static::classUsesTrait($val, MetaMagic::class)) {
+//				return static::metaMagicSpell($val, 'obj', $val, $is_std_class);
+//			}
+//		}
+//		// FIX  Unfinished
+////		return (obj) $val;
+//	}
 
 	static function arr(mixed $val): array {
 		if (is_object($val)) {
 			if (static::classUsesTrait($val, MetaMagic::class)) {
-				return static::metaMagicSpell($val, 'array', $val);
+				return static::metaMagicSpell($val, 'array');
 			}
 		}
 		return (array) $val;
+	}
+
+	static function json(mixed $val, ?bool $pretty = null, bool $with_class = false): string {
+		if (is_object($val)) {
+			if (static::classUsesTrait($val, MetaMagic::class)) {
+				return static::metaMagicSpell($val, 'json', $pretty, $with_class);
+			}
+		}
+		return json_encode($val, PHP::flagsForJson($pretty));
+	}
+
+	static function flagsForJson(bool $pretty) {
+		$flags = 0;
+		if ($pretty) {
+			$flags |= JSON_PRETTY_PRINT;
+		}
+		return $flags;
 	}
 }

@@ -14,7 +14,7 @@ use function spaf\simputils\basic\bx;
  * @covers \spaf\simputils\models\StackLifo
  *
  * @uses \spaf\simputils\PHP
- * @uses \spaf\simputils\Str::is
+ * @uses \spaf\simputils\Str
  * @uses \spaf\simputils\attributes\Property
  * @uses \spaf\simputils\special\CodeBlocksCacheIndex
  * @uses \spaf\simputils\traits\SimpleObjectTrait::_simpUtilsPrepareProperty
@@ -22,8 +22,9 @@ use function spaf\simputils\basic\bx;
  * @uses \spaf\simputils\traits\SimpleObjectTrait::getAllTheLastMethodsAndProperties
  * @uses \spaf\simputils\Math
  * @uses \spaf\simputils\traits\SimpleObjectTrait::_simpUtilsGetValidator
- * @uses \spaf\simputils\traits\MetaMagic::_jsonFlags
  * @uses \spaf\simputils\traits\MetaMagic::toJson
+ * @uses \spaf\simputils\traits\MetaMagic::___json
+ * @uses \spaf\simputils\traits\MetaMagic::_metaMagic
  */
 class BoxTest extends TestCase {
 

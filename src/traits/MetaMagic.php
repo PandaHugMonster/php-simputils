@@ -16,7 +16,6 @@ use spaf\simputils\models\Box;
 use spaf\simputils\models\File;
 use spaf\simputils\PHP;
 use spaf\simputils\special\CommonMemoryCacheIndex;
-use stdClass;
 use function get_object_vars;
 use function in_array;
 use function is_array;
@@ -28,7 +27,6 @@ use function json_last_error;
 use function json_last_error_msg;
 use function method_exists;
 use function spl_object_id;
-use const JSON_PRETTY_PRINT;
 
 /**
  * MetaMagic trait
@@ -138,42 +136,7 @@ trait MetaMagic {
 	 * @return string
 	 */
 	public function toJson(?bool $pretty = null, bool $with_class = false): string {
-		$res = [];
-//		$box_class = PHP::redef(Box::class);
-		foreach ($this->toArray() as $k => $v) {
-			if (is_array($v)) {
-				$v = PHP::box($v);
-			}
-			if (is_object($v) && method_exists($v, 'toJson')) {
-				// TODO Hack to convert it back
-				$res[$k] = json_decode($_orig_json_str = $v->toJson($pretty, $with_class), true);
-				if (json_last_error()) {
-					throw new JsonException(json_last_error_msg()." \"{$_orig_json_str}\".");
-				}
-			} elseif (is_object($v) && method_exists($v, 'toArray')) {
-				$res[$k] = $v->toArray();
-			} else {
-				$res[$k] = "{$v}";
-			}
-		}
-
-		if ($with_class) {
-			$res[PHP::$serialized_class_key_name] = static::class;
-		}
-
-		return json_encode($res, $this->_jsonFlags($pretty));
-	}
-
-	protected function _jsonFlags(bool $pretty = null) {
-		$flags = 0;
-		if (is_null($pretty)) {
-			if (isset(static::$is_json_pretty) && static::$is_json_pretty === true) {
-				$flags |= JSON_PRETTY_PRINT;
-			}
-		} else if ($pretty) {
-			$flags |= JSON_PRETTY_PRINT;
-		}
-		return $flags;
+		return PHP::json($this, $pretty, $with_class);
 	}
 
 	/**
@@ -614,7 +577,8 @@ trait MetaMagic {
 			'___int' => $context->___int(...$spell),
 			'___float' => $context->___float(...$spell),
 			'___bool' => $context->___bool(...$spell),
-			'___obj' => $context->___obj(...$spell),
+			'___json' => $context->___json(...$spell),
+//			'___obj' => $context->___obj(...$spell),
 
 			'___l10n' => $context::___l10n(...$spell),
 		};
@@ -664,11 +628,42 @@ trait MetaMagic {
 		throw new NonBoolObjException();
 	}
 
-	protected function ___obj($is_std_class = false): SimpleObject|stdClass {
-		return $this;
-	}
+//	protected function ___obj($is_std_class = false): SimpleObject|stdClass {
+//		return $this;
+//	}
 
 	protected function ___array(): array {
 		throw new NonArrayObjException();
+	}
+
+	protected function ___json(?bool $pretty = null, bool $with_class = false) {
+		$res = [];
+//		$box_class = PHP::redef(Box::class);
+		foreach ($this->toArray() as $k => $v) {
+			if (is_array($v)) {
+				$v = PHP::box($v);
+			}
+			if (is_object($v) && method_exists($v, 'toJson')) {
+				// TODO Hack to convert it back
+				$res[$k] = json_decode($_orig_json_str = $v->toJson($pretty, $with_class), true);
+				if (json_last_error()) {
+					throw new JsonException(json_last_error_msg()." \"{$_orig_json_str}\".");
+				}
+			} elseif (is_object($v) && method_exists($v, 'toArray')) {
+				$res[$k] = $v->toArray();
+			} else {
+				$res[$k] = "{$v}";
+			}
+		}
+
+		if ($with_class) {
+			$res[PHP::$serialized_class_key_name] = static::class;
+		}
+
+		if (is_null($pretty)) {
+			$pretty = isset(static::$is_json_pretty) && static::$is_json_pretty === true;
+		}
+
+		return json_encode($res, PHP::flagsForJson($pretty));
 	}
 }

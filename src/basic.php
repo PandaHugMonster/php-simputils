@@ -27,7 +27,6 @@ use spaf\simputils\models\StackLifo;
 use spaf\simputils\models\TimeDuration;
 use spaf\simputils\models\UrlObject;
 use spaf\simputils\PHP;
-use stdClass;
 
 /**
  * Please Die function
@@ -850,6 +849,11 @@ function with($obj, callable $callback): void {
 	PHP::with($obj, $callback);
 }
 
+#[Shortcut('PHP::str()')]
+function str(mixed $val): string {
+	return PHP::str($val);
+}
+
 #[Shortcut('PHP::int()')]
 function int(mixed $val): int {
 	return PHP::int($val);
@@ -865,12 +869,18 @@ function bool(mixed $val): bool {
 	return PHP::bool($val);
 }
 
-#[Shortcut('PHP::obj()')]
-function obj(mixed $val, $is_std_class = false): SimpleObject|stdClass {
-	return PHP::obj($val, $is_std_class);
-}
+//#[Shortcut('PHP::obj()')]
+//function obj(mixed $val, $is_std_class = false): SimpleObject|stdClass {
+//	return PHP::obj($val, $is_std_class);
+//}
 
 #[Shortcut('PHP::arr()')]
 function arr(mixed $val): array {
 	return PHP::arr($val);
 }
+
+#[Shortcut('PHP::json()')]
+function json(mixed $val, ?bool $pretty = null, bool $with_class = false): string {
+	return PHP::json($val, $pretty, $with_class);
+}
+

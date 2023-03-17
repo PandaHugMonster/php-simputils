@@ -9,6 +9,7 @@ namespace spaf\simputils;
 
 use ArrayAccess;
 use ArrayObject;
+use Closure;
 use Exception;
 use Generator;
 use Iterator;
@@ -45,18 +46,21 @@ use function intval;
 use function is_array;
 use function is_dir;
 use function is_null;
+use function is_numeric;
 use function is_object;
 use function is_resource;
+use function is_string;
 use function json_decode;
 use function json_encode;
 use function json_last_error;
 use function method_exists;
 use function ob_get_clean;
 use function ob_start;
-use function print_r;
 use function serialize;
+use function spl_object_id;
 use function str_contains;
 use function unserialize;
+use function var_dump;
 use const JSON_ERROR_NONE;
 
 
@@ -83,8 +87,10 @@ class PHP {
 	const STACK_LIFO = 'lifo';
 	const STACK_FIFO = 'fifo';
 
-	public static string $serialized_class_key_name = '#class';
-	public static string|int $serialization_mechanism = self::SERIALIZATION_TYPE_JSON;
+	static string $serialized_class_key_name = '#class';
+	static string|int $serialization_mechanism = self::SERIALIZATION_TYPE_JSON;
+	static bool $use_print_r_for_debug_output = false;
+	static bool $show_types_in_debug_output = false;
 
 	/**
 	 * @var bool Using Box object instead of array for the most of stuff related to "Objects"
@@ -92,18 +98,18 @@ class PHP {
 	 *
 	 * @see \spaf\simputils\traits\MetaMagic::toArray()
 	 */
-	public static bool $use_box_instead_of_array = true;
+	static bool $use_box_instead_of_array = true;
 
-	public static bool $allow_dying = true;
+	static bool $allow_dying = true;
 
 	/**
 	 * @var bool $refresh_php_info_env_vars If set, the PHP info object's env variables are
 	 *                                      refreshed when updated through `PHP::envSet()` or
 	 *                                      `env_set()`
 	 */
-	public static bool $refresh_php_info_env_vars = true;
+	static bool $refresh_php_info_env_vars = true;
 
-	public static function frameworkDir() {
+	static function frameworkDir() {
 		return __DIR__;
 	}
 
@@ -113,7 +119,7 @@ class PHP {
 	 * IMP  Always update version info before every release
 	 * @return Version|string
 	 */
-	public static function simpUtilsVersion(): Version|string {
+	static function simpUtilsVersion(): Version|string {
 		$class = static::redef(Version::class);
 		return new $class('1.1.4', 'SimpUtils');
 	}
@@ -165,7 +171,7 @@ class PHP {
 	 *      right after the "composer autoloader".
 	 *
 	 */
-	public static function init(null|array|Box|BasicInitConfig $args = null): BasicInitConfig {
+	static function init(null|array|Box|BasicInitConfig $args = null): BasicInitConfig {
 
 		$config = null;
 		if ($args instanceof BasicInitConfig) {
@@ -239,7 +245,7 @@ class PHP {
 		return static::$_cached_current_url;
 	}
 
-	public static function metaMagicSpell(string|object $ref, $spell, ...$args) {
+	static function metaMagicSpell(string|object $ref, $spell, ...$args) {
 		$spell = Str::removeStarting($spell, '___');
 		$spell = "___{$spell}";
 		if ((static::isClass($ref) || is_object($ref)) && method_exists($ref, '_metaMagic')) {
@@ -249,7 +255,7 @@ class PHP {
 		return null; // @codeCoverageIgnore
 	}
 
-	public static function getInitConfig(?string $name = null): ?BasicInitConfig {
+	static function getInitConfig(?string $name = null): ?BasicInitConfig {
 		return CodeBlocksCacheIndex::getInitBlock($name);
 	}
 
@@ -259,7 +265,7 @@ class PHP {
 	 * @return \spaf\simputils\generic\BasicInitConfig|null
 	 */
 	#[Shortcut('static::getInitConfig()')]
-	public static function ic(?string $name = null): ?BasicInitConfig {
+	static function ic(?string $name = null): ?BasicInitConfig {
 		return static::getInitConfig($name);
 	}
 
@@ -276,7 +282,7 @@ class PHP {
 	 *      whether it wants to be a string, an array or a number).
 	 *
 	 */
-	public static function serialize(mixed $data, ?int $enforced_type = null): ?string {
+	static function serialize(mixed $data, ?int $enforced_type = null): ?string {
 		if (is_resource($data))
 			throw new SerializationProblem(
 				'Resources cannot be serialized through PHP default mechanisms'
@@ -318,7 +324,7 @@ class PHP {
 	 * @return mixed
 	 * @throws \ReflectionException Reflection related exceptions
 	 */
-	public static function deserialize(
+	static function deserialize(
 		?string $str,
 		?string $class = null,
 		?int $enforced_type = null
@@ -394,7 +400,7 @@ class PHP {
 	 *
 	 * @return bool
 	 */
-	public static function classUsesTrait(object|string $class_ref, string $trait_ref): bool {
+	static function classUsesTrait(object|string $class_ref, string $trait_ref): bool {
 		foreach (class_parents($class_ref) as $cp) {
 			if (static::_iterateTraitsOver($cp, $trait_ref)) {
 				return true;
@@ -426,7 +432,7 @@ class PHP {
 	 *
 	 * @return Version|string
 	 */
-	public static function version(): Version|string {
+	static function version(): Version|string {
 		$class = static::redef(Version::class);
 		return new $class(phpversion(), 'PHP');
 	}
@@ -436,7 +442,7 @@ class PHP {
 	 *
 	 * @return string
 	 */
-	public static function simpUtilsLicense(): string {
+	static function simpUtilsLicense(): string {
 		return 'MIT';
 	}
 
@@ -445,7 +451,7 @@ class PHP {
 	 *
 	 * @return \spaf\simputils\models\PhpInfo|array|string
 	 */
-	public static function info(bool $use_fresh = false): PhpInfo|array|string {
+	static function info(bool $use_fresh = false): PhpInfo|array|string {
 		if ($use_fresh || empty(CommonMemoryCacheIndex::$default_phpinfo_object)) {
 			$class = static::redef(PhpInfo::class);
 			CommonMemoryCacheIndex::$default_phpinfo_object = new $class();
@@ -460,7 +466,7 @@ class PHP {
 	 *
 	 * @return string
 	 */
-	public static function type(mixed $var): string {
+	static function type(mixed $var): string {
 		$res = is_object($var)?get_class($var):gettype($var);
 		if ($res === 'double') {
 			return 'float';
@@ -476,7 +482,7 @@ class PHP {
 	 *
 	 * @return bool
 	 */
-	public static function isClass(mixed $class_or_not): bool {
+	static function isClass(mixed $class_or_not): bool {
 		if (Str::is($class_or_not)) {
 			if (class_exists($class_or_not, true)) {
 				return true;
@@ -501,7 +507,7 @@ class PHP {
 	 *
 	 * @return bool
 	 */
-	public static function isClassIn(
+	static function isClassIn(
 		string|object $item,
 		string|object|array $of_item,
 		bool $disallow_objects = false
@@ -578,7 +584,7 @@ class PHP {
 	 *
 	 * @return bool
 	 */
-	public static function classContains(
+	static function classContains(
 		string|object $of_item,
 		string|object $item,
 		bool $disallow_objects = false
@@ -597,7 +603,7 @@ class PHP {
 	 * @return object
 	 * @throws \ReflectionException Reflection exception
 	 */
-	public static function createDummy(string|object $class): object {
+	static function createDummy(string|object $class): object {
 		if (is_object($class)) {
 			$class = $class::class;
 		}
@@ -619,7 +625,7 @@ class PHP {
 	 * @return bool
 	 * @throws \ReflectionException Temporary
 	 */
-	public static function isArrayCompatible(mixed $var): bool {
+	static function isArrayCompatible(mixed $var): bool {
 		if (is_array($var)) {
 			return true;
 		}
@@ -675,16 +681,102 @@ class PHP {
 		}
 	}
 
-	public static function pr(...$args): void {
-		$callback = CodeBlocksCacheIndex::getRedefinition(InitConfig::REDEF_PR);
-		if ($callback && $callback !== InitConfig::REDEF_PR) {
-			$callback(...$args);
-		} else {
-			foreach ($args as $arg) {
-				print_r($arg);
-				echo "\n";
+	private static function _debugOutputObjRecurent($arg, int $level = 1) {
+		$type = static::type($arg);
+		$obj_id = spl_object_id($arg);
+		$res = "[\t// {$type} #{$obj_id} \n";
+		foreach ($arg->toArray() as $t => $m) {
+			if (is_array($m)) {
+				$m = static::_debugOutputArrayRecurent($m, $level + 1);
+			} else if (is_string($m)) {
+				$m = '"'.$m.'"';
 			}
+			$tabs = Str::mul("\t", $level);
+			if (is_string($t)) {
+				$t = '"'.$t.'"';
+			}
+			$res .= "{$tabs}{$t} => {$m},\n";
 		}
+		$tabs = Str::mul("\t", $level - 1);
+		$res .= "{$tabs}]";
+		return $res;
+	}
+
+	private static function _debugOutputArrayRecurent($arg, int $level = 1) {
+		$res = "[\n";
+		foreach ($arg as $t => $m) {
+			if (is_array($m)) {
+				$m = static::_debugOutputArrayRecurent($m, $level + 1);
+			} else if (is_string($m)) {
+				$m = '"'.$m.'"';
+			}
+			$tabs = Str::mul("\t", $level);
+			if (is_string($t)) {
+				$t = '"'.$t.'"';
+			}
+			$res .= "{$tabs}{$t} => {$m},\n";
+		}
+		$tabs = Str::mul("\t", $level - 1);
+		$res .= "{$tabs}]";
+		return $res;
+	}
+
+	/**
+	 * Outputs values in debug-mode
+	 *
+	 * It's custom implementation of `\print_r()`, due to bugs in displaying
+	 * php native-inherited objects like `DateTime`, etc.
+	 *
+	 * @param mixed ...$args
+	 *
+	 * @return void
+	 */
+	protected static function debugOutput(...$args): void {
+		foreach ($args as $k => $arg) {
+			if (static::$use_print_r_for_debug_output) {
+//				print_r($arg);
+				var_dump($arg);
+			} else {
+				static::_decisionMakingDebug($k, $arg);
+			}
+			echo "\n";
+		}
+	}
+
+	static private function _decisionMakingDebug($k, $arg) {
+		$type = PHP::type($arg);
+		if ($type === 'string') {
+			$arg = '"'.$arg.'"';
+		}
+		if ($type === 'boolean') {
+			$arg = $arg?'true':'false';
+		}
+		$k = !is_numeric($k)?"/* {$k} */":'';
+
+		$type_display = '';
+		if (static::$show_types_in_debug_output) {
+			$type_display = "({$type}) \t";
+		}
+
+		if (is_object($arg)) {
+			// echo $type;
+			$arg = static::_debugOutputObjRecurent($arg);
+			echo "{$arg}; \t{$k}";
+		} else if (is_array($arg)) {
+			$arg = static::_debugOutputArrayRecurent($arg);
+			echo "{$type_display}{$arg}; \t{$k}";
+		} else {
+			echo "{$type_display}{$arg}; \t{$k}";
+		}
+	}
+
+	static function pr(...$args): void {
+		$callback = CodeBlocksCacheIndex::getRedefinition(InitConfig::REDEF_PR);
+		if ($callback === InitConfig::REDEF_PR) {
+			$callback = Closure::fromCallable([PHP::class, 'debugOutput']);
+		}
+
+		$callback(...$args);
 	}
 
 	/**
@@ -703,7 +795,7 @@ class PHP {
 	 *
 	 * @return string|null
 	 */
-	public static function prstr(mixed ...$args): ?string {
+	static function prstr(mixed ...$args): ?string {
 		if (empty($args)) {
 			return null;
 		}
@@ -729,12 +821,12 @@ class PHP {
 	 *
 	 * @return Box|array
 	 */
-	public static function box(mixed $array = null, mixed ...$merger): Box|array {
+	static function box(mixed $array = null, mixed ...$merger): Box|array {
 		$class = static::redef(Box::class);
 		return static::_boxAndRo($class, $array, $merger);
 	}
 
-	public static function bro(mixed $array = null, mixed ...$merger): Box|array {
+	static function bro(mixed $array = null, mixed ...$merger): Box|array {
 		$class = static::redef(BoxRO::class);
 		return static::_boxAndRo($class, $array, $merger);
 	}
@@ -798,7 +890,7 @@ class PHP {
 	 * TODO Improve stack processing, for example if Stack provided, then do not create a new one
 	 * @return \spaf\simputils\models\StackFifo|\spaf\simputils\models\StackLifo
 	 */
-	public static function stack(
+	static function stack(
 		Box|StackLifo|StackFifo|array|null $items = null,
 		mixed ...$merger_and_conf
 	): StackFifo|StackLifo {
@@ -824,7 +916,7 @@ class PHP {
 	 * @param Box|array $items Arguments that will be elements of the Set
 	 *
 	 */
-	public static function set(Box|array|null $items = null): Set {
+	static function set(Box|array|null $items = null): Set {
 		$class = static::redef(Set::class);
 		$items = $items ?? [];
 		return new $class($items);
@@ -841,7 +933,7 @@ class PHP {
 	 * @return array|Box
 	 */
 	#[Shortcut('\$_ENV')]
-	public static function allEnvs(): array|Box {
+	static function allEnvs(): array|Box {
 		$class_box = static::redef(Box::class);
 		return new $class_box($_ENV ?? CommonMemoryCacheIndex::$initial_get_env_state ?? []);
 	}
@@ -859,7 +951,7 @@ class PHP {
 	 *
 	 * @return mixed Returns value, or null if does not exist
 	 */
-	public static function env(?string $name = null, mixed $default = null): mixed {
+	static function env(?string $name = null, mixed $default = null): mixed {
 		return $_ENV[$name] ?? $default;
 	}
 
@@ -886,7 +978,7 @@ class PHP {
 	 *                         "special keys" or even "secrets".
 	 * @see static::info()
 	 */
-	public static function envSet(string $name, mixed $value, bool $override = false): void {
+	static function envSet(string $name, mixed $value, bool $override = false): void {
 		if (empty($_ENV[$name]) || $override) {
 			$_ENV[$name] = $value;
 			if (static::$refresh_php_info_env_vars) {
@@ -904,13 +996,13 @@ class PHP {
 	 *
 	 * @return bool Returns true if console, returns false if web
 	 */
-	public static function isConsole(): bool {
+	static function isConsole(): bool {
 		$sapi_value = Str::lower(static::info()->sapi_name);
 		return str_contains($sapi_value, 'cli');
 	}
 
 	#[Shortcut('PHP::isConsole()')]
-	public static function isCLI(): bool {
+	static function isCLI(): bool {
 		return static::isConsole();
 	}
 
@@ -973,7 +1065,7 @@ class PHP {
 	 * @return ?string Returns the final class name string that could be used for creation
 	 *                 of objects, and usage of static methods.
 	 */
-	public static function redef(string $target_class, string $hint = null): ?string {
+	static function redef(string $target_class, string $hint = null): ?string {
 		if (!static::isClass($target_class)) {
 			throw new RedefWrongReference(
 				"String \"{$target_class}\" is not a valid class reference"
@@ -1001,7 +1093,7 @@ class PHP {
 	 * @codeCoverageIgnore
 	 * @return void
 	 */
-	public static function setPropertyValidator(string $key, string $class) {
+	static function setPropertyValidator(string $key, string $class) {
 		CommonMemoryCacheIndex::$property_validators[$key] = $class;
 	}
 
@@ -1011,7 +1103,7 @@ class PHP {
 	 * @codeCoverageIgnore
 	 * @return mixed|string
 	 */
-	public static function getPropertyValidator(string $key) {
+	static function getPropertyValidator(string $key) {
 		return CommonMemoryCacheIndex::$property_validators[$key];
 	}
 
@@ -1021,7 +1113,7 @@ class PHP {
 	 * @codeCoverageIgnore
 	 * @return void
 	 */
-	public static function setPropertyValidatorLevel(int $val) {
+	static function setPropertyValidatorLevel(int $val) {
 		CommonMemoryCacheIndex::$property_validators_enabled = $val;
 	}
 
@@ -1029,7 +1121,7 @@ class PHP {
 	 * @codeCoverageIgnore
 	 * @return int
 	 */
-	public static function getPropertyValidatorLevel(): int {
+	static function getPropertyValidatorLevel(): int {
 		return CommonMemoryCacheIndex::$property_validators_enabled;
 	}
 
@@ -1078,7 +1170,7 @@ class PHP {
 		return static::$_get;
 	}
 
-	public static function classShortName(string $val): string {
+	static function classShortName(string $val): string {
 		$class_reflection = new ReflectionClass($val);
 		return $class_reflection->getShortName();
 	}

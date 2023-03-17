@@ -86,7 +86,8 @@ SOFTWARE.
 
 ### 1.1.5
 
-*
+* Implemented ticket #97 - Custom Debug-Output Functionality
+  * [Description and Rationale](docs/description-and-rationale.md)
 
 ### 1.1.4
 

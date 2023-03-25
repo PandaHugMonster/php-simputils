@@ -138,6 +138,7 @@ previous function):
 * No possibility for code-highlight in `.md` documents (github, gitlab, etc.),
   or plain text display, or "php" but the highlight then is more random, than useful!
 
+
 ### Requirements for the new way
 To resolve all previously mentioned issues the new functionality should be implemented,
 applying the following requirements:
@@ -148,10 +149,14 @@ applying the following requirements:
     * Should be easily usable for testing/mocking purposes
 3. Instead of detecting Infinite Recursion, reference to already output instance 
    must be represented
+   * Non-object references cannot be detected at this point.
 4. Enable/disable type notation in output
 5. Even with disabled explicit type notation, the clear understanding of type
    must be easily inferred from the value (quotes for strings, null, etc.)
-6. Non-existing and non initialized variables/fields should be displayed as completely empty.
-   * In case if explicit type annotation is on, then non-existing type `undefined` must be
-     displayed.
+6. Non-existing and non initialized variables/fields should be displayed as null.
+   * type for null will be always omitted
 7. 
+
+
+### Proposal
+

@@ -765,6 +765,10 @@ class PHP {
 		} else if (is_array($arg)) {
 			$arg = static::_debugOutputArrayRecurent($arg);
 			echo "{$type_display}{$arg}; \t{$k}";
+		} else if (is_null($arg)) {
+			$arg = 'null';
+			$type_display = '';
+			echo "{$type_display}{$arg}; \t{$k}";
 		} else {
 			echo "{$type_display}{$arg}; \t{$k}";
 		}

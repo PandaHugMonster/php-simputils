@@ -2,11 +2,11 @@
 
 namespace spaf\simputils\traits;
 
-use Exception;
 use spaf\simputils\attributes\Renderer;
 use spaf\simputils\Attrs;
 use spaf\simputils\components\RenderedWrapper;
 use spaf\simputils\PHP;
+use TypeError;
 use function is_null;
 
 /**
@@ -30,9 +30,11 @@ trait StaticRendererTrait {
 		foreach ($methods as $method) {
 			$res = $method(...$params);
 			if ($res instanceof RenderedWrapper) {
-				return $res;
+				if (!$res->is_disabled) {
+					return $res;
+				}
 			} else if (!is_null($res)) {
-				throw new Exception(
+				throw new TypeError(
 					'Renderers must return either RenderedWrapper object, or null'
 				);
 			}

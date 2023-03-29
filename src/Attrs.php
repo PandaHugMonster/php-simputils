@@ -7,6 +7,7 @@ use Exception;
 use ReflectionClass;
 use ReflectionObject;
 use spaf\simputils\models\Box;
+use TypeError;
 use function class_exists;
 use function is_object;
 use function is_string;
@@ -29,12 +30,12 @@ class Attrs {
 		} else if (is_string($instance) && class_exists($instance)) {
 			$reflection = new ReflectionClass($instance);
 		} else {
-			throw new Exception(
+			throw new TypeError(
 				'$instance is not Object or Class String or Class does not exist'
 			);
 		}
 		if (!is_string($attr) || !class_exists($attr)) {
-			throw new Exception('$attr is not Class String or Class does not exist');
+			throw new TypeError('$attr is not Class String or Class does not exist');
 		}
 		$methods = $reflection->getMethods();
 		$res = PHP::box();

@@ -36,7 +36,13 @@ trait StaticRendererTrait {
 			$method_reflection->setAccessible(true);
 			$method = Closure::fromCallable([$instance->name, $method_reflection->name]);
 
-			$res = $method(...$params);
+			try {
+				$res = $method(...$params);
+			}
+			catch (TypeError) {
+				$res = null;
+			}
+
 			if ($res instanceof RenderedWrapper) {
 				if (!$res->is_disabled) {
 					return $res;
@@ -57,8 +63,8 @@ trait StaticRendererTrait {
 		return $res;
 	}
 
-//	#[Renderer]
-	static private function _defaultRenderer($arg = null) {
-		return (new RenderedWrapper($arg));
+	#[Renderer]
+	static private function defaultRenderer($arg = null): RenderedWrapper {
+		return new RenderedWrapper($arg);
 	}
 }

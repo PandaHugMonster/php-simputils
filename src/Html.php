@@ -1,9 +1,12 @@
 <?php
+/** @noinspection PhpMissingParamTypeInspection */
 
 namespace spaf\simputils;
 
+use spaf\simputils\attributes\Renderer;
 use spaf\simputils\components\RenderedWrapper;
 use spaf\simputils\models\Box;
+use spaf\simputils\models\DateTime;
 use spaf\simputils\traits\BaseHtmlTrait;
 use spaf\simputils\traits\StaticRendererTrait;
 
@@ -42,6 +45,25 @@ class Html {
 	 */
 	static function span(string $content, Box|array $attrs = []) {
 		return static::tag('span', $content, $attrs);
+	}
+
+	/**
+	 * TIME tag
+	 *
+	 * @param DateTime $dt
+	 * @param array    $attrs
+	 *
+	 * @return RenderedWrapper|string
+	 */
+	#[Renderer]
+	static function dt(DateTime $dt, $attrs = []) {
+		if (!$dt instanceof DateTime) {
+			return null;
+		}
+		$attrs = PHP::box($attrs);
+		$attrs['datetime'] = $dt->format('c');
+
+		return static::tag('time', "{$dt}", $attrs);
 	}
 
 }

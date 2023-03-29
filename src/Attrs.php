@@ -5,6 +5,7 @@ namespace spaf\simputils;
 use Closure;
 use Exception;
 use ReflectionClass;
+use ReflectionMethod;
 use ReflectionObject;
 use spaf\simputils\models\Box;
 use TypeError;
@@ -25,6 +26,21 @@ class Attrs {
 	 * @throws Exception
 	 */
 	static function collectMethods(mixed $instance, string $attr): Box|array {
+		$res = PHP::box();
+		$reflections = static::collectMethodReflections($instance, $attr);
+
+		foreach ($reflections as $reflection_method) {
+			/** @var ReflectionMethod $reflection_method */
+			$res->append(Closure::fromCallable([
+				$reflection_method->getClosureCalledClass(),
+				$reflection_method->name,
+			]));
+		}
+
+		return $res;
+	}
+
+	static function collectMethodReflections(mixed $instance, string $attr): Box|array {
 		if (is_object($instance)) {
 			$reflection = new ReflectionObject($instance);
 		} else if (is_string($instance) && class_exists($instance)) {
@@ -42,9 +58,10 @@ class Attrs {
 		foreach ($methods as $reflection_method) {
 			$is = $reflection_method->getAttributes($attr);
 			if ($is) {
-				$res->append(Closure::fromCallable([$instance, $reflection_method->name]));
+				$res->append($reflection_method);
 			}
 		}
+
 		return $res;
 	}
 

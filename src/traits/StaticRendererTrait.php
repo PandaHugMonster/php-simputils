@@ -2,6 +2,8 @@
 
 namespace spaf\simputils\traits;
 
+use Closure;
+use ReflectionMethod;
 use spaf\simputils\attributes\Renderer;
 use spaf\simputils\Attrs;
 use spaf\simputils\components\RenderedWrapper;
@@ -26,8 +28,14 @@ trait StaticRendererTrait {
 	 */
 	static function render(mixed ...$params): string {
 		$params = PHP::box($params);
-		$methods = Attrs::collectMethods(static::class, Renderer::class);
-		foreach ($methods as $method) {
+		$method_reflections = Attrs::collectMethodReflections(static::class, Renderer::class);
+		foreach ($method_reflections as $method_reflection) {
+			/** @var ReflectionMethod $method_reflection */
+
+			$instance = $method_reflection->getDeclaringClass();
+			$method_reflection->setAccessible(true);
+			$method = Closure::fromCallable([$instance->name, $method_reflection->name]);
+
 			$res = $method(...$params);
 			if ($res instanceof RenderedWrapper) {
 				if (!$res->is_disabled) {
@@ -38,6 +46,8 @@ trait StaticRendererTrait {
 					'Renderers must return either RenderedWrapper object, or null'
 				);
 			}
+
+			$method_reflection->setAccessible(false);
 		}
 		$res = '';
 		foreach ($params as $param) {
@@ -47,4 +57,8 @@ trait StaticRendererTrait {
 		return $res;
 	}
 
+//	#[Renderer]
+	static private function _defaultRenderer($arg = null) {
+		return (new RenderedWrapper($arg));
+	}
 }

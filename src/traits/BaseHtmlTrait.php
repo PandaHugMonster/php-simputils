@@ -3,6 +3,7 @@
 namespace spaf\simputils\traits;
 
 use spaf\simputils\components\RenderedWrapper;
+use spaf\simputils\models\Box;
 use function spaf\simputils\basic\bx;
 use function str_replace;
 
@@ -12,10 +13,24 @@ use function str_replace;
 trait BaseHtmlTrait {
 	use StaticRendererTrait;
 
-	static function tag($tag, $value = null, $attrs = []): string|RenderedWrapper {
+	/**
+	 * Really simple html-tags generator
+	 *
+	 * @param string    $tag   Tag name
+	 * @param ?string   $value content value
+	 * @param array|Box $attrs HTML Attributes for the tag
+	 *
+	 * @return string|RenderedWrapper
+	 */
+	static function tag(
+		string $tag,
+		string $value = null,
+		array|Box $attrs = []
+	): string|RenderedWrapper {
 		$attrs = bx($attrs)->stretched(separator: ' ', value_wrap: function ($value) {
 			$value = str_replace("\\\"", "\"", $value);
 			$value = str_replace("\"", "\\\"", $value);
+
 			return "\"{$value}\"";
 		});
 

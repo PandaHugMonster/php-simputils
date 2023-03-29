@@ -23,6 +23,7 @@ class RenderedWrapper extends SimpleObject {
 
 	function disabled($value) {
 		$this->_is_disabled = $value;
+		return $this;
 	}
 
 	public function __toString(): string {

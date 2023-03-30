@@ -7,7 +7,7 @@ use spaf\simputils\generic\SimpleObject;
 
 /**
  * @property-read mixed $value
- * @property-read bool $is_disabled
+ * @property-read bool  $is_disabled
  */
 class RenderedWrapper extends SimpleObject {
 
@@ -21,8 +21,16 @@ class RenderedWrapper extends SimpleObject {
 		$this->_value = $rendered_value;
 	}
 
+	/**
+	 * @codeCoverageIgnore
+	 *
+	 * @param $value
+	 *
+	 * @return $this
+	 */
 	function disabled($value) {
 		$this->_is_disabled = $value;
+
 		return $this;
 	}
 

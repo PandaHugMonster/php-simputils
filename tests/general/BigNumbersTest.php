@@ -1,6 +1,5 @@
 <?php /** @noinspection ALL */
 
-
 use PHPUnit\Framework\TestCase;
 use spaf\simputils\Boolean;
 use spaf\simputils\models\BigNumber;
@@ -28,6 +27,7 @@ use function spaf\simputils\basic\env;
  * @uses \spaf\simputils\traits\SimpleObjectTrait::__set
  * @uses \spaf\simputils\traits\SimpleObjectTrait::getAllTheLastMethodsAndProperties
  * @uses \spaf\simputils\traits\SimpleObjectTrait::_simpUtilsGetValidator
+ * @uses \spaf\simputils\components\normalizers\BooleanNormalizer
  */
 class BigNumbersTest extends TestCase {
 

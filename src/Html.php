@@ -57,13 +57,8 @@ class Html {
 	 */
 	#[Renderer]
 	static function dt(DateTime $dt, $attrs = []) {
-		if (!$dt instanceof DateTime) {
-			return null;
-		}
 		$attrs = PHP::box($attrs);
 		$attrs['datetime'] = $dt->format('c');
-
 		return static::tag('time', "{$dt}", $attrs);
 	}
-
 }

@@ -2,7 +2,6 @@
 
 namespace spaf\simputils\traits;
 
-use Closure;
 use ReflectionMethod;
 use spaf\simputils\attributes\Renderer;
 use spaf\simputils\Attrs;
@@ -34,10 +33,9 @@ trait StaticRendererTrait {
 
 			$instance = $method_reflection->getDeclaringClass();
 			$method_reflection->setAccessible(true);
-			$method = Closure::fromCallable([$instance->name, $method_reflection->name]);
 
 			try {
-				$res = $method(...$params);
+				$res = $method_reflection->invoke($instance, ...$params);
 			}
 			catch (TypeError) {
 				$res = null;
@@ -48,9 +46,9 @@ trait StaticRendererTrait {
 					return $res;
 				}
 			} else if (!is_null($res)) {
-				throw new TypeError(
+				throw new TypeError(//@codeCoverageIgnore
 					'Renderers must return either RenderedWrapper object, or null'
-				);
+				);//@codeCoverageIgnore
 			}
 
 			$method_reflection->setAccessible(false);

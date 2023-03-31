@@ -12,6 +12,13 @@ use function is_null;
 
 /**
  * Static renderer trait (for static helpers)
+ *
+ * Does rendering based on marked static methods with {@see Renderer}
+ *
+ * Rendering functionality allows overloading, so multiple methods with different
+ * set of parameters and types, or if method does not return `null`.
+ *
+ * `TypeError` exception or returned `null` will cause the renderer method to be skipped.
  */
 trait StaticRendererTrait {
 
@@ -24,6 +31,7 @@ trait StaticRendererTrait {
 	 * @return string
 	 * @throws \Exception
 	 * @see Renderer
+	 * @see RenderedWrapper
 	 */
 	static function render(mixed ...$params): string {
 		$params = PHP::box($params);

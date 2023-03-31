@@ -9,9 +9,11 @@ use spaf\simputils\components\RenderedWrapper;
 use spaf\simputils\Html;
 use spaf\simputils\models\DateTime;
 use spaf\simputils\models\Version;
+use spaf\simputils\traits\StaticRendererTrait;
 use TypeError;
 use function is_object;
 use function is_string;
+use function spaf\simputils\basic\bx;
 use function spaf\simputils\basic\ts;
 
 class TestingCliRenderingClass extends Html {
@@ -19,6 +21,7 @@ class TestingCliRenderingClass extends Html {
 	#[Renderer]
 	public static function dt(DateTime $value, $args = []): ?RenderedWrapper {
 		$value = parent::dt($value, $args);
+
 		return new RenderedWrapper("This is version: {$value}");
 	}
 
@@ -41,7 +44,20 @@ class TestingCliRenderingClass extends Html {
 	}
 }
 
+class AnotherRenderingClass {
+	use StaticRendererTrait;
 
+	#[Renderer]
+	static function incompatibleRenderer($arg1, $arg2, $arg3, $arg4) {
+		return new RenderedWrapper("uncompatible-renderer: {$arg1}, {$arg2}, {$arg3}, {$arg4}");
+	}
+
+	#[Renderer]
+	static function compatibleRenderer(...$args) {
+		$args = bx($args);
+		return new RenderedWrapper("compatible-renderer: {$args}");
+	}
+}
 
 /**
  * @covers \spaf\simputils\attributes\Renderer
@@ -79,7 +95,7 @@ class RenderersTest extends TestCase {
 			[
 				'This is version: '
 				.'<time datetime="2023-01-01T00:00:00+00:00">2023-01-01 00:00:00</time>',
-				ts('2023-01-01')
+				ts('2023-01-01'),
 			],
 			['This is version: 1.2.3-DEV', new Version('1.2.3DEV')],
 			['Just a string: BEBEBE', 'BEBEBE'],
@@ -89,6 +105,7 @@ class RenderersTest extends TestCase {
 
 	/**
 	 * @dataProvider dataProviderMain
+	 *
 	 * @param $expected
 	 * @param $value
 	 *
@@ -112,6 +129,20 @@ class RenderersTest extends TestCase {
 
 		$this->expectException(TypeError::class);
 		$r = Html::dt('Test');
+	}
+
+	function testCompatbileIncompatibles() {
+		$r = AnotherRenderingClass::render('only first arg');
+		$this->assertEquals('compatible-renderer: ["only first arg"]', $r);
+
+		$r = AnotherRenderingClass::render('only first arg', 2);
+		$this->assertEquals('compatible-renderer: ["only first arg","2"]', $r);
+
+		$r = AnotherRenderingClass::render('only first arg', 2, true);
+		$this->assertEquals('compatible-renderer: ["only first arg","2","1"]', $r);
+
+		$r = AnotherRenderingClass::render('now', 'is', 'uncompatible', 'renderer');
+		$this->assertEquals('incompatible-renderer: now, is, uncompatible, renderer', $r);
 	}
 
 }

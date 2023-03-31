@@ -255,9 +255,9 @@ trait PropertiesTrait {
 
 		if (!empty($sub)) {
 			if ($sub === 'read-only') {
-				throw new PropertyIsReadOnly(
-					'Property '.$name.' of "'.$sub.'" access'
-				);
+				throw new PropertyIsReadOnly(//@codeCoverageIgnore
+					'Property '.$name.' of "'.$sub.'" access' // @codeCoverageIgnore
+				);//@codeCoverageIgnore
 			} else if ($sub === 'write-only') {
 				throw new PropertyIsWriteOnly(
 					'Property '.$name.' of "'.$sub.'" access'
@@ -297,7 +297,7 @@ trait PropertiesTrait {
 					$class = $t->getName();
 
 					if ($class === 'mixed') {
-						return null;
+						return null; // @codeCoverageIgnore
 					}
 
 					if (empty($validators[$class])) {
@@ -399,7 +399,7 @@ trait PropertiesTrait {
 				}
 
 				if ($attr->getName() === 'ReturnTypeWillChange') {
-					continue;
+					continue; //@codeCoverageIgnore
 				}
 
 				$attr_instance = $attr->newInstance();

@@ -7,15 +7,12 @@ https://bank.gov.ua/en/news/all/natsionalniy-bank-vidkriv-spetsrahunok-dlya-zbor
 -----
 -----
 
-
 # SimpUtils
 
 Those badges are outdated for now :(
 
 [![Build Status](https://app.travis-ci.com/PandaHugMonster/php-simputils.svg?branch=main)](https://app.travis-ci.com/PandaHugMonster/php-simputils)
 [![codecov](https://codecov.io/gh/PandaHugMonster/php-simputils/branch/main/graph/badge.svg)](https://codecov.io/gh/PandaHugMonster/php-simputils)
-
-
 
 **SimpUtils** is a micro-framework that provides really simple and lightweight tools
 for development and prototyping. Additionally there are tools for comfortable and efficient
@@ -56,7 +53,12 @@ SOFTWARE.
 
 ----
 
+## Changelog
+
+[Changelog](docs/changelog.md)
+
 ## Important notes
+
 1. Currently JSON serialization and deserialization does not work properly.
    Please do not rely on it for now! **IMPORTANT!**
    When fix for this problem comes, and you are using current logic - you might get
@@ -72,162 +74,6 @@ SOFTWARE.
 2. Starting from the release 1.1.6 fixed the bug with timezones indirect params (this
    partially changes the logic, but initial logic before that release was broken).
 
-## Changelog
-
-### 1.1.6
-
-* Implemented extensive PHPDOC with examples to `\spaf\simputils\basic` (in progress)
-* Fixed ticket #116 (Weird bug of "tz" on DateTime)
-* Fixed bug with incorrect interpretation of TZ parameter
-  in `\spaf\simputils\DT::normalize`. Previously `false` and `true` params for `$tz`
-  were returning incorrect values.
-
-[//]: # (FIX   Don't forget to implement proper tests for the fixed timezone machanics)
-
-### 1.1.5
-
-*
-
-### 1.1.4
-
-* Fixed the ".env" autoload respect of the "working_dir" which was not working
-
-### 1.1.3
-
-* Implemented method `\spaf\simputils\models\Box::batch()` that allows to easily export items
-  of specified keys to the local variable scope
-* Implemented methods `setFromData()` and meta-magic methods `___serialize()` and
-  `___deserialize()` to fix PHP native serialization/deserialization for the
-  following classes:
-    * `\spaf\simputils\models\Version`
-    * `\spaf\simputils\models\UrlObject`
-    * `\spaf\simputils\models\Time`
-    * `\spaf\simputils\models\L10n`
-    * `\spaf\simputils\models\IPv4Range`
-    * `\spaf\simputils\models\IPv4`
-    * `\spaf\simputils\models\File`
-    * `\spaf\simputils\models\Dir`
-    * `\spaf\simputils\models\DateTimeZone`
-    * `\spaf\simputils\models\DateTime`
-    * `\spaf\simputils\models\DatePeriod`
-    * `\spaf\simputils\models\DateInterval`
-    * `\spaf\simputils\models\Date`
-    * `\spaf\simputils\models\DataUnit`
-    * `\spaf\simputils\models\BigNumber`
-* Code Sniffer is removed from the project (got really annoyed, and it does not work correctly)
-* `\spaf\simputils\models\Time` and `\spaf\simputils\models\Date` have been refactored a bit.
-  The caching mechanics has been fixed.
-    * Additionally have been added the properties for `\spaf\simputils\models\Date`
-      and `\spaf\simputils\models\Time` from the target `DateTime` object
-    * `\spaf\simputils\models\Date` and `\spaf\simputils\models\Time` result of `for_system`
-      now returns the whole DateTime string value of UTC, not only the date or time component.
-* Implemented `\spaf\simputils\generic\BasicExecEnvHandler` Execution-Environment (aka stages),
-  besides that implemented `\spaf\simputils\generic\BasicInitConfig::@$ee` property that
-  automatically will be assigned during `PHP::init()`, the object or params could be
-  adjusted in the incoming config, example:
-  ```php
-     $ic = PHP::init([
-       'l10n' => 'AT',
-       //	'ee' => new DummyExecEnvHandler(false, ee_name: 'TOO'),
-       'ee' => [
-           'ee' => 'test3-local',
-           'is_hierarchical' => true,
-           'permitted_values' => [
-               'test1',
-               'test2',
-               'test3',
-               'test4',
-           ]
-       ]
-     ]);
-     pd("{$ic->ee}", Boolean::to($ic->ee->is('test4-local')));
-  ```
-  For now not much of documentation is provided, but you always can define your own
-  implementation of the class like `\spaf\simputils\components\execenvs\DummyExecEnvHandler`
-  to handle your Exec-Env/stages implementation! More documentation and example will follow.
-* Additionally implemented `\spaf\simputils\components\execenvs\DummyExecEnvHandler`
-  which is a dummy handler that just returns the predefined value. Should not be used
-  on production.
-* Implemented `\spaf\simputils\exceptions\ExecEnvException` exception for Exec-Env cases
-* Implemented `\spaf\simputils\models\Box::popFromStart()` and
-  `\spaf\simputils\models\Box::popFromEnd()` methods to get value from the box, return
-  and remove it from the box.
-* Implemented tests for:
-    * Exec-Env
-    * Box batch functionality
-
-### 1.1.2
-
-* Implemented `\spaf\simputils\basic\with` functionality of a transactional style like
-  python `with` command. Really useful for DB and other connection types.
-
-### 1.1.1
-
-* Implemented `\spaf\simputils\components\normalizers\BoxNormalizer` To normalize simple
-  arrays when assigned to Properties
-
-### 1.1.0
-
-* Implemented `FS::require()`, `FS::include()` and `FS::data()`
-* Implemented `PHP::listOfExecPhpFileExtensions()`, `PHP::listOfExecPhpMimeTypes()`
-* Now array/box argument for `File` constructor is allowed (like for `FS::locate()`)
-* Added support of `FS::locate()` alike array/box of path components for `fl()`,
-  `FS::file()` and `File`. So now `fl(['part1', 'part2', 'file.txt'])` will make a file
-  object with path: "{working-dir}/part1/part2/file.txt"
-* In `BasicInitConfig` introduced component-aware `$allowed_data_dirs` for specifying
-  allowed data-dirs
-* Introduced new exceptions: `DataDirectoryIsNotAllowed`, `IPParsingException`
-* Implemented the shortcut for the "InitConfig". Now instead of
-  `$config = PHP::getInitConfig()` you can use a shortcut `$config = ic()`
-* Fixed some of the logic related to "l10n" and "default_tz" more you can find here:
-  [Nuances of l10n and default_tz](docs/notes.md#Nuances-of-l10n-and-default_tz)
-* Implemented list of **days of the week**: `\spaf\simputils\DT::getListOfDaysOfWeek()`
-* Implemented list of **months**: `\spaf\simputils\DT::getListOfMonths()`
-* Incorporated all the previous minor-version patches
-    * To set the timezone for "DateTime" object now can be done by "strings" instead of
-      creation of "DateTimeZone" object every single time
-    * Other minimal changes
-* Implemented trait `\spaf\simputils\traits\ComparablesTrait` which enables to implement
-  common set of comparing functionality (`equalsTo`, `greaterThan`, `lessThan`,
-  `greaterThanEqual`, `lessThanEqual`) and their shortcuts (`e`, `gt`, `lt`,
-  `gte`, `lte`). Currently used in `Version` and `IPv4` models
-* Implemented `\spaf\simputils\models\IPv4` and `\spaf\simputils\models\IPv4Range` models
-  with minimal but nice functionality
-* Implemented `\spaf\simputils\models\UrlObject` model
-  and `\spaf\simputils\models\urls\processors\HttpProtocolProcessor`
-    * The most of the stuff should work out of the box except lack
-      of "to punycode" conversion. Cyrillic and other non-latin domains are
-      not converted to punycode.
-* Implemented `\spaf\simputils\System::localIp()` that gets the local IP
-* Implemented shortcuts `url()` for `\spaf\simputils\models\UrlObject` model and
-  `ip()` for `\spaf\simputils\models\IPv4`
-* Added `\spaf\simputils\components\normalizers\IPNormalizer` property normalizer
-* Implementation of `\spaf\simputils\PHP::bro()` method (`\spaf\simputils\models\BoxRO`)
-  which is basically "immutable Box"
-* Implemented shortcuts for getting `POST` and `GET` data as bros (BoxRO). Please keep
-  in mind that they are immutable due to best-practices:
-    * `\spaf\simputils\PHP::POST()`
-    * `\spaf\simputils\PHP::GET()`
-* Implemented `\spaf\simputils\PHP::objToNaiveString()` method to generate simple/naive
-  object representation
-* Implemented some relevant tests
-* Important: Functionality of the Box is slightly extended. Now you can re-define static
-  `\spaf\simputils\models\Box::$default_separator` variable value to string that should be used
-  during `\spaf\simputils\models\Box::join()` and `\spaf\simputils\models\Box::implode()` as
-  a separator by default (initially default is ", " as it was before).
-  Additionally you can specify `\spaf\simputils\models\Box::$separator` on per object basis
-  that will be used in the object in case of "join" or "implode" without the first argument.
-  That functionality allows to create "path-ready" Box-arrays, that can by default
-  be automatically converted into a "unix" path.
-  `\spaf\simputils\models\Box::$joined_to_str` per object variable allows to define that
-  this Box-object needs to be converted in `__toString()` method
-  through `\spaf\simputils\models\Box::join()` method, which is really useful for "path-ready"
-  Box-arrays. See example here: [Path-alike Box-array](#Path-alike-Box-array)
-* For convenience create method-shortcut
-  to set Box as "Path-alike": `\spaf\simputils\models\Box::pathAlike()`
-* Added missing data-blocks for different locales
-
-
 ----
 
 ## Documentation
@@ -239,6 +85,7 @@ more documentation__. The very first stable release must be polished in matter o
 so documentation will come after that in the very nearest time. My apologies.
 
 ### Some:
+
 1. [Glossary](docs/glossary.md)
 2. [Structure](docs/structure.md)
 3. [Important notes](docs/notes.md) - this can help with troubleshooting
@@ -250,6 +97,7 @@ so documentation will come after that in the very nearest time. My apologies.
 Minimal PHP version: **8.0**
 
 Current framework version: **1.1.6**
+
 ```shell
 composer require spaf/simputils "^1"
 ```
@@ -263,10 +111,11 @@ More about semantic versioning: [Semantic Versioning Explanation](https://semver
 -----
 
 ### "dev-main" Stable version
+
 From this point, I decided to have stable version with some recent updates that I need
 before the final release. Consider it "ALPHA" release.
 
-**Though, avoid using it on production, it would be times better if you would 
+**Though, avoid using it on production, it would be times better if you would
 just poke me with a ticket so I would release the stable version quicker!**
 
 Just keep in mind, even though it should be stable, it's still "unreleased" and might be even
@@ -274,6 +123,7 @@ unfinished concepts. Please avoid using it without serious reasons.
 
 **Important**: DO NOT USE THIS VERSION, IF YOU ARE NOT SURE WHAT IT DOES.
 For production always use the installation method above!
+
 ```shell
 composer require spaf/simputils "dev-main"
 ```
@@ -283,16 +133,18 @@ All the features of this branch will be properly packaged and released, don't wo
 -----
 
 ### "dev-dev" Unstable version
-Additionally I've decided to have unstable version with much more recent updates that 
+
+Additionally I've decided to have unstable version with much more recent updates that
 I need in a first row with unfinished and broken concepts.
 
-Just keep in mind, it can completely break your code, unfinished concepts or 
-even broken code could be here very common thing. 
+Just keep in mind, it can completely break your code, unfinished concepts or
+even broken code could be here very common thing.
 
-I strongly recommend to avoid using this code, except cases 
+I strongly recommend to avoid using this code, except cases
 when you are very totally sure what you are doing!
 
 **Important**: DO NOT USE THIS VERSION, IF YOU ARE NOT SURE WHAT IT DOES.
+
 ```shell
 composer require spaf/simputils "dev-dev"
 ```
@@ -305,20 +157,21 @@ All the features of this branch will be properly packaged and released, don't wo
 
 Just a few tini-tiny examples of very condensed functionality :)
 
-1. [Working with URLs](#Working-with-URLs)
-2. [Data files and executable files processing](#Data-files-and-executable-files-processing)
-3. [Properties](#Properties)
-4. [Date Times](#Date-Times)
-5. [Advanced PHP Info Object](#Advanced-PHP-Info-Object)
-6. [IPv4 model](#IPv4-model)
-7. [Path-alike Box-array](#Path-alike-Box-array)
-8. [Stretchable feature of Box-array](#Stretchable-feature-of-Box-array) (`paramsAlike()`)
-9. ["with" love](#with-love)
+1. [Renderers](docs/features/renderers.md)
+2. [Working with URLs](#Working-with-URLs)
+3. [Data files and executable files processing](#Data-files-and-executable-files-processing)
+4. [Properties](#Properties)
+5. [Date Times](#Date-Times)
+6. [Advanced PHP Info Object](#Advanced-PHP-Info-Object)
+7. [IPv4 model](#IPv4-model)
+8. [Path-alike Box-array](#Path-alike-Box-array)
+9. [Stretchable feature of Box-array](#Stretchable-feature-of-Box-array) (`paramsAlike()`)
+10. ["with" love](#with-love)
 
 ### Working with URLs
 
 The new feature of "URL" object (`UrlObject`) has arrived and almost finished.
-After recent update it's tested enough to be considered stable (even though some unconventional 
+After recent update it's tested enough to be considered stable (even though some unconventional
 cases of bugs can still occur).
 
 Example:
@@ -334,6 +187,7 @@ pr($url, "{$url}");
 ```
 
 Output would be:
+
 ```text
 spaf\simputils\models\UrlObject Object
 (
@@ -364,7 +218,7 @@ spaf\simputils\models\UrlObject Object
 https://localhost:8080/booo/fooo?godzila=tamdam#jjj
 ```
 
-It can not only  generate, but parse as well and even combine parts:
+It can not only generate, but parse as well and even combine parts:
 
 ```php
 
@@ -391,6 +245,7 @@ pr($url, "{$url}");
 ```
 
 Output would be:
+
 ```text
 
 spaf\simputils\models\UrlObject Object
@@ -430,8 +285,9 @@ http://my.spec.domain.com.ru.at/path1/path2/path_3/path_4?param1=val1&param2=val
 
 And after all that you could get parts separately and play around with them.
 
-For example we get "path" parts, and they are returned as a Box-array, you can 
-work with them sequntially, but as soon as you stringify them, they turn back to "path" string again:
+For example we get "path" parts, and they are returned as a Box-array, you can
+work with them sequntially, but as soon as you stringify them, they turn back to "path" string
+again:
 
 ```php
 
@@ -464,16 +320,18 @@ pr($stringified_path);
 ```
 
 The output would be:
+
 ```text
 My path really is: path1/I_REPLACED_PATH2_PIECE/path_3/path_4/HUGE-PATH-ADDITION
 
 ```
 
-Another moment worth mentioning, that when you modify the "path" box object - 
-it will affect the url object as well. (if you want to avoid that, 
+Another moment worth mentioning, that when you modify the "path" box object -
+it will affect the url object as well. (if you want to avoid that,
 always clone the object instead)
 
 The same example as above, but outputting the whole url object now:
+
 ```php
 
 use function spaf\simputils\basic\url;
@@ -505,6 +363,7 @@ pr($url, "{$url}");
 ```
 
 Output would be:
+
 ```text
 spaf\simputils\models\UrlObject Object
 (
@@ -544,15 +403,16 @@ http://my.spec.domain.com.ru.at/path1/I_REPLACED_PATH2_PIECE/path_3/path_4/HUGE-
 
 All of the above work similar to params.
 
-**Important:** For string arguments, full parsing happening only for `$host` parameter, 
+**Important:** For string arguments, full parsing happening only for `$host` parameter,
 additional path (+params+sharpy) parsing happening for `$path` (uri) parameter,
-and `$params` does not do the "string-parsing". String is not allowed as data type for `$params` 
+and `$params` does not do the "string-parsing". String is not allowed as data type for `$params`
 argument (at least for now).
 
 #### Current page / Active Url
 
-New method prepared for getting the current Url (works only for web, will not work for CLI 
+New method prepared for getting the current Url (works only for web, will not work for CLI
 without faking some params):
+
 ```php
 
 PHP::init();
@@ -564,6 +424,7 @@ pd($url);
 ```
 
 Output might depend on your web-server:
+
 ```text
 
 spaf\simputils\models\UrlObject Object
@@ -608,6 +469,7 @@ pr("the same: ".Boolean::to($url->isCurrent()));
 ```
 
 The output might depend on your web-server:
+
 ```text
 
 current: https://localhost:8080/booo/fooo?godzila=tamdam#jjj
@@ -617,20 +479,24 @@ the same: false
 ```
 
 There are nice parameters of `UrlObject::isCurrent()` that could be tweaked.
-Besides that there is another comparison method for 2 different urls, and not 
-only the current web-page url `UrlObject::isSimilar()`, structure of which is almost 
-the same. 
+Besides that there is another comparison method for 2 different urls, and not
+only the current web-page url `UrlObject::isSimilar()`, structure of which is almost
+the same.
 
 [//]: # (FIX    !!!!!)
 SOME FEATURES ARE NOT FULLY IMPLEMENTED
- * url extension like a "russian-nesting doll"
- * "params" parameter parsing strings
- * Support for other protocols except HTTP(S)
- * maybe something else as well!
+
+* url extension like a "russian-nesting doll"
+* "params" parameter parsing strings
+* Support for other protocols except HTTP(S)
+* maybe something else as well!
 
 ### Files, Data Files and executables processing
+
 #### Files Infrastructure
+
 Working with files can be really easy:
+
 ```php
 use spaf\simputils\Boolean;
 use spaf\simputils\PHP;
@@ -673,6 +539,7 @@ pr("File {$new_file} | content: \"{$new_file->content}\"");
 So please if you need to use it multiple times in code - please store it in a var
 
 The output would be:
+
 ```text
 File size before write: 0 B
 File size after write: 28 B
@@ -698,15 +565,18 @@ In the example above there is a simple textual data is used. The processing capa
 depend on the Resource App Processor and can be customized in any way you want.
 
 Currently there are a few of them:
+
 * `\spaf\simputils\models\files\apps\CsvProcessor` - CSV file processing
 * `\spaf\simputils\models\files\apps\DotEnvProcessor` - ".env" file processing
 * `\spaf\simputils\models\files\apps\JsonProcessor` - JSON files processing
 * `\spaf\simputils\models\files\apps\TextProcessor` - Default used for any non-recognized file types
-* `\spaf\simputils\models\files\apps\PHPFileProcessor` - Special processor, **it is not allowed to be use directly** for security reasons!
+* `\spaf\simputils\models\files\apps\PHPFileProcessor` - Special processor, **it is not allowed to
+  be use directly** for security reasons!
 
 By default if file is not recognized then `TextProcessor` is used.
 
 The processor can be used explicitly when creating file object or can be re-assigned later:
+
 ```php
 use spaf\simputils\models\files\apps\JsonProcessor;
 use spaf\simputils\models\files\apps\TextProcessor;
@@ -747,7 +617,8 @@ cases across the framework. But it should never be explicitly used. Do not overr
 
 -----
 
-Files App Processors can be set as default by "mime-types" as well, instead of explicit specification
+Files App Processors can be set as default by "mime-types" as well, instead of explicit
+specification
 of each object with the exact Resource App Processor.
 
 ```php
@@ -808,6 +679,7 @@ if you redefine it, any unspecified/unrecognized files will be using it!
 You can redefine the complete set of supported mime-types. And even create your own.
 
 #### Data Files
+
 Data Files are scoped set of files with configs or some stored info in files for your application.
 
 It's a common thing to want to save a small config into JSON or "PHP-Array" files, and
@@ -868,14 +740,17 @@ pr($data_php->content);
 $data_php = FS::dataFile(['data', 'spec', 'my-spec.json']);
 pr($data_php->content);
 ```
+
 The output would be exactly the same.
 
 It's recommended to use `FS::data()` over `FS::dataFile()`.
 
 #### Executables Processing
+
 Files Infrastructure is not supposed to be used to execute "PHP" files (except through Data Files).
 
 So the following code:
+
 ```php
 use spaf\simputils\PHP;
 use function spaf\simputils\basic\fl;
@@ -908,6 +783,7 @@ pr($file->content);
 ```
 
 Both above code cases will cause exception:
+
 ```text
 
 Fatal error: Uncaught spaf\simputils\exceptions\ExecutablePermissionException: Executables like PHP should not be processed through the File infrastructure (except some rare cases) in /home/ivan/development/php-simputils/src/models/files/apps/PHPFileProcessor.php:33
@@ -926,6 +802,7 @@ Process finished with exit code 255
 **This behaviour is very intended due to security reasons!** Do not try to override this behaviour.
 
 #### Special notes
+
 1. For every `PHP::init()` process the ".env" file is searched and processed, so it's easy
    to specify/modify env variables. The values are accessible through `env()` function.
    In case if you want to disable it:
@@ -986,6 +863,7 @@ pd($m); // The same as pr(), but it dies after that
 ```
 
 The output will be:
+
 ```php
 MyObjectOne Object
 (
@@ -1075,6 +953,7 @@ pd("My password really is: {$m->password}");
 ```
 
 And the output will be:
+
 ```php
 MyObjectOne Object
 (
@@ -1096,6 +975,7 @@ My password really is: myverry secrete paswort!@#
 ### Date Times
 
 Simple quick iterations over the date period
+
 ```php
 
 use spaf\simputils\PHP;
@@ -1226,6 +1106,7 @@ works in a very similar way).
 Here you can read more about that: https://www.php.net/manual/en/datetime.modify.php
 
 Examples of getting difference between 2 dates/times
+
 ```php
 
 use function spaf\simputils\basic\ts;
@@ -1252,6 +1133,7 @@ echo "{$dt->add('10 years')->add('15 days 49 hours 666 microseconds')->diff('202
 
 What if you want to get difference for all those modifications? In general you could use
 the following approach:
+
 ```php
 
 use function spaf\simputils\basic\ts;
@@ -1266,6 +1148,7 @@ echo "{$dt->diff($dt_backup)}\n";
 ```
 
 But example above is a bit chunky, it would be slightly more elegant to do the following:
+
 ```php
 use function spaf\simputils\basic\ts;
 
@@ -1287,6 +1170,7 @@ echo "{$dt->diff()}\n";
 without argument or with `true` - it will override the condition with the current one.
 
 Example of `DatePeriod`
+
 ```php
 
 use spaf\simputils\PHP;
@@ -1335,6 +1219,7 @@ That you can access and walk through any comfortable for you way. It also compat
 with the common IDE autocomplete (only top level fields).
 
 You can access top-level fields (those that directly on the object):
+
 1. In a property/field-like style:
    ```php
    use spaf\simputils\PHP;
@@ -1361,6 +1246,7 @@ You can access top-level fields (those that directly on the object):
    ```
 
 ## Additional benefits
+
 1. All the versions are wrapped into `Version` class (out of the box version comparison, etc.)
 2. The object is created once, and can be accessed through `PHP::info()`
    (manually possible to have multiple)
@@ -1371,6 +1257,7 @@ You can access top-level fields (those that directly on the object):
    relevant information.
 
 ## Reasoning to use Advanced PHP Info Object
+
 The native `phpinfo()` returns just a static text representation, which is incredibly
 uncomfortable to use.
 Info about native one you can find here: https://www.php.net/manual/ru/function.phpinfo.php
@@ -1378,6 +1265,7 @@ Info about native one you can find here: https://www.php.net/manual/ru/function.
 ### IPv4 model
 
 Simple example:
+
 ```php
 
 $ic = PHP::init([
@@ -1409,6 +1297,7 @@ pr("I am {$t->name} and my address is {$t->my_ip} (and ip-mask is {$t->my_ip->ma
 ```
 
 The output would be:
+
 ```
 I am Totoro and my address is 127.0.0.1 (and ip-mask is 255.255.0.0)
 ```
@@ -1418,6 +1307,7 @@ I am Totoro and my address is 127.0.0.1 (and ip-mask is 255.255.0.0)
 This is a new feature for `Box` model.
 
 The new short version `Box::pathAlike()` method is available:
+
 ```php
 PHP::init();
 
@@ -1427,6 +1317,7 @@ pd($bx, "{$bx}");
 ```
 
 Output would be:
+
 ```text
 spaf\simputils\models\Box Object
 (
@@ -1463,6 +1354,7 @@ pr("{$b}");
 ```
 
 The output would be:
+
 ```
 
 ["TEST","PATH","alike","box"]
@@ -1477,6 +1369,7 @@ TEST ## PATH ## alike ## box
 It works almost exactly as "Path-Alike", but it stringifies boxes including "keys".
 
 Example 1:
+
 ```php
 
 PHP::init();
@@ -1493,6 +1386,7 @@ pd($bx, "{$bx}");
 ```
 
 Output would be:
+
 ```text
 spaf\simputils\models\Box Object
 (
@@ -1505,10 +1399,11 @@ spaf\simputils\models\Box Object
 key1=val1, key2=val2, key3=val3, key4=val4
 ```
 
-And as it might be obvious already, there is a really good potential to use it 
+And as it might be obvious already, there is a really good potential to use it
 for url params.
 
 Example 2:
+
 ```php
 PHP::init();
 
@@ -1533,6 +1428,7 @@ pd($bx, "{$bx}");
 ```
 
 Output would be:
+
 ```text
 spaf\simputils\models\Box Object
 (
@@ -1546,12 +1442,13 @@ key1=val1&key2=val2&key3=val3&key4=val4
 ```
 
 Important to note, this methods does not turn the objects directly to strings!
-They store in the object special configuration, that when you start 
+They store in the object special configuration, that when you start
 to stringify this Box - it will use the saved settings for that.
 
 #### Value wrappers and htmlAttrAlike()
 
 For html attrs alike just use this method:
+
 ```php
 $bx = bx([
 	'data-my-attr-1' => 'test',
@@ -1562,12 +1459,14 @@ $bx = bx([
 ```
 
 Output would be:
+
 ```text
 data-my-attr-1="test" data-my-attr-2="test2"
 ```
 
 But if you would want to do "value-processing" instead of just wrapping, you could use
 stretched functionality:
+
 ```php
 $bx = bx([
 	'data-my-attr-1' => 'test',
@@ -1578,18 +1477,19 @@ $bx = bx([
 ```
 
 Output would be:
+
 ```text
 data-my-attr-1 = (`test`) data-my-attr-2 = (`test2`)
 ```
 
 #### Wrap, wrap, wrap
 
-For stretching functionality you can wrap each part separately 
-with `$value_wrap` and `$key_wrap`. They work in the same way, but wrap their each 
+For stretching functionality you can wrap each part separately
+with `$value_wrap` and `$key_wrap`. They work in the same way, but wrap their each
 corresponding part. After that or instead of that if for the `$stretcher` argument
 provided the function/callable/closure then it will be used for wrapping the whole pair.
 
-Keep in mind, that if you specify wrappers for `key` or `value` they already will 
+Keep in mind, that if you specify wrappers for `key` or `value` they already will
 be applied before the `stretcher` callable is called!
 
 Example bellow will help to understand the logic.
@@ -1605,6 +1505,7 @@ pd("$bx");
 ```
 
 Output would be:
+
 ```text
 ("?key1?": "!val1!") || ("?key2?": "!val2!") || ("?key3?": "!val3!")
 ```
@@ -1614,6 +1515,7 @@ Output would be:
 Python specific command `with` can be easily implemented through meta-magic and callables.
 
 Simple example:
+
 ```php
 
 PHP::init();
@@ -1640,6 +1542,7 @@ with($obj, function () {
 ```
 
 You can access the target object easily from the callable:
+
 ```php
 $obj = new Totoro;
 

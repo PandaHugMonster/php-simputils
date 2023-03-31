@@ -49,7 +49,7 @@ class AnotherRenderingClass {
 
 	#[Renderer]
 	static function incompatibleRenderer($arg1, $arg2, $arg3, $arg4) {
-		return new RenderedWrapper("uncompatible-renderer: {$arg1}, {$arg2}, {$arg3}, {$arg4}");
+		return new RenderedWrapper("incompatible-renderer: {$arg1}, {$arg2}, {$arg3}, {$arg4}");
 	}
 
 	#[Renderer]
@@ -80,6 +80,7 @@ class AnotherRenderingClass {
  * @uses   \spaf\simputils\models\Box
  * @uses   \spaf\simputils\components\normalizers\BooleanNormalizer
  * @uses   \spaf\simputils\components\normalizers\StringNormalizer
+ * @uses   \spaf\simputils\traits\MetaMagic
  */
 class RenderersTest extends TestCase {
 
@@ -141,8 +142,8 @@ class RenderersTest extends TestCase {
 		$r = AnotherRenderingClass::render('only first arg', 2, true);
 		$this->assertEquals('compatible-renderer: ["only first arg","2","1"]', $r);
 
-		$r = AnotherRenderingClass::render('now', 'is', 'uncompatible', 'renderer');
-		$this->assertEquals('incompatible-renderer: now, is, uncompatible, renderer', $r);
+		$r = AnotherRenderingClass::render('now', 'is', 'incompatible', 'renderer');
+		$this->assertEquals('incompatible-renderer: now, is, incompatible, renderer', $r);
 	}
 
 }

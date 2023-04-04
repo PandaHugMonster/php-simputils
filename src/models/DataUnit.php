@@ -4,6 +4,7 @@ namespace spaf\simputils\models;
 
 use spaf\simputils\attributes\DebugHide;
 use spaf\simputils\attributes\Property;
+use spaf\simputils\components\init\AppInitConfig;
 use spaf\simputils\exceptions\NonExistingDataUnit;
 use spaf\simputils\generic\SimpleObject;
 use spaf\simputils\PHP;
@@ -563,6 +564,6 @@ class DataUnit extends SimpleObject {
 	 * @codeCoverageIgnore
 	 */
 	public static function redefComponentName(): string {
-		return InitConfig::REDEF_DATA_UNIT;
+		return AppInitConfig::REDEF_DATA_UNIT;
 	}
 }

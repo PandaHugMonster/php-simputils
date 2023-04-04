@@ -3,6 +3,7 @@
 namespace spaf\simputils\special;
 
 use Closure;
+use spaf\simputils\components\init\AppInitConfig;
 use spaf\simputils\exceptions\InitConfigException;
 use spaf\simputils\exceptions\InitConfigNonUniqueCodeBlock;
 use spaf\simputils\generic\BasicInitConfig;
@@ -15,7 +16,6 @@ use spaf\simputils\models\DateTime;
 use spaf\simputils\models\DateTimeZone;
 use spaf\simputils\models\Dir;
 use spaf\simputils\models\File;
-use spaf\simputils\models\InitConfig;
 use spaf\simputils\models\IPv4;
 use spaf\simputils\models\IPv4Range;
 use spaf\simputils\models\L10n;
@@ -39,34 +39,34 @@ class CodeBlocksCacheIndex {
 	public static function listDefaultRedefinableComponents(): Box {
 		// NOTE Box here cannot be replaced with the dynamic ones.
 		return new Box([
-			InitConfig::REDEF_PD => InitConfig::REDEF_PD,
-			InitConfig::REDEF_PR => InitConfig::REDEF_PR,
+			AppInitConfig::REDEF_PD => AppInitConfig::REDEF_PD,
+			AppInitConfig::REDEF_PR => AppInitConfig::REDEF_PR,
 
-			InitConfig::REDEF_BOX => Box::class,
-			InitConfig::REDEF_DATE_TIME => DateTime::class,
-			InitConfig::REDEF_DATE_TIME_ZONE => DateTimeZone::class,
-			InitConfig::REDEF_FILE => File::class,
-			InitConfig::REDEF_DIR => Dir::class,
-			InitConfig::REDEF_PHP_INFO => PhpInfo::class,
-			InitConfig::REDEF_VERSION => Version::class,
-			// InitConfig::REDEF_LOGGER => Logger::class,
+			AppInitConfig::REDEF_BOX => Box::class,
+			AppInitConfig::REDEF_DATE_TIME => DateTime::class,
+			AppInitConfig::REDEF_DATE_TIME_ZONE => DateTimeZone::class,
+			AppInitConfig::REDEF_FILE => File::class,
+			AppInitConfig::REDEF_DIR => Dir::class,
+			AppInitConfig::REDEF_PHP_INFO => PhpInfo::class,
+			AppInitConfig::REDEF_VERSION => Version::class,
+			// AppInitConfig::REDEF_LOGGER => Logger::class,
 
-			InitConfig::REDEF_DATE_INTERVAL => DateInterval::class,
-			InitConfig::REDEF_DATE_PERIOD => DatePeriod::class,
-			InitConfig::REDEF_TIME_DURATION => TimeDuration::class,
-			InitConfig::REDEF_DATA_UNIT => DataUnit::class,
-			InitConfig::REDEF_STACK_FIFO => StackFifo::class,
-			InitConfig::REDEF_STACK_LIFO => StackLifo::class,
-			// InitConfig::REDEF_GIT_REPO => GitRepo::class,
-			InitConfig::REDEF_BIG_NUMBER => BigNumber::class,
-			InitConfig::REDEF_L10N => L10n::class,
-			// InitConfig::REDEF_TEMPERATURE => Temperature::class,
-			// InitConfig::REDEF_SYSTEM_FINGERPRINT => SystemFingerprint::class,
-			// InitConfig::REDEF_STR_OBJ => StrObj::class,
-			InitConfig::REDEF_SET => Set::class,
-			InitConfig::REDEF_IPV4_RANGE => IPv4Range::class,
-			InitConfig::REDEF_IPV4 => IPv4::class,
-			InitConfig::REDEF_URL => UrlObject::class,
+			AppInitConfig::REDEF_DATE_INTERVAL => DateInterval::class,
+			AppInitConfig::REDEF_DATE_PERIOD => DatePeriod::class,
+			AppInitConfig::REDEF_TIME_DURATION => TimeDuration::class,
+			AppInitConfig::REDEF_DATA_UNIT => DataUnit::class,
+			AppInitConfig::REDEF_STACK_FIFO => StackFifo::class,
+			AppInitConfig::REDEF_STACK_LIFO => StackLifo::class,
+			// AppInitConfig::REDEF_GIT_REPO => GitRepo::class,
+			AppInitConfig::REDEF_BIG_NUMBER => BigNumber::class,
+			AppInitConfig::REDEF_L10N => L10n::class,
+			// AppInitConfig::REDEF_TEMPERATURE => Temperature::class,
+			// AppInitConfig::REDEF_SYSTEM_FINGERPRINT => SystemFingerprint::class,
+			// AppInitConfig::REDEF_STR_OBJ => StrObj::class,
+			AppInitConfig::REDEF_SET => Set::class,
+			AppInitConfig::REDEF_IPV4_RANGE => IPv4Range::class,
+			AppInitConfig::REDEF_IPV4 => IPv4::class,
+			AppInitConfig::REDEF_URL => UrlObject::class,
 		]);
 	}
 

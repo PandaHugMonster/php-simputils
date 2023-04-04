@@ -5,6 +5,7 @@ namespace spaf\simputils\models;
 use ArrayIterator;
 use spaf\simputils\attributes\DebugHide;
 use spaf\simputils\attributes\Property;
+use spaf\simputils\components\init\AppInitConfig;
 use spaf\simputils\FS;
 use spaf\simputils\interfaces\WalkThroughFilterInterface;
 use spaf\simputils\PHP;
@@ -16,6 +17,7 @@ use function file_exists;
 use function is_dir;
 use function preg_match;
 use function scandir;
+use function str_replace;
 
 /**
  *
@@ -45,7 +47,7 @@ class Dir extends Box {
 		if (empty($this->_path) && empty($this->_name)) {
 			return null; // @codeCoverageIgnore
 		}
-		return FS::glueFullFilePath($this->_path, $this->_name);
+		return str_replace('//', '/', FS::glueFullFilePath($this->_path, $this->_name));
 	}
 
 	#[Property('path')]
@@ -218,6 +220,6 @@ class Dir extends Box {
 	}
 
 	public static function redefComponentName(): string {
-		return InitConfig::REDEF_DIR;  // @codeCoverageIgnore
+		return AppInitConfig::REDEF_DIR;  // @codeCoverageIgnore
 	}
 }

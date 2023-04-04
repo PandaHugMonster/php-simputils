@@ -4,7 +4,7 @@ namespace spaf\simputils\generic\fixups;
 
 
 use DateTimeZone;
-use spaf\simputils\models\InitConfig;
+use spaf\simputils\components\init\AppInitConfig;
 use spaf\simputils\traits\RedefinableComponentTrait;
 use spaf\simputils\traits\SimpleObjectTrait;
 
@@ -16,6 +16,6 @@ class FixUpDateTimeZone extends DateTimeZone {
 	use RedefinableComponentTrait;
 
 	public static function redefComponentName(): string {
-		return InitConfig::REDEF_DATE_TIME_ZONE;
+		return AppInitConfig::REDEF_DATE_TIME_ZONE;
 	}
 }

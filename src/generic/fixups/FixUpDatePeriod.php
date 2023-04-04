@@ -3,7 +3,7 @@
 namespace spaf\simputils\generic\fixups;
 
 use DatePeriod;
-use spaf\simputils\models\InitConfig;
+use spaf\simputils\components\init\AppInitConfig;
 use spaf\simputils\traits\RedefinableComponentTrait;
 use spaf\simputils\traits\SimpleObjectTrait;
 
@@ -15,6 +15,6 @@ class FixUpDatePeriod extends DatePeriod {
 	use RedefinableComponentTrait;
 
 	public static function redefComponentName(): string {
-		return InitConfig::REDEF_DATE_PERIOD;
+		return AppInitConfig::REDEF_DATE_PERIOD;
 	}
 }

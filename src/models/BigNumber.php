@@ -4,6 +4,7 @@ namespace spaf\simputils\models;
 
 use spaf\simputils\attributes\markers\Shortcut;
 use spaf\simputils\attributes\Property;
+use spaf\simputils\components\init\AppInitConfig;
 use spaf\simputils\exceptions\NoExtensionFound;
 use spaf\simputils\generic\SimpleObject;
 use spaf\simputils\PHP;
@@ -532,6 +533,6 @@ class BigNumber extends SimpleObject {
 	}
 
 	public static function redefComponentName(): string {
-		return InitConfig::REDEF_BIG_NUMBER; // @codeCoverageIgnore
+		return AppInitConfig::REDEF_BIG_NUMBER; // @codeCoverageIgnore
 	}
 }

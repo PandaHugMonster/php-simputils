@@ -3,6 +3,7 @@
 use PHPUnit\Framework\TestCase;
 use spaf\simputils\attributes\Property;
 use spaf\simputils\Boolean;
+use spaf\simputils\components\init\AppInitConfig;
 use spaf\simputils\exceptions\RedefWrongReference;
 use spaf\simputils\FS;
 use spaf\simputils\generic\SimpleObject;
@@ -31,7 +32,7 @@ class MyObjectExample {
 class MyDT extends DateTime {
 	#[Property('date')]
 	protected function getDateExt(): string {
-		return "This is day: {$this->format('d')}, this is month: {$this->format('m')}, " .
+		return "This is day: {$this->format('d')}, this is month: {$this->format('m')}, ".
 			"this is year: {$this->format('Y')}";
 	}
 }
@@ -49,9 +50,9 @@ class MyBoxConvertable extends SimpleObject {
 	}
 
 	public function toArray(
-		bool $recursively = false,
-		bool $with_class = false,
-		array $exclude_fields = []
+		bool  $recursively = false,
+		bool  $with_class = false,
+		array $exclude_fields = [],
 	): array {
 		$res = [
 			'EVEN_some_MORE' => 'EVEN stuff MORE',
@@ -79,21 +80,21 @@ class MyBoxConvertable2 extends SimpleObject {
  * @covers \spaf\simputils\generic\BasicInitConfig
  * @covers \spaf\simputils\traits\MetaMagic
  *
- * @uses \spaf\simputils\models\Version
- * @uses \spaf\simputils\traits\SimpleObjectTrait
- * @uses \spaf\simputils\generic\BasicVersionParser
- * @uses \spaf\simputils\traits\PropertiesTrait
- * @uses \spaf\simputils\models\Box
- * @uses \spaf\simputils\special\CodeBlocksCacheIndex
- * @uses \spaf\simputils\FS
- * @uses \spaf\simputils\attributes\Property
- * @uses \spaf\simputils\models\File
- * @uses \spaf\simputils\generic\BasicResource
- * @uses \spaf\simputils\generic\BasicResourceApp
- * @uses \spaf\simputils\models\files\apps\DotEnvProcessor
- * @uses \spaf\simputils\models\files\apps\TextProcessor
- * @uses \spaf\simputils\models\files\apps\settings\DotEnvSettings
- * @uses \spaf\simputils\Str
+ * @uses   \spaf\simputils\models\Version
+ * @uses   \spaf\simputils\traits\SimpleObjectTrait
+ * @uses   \spaf\simputils\generic\BasicVersionParser
+ * @uses   \spaf\simputils\traits\PropertiesTrait
+ * @uses   \spaf\simputils\models\Box
+ * @uses   \spaf\simputils\special\CodeBlocksCacheIndex
+ * @uses   \spaf\simputils\FS
+ * @uses   \spaf\simputils\attributes\Property
+ * @uses   \spaf\simputils\models\File
+ * @uses   \spaf\simputils\generic\BasicResource
+ * @uses   \spaf\simputils\generic\BasicResourceApp
+ * @uses   \spaf\simputils\models\files\apps\DotEnvProcessor
+ * @uses   \spaf\simputils\models\files\apps\TextProcessor
+ * @uses   \spaf\simputils\models\files\apps\settings\DotEnvSettings
+ * @uses   \spaf\simputils\Str
  */
 class PHPHelperTest extends TestCase {
 
@@ -106,22 +107,21 @@ class PHPHelperTest extends TestCase {
 	 * @return void
 	 * @runInSeparateProcess
 	 */
-//	public function testPleaseDie(): void {
-//		PHP::$allow_dying = false;
-//
-//		Settings::redefinePd(function ($data) {
-//			print_r($data);
-//			// do not put die, to do not corrupt tests
-//		});
-//
-//		$str = 'This should be printed, is it?';
-//		pd($str);
-//		Settings::redefinePd(null);
-//		pd($str);
-//		$this->expectOutputString($str.$str."\n");
-//		PHP::$allow_dying = true;
-//	}
-
+	//	public function testPleaseDie(): void {
+	//		PHP::$allow_dying = false;
+	//
+	//		Settings::redefinePd(function ($data) {
+	//			print_r($data);
+	//			// do not put die, to do not corrupt tests
+	//		});
+	//
+	//		$str = 'This should be printed, is it?';
+	//		pd($str);
+	//		Settings::redefinePd(null);
+	//		pd($str);
+	//		$this->expectOutputString($str.$str."\n");
+	//		PHP::$allow_dying = true;
+	//	}
 
 	/**
 	 *
@@ -135,7 +135,7 @@ class PHPHelperTest extends TestCase {
 	public function testSerializationAndDeserialization() {
 		$version_class = PHP::redef(Version::class);
 		// JSON no meta-magic
-		$obj1 = new stdClass();
+		$obj1 = new stdClass;
 		$obj1->option1 = 'test';
 
 		$data1 = PHP::serialize($obj1);
@@ -185,7 +185,7 @@ class PHPHelperTest extends TestCase {
 		$this->assertInstanceOf($version_class, $obj2, 'Checking deserialization');
 
 		// stdClass version
-		$obj1 = new stdClass();
+		$obj1 = new stdClass;
 		$obj1->option1 = 'test';
 
 		$data1 = PHP::serialize($obj1);
@@ -196,7 +196,6 @@ class PHPHelperTest extends TestCase {
 
 		$obj2 = PHP::deserialize($data1, stdClass::class);
 		$this->assertInstanceOf(stdClass::class, $obj2, 'Checking deserialization');
-
 
 		PHP::$serialization_mechanism = 'FAKED';
 		$res = PHP::deserialize($data1);
@@ -213,7 +212,7 @@ class PHPHelperTest extends TestCase {
 
 		PHP::$serialization_mechanism = PHP::SERIALIZATION_TYPE_JSON;
 
-		$res = PHP::serialize(new MyBoxConvertable());
+		$res = PHP::serialize(new MyBoxConvertable);
 		$res = PHP::deserialize($res);
 		$this->assertEquals('EVEN stuff MORE', $res->EVEN_some_MORE);
 	}
@@ -253,8 +252,8 @@ class PHPHelperTest extends TestCase {
 		FS::mkFile($file, $expected_content);
 		$this->assertFileExists($file);
 
-//		$received_content = PHP::getFileContent($file);
-//		$this->assertEquals($expected_content, $received_content);
+		//		$received_content = PHP::getFileContent($file);
+		//		$this->assertEquals($expected_content, $received_content);
 
 		FS::rmFile($dir, true);
 
@@ -262,7 +261,7 @@ class PHPHelperTest extends TestCase {
 	}
 
 	public function testDirectTraitUsageCheck() {
-		$obj = new MyObjectExample();
+		$obj = new MyObjectExample;
 		$res = PHP::classUsesTrait($obj, MetaMagic::class);
 		$this->assertTrue($res, 'Is directly used meta-magic');
 	}
@@ -272,12 +271,12 @@ class PHPHelperTest extends TestCase {
 	 * @covers \spaf\simputils\models\PhpInfo
 	 * @return void
 	 *
-	 * @uses \spaf\simputils\models\Version
-	 * @uses \spaf\simputils\traits\SimpleObjectTrait
-	 * @uses \spaf\simputils\components\versions\parsers\DefaultVersionParser
-	 * @uses \spaf\simputils\Boolean::from
+	 * @uses   \spaf\simputils\models\Version
+	 * @uses   \spaf\simputils\traits\SimpleObjectTrait
+	 * @uses   \spaf\simputils\components\versions\parsers\DefaultVersionParser
+	 * @uses   \spaf\simputils\Boolean::from
 	 *
-	 * @uses \spaf\simputils\System
+	 * @uses   \spaf\simputils\System
 	 */
 	public function testPhpInfo() {
 		$php_info = PHP::info(true);
@@ -286,8 +285,9 @@ class PHPHelperTest extends TestCase {
 		$this->assertNotEmpty($php_info, 'PHP info is not empty');
 
 		$expected_keys = array_keys($php_info->toArray());
-		foreach ($expected_keys as $key)
+		foreach ($expected_keys as $key) {
 			$this->assertArrayHasKey($key, $php_info, 'Does have '.$key);
+		}
 	}
 
 	/**
@@ -333,7 +333,7 @@ class PHPHelperTest extends TestCase {
 	 * @param bool  $expected_val Expected value from dp
 	 *
 	 * @dataProvider dataProviderBoolFrom
-	 * @covers \spaf\simputils\Boolean::from
+	 * @covers       \spaf\simputils\Boolean::from
 	 * FIX  Should be moved out
 	 * @return void
 	 */
@@ -341,29 +341,33 @@ class PHPHelperTest extends TestCase {
 		$sub_res = Boolean::from($mixed_val);
 
 		// Due to dataProviderToBool works for both strict and non strict, adjusting null
-		$expected_val = $expected_val === null?false:$expected_val;
+		$expected_val = $expected_val === null
+			?false
+			:$expected_val;
 
 		$this->assertEquals(
 			$expected_val,
 			$sub_res,
-			"Checking to bool non strict conversion of {$mixed_val} to {$expected_val}"
+			"Checking to bool non strict conversion of {$mixed_val} to {$expected_val}",
 		);
 	}
 
 	/**
-	 * @covers \spaf\simputils\Boolean::to
-	 * @uses \spaf\simputils\Boolean::from()
+	 * @covers       \spaf\simputils\Boolean::to
+	 *
+	 * @param mixed     $mixed_val
+	 * @param bool|null $expected_val
+	 * FIX  Should be moved out
+	 *
+	 * @return void
+	 * @uses         \spaf\simputils\Boolean::from()
 	 *
 	 * @dataProvider dataProviderBoolTo
 	 *
-	 * @param mixed $mixed_val
-	 * @param bool|null $expected_val
-	 * FIX  Should be moved out
-	 * @return void
 	 */
 	public function testBoolTo(mixed $mixed_val, string $expected_val) {
 		$this->assertEquals($expected_val, Boolean::to($mixed_val),
-			"Checking conversion bool to string of {$mixed_val} to {$expected_val}"
+			"Checking conversion bool to string of {$mixed_val} to {$expected_val}",
 		);
 	}
 
@@ -372,7 +376,7 @@ class PHPHelperTest extends TestCase {
 	 * @param bool  $expected_val Expected value from dp
 	 *
 	 * @dataProvider dataProviderBoolFrom
-	 * @covers \spaf\simputils\Boolean::from
+	 * @covers       \spaf\simputils\Boolean::from
 	 * FIX  Should be moved out
 	 * @return void
 	 */
@@ -381,7 +385,7 @@ class PHPHelperTest extends TestCase {
 		$this->assertEquals(
 			$expected_val,
 			$sub_res,
-			"Checking to bool STRICT conversion of {$mixed_val} to {$expected_val}"
+			"Checking to bool STRICT conversion of {$mixed_val} to {$expected_val}",
 		);
 	}
 
@@ -472,7 +476,6 @@ class PHPHelperTest extends TestCase {
 		$this->assertTrue(PHP::isArrayCompatible([]));
 		$this->assertTrue(PHP::isArrayCompatible(bx([])));
 		$this->assertFalse(PHP::isArrayCompatible($obj1));
-
 	}
 
 	/**
@@ -481,9 +484,9 @@ class PHPHelperTest extends TestCase {
 	 * @covers \spaf\simputils\models\DateTime::redefComponentName
 	 * @covers \spaf\simputils\components\initblocks\DotEnvInitBlock
 	 * @covers \spaf\simputils\special\CodeBlocksCacheIndex
-	 * @uses \spaf\simputils\generic\BasicInitConfig
-	 * @uses \spaf\simputils\basic\now
 	 * @return void
+	 * @uses   \spaf\simputils\basic\now
+	 * @uses   \spaf\simputils\generic\BasicInitConfig
 	 */
 	function testRedef() {
 
@@ -493,8 +496,8 @@ class PHPHelperTest extends TestCase {
 
 		PHP::init([
 			'redefinitions' => [
-				DateTime::redefComponentName() => MyDT::class
-			]
+				DateTime::redefComponentName() => MyDT::class,
+			],
 		]);
 
 		$dt = now();
@@ -515,8 +518,8 @@ class PHPHelperTest extends TestCase {
 
 		PHP::init([
 			'redefinitions' => [
-				'test22' => MyDT::class
-			]
+				'test22' => MyDT::class,
+			],
 		]);
 	}
 
@@ -531,14 +534,14 @@ class PHPHelperTest extends TestCase {
 
 		PHP::init([
 			'redefinitions' => [
-				DateTime::redefComponentName() => MyDT::class
-			]
+				DateTime::redefComponentName() => MyDT::class,
+			],
 		]);
 
 		PHP::init([
 			'redefinitions' => [
-				DateTime::redefComponentName() => MyDT::class
-			]
+				DateTime::redefComponentName() => MyDT::class,
+			],
 		]);
 	}
 
@@ -600,16 +603,15 @@ class PHPHelperTest extends TestCase {
 	function testRedefPd() {
 		$a = PHP::init([
 			'redefinitions' => [
-				InitConfig::REDEF_PD => function () {
+				AppInitConfig::REDEF_PD => function () {
 					echo "my custom dying method.";
-				}
-			]
+				},
+			],
 		]);
 
 		$this->expectOutputString('my custom dying method.');
 
 		pd('Some text that will be ignored');
-
 	}
 
 	/**
@@ -625,14 +627,15 @@ class PHPHelperTest extends TestCase {
 
 		pd($str1);
 
-		PHP::init(new InitConfig([
+		PHP::init(new AppInitConfig([
 			'redefinitions' => [
-				InitConfig::REDEF_PR => function (...$args) {
+				AppInitConfig::REDEF_PR => function (...$args) {
 					$args = new Box($args);
 					echo "||HELLO {$args->join('|-|')} WORLD||\n";
-				}
-			]
-		]));
+				},
+			],
+		]),
+		);
 
 		pr('TEST', 'TEST1', 'TEST2');
 
@@ -641,7 +644,7 @@ class PHPHelperTest extends TestCase {
 	}
 
 	/**
-	 * @uses \spaf\simputils\Boolean
+	 * @return void
 	 * @uses \spaf\simputils\System
 	 * @uses \spaf\simputils\attributes\PropertyBatch
 	 * @uses \spaf\simputils\components\versions\parsers\DefaultVersionParser
@@ -650,7 +653,7 @@ class PHPHelperTest extends TestCase {
 	 * @uses \spaf\simputils\models\StackLifo
 	 * @uses \spaf\simputils\models\StackFifo
 	 *
-	 * @return void
+	 * @uses \spaf\simputils\Boolean
 	 */
 	function testCommonalities() {
 		$reflection = new ReflectionClass(PHP::class);
@@ -670,7 +673,7 @@ class PHPHelperTest extends TestCase {
 		}
 
 		// Converting to box object that does support custom toBox conversion
-		$boxed_obj = PHP::box(new MyBoxConvertable());
+		$boxed_obj = PHP::box(new MyBoxConvertable);
 		$this->assertInstanceOf(Box::class, $boxed_obj);
 		$this->assertEquals(PHP::box(['some' => 'stuff']), $boxed_obj);
 
@@ -684,7 +687,7 @@ class PHPHelperTest extends TestCase {
 		$this->assertEquals(PHP::box([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 'some' => 'stuff']), $merger);
 
 		// Test Merger of mix instance
-		$merger = PHP::box([], $boxed_obj, new MyBoxConvertable(), new MyBoxConvertable2());
+		$merger = PHP::box([], $boxed_obj, new MyBoxConvertable, new MyBoxConvertable2);
 		$this->assertEquals(PHP::box(['some' => 'stuff', 'my_field' => 'test']), $merger);
 		$this->assertEmpty(PHP::env('TEST_VAR_IS_OK'));
 
@@ -698,7 +701,7 @@ class PHPHelperTest extends TestCase {
 
 		$this->assertEquals(
 			(array) PHP::box([1, 2, 3, 4]),
-			(array) $stack
+			(array) $stack,
 		);
 
 		$this->assertEquals(4, $stack->pop());

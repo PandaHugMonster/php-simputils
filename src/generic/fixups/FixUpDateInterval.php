@@ -2,7 +2,7 @@
 
 namespace spaf\simputils\generic\fixups;
 
-use spaf\simputils\models\InitConfig;
+use spaf\simputils\components\init\AppInitConfig;
 use spaf\simputils\traits\RedefinableComponentTrait;
 use spaf\simputils\traits\SimpleObjectTrait;
 
@@ -31,6 +31,6 @@ class FixUpDateInterval extends \DateInterval {
 	public $have_special_relative;
 
 	public static function redefComponentName(): string {
-		return InitConfig::REDEF_DATE_INTERVAL;
+		return AppInitConfig::REDEF_DATE_INTERVAL;
 	}
 }

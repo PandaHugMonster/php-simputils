@@ -5,6 +5,7 @@ namespace spaf\simputils\models;
 use Exception;
 use spaf\simputils\attributes\DebugHide;
 use spaf\simputils\attributes\Property;
+use spaf\simputils\components\init\AppInitConfig;
 use spaf\simputils\generic\SimpleObject;
 use spaf\simputils\Math;
 use spaf\simputils\PHP;
@@ -333,6 +334,6 @@ class TimeDuration extends SimpleObject {
 	}
 
 	public static function redefComponentName(): string {
-		return InitConfig::REDEF_TIME_DURATION;
+		return AppInitConfig::REDEF_TIME_DURATION;
 	}
 }

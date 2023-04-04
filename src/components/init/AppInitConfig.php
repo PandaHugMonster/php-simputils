@@ -29,13 +29,13 @@ use function is_string;
 
 /**
  *
- * @property-read Box|array $successful_init_blocks
- * @property ?L10n $l10n
- * @property ?DateTimeZone $default_tz
+ * @property-read Box|array                                   $successful_init_blocks
+ * @property ?L10n                                            $l10n
+ * @property ?DateTimeZone                                    $default_tz
  *
- * @property string $big_number_extension
- * @property bool $data_unit_long
- * @property null|ExecEnvHandlerInterface|\spaf\simputils\generic\BasicExecEnvHandler $ee Exec-Environment
+ * @property string                                           $big_number_extension
+ * @property bool                                             $data_unit_long
+ * @property null|ExecEnvHandlerInterface|BasicExecEnvHandler $ee Exec-Environment
  */
 class AppInitConfig extends InitConfig {
 
@@ -68,17 +68,149 @@ class AppInitConfig extends InitConfig {
 	const REDEF_URL = 'UrlObject';
 
 	public ?string $name = null;
+
 	public ?string $default_host = 'localhost';
-	public ?string $code_root = null;
-	public ?string $working_dir = null;
+
 	public array|Box $disable_init_for = [];
 
 	public null|array|Box $allowed_data_dirs = [];
+
+	/**
+	 * @var array|Box|null $init_blocks List of classes FQNs (those classes must implement
+	 *                                  interface `\spaf\simputils\interfaces\InitBlockInterface`)
+	 */
+	public null|array|Box $init_blocks = [
+		DotEnvInitBlock::class,
+	];
+
+	/**
+	 * @var array|Box|null $redefinitions Key => Closure/Class string
+	 */
+	public null|array|Box $redefinitions = [];
 
 	protected bool $_is_timezone_changed = false;
 
 	#[Property('ee', type: 'get')]
 	protected ?ExecEnvHandlerInterface $_ee_handler = null;
+
+	#[DebugHide]
+	protected null|string $_l10n_name = null;
+
+	#[DebugHide]
+	protected mixed $_l10n = null;
+
+	#[DebugHide]
+	protected array $_successful_init_blocks = [];
+
+	#[DebugHide]
+	protected bool $_is_already_setup = false;
+
+	function __construct(null|array|Box $args = null) {
+		parent::__construct($args);
+		PHP::metaMagicSpell($this, 'setup', $args ?? []);
+		if (empty($this->ee)) {
+			$this->ee = BasicExecEnvHandler::EE_UNKNOWN;
+		}
+	}
+
+	/**
+	 * The very first thing is being run, when config successfully registered
+	 *
+	 * Can be redefined to do initialization/bootstrapping of your stuff
+	 *
+	 * IMP  Keep in mind to call parent method, to do not disable "init_blocks" invocation.
+	 *      If redefined without invoked parent method - then no code of `$init_blocks` would
+	 *      be initialized!
+	 *
+	 * If init-block objects are created and initialized successfully - then those objects added to
+	 * `$ran_init_blocks`.
+	 *
+	 */
+	function init(...$params) {
+		// The only place getenv is used. It might be safe enough, though not sure yet.
+		if (empty($this->name) || $this->name === 'app') {
+			$_ENV = CommonMemoryCacheIndex::$initial_get_env_state = !empty($_ENV)
+				?$_ENV
+				:(getenv() ?? []); // @codeCoverageIgnore
+		}
+
+		foreach ($this->init_blocks as $block_class) {
+			$orig_obj = null;
+			if ($block_class instanceof InitBlockInterface) {
+				$orig_obj = $block_class;
+				$block_class = $block_class::class;
+			}
+			if (class_exists($block_class)) {
+				if (in_array($block_class, $this->disable_init_for)) {
+					continue; // @codeCoverageIgnore
+				}
+
+				$init_block_obj = $orig_obj ?? new $block_class;
+				/** @var \spaf\simputils\interfaces\InitBlockInterface $init_block_obj */
+				$init_res = $init_block_obj->initBlock($this);
+				if (is_null($init_res) || $init_res == true) {
+					$this->_successful_init_blocks[] = $init_block_obj;
+				}
+			}
+		}
+		$this->_is_already_setup = true;
+	}
+
+	/** @noinspection PhpUndefinedMethodInspection */
+
+	/**
+	 * Setting up the InitConfig
+	 *
+	 * TODO Changed the modifier to "public" maybe another solution?
+	 *
+	 * @param array|Box $data Arguments for the object
+	 *
+	 * @return $this
+	 * @throws InitConfigAlreadyInitialized Already initialized
+	 */
+	public function ___setup(array|Box $data): static {
+		if (!$this->_is_already_setup) {
+			foreach ($data as $key => $item) {
+				if (is_numeric($key)) {
+					if ($item instanceof InitBlockInterface) {
+						$this->init_blocks[] = $item;
+						// More objects recognition could be added here
+					} else {
+						throw new ValueError("Not recognized argument: {$item}");
+					}
+				} else {
+					$this->$key = $item;
+				}
+			}
+
+			// This is important to do not consider default l10n setting of tz as "tz changed"
+			$this->_is_timezone_changed = false;
+
+			if (isset($data['default_tz'])) {
+				// NOTE Important to do it so, because otherwise the "l10n" value will
+				//      override it depending on the order of the config array
+				$this->default_tz = $data['default_tz'];
+			}
+		} else {
+			throw new InitConfigAlreadyInitialized( // @codeCoverageIgnore
+				'The InitConfig object is already setup and initialized.'.
+				'It\'s not possible to initialize it more than once.'
+			);
+		}
+
+		return $this;
+	}
+
+	public function __toString(): string {
+		$box_class = PHP::redef(Box::class);
+		$init_blocks = $this->init_blocks;
+		if (!$init_blocks instanceof $box_class) {
+			$init_blocks = new $box_class($init_blocks);
+		}
+
+		return "{$this->class_short}[name={$this->name}, code_root={$this->code_root}, ".
+			"working_dir={$this->working_dir}, init_blocks={$init_blocks}]";
+	}
 
 	#[Property('ee')]
 	protected function setEe(null|ExecEnvHandlerInterface|array|Box|string $val) {
@@ -94,16 +226,6 @@ class AppInitConfig extends InitConfig {
 
 		$this->_ee_handler = $obj;
 	}
-
-	#[DebugHide]
-	protected null|string $_l10n_name = null;
-	#[DebugHide]
-	protected mixed $_l10n = null;
-
-	#[DebugHide]
-	protected array $_successful_init_blocks = [];
-	#[DebugHide]
-	protected bool $_is_already_setup = false;
 
 	#[Property('default_tz')]
 	#[Shortcut('DT::getDefaultTimeZone()')]
@@ -123,7 +245,8 @@ class AppInitConfig extends InitConfig {
 		return $this->_l10n;
 	}
 
-	/** @noinspection PhpUndefinedMethodInspection */
+	//	public null|array|Box $init_blocks = [];
+
 	#[Property('l10n')]
 	protected function setL10n(null|string|L10n $val): void {
 		$preserved_tz = null;
@@ -143,11 +266,11 @@ class AppInitConfig extends InitConfig {
 				$val = $class::createFrom($path);
 
 				$custom_file = FS::file(
-					FS::path($this->working_dir, 'data', 'l10n', "{$l10n_name}.json")
+					FS::path($this->working_dir, 'data', 'l10n', "{$l10n_name}.json"),
 				);
 				if ($custom_file->exists) {
 					PHP::metaMagicSpell( // @codeCoverageIgnore
-						$val, 'setup', $custom_file->content ?? [] // @codeCoverageIgnore
+						$val, 'setup', $custom_file->content ?? [], // @codeCoverageIgnore
 					); // @codeCoverageIgnore
 				}
 				$val->name = $l10n_name;
@@ -183,7 +306,7 @@ class AppInitConfig extends InitConfig {
 	#[Property('big_number_extension')]
 	#[Shortcut('BigNumber::$default_extension')]
 	protected function setBigNumberExt(string $val) {
-		 BigNumber::$default_extension = $val;
+		BigNumber::$default_extension = $val;
 	}
 
 	/**
@@ -216,119 +339,5 @@ class AppInitConfig extends InitConfig {
 	#[Shortcut('DataUnit::$long_format')]
 	protected function getDataUnitLong(): bool {
 		return DataUnit::$long_format;
-	}
-
-	//	public null|array|Box $init_blocks = [];
-	/**
-	 * @var array|Box|null $init_blocks List of classes FQNs (those classes must implement
-	 *                                  interface `\spaf\simputils\interfaces\InitBlockInterface`)
-	 */
-	public null|array|Box $init_blocks = [
-		DotEnvInitBlock::class,
-	];
-
-	/**
-	 * @var array|Box|null $redefinitions Key => Closure/Class string
-	 */
-	public null|array|Box $redefinitions = [];
-
-	public function __construct(null|array|Box $args = null) {
-//		$this->___setup($args ?? []);
-		PHP::metaMagicSpell($this, 'setup', $args ?? []);
-	}
-
-	/**
-	 * The very first thing is being run, when config successfully registered
-	 *
-	 * Can be redefined to do initialization/bootstrapping of your stuff
-	 *
-	 * IMP  Keep in mind to call parent method, to do not disable "init_blocks" invocation.
-	 *      If redefined without invoked parent method - then no code of `$init_blocks` would
-	 *      be initialized!
-	 *
-	 * If init-block objects are created and initialized successfully - then those objects added to
-	 * `$ran_init_blocks`.
-	 *
-	 */
-	public function init() {
-		// The only place getenv is used. It might be safe enough, though not sure yet.
-		if (empty($this->name) || $this->name === 'app') {
-			$_ENV = CommonMemoryCacheIndex::$initial_get_env_state = !empty($_ENV)
-				?$_ENV:(getenv() ?? []); // @codeCoverageIgnore
-		}
-
-		foreach ($this->init_blocks as $block_class) {
-			$orig_obj = null;
-			if ($block_class instanceof InitBlockInterface) {
-				$orig_obj = $block_class;
-				$block_class = $block_class::class;
-			}
-			if (class_exists($block_class)) {
-				if (in_array($block_class, $this->disable_init_for)) {
-					continue; // @codeCoverageIgnore
-				}
-
-				$init_block_obj = $orig_obj ?? new $block_class;
-				/** @var \spaf\simputils\interfaces\InitBlockInterface $init_block_obj */
-				$init_res = $init_block_obj->initBlock($this);
-				if (is_null($init_res) || $init_res == true) {
-					$this->_successful_init_blocks[] = $init_block_obj;
-				}
-			}
-		}
-		$this->_is_already_setup = true;
-	}
-
-	/**
-	 * Setting up the InitConfig
-	 *
-	 * TODO Changed the modifier to "public" maybe another solution?
-	 *
-	 * @param array|Box $data Arguments for the object
-	 *
-	 * @return $this
-	 * @throws \spaf\simputils\exceptions\InitConfigAlreadyInitialized Already initialized
-	 */
-	public function ___setup(array|Box $data): static {
-		if (!$this->_is_already_setup) {
-			foreach ($data as $key => $item) {
-				if (is_numeric($key)) {
-					if ($item instanceof InitBlockInterface) {
-						$this->init_blocks[] = $item;
-
-						// More objects recognition could be added here
-					} else {
-						throw new ValueError("Not recognized argument: {$item}");
-					}
-				} else {
-					$this->$key = $item;
-				}
-			}
-
-			// This is important to do not consider default l10n setting of tz as "tz changed"
-			$this->_is_timezone_changed = false;
-
-			if (isset($data['default_tz'])) {
-				// NOTE Important to do it so, because otherwise the "l10n" value will
-				//      override it depending on the order of the config array
-				$this->default_tz = $data['default_tz'];
-			}
-		} else {
-			throw new InitConfigAlreadyInitialized( // @codeCoverageIgnore
-				'The InitConfig object is already setup and initialized.' .
-				'It\'s not possible to initialize it more than once.'
-			);
-		}
-		return $this;
-	}
-
-	public function __toString(): string {
-		$box_class = PHP::redef(Box::class);
-		$init_blocks = $this->init_blocks;
-		if (!$init_blocks instanceof $box_class) {
-			$init_blocks = new $box_class($init_blocks);
-		}
-		return  "{$this->class_short}[name={$this->name}, code_root={$this->code_root}, " .
-				"working_dir={$this->working_dir}, init_blocks={$init_blocks}]";
 	}
 }

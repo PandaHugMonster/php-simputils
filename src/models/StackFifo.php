@@ -2,6 +2,8 @@
 
 namespace spaf\simputils\models;
 
+use spaf\simputils\components\init\AppInitConfig;
+
 /**
  * Stack FIFO
  *
@@ -27,6 +29,6 @@ class StackFifo extends StackLifo {
 	}
 
 	public static function redefComponentName(): string {
-		return InitConfig::REDEF_STACK_FIFO;
+		return AppInitConfig::REDEF_STACK_FIFO;
 	}
 }

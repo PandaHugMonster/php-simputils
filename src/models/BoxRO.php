@@ -2,6 +2,7 @@
 
 namespace spaf\simputils\models;
 
+use spaf\simputils\components\init\AppInitConfig;
 use spaf\simputils\exceptions\ReadOnlyProblem;
 use spaf\simputils\traits\ArrayReadOnlyAccessTrait;
 use spaf\simputils\traits\RedefinableComponentTrait;
@@ -29,6 +30,6 @@ class BoxRO extends Box {
 	}
 
 	static function redefComponentName(): string {
-		return InitConfig::REDEF_BRO; // @codeCoverageIgnore
+		return AppInitConfig::REDEF_BRO; // @codeCoverageIgnore
 	}
 }

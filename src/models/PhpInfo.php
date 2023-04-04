@@ -4,6 +4,7 @@ namespace spaf\simputils\models;
 
 use spaf\simputils\attributes\PropertyBatch;
 use spaf\simputils\Boolean;
+use spaf\simputils\components\init\AppInitConfig;
 use spaf\simputils\generic\constants\ConstPHPInfo as constants;
 use spaf\simputils\PHP;
 use spaf\simputils\special\CommonMemoryCacheIndex;
@@ -373,6 +374,6 @@ class PhpInfo extends BoxRO {
 	 * @return string
 	 */
 	public static function redefComponentName(): string {
-		return InitConfig::REDEF_PHP_INFO;
+		return AppInitConfig::REDEF_PHP_INFO;
 	}
 }

@@ -3,6 +3,7 @@
 namespace spaf\simputils\models;
 
 use spaf\simputils\attributes\Property;
+use spaf\simputils\components\init\AppInitConfig;
 use spaf\simputils\generic\SimpleObject;
 use spaf\simputils\PHP;
 use spaf\simputils\Str;
@@ -66,6 +67,6 @@ class IPv4Range extends SimpleObject {
 	 * @inheritDoc
 	 */
 	public static function redefComponentName(): string {
-		return InitConfig::REDEF_IPV4_RANGE;
+		return AppInitConfig::REDEF_IPV4_RANGE;
 	}
 }

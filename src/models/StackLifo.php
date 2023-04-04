@@ -3,6 +3,7 @@
 namespace spaf\simputils\models;
 
 use Generator;
+use spaf\simputils\components\init\AppInitConfig;
 use spaf\simputils\exceptions\SortingIsNotPermitted;
 use spaf\simputils\Math;
 use spaf\simputils\traits\RedefinableComponentTrait;
@@ -158,6 +159,6 @@ class StackLifo extends Box {
 	 * @return string
 	 */
 	public static function redefComponentName(): string {
-		return InitConfig::REDEF_STACK_LIFO;
+		return AppInitConfig::REDEF_STACK_LIFO;
 	}
 }

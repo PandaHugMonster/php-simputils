@@ -72,7 +72,7 @@ use spaf\simputils\PHP;
  * ```php
  *  PHP::init([
  *      'redefinitions' => [
- *          InitConfig::REDEF_PD => function (...$args) {
+ *          AppInitConfig::REDEF_PD => function (...$args) {
  *              $args = bx($args);
  *
  *              echo "Ho Ho Ho / {$args} / Gooli Gooli Gooli";
@@ -690,7 +690,7 @@ function fl(null|string|Box|array|File $file = null, $app = null): ?File {
  *
  * @param string|null $path
  *
- * @return \spaf\simputils\models\Dir|null
+ * @return Dir|null
  */
 #[Shortcut('FS::dir()')]
 function dr(null|string $path = null): ?Dir {

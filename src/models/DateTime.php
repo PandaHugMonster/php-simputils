@@ -5,6 +5,7 @@ use DateTimeInterface;
 use spaf\simputils\attributes\DebugHide;
 use spaf\simputils\attributes\markers\Shortcut;
 use spaf\simputils\attributes\Property;
+use spaf\simputils\components\init\AppInitConfig;
 use spaf\simputils\DT;
 use spaf\simputils\generic\fixups\FixUpDateTime;
 use spaf\simputils\PHP;
@@ -428,7 +429,7 @@ class DateTime extends FixUpDateTime {
 	}
 
 	public static function redefComponentName(): string {
-		return InitConfig::REDEF_DATE_TIME;
+		return AppInitConfig::REDEF_DATE_TIME;
 	}
 
 	function setFromData($data): static {

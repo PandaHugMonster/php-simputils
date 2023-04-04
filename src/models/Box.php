@@ -9,6 +9,7 @@ use spaf\simputils\attributes\Extract;
 use spaf\simputils\attributes\markers\Affecting;
 use spaf\simputils\attributes\markers\Shortcut;
 use spaf\simputils\attributes\Property;
+use spaf\simputils\components\init\AppInitConfig;
 use spaf\simputils\Math;
 use spaf\simputils\PHP;
 use spaf\simputils\Str;
@@ -1121,7 +1122,7 @@ class Box extends ArrayObject {
 	 * @return string
 	 */
 	public static function redefComponentName(): string {
-		return InitConfig::REDEF_BOX;
+		return AppInitConfig::REDEF_BOX;
 	}
 
 	//// Meta-Magic methods

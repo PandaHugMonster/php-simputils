@@ -6,6 +6,7 @@ namespace spaf\simputils\models;
 use spaf\simputils\attributes\DebugHide;
 use spaf\simputils\attributes\Extract;
 use spaf\simputils\attributes\Property;
+use spaf\simputils\components\init\AppInitConfig;
 use spaf\simputils\components\versions\parsers\DefaultVersionParser;
 use spaf\simputils\generic\SimpleObject;
 use spaf\simputils\interfaces\VersionParserInterface;
@@ -397,6 +398,6 @@ class Version extends SimpleObject {
 	}
 
 	public static function redefComponentName(): string {
-		return InitConfig::REDEF_VERSION;
+		return AppInitConfig::REDEF_VERSION;
 	}
 }

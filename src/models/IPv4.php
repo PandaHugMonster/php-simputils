@@ -5,6 +5,7 @@ namespace spaf\simputils\models;
 use spaf\simputils\attributes\DebugHide;
 use spaf\simputils\attributes\Extract;
 use spaf\simputils\attributes\Property;
+use spaf\simputils\components\init\AppInitConfig;
 use spaf\simputils\exceptions\IPParsingException;
 use spaf\simputils\generic\BasicIP;
 use spaf\simputils\interfaces\UrlCompatible;
@@ -266,6 +267,6 @@ class IPv4 extends BasicIP implements UrlCompatible {
 	 * @inheritDoc
 	 */
 	public static function redefComponentName(): string {
-		return InitConfig::REDEF_IPV4;
+		return AppInitConfig::REDEF_IPV4;
 	}
 }

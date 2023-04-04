@@ -4,7 +4,7 @@ namespace spaf\simputils\generic\fixups;
 
 
 use DateTime;
-use spaf\simputils\models\InitConfig;
+use spaf\simputils\components\init\AppInitConfig;
 use spaf\simputils\traits\RedefinableComponentTrait;
 use spaf\simputils\traits\SimpleObjectTrait;
 
@@ -16,6 +16,6 @@ class FixUpDateTime extends DateTime {
 	use RedefinableComponentTrait;
 
 	public static function redefComponentName(): string {
-		return InitConfig::REDEF_DATE_TIME;
+		return AppInitConfig::REDEF_DATE_TIME;
 	}
 }

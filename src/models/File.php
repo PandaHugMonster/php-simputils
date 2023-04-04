@@ -7,6 +7,7 @@ use Exception;
 use spaf\simputils\attributes\DebugHide;
 use spaf\simputils\attributes\Extract;
 use spaf\simputils\attributes\Property;
+use spaf\simputils\components\init\AppInitConfig;
 use spaf\simputils\DT;
 use spaf\simputils\exceptions\IOProblem;
 use spaf\simputils\exceptions\PathProblem;
@@ -543,6 +544,6 @@ class File extends BasicResource {
 	 * @return string
 	 */
 	public static function redefComponentName(): string {
-		return InitConfig::REDEF_FILE;
+		return AppInitConfig::REDEF_FILE;
 	}
 }

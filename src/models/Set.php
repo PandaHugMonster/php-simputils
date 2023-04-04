@@ -2,6 +2,7 @@
 
 namespace spaf\simputils\models;
 
+use spaf\simputils\components\init\AppInitConfig;
 use spaf\simputils\PHP;
 use spaf\simputils\traits\RedefinableComponentTrait;
 
@@ -48,6 +49,6 @@ class Set extends Box {
 	}
 
 	public static function redefComponentName(): string {
-		return InitConfig::REDEF_SET;
+		return AppInitConfig::REDEF_SET;
 	}
 }

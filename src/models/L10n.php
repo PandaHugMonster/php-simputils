@@ -4,6 +4,7 @@ namespace spaf\simputils\models;
 
 use spaf\simputils\attributes\DebugHide;
 use spaf\simputils\attributes\Property;
+use spaf\simputils\components\init\AppInitConfig;
 use spaf\simputils\DT;
 use spaf\simputils\generic\SimpleObject;
 use spaf\simputils\PHP;
@@ -100,6 +101,6 @@ class L10n extends SimpleObject {
 	}
 
 	public static function redefComponentName(): string {
-		return InitConfig::REDEF_L10N; // @codeCoverageIgnore
+		return AppInitConfig::REDEF_L10N; // @codeCoverageIgnore
 	}
 }

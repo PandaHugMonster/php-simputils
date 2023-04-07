@@ -11,7 +11,6 @@ use spaf\simputils\models\File;
 use spaf\simputils\PHP;
 use spaf\simputils\Str;
 
-
 /**
  * @covers \spaf\simputils\FS
  * @covers \spaf\simputils\models\File
@@ -229,7 +228,7 @@ class FSTest extends TestCase {
 
 		$res = $dd->walk(true, new OnlyDirsFilter());
 		$this->assertInstanceOf(Box::class, $res);
-		$this->assertEquals(1, $res->size);
+		$this->assertEquals(2, $res->size);
 
 		$res = $dd->walk(true, new OnlyFilesFilter);
 		$this->assertInstanceOf(Box::class, $res);

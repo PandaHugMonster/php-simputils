@@ -18,7 +18,6 @@ use spaf\simputils\exceptions\RedefUnimplemented;
 use spaf\simputils\exceptions\RedefWrongReference;
 use spaf\simputils\exceptions\SerializationProblem;
 use spaf\simputils\exceptions\UnBoxable;
-use spaf\simputils\generic\BasicExecEnvHandler;
 use spaf\simputils\generic\BasicInitConfig;
 use spaf\simputils\generic\BasicIP;
 use spaf\simputils\generic\SimpleObject;
@@ -40,10 +39,8 @@ use Throwable;
 use function class_exists;
 use function class_parents;
 use function defined;
-use function dirname;
 use function intval;
 use function is_array;
-use function is_dir;
 use function is_null;
 use function is_object;
 use function is_resource;
@@ -245,6 +242,9 @@ class PHP {
 					);
 				}
 			} else {
+				if (is_string($array) && empty($array)) {
+					$array = [];
+				}
 				$res = new $class($array);
 			}
 		}

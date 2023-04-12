@@ -297,8 +297,9 @@ class PHP {
 	 *      right after the "composer autoloader".
 	 *
 	 */
-	public static function init(null|array|Box|BasicInitConfig|InitConfig|AppInitConfig $args = null):
-	BasicInitConfig|InitConfig|AppInitConfig {
+	public static function init(
+		null|array|Box|BasicInitConfig|InitConfig|AppInitConfig $args = null
+	): BasicInitConfig|InitConfig|AppInitConfig {
 
 		$config = null;
 		if ($args instanceof BasicInitConfig) {

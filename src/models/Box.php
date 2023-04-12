@@ -498,7 +498,7 @@ class Box extends ArrayObject {
 					}
 				} else {
 					// String, then replace if exists
-					if (!is_null($v)) {
+					if (!is_null($v) || !isset($this[$k])) {
 						$this[$k] = $v;
 					}
 				}

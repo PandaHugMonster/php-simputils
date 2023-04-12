@@ -68,6 +68,7 @@ class HttpProtocolProcessor extends BasicProtocolProcessor {
 		$m = [];
 		// NOTE Parsing URL
 		preg_match($regexp, $value, $m);
+
 		if ($part === static::PART_FULL) {
 			if (!$protocol) {
 				$protocol = static::$default_protocol;
@@ -120,7 +121,7 @@ class HttpProtocolProcessor extends BasicProtocolProcessor {
 			foreach ($params_pre_parsed as $item) {
 				if ($item && Str::contains($item, '=')) {
 					[$key, $val] = explode('=', $item);
-					if ($key && $val) {
+					if ($key) {
 						$val = Str::contains($val, '%')?urldecode($val):$val;
 
 						$params_res[$key] = $val;
@@ -134,7 +135,7 @@ class HttpProtocolProcessor extends BasicProtocolProcessor {
 			$host = Str::lower($host);
 		}
 
-		return PHP::box([
+		$r = PHP::box([
 			'protocol' => $protocol,
 			'user' => $user,
 			'pass' => $pass,
@@ -144,6 +145,7 @@ class HttpProtocolProcessor extends BasicProtocolProcessor {
 			'params' => $params,
 			'sharpy' => $sharpy,
 		]);
+		return $r;
 	}
 
 	private static function _stringify($url, bool $obfuscate, bool $relative) {

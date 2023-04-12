@@ -2,22 +2,22 @@
 
 ## 1.2.1
 
+## 1.2.0
+
+[//]: # (FIX   Don't forget to implement proper tests for the fixed timezone machanics)
+
 * Implemented extensive PHPDOC with examples to `\spaf\simputils\basic` (in progress)
 * Fixed ticket #116 (Weird bug of "tz" on DateTime)
 * Fixed bug with incorrect interpretation of TZ parameter
   in `\spaf\simputils\DT::normalize`. Previously `false` and `true` params for `$tz`
   were returning incorrect values.
-
-[//]: # (FIX   Don't forget to implement proper tests for the fixed timezone machanics)
-
-## 1.2.0
-
 * #144 | Added Renderer functionality
 	* `\spaf\simputils\traits\StaticRendererTrait` - Trait for static helpers to enable rendering
 	  features on them
 	* `\spaf\simputils\traits\BaseHtmlTrait` - Minimal HTML related methods and renderers trait
 	* `\spaf\simputils\Attrs` - PHP Attributes related helper
 	* `\spaf\simputils\Html` - Minimal HTML helper that can be used as a base for custom HTML helper
+* Fixed issue with url "params" when the params with empty value are stripped out.
 
 ## 1.1.4
 

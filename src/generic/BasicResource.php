@@ -260,7 +260,9 @@ abstract class BasicResource extends SimpleObject {
 	}
 
 	function ___withEnd($obj) {
-		$this->_fdao->___withEnd($this->_fdao);
+		$fdao = $this->_fdao;
+		$fdao->___withEnd($fdao);
+		$this->_fdao = null;
 	}
 
 	function open($type = 'r+', ...$params) {

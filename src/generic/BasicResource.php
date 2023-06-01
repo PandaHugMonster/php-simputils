@@ -5,14 +5,17 @@ namespace spaf\simputils\generic;
 use Closure;
 use spaf\simputils\attributes\DebugHide;
 use spaf\simputils\attributes\Property;
+use spaf\simputils\exceptions\Inconsistent;
 use spaf\simputils\FS;
 use spaf\simputils\models\Box;
 use spaf\simputils\models\DataUnit;
+use spaf\simputils\models\files\apps\access\CsvFileDataAccess;
 use spaf\simputils\models\files\apps\CsvProcessor;
 use spaf\simputils\models\files\apps\DotEnvProcessor;
 use spaf\simputils\models\files\apps\JsonProcessor;
 use spaf\simputils\models\files\apps\PHPFileProcessor;
 use spaf\simputils\models\files\apps\TextProcessor;
+use function fopen;
 
 /**
  * Basic resource abstract model
@@ -230,4 +233,47 @@ abstract class BasicResource extends SimpleObject {
 
 	#[Property('app')]
 	abstract protected function setResourceApp(null|Closure|array|BasicResourceApp $var): void;
+
+	/**
+	 * @var CsvFileDataAccess
+	 */
+	private $_fdao = null;
+
+	function ___withStart($obj, $callback) {
+		if ($this->_fdao) {
+			throw new Inconsistent(
+				'Can not start a new "with" operation without closing previous one.'
+			);
+		}
+		$fd = $this->fd;
+		$is_opened_locally = false;
+		if (empty($fd)) {
+			$is_opened_locally = true;
+			// FIX  need "open()" method with r/w params!!!
+			$fd = fopen($this->name_full, 'r+');
+		}
+
+		// FIX  Integrate this fd into File instance for consistency
+		$this->_fdao = $this->app->fileDataAccessObj($this, $fd, $is_opened_locally);
+
+		return $this->_fdao->___withStart($this->_fdao, $callback);
+	}
+
+	function ___withEnd($obj) {
+		$this->_fdao->___withEnd($this->_fdao);
+	}
+
+	function open($type = 'r+', ...$params) {
+		$fd = $this->fd;
+		$is_opened_locally = false;
+
+		if (empty($fd)) {
+			$is_opened_locally = true;
+			$fd = fopen($this->name_full, $type);
+		} else {
+			// TODO Log message: Already opened
+		}
+
+		return $this->app->fileDataAccessObj($this, $fd, $is_opened_locally);
+	}
 }

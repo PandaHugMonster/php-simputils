@@ -35,6 +35,7 @@ use function is_object;
 use function is_string;
 use function preg_replace;
 use function shuffle;
+use function spaf\simputils\basic\bx;
 use function uasort;
 
 /**
@@ -774,6 +775,49 @@ class Box extends ArrayObject {
 		return $this;
 	}
 
+	protected static function _buildImplodedStr(Box $box, $sep = null, $stretcher = null) {
+		$res = bx();
+
+		if (is_null($sep)) {
+			$sep = static::$default_separator;
+		}
+
+		foreach ($box as $key => $val) {
+			if ($wrap = $box->_value_wrap) {
+				if (is_callable($wrap)) {
+					$val = $wrap($val, $key, $box);
+				} else if (is_string($wrap)) {
+					$val = "{$wrap}{$val}{$wrap}";
+				}
+			}
+
+			if (!is_null($stretcher) && $stretcher !== false) {
+				if ($wrap = $box->_key_wrap) {
+					if (is_callable($wrap)) {
+						$key = $wrap($key, $val, $box);
+					} else if (is_string($wrap)) {
+						$key = "{$wrap}{$key}{$wrap}";
+					}
+				}
+
+				if (is_callable($stretcher)) {
+					$sub_res = $stretcher($val, $key, $box);
+					$res->append("{$sub_res}");
+				} else {
+					$res->append("{$key}{$stretcher}{$val}");
+				}
+			} else {
+				$res->append("{$val}");
+			}
+
+		}
+
+		return implode(
+			$sep,
+			(array) $res
+		);
+	}
+
 	/**
 	 * @param ?string $sep Separator
 	 * @param callable|string|bool|null $stretcher
@@ -788,46 +832,11 @@ class Box extends ArrayObject {
 	#[Shortcut('\implode()')]
 	public function implode(?string $sep = null, null|callable|string|bool $stretcher = null): string {
 		$stretcher = $stretcher ?? $this->_stretcher;
-		if (!is_null($stretcher) && $stretcher !== false) {
-			$res = new static();
-			if ($stretcher === true) {
-				$stretcher = '=';
-			}
-			foreach ($this as $key => $val) {
-				if ($wrap = $this->_value_wrap) {
-					if (is_callable($wrap)) {
-						$val = $wrap($val, $key, $this);
-					} else if (is_string($wrap)) {
-						$val = "{$wrap}{$val}{$wrap}";
-					}
-				}
-				if ($wrap = $this->_key_wrap) {
-					if (is_callable($wrap)) {
-						$key = $wrap($key, $val, $this);
-					} else if (is_string($wrap)) {
-						$key = "{$wrap}{$key}{$wrap}";
-					}
-				}
-				if (is_callable($stretcher)) {
-					$sub_res = $stretcher($val, $key, $this);
-					$res->append("{$sub_res}");
-				} else {
-					$res->append("{$key}{$stretcher}{$val}");
-				}
-			}
-
-		} else {
-			$res = $this;
+		if ($stretcher === true) {
+			$stretcher = '=';
 		}
 
-		$sep = !is_null($sep)
-			?$sep
-			:($this->_separator ?? static::$default_separator);
-
-		return implode(
-			$sep,
-			(array) $res
-		);
+		return static::_buildImplodedStr($this, $sep ?? $this->_separator, $stretcher);
 	}
 
 	/**

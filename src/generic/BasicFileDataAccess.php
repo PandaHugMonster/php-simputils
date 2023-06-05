@@ -6,6 +6,7 @@ use spaf\simputils\attributes\Property;
 use spaf\simputils\models\File;
 use function fclose;
 use function fopen;
+use function fread;
 use function rewind;
 
 /**
@@ -63,6 +64,15 @@ abstract class BasicFileDataAccess extends SimpleObject {
 
 	function rewind() {
 		rewind($this->_fd);
+	}
+
+	function read($length = 1024): mixed {
+		$fd = $this->_fd;
+		$res = fread($fd, $length);
+		if ($res === false) {
+			return null;
+		}
+		return $res;
 	}
 
 }

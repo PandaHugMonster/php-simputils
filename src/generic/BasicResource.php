@@ -21,11 +21,11 @@ use function fopen;
  * Basic resource abstract model
  * TODO Currently only "local" resources/files are supported. In the future it will be extended
  *
- * @property-read ?string $mime_type
+ * @property ?string $mime_type
  * @property-read int $size Size in bytes
  * @property-read ?string $size_hr Human readable size string
- * @property-read ?string $extension
- * @property-read ?string $name
+ * @property ?string $extension
+ * @property ?string $name
  * @property-read ?string $name_full
  * @property-read ?string $path
  * @property-read bool $is_local
@@ -36,6 +36,8 @@ use function fopen;
  * @property-read ?resource $fd
  * @property-read BasicResourceApp|callable|null $app
  * @property-read bool $is_executable_processing_enabled
+ *
+ * @property-read ?string $filename
  *
  */
 abstract class BasicResource extends SimpleObject {
@@ -75,8 +77,10 @@ abstract class BasicResource extends SimpleObject {
 	#[DebugHide]
 	protected ?string $_path = null;
 	#[DebugHide]
+	#[Property('name', 'set')]
 	protected ?string $_name = null;
 	#[DebugHide]
+	#[Property('extension', 'set')]
 	protected ?string $_ext = null;
 	#[DebugHide]
 	protected ?int $_size = null;
@@ -86,6 +90,10 @@ abstract class BasicResource extends SimpleObject {
 	protected ?string $_md5 = null;
 	#[DebugHide]
 	protected mixed $_fd = null;
+
+	#[DebugHide]
+	#[Property('mime_type', 'set')]
+	protected ?string $_override_mime = null;
 
 	/**
 	 * Returns ResourceApp object for a particular mime-type/file-type
@@ -137,9 +145,16 @@ abstract class BasicResource extends SimpleObject {
 		return $this->urn;
 	}
 
+	#[Property('filename')]
+	protected function getFilename(): string {
+		$name = $this->_name ?: '';
+		$ext = $this->_ext?".{$this->_ext}":'';
+		return "{$name}{$ext}";
+	}
+
 	#[Property('mime_type')]
 	protected function getMimeType(): ?string {
-		return $this->_mime_type;
+		return $this->_override_mime ?: $this->_mime_type;
 	}
 
 	/**

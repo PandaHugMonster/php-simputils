@@ -34,7 +34,7 @@ use function fopen;
  *
  * @property-read ?string $md5
  * @property-read ?resource $fd
- * @property-read BasicResourceApp|callable|null $app
+ * @property BasicResourceApp|callable|null $app
  * @property-read bool $is_executable_processing_enabled
  *
  * @property-read ?string $filename

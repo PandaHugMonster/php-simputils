@@ -4,6 +4,7 @@ namespace spaf\simputils\models\files\apps\settings;
 
 use Closure;
 use spaf\simputils\generic\SimpleObject;
+use function is_null;
 
 class CsvSettings extends SimpleObject {
 
@@ -53,6 +54,32 @@ class CsvSettings extends SimpleObject {
 	 */
 	public null|Closure|array $postprocessing_callback = null;
 
-
+	function __construct(
+		$separator = null,
+		$enclosure = null,
+		$escape = null,
+		$first_line_header = null,
+		$allow_raw_string_saving = null,
+		$postprocessing_callback = null
+	) {
+		if (!is_null($separator)) {
+			$this->separator = $separator;
+		}
+		if (!is_null($enclosure)) {
+			$this->enclosure = $enclosure;
+		}
+		if (!is_null($escape)) {
+			$this->escape = $escape;
+		}
+		if (!is_null($first_line_header)) {
+			$this->first_line_header = $first_line_header;
+		}
+		if (!is_null($allow_raw_string_saving)) {
+			$this->allow_raw_string_saving = $allow_raw_string_saving;
+		}
+		if (!is_null($postprocessing_callback)) {
+			$this->postprocessing_callback = $postprocessing_callback;
+		}
+	}
 	// TODO Add "null" or "empty" setting, that will be used to fulfill and to be parsed as null
 }

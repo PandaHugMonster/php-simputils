@@ -63,7 +63,6 @@ use function unserialize;
 use function var_dump;
 use const JSON_ERROR_NONE;
 
-
 /**
  * Special static PHP helper
  *
@@ -856,6 +855,9 @@ class PHP {
 					argument to box");
 				}
 			} else {
+				if (is_string($array) && empty($array)) {
+					$array = [];
+				}
 				$res = new $class($array);
 			}
 		}

@@ -23,7 +23,9 @@ use function file_exists;
 use function file_put_contents;
 use function fopen;
 use function fstat;
-use function is_array;
+use function get_resource_id;
+use function get_resource_type;
+use function is_integer;
 use function is_null;
 use function md5;
 use function rewind;
@@ -65,6 +67,8 @@ use function stream_get_contents;
  * @property-read ?int $group_id
  * @property-read ?int $file_mode
  * @property-read ?int $links_number
+ * @property-read ?int $resource_id
+ * @property-read ?int $resource_type
  */
 class File extends BasicResource {
 	use RedefinableComponentTrait;
@@ -109,30 +113,40 @@ class File extends BasicResource {
 	 *
 	 * IMP  All the mime-less files would be processing by default `TextProcessor`.
 	 *
-	 * @param mixed                         $file      File reference
-	 * @param string|\Closure|callable|null $app       Callable/Closure or Class string that
-	 *                                                 would be used for file processing (read
-	 *                                                 and write)
-	 * @param ?string                       $mime_type Enforcing mime type (recommended to
-	 *                                                 supply it always when file descriptor
-	 *                                                 or null is supplied to `$file` argument)
-	 *
+	 * @param string|resource|int|Box|array|File|null $file      File reference
+	 * @param string|Closure|callable|null            $app       Callable/Closure or Class string
+	 *                                                           that would be used for file
+	 *                                                           processing (read and write)
+	 * @param ?string                                 $mime_type Enforcing mime type (recommended to
+	 *                                                           supply it always when file
+	 *                                                           descriptor
+	 *                                                           or null is supplied to `$file`
+	 *                                                           argument)
 	 */
 	public function __construct(
 		mixed $file = null,
 		null|string|Closure|callable $app = null,
-		?string $mime_type = null
+		?string $mime_type = null,
+		string $in_memory_type = 'memory'
 	) {
 
-		if (is_array($file) || $file instanceof Box) {
+
+		if (PHP::isArrayCompatible($file)) {
 			$file = FS::locate(...$file); // @codeCoverageIgnore
 		}
 
 		if (is_null($file)) {
 			// Temp file, created in memory
 			// In this case you have to provide $app explicitly
+			if (!PHP::box(['memory', 'temp'])->containsValue($in_memory_type)) {
+				throw new ValueError(
+					'Only values "memory" and "temp" are supported for $in_memory_type'
+				);
+			}
 
-			$this->_fd = fopen('php://memory', 'r+');
+			$this->_fd = fopen("php://{$in_memory_type}", 'r+');
+		} else if (is_integer($file)) {
+			$this->_fd = fopen("php://fd/{$file}", 'r+');
 		} else if (is_resource($file)) {
 			// If file descriptor provided
 			$this->_fd = $file;
@@ -141,18 +155,22 @@ class File extends BasicResource {
 			// File instance is supplied
 			if (!empty($file->fd)) {
 				$this->_fd = $file->fd;
-			} else {
-				$this->_path = $file->path;
-				$this->_name = $file->name;
-				$this->_ext = $file->extension;
 			}
+
+			$this->_path = $file->path;
+			$this->_name = $file->name;
+			$this->_ext = $file->extension;
+
 			$this->_mime_type = $mime_type ?? $file->mime_type;
 		} else if (Str::is($file)) {
 			// File path is supplied
 			[$this->_path, $this->_name, $this->_ext] = FS::splitFullFilePath($file);
 			$this->_mime_type = $mime_type ?? FS::getFileMimeType($file);
 		} else {
-			throw new ValueError('File object can receive only null|string|resource|File argument');
+			throw new ValueError(
+				'File object can receive only'.
+				' string|resource|int|Box|array|File|null argument'
+			);
 		}
 
 
@@ -161,8 +179,6 @@ class File extends BasicResource {
 			if (!empty($app)) {
 				$this->_is_default_app = false; // @codeCoverageIgnore
 			}
-			$name = $this->name;
-			$name2 = $this->name_full;
 			$app = static::getCorrespondingProcessor($this->name_full, $this->mime_type, $app);
 		}
 
@@ -340,6 +356,20 @@ class File extends BasicResource {
 		[$dir, $name, $ext] = FS::splitFullFilePath($this->_backup_file);
 
 		$this->copy($dir, $name, $ext,true);
+	}
+
+	#[Property('resource_id')]
+	protected function getResourceId(): ?int {
+		return $this->_fd
+			?get_resource_id($this->_fd)
+			:null;
+	}
+
+	#[Property('resource_type')]
+	protected function getResourceType(): ?string {
+		return $this->_fd
+			?get_resource_type($this->_fd)
+			:null;
 	}
 
 	#[Property('links_number')]

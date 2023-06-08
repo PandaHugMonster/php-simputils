@@ -2,24 +2,44 @@
 
 namespace spaf\simputils\models;
 
+use Exception;
 use spaf\simputils\generic\fixups\FixUpDateTimeZone;
 use spaf\simputils\Str;
 
 class DateTimeZone extends FixUpDateTimeZone {
 
-	function setFromData($data): static {
-		$this->__construct($data['value']);
-		return $this;
-	}
-
+	/**
+	 * @codeCoverageIgnore
+	 * @return Box|array
+	 */
 	function ___serialize(): Box|array {
 		return [
 			'value' => "{$this}",
 		];
 	}
 
+	/**
+	 * @param array|Box $data
+	 *
+	 * @return $this
+	 * @throws Exception
+	 * @codeCoverageIgnore
+	 */
 	protected function ___deserialize(array|Box $data): static {
 		return $this->setFromData($data);
+	}
+
+	/**
+	 * @param $data
+	 *
+	 * @codeCoverageIgnore
+	 * @return $this
+	 * @throws Exception
+	 */
+	function setFromData($data): static {
+		$this->__construct($data['value']);
+
+		return $this;
 	}
 
 	public function __toString(): string {

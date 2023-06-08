@@ -4,15 +4,24 @@ namespace spaf\simputils\generic;
 
 
 use spaf\simputils\attributes\Property;
+use spaf\simputils\exceptions\NotImplemented;
 
 /**
  *
  * @property-read bool $is_fd_supported
+ * @property-read bool $default_settings
  */
 abstract class BasicResourceApp extends SimpleObject {
 
 	#[Property]
 	protected bool $_is_fd_supported = true;
+
+	#[Property(type: 'get')]
+	protected $_default_settings = null;
+
+	function __construct($default_settings = null) {
+		$this->_default_settings = $default_settings;
+	}
 
 	/**
 	 * Getting content at once
@@ -59,15 +68,20 @@ abstract class BasicResourceApp extends SimpleObject {
 	 * @codeCoverageIgnore
 	 *
 	 * @param ?BasicResource $file Target file
+	 * @param mixed          $app_default_settings
 	 *
 	 * @return mixed
 	 */
-	public static function getSettings(?BasicResource $file = null): mixed {
+	public static function getSettings(
+		?BasicResource $file = null,
+		mixed $app_default_settings = null
+	): mixed {
+		$app_settings = $app_default_settings ?? static::defaultProcessorSettings();
 		if (empty($file)) {
-			return static::defaultProcessorSettings();
+			return $app_settings;
 		}
 
-		return $file->processor_settings ?? static::defaultProcessorSettings();
+		return $file->processor_settings ?? $app_settings;
 	}
 
 	public function __invoke(
@@ -82,4 +96,9 @@ abstract class BasicResourceApp extends SimpleObject {
 
 		$this->setContent($fd, $data, $file);
 	}
+
+	function fileDataAccessObj($file, $fd = null, $is_opened_locally = false) {
+		throw new NotImplemented();
+	}
+
 }

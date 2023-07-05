@@ -63,6 +63,8 @@ abstract class BasicInitConfig extends SimpleObject {
 	const REDEF_IPV4_RANGE = 'IPv4Range';
 	const REDEF_IPV4 = 'IPv4';
 	const REDEF_URL = 'UrlObject';
+	const REDEF_SECRET = 'Secret';
+	const REDEF_PASSWORD = 'Password';
 
 	public ?string $name = null;
 	public ?string $default_host = 'localhost';

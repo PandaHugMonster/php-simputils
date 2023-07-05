@@ -19,7 +19,9 @@ use spaf\simputils\models\InitConfig;
 use spaf\simputils\models\IPv4;
 use spaf\simputils\models\IPv4Range;
 use spaf\simputils\models\L10n;
+use spaf\simputils\models\Password;
 use spaf\simputils\models\PhpInfo;
+use spaf\simputils\models\Secret;
 use spaf\simputils\models\Set;
 use spaf\simputils\models\StackFifo;
 use spaf\simputils\models\StackLifo;
@@ -67,6 +69,8 @@ class CodeBlocksCacheIndex {
 			InitConfig::REDEF_IPV4_RANGE => IPv4Range::class,
 			InitConfig::REDEF_IPV4 => IPv4::class,
 			InitConfig::REDEF_URL => UrlObject::class,
+			InitConfig::REDEF_SECRET => Secret::class,
+			InitConfig::REDEF_PASSWORD => Password::class,
 		]);
 	}
 

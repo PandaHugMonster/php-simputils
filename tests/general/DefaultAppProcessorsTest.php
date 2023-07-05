@@ -173,6 +173,7 @@ class DefaultAppProcessorsTest extends TestCase {
 //	}
 
 	/**
+	 * @uses \spaf\simputils\models\files\apps\settings\CsvSettings
 	 * @return void
 	 */
 	function testCsvProcessor() {

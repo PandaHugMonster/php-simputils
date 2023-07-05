@@ -1,6 +1,5 @@
 <?php
 
-
 use PHPUnit\Framework\TestCase;
 use spaf\simputils\models\Box;
 use spaf\simputils\models\Set;
@@ -112,6 +111,7 @@ class BoxTest extends TestCase {
 	 * @uses \spaf\simputils\components\normalizers\BooleanNormalizer
 	 * @uses \spaf\simputils\components\normalizers\StringNormalizer
 	 * @uses \spaf\simputils\traits\PropertiesTrait::__set
+	 * @uses \spaf\simputils\basic\bx
 	 *
 	 * @return void
 	 */

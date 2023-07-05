@@ -37,6 +37,10 @@ class BoxAdvancedFeaturesTest extends TestCase {
 	 * @param $expected
 	 * @param $box
 	 *
+	 * @uses \spaf\simputils\PHP
+	 * @uses \spaf\simputils\Str
+	 * @uses \spaf\simputils\basic\bx
+	 * @uses \spaf\simputils\special\CodeBlocksCacheIndex
 	 * @dataProvider dataProviderForStretching
 	 * @return void
 	 */

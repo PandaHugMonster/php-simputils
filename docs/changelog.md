@@ -18,6 +18,8 @@
 	* `\spaf\simputils\Attrs` - PHP Attributes related helper
 	* `\spaf\simputils\Html` - Minimal HTML helper that can be used as a base for custom HTML helper
 * Fixed issue with url "params" when the params with empty value are stripped out.
+* Added models `\spaf\simputils\models\Password` and `\spaf\simputils\models\Secret`.
+  Documentation: [Passwords and Secrets explained](passwords-and-secrets.md)
 
 ## 1.1.4
 
@@ -111,7 +113,7 @@
 * Implemented the shortcut for the "InitConfig". Now instead of
   `$config = PHP::getInitConfig()` you can use a shortcut `$config = ic()`
 * Fixed some of the logic related to "l10n" and "default_tz" more you can find here:
-  [Nuances of l10n and default_tz](docs/notes.md#Nuances-of-l10n-and-default_tz)
+  [Nuances of l10n and default_tz](notes.md#Nuances-of-l10n-and-default_tz)
 * Implemented list of **days of the week**: `\spaf\simputils\DT::getListOfDaysOfWeek()`
 * Implemented list of **months**: `\spaf\simputils\DT::getListOfMonths()`
 * Incorporated all the previous minor-version patches

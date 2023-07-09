@@ -3,9 +3,34 @@
 namespace general;
 
 use PHPUnit\Framework\TestCase;
+use spaf\simputils\attributes\DebugHide;
+use spaf\simputils\attributes\Property;
 use spaf\simputils\exceptions\CallableAbsent;
+use spaf\simputils\generic\SimpleObject;
 use spaf\simputils\models\Password;
 use spaf\simputils\models\Secret;
+use function spaf\simputils\basic\pr;
+
+class DebugHideClassForTesting extends SimpleObject {
+
+	#[DebugHide(false)]
+	public $secret = null;
+
+	#[DebugHide(false)]
+	public $password = null;
+
+	#[DebugHide(false)]
+	public $password_sec_violated = null;
+
+}
+
+class MyCustomPass extends Password {
+	#[Property('for_user')]
+	protected function getForUser(): string {
+		// IMP  NEVER DO THIS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		return $this->value;
+	}
+}
 
 /**
  * @covers \spaf\simputils\models\Secret
@@ -14,6 +39,11 @@ use spaf\simputils\models\Secret;
  * @uses   \spaf\simputils\Str
  * @uses   \spaf\simputils\attributes\Property
  * @uses   \spaf\simputils\traits\PropertiesTrait
+ * @uses   \spaf\simputils\PHP
+ * @uses   \spaf\simputils\basic\pr
+ * @uses   \spaf\simputils\models\Box
+ * @uses   \spaf\simputils\special\CodeBlocksCacheIndex
+ * @uses   \spaf\simputils\traits\MetaMagic
  */
 class PasswordsAndSecretsTest extends TestCase {
 
@@ -73,6 +103,27 @@ class PasswordsAndSecretsTest extends TestCase {
 
 		$this->assertFalse($pass1->verifyPassword($p2,));
 		$this->assertTrue($pass3->verifyPassword($p1));
+	}
+
+	/**
+	 * @return void
+	 */
+	function testDebugHideForSecrets() {
+		$s1 = new Secret('my-SECRET-token-bla-bla-bla');
+		$p2 = new Password('mYnOrMaL-PaSswOrd', 'my-password');
+		$p3 = new MyCustomPass('mYnOrMaL-TRICKED-PaSswOrd', 'my-password-2');
+
+		$container = new DebugHideClassForTesting;
+
+		$container->secret = $s1;
+		$container->password = $p2;
+		$container->password_sec_violated = $p3;
+
+		pr($container);
+
+		$this->expectOutputRegex("/\[password\] => \*\*\[P:my-password\]\*\*/");
+		$this->expectOutputRegex("/\[password_sec_violated\] => \*\*\*\*/");
+		$this->expectOutputRegex("/\[secret\] => \*\*\[secret\]\*\*/");
 	}
 
 }

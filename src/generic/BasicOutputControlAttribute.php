@@ -25,9 +25,12 @@ abstract class BasicOutputControlAttribute extends BasicAttribute {
 	/**
 	 * Controls content output of the property
 	 *
+	 * @param null|mixed $value Containing the final value/object/etc.
+	 *                          that suppose to be returned.
+	 *
 	 * @return null|string|bool
 	 */
-	abstract function appliedOnProperty(): null|string|bool;
+	abstract function appliedOnProperty(mixed $value = null): null|string|bool;
 
 	/**
 	 * Checking the settings

@@ -49,6 +49,9 @@ spaf\simputils\models\Password Object
 Stringified password: **[P:my-password]**
 ```
 
+P.S. If you access `value` property directly of those objects it will return to you the real value
+(as well as `for_system` property)
+
 The `\spaf\simputils\models\Password` model is inherited from `spaf\simputils\models\Secret`,
 so their functionality is very similar.
 The difference is that `\spaf\simputils\models\Password` adds additional functionality,

@@ -18,6 +18,8 @@
 	* `\spaf\simputils\Attrs` - PHP Attributes related helper
 	* `\spaf\simputils\Html` - Minimal HTML helper that can be used as a base for custom HTML helper
 * Fixed issue with url "params" when the params with empty value are stripped out.
+* Added models `\spaf\simputils\models\Password` and `\spaf\simputils\models\Secret`.
+  Documentation: [Passwords and Secrets explained](docs/passwords-and-secrets.md)
 
 ## 1.1.4
 

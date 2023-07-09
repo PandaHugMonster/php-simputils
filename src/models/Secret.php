@@ -12,9 +12,9 @@ use function is_null;
 /**
  * Class to store secret in a slightly more secure way than just a string
  *
- * @property ?string $name The recognizable name to associate with this secret.
+ * @property ?string $name  The recognizable name to associate with this secret.
  *                         Strongly recommended to specify it if exists.
- * @property ?string $type Custom type of the secret. Can be adjusted
+ * @property ?string $type  Custom type of the secret. Can be adjusted
  * @property ?string $value The secret value. It should be used carefully!
  */
 class Secret extends SimpleObject {

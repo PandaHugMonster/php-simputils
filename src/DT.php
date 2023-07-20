@@ -6,6 +6,8 @@ namespace spaf\simputils;
 
 use Exception;
 use spaf\simputils\attributes\markers\Shortcut;
+use spaf\simputils\exceptions\RedefUnimplemented;
+use spaf\simputils\models\Box;
 use spaf\simputils\models\DateInterval;
 use spaf\simputils\models\DateTime;
 use spaf\simputils\models\DateTimeZone;
@@ -113,8 +115,8 @@ class DT {
 	 *                                                        a new object). Default is true.
 	 *
 	 * @return DateTime|null
-	 * @throws \spaf\simputils\exceptions\RedefUnimplemented Redefinable component is not defined
-	 * @throws \Exception Empty string as timezone is not allowed
+	 * @throws RedefUnimplemented Redefinable component is not defined
+	 * @throws Exception Empty string as timezone is not allowed
 	 * @noinspection PhpUndefinedMethodInspection
 	 */
 	public static function normalize(
@@ -178,29 +180,32 @@ class DT {
 		return $res;
 	}
 
+	static private function _composeIntervalSpecificationString(
+		$obj,
+		Box|array $cases,
+	) {
+		$res = '';
+		foreach ($cases as $field => $spec) {
+			if ($obj->$field) {
+				$res .= "{$obj->$field}{$spec}";
+			}
+		}
+
+		return $res;
+	}
+
 	static function dateIntervalSpecificationString(\DateInterval $obj) {
-		$date = '';
-		$time = '';
+		$date = static::_composeIntervalSpecificationString($obj, [
+			'y' => 'Y',
+			'm' => 'M',
+			'd' => 'D',
+		]);
+		$time = static::_composeIntervalSpecificationString($obj, [
+			'h' => 'H',
+			'i' => 'M',
+			's' => 'S',
+		]);
 
-		if ($obj->y) {
-			$date .= "{$obj->y}Y";
-		}
-		if ($obj->m) {
-			$date .= "{$obj->m}M";
-		}
-		if ($obj->d) {
-			$date .= "{$obj->d}D";
-		}
-
-		if ($obj->h) {
-			$time .= "{$obj->h}H";
-		}
-		if ($obj->i) {
-			$time .= "{$obj->i}M";
-		}
-		if ($obj->s) {
-			$time .= "{$obj->s}S";
-		}
 		if (!empty($time)) {
 			$time = "T{$time}";
 		}
@@ -226,7 +231,7 @@ class DT {
 	 * @param string|null              $parsing_fmt Parsing string input-format hint
 	 *
 	 * @return string|null
-	 * @throws \spaf\simputils\exceptions\RedefUnimplemented Redefinable component is not defined
+	 * @throws RedefUnimplemented Redefinable component is not defined
 	 */
 	public static function stringify(
 		DateTime|string|int $dt,

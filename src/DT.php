@@ -120,7 +120,7 @@ class DT {
 	public static function normalize(
 		DateTime|string|int $dt,
 		null|bool|DateTimeZone|string $tz = null,
-		string $fmt = null,
+		?string $fmt = null,
 		bool $is_clone_allowed = true,
 	): ?DateTime {
 		if ($dt instanceof DateTime) {
@@ -161,17 +161,47 @@ class DT {
 
 		}
 
-		/** @var DateTime $res */
+		/** @var ?DateTime $res */
+		$res = null;
 		// Resulting
 		if (Str::is($dt)) {
-			$res = !empty($fmt)
-				?$class::createFromFormat($fmt, $dt, $tz_in)
-				:new $class($dt, $tz_in);
+			if (empty($fmt)) {
+				$try_formats = PHP::box([
+					"user_time_format",
+					"user_date_format",
+					"user_datetime_format",
+					"user_time_ext_format",
+					"user_time_full_format",
+					"user_datetime_ext_format",
+					"user_datetime_full_format",
+				]);
+
+				foreach ($try_formats as $field) {
+					try {
+						$fmt = PHP::ic()?->l10n?->settings_date_time[$field];
+						if (!empty($fmt)) {
+							$res = $class::createFromFormat($fmt, $dt, $tz_in);
+							if ($res !== false) {
+								break;
+							}
+						}
+					} catch (Exception) {
+						// NOTE Skipping, because we are simply trying out the cases to parse
+					}
+				}
+			} else {
+				$res = $class::createFromFormat($fmt, $dt, $tz_in);
+			}
+
+			if (empty($fmt) || $res === false) {
+				$res = new $class($dt, $tz_in);
+			}
+
 		} else if (is_numeric($dt)) {
 			$res = new $class(date(DATE_ATOM, intval($dt)), $tz_in);
 		}
 
-		if ($res->tz->getName() !== $tz_out->getName()) {
+		if ($res && $res->tz->getName() !== $tz_out->getName()) {
 			$res->tz = $tz_out;
 		}
 

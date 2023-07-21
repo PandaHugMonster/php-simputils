@@ -25,6 +25,10 @@ use const DIRECTORY_SEPARATOR;
  *
  * TODO Add fileExists method
  * TODO Add real-path property and check if realpath is the same as specified.
+ * @SuppressWarnings(PHPMD.TooManyMethods)
+ * @SuppressWarnings(PHPMD.TooManyPublicMethods)
+ * @SuppressWarnings(PHPMD.ExcessivePublicCount)
+ * @SuppressWarnings(PHPMD.ExcessiveClassComplexity) Does not matter for Core Helper Classes
  */
 class FS {
 
@@ -228,19 +232,25 @@ class FS {
 	public static function lsFiles(
 		?string $file_path,
 		bool $recursively = false,
-		bool|string $sorting = true,
+		bool|string|callable $sorting = true,
 		bool $exclude_original_path = true
 	): ?array {
-		$res = $exclude_original_path?[]:[$file_path];
+		$res = $exclude_original_path
+			?[]
+			:[$file_path];
+
 		if (file_exists($file_path)) {
-			if (!is_dir($file_path))
+			if (!is_dir($file_path)) {
 				return $res;
+			}
 
 			// TODO bug here!
 			$scanned_dir = scandir($file_path);
 			if ($recursively) {
 				foreach ($scanned_dir as $file) {
-					if (in_array($file, ['.', '..'])) continue;
+					if (in_array($file, ['.', '..'])) {
+						continue;
+					}
 
 					$full_sub_file_path = realpath($file_path.'/'.$file);
 					$sub_list = static::lsFiles(
@@ -255,15 +265,20 @@ class FS {
 			}
 		}
 
-		if (!empty($sorting)) {
-			if (Str::is($sorting) || is_callable($sorting)) {
-				$sorting($res);
-			} else {
-				sort($res);
-			}
-		}
+		$res = static::applySorting($res, $sorting);
 
 		return $res;
+	}
+
+	protected static function applySorting(Box|array $files, bool|string|callable $sorting) {
+		if (!empty($sorting)) {
+			if (Str::is($sorting) || is_callable($sorting)) {
+				$sorting($files);
+			} else {
+				sort($files);
+			}
+		}
+		return $files;
 	}
 
 	/**

@@ -89,6 +89,48 @@ class DT {
 		return new $class($value);
 	}
 
+	protected static function chooseTimeZoneForNormalization(
+		null|bool|DateTimeZone|string $target_tz,
+	) {
+		$class = PHP::redef(DateTimeZone::class);
+
+		$is_valid_str = is_string($target_tz) && Str::len($target_tz) > 0;
+
+		if (is_string($target_tz) && !$is_valid_str) {
+			throw new Exception('Empty string as timezone is not allowed.');
+		}
+
+		return match (true) {
+			$is_valid_str
+				=> [$o = new $class($target_tz), $o],
+			$target_tz instanceof \DateTimeZone
+				=> [$target_tz, $target_tz],
+			$target_tz === false
+				=> [$o = new $class('UTC'), $o],
+			is_null($target_tz) || $target_tz === true
+				=> [new $class('UTC'), static::getDefaultTimeZone()]
+		};
+	}
+
+	protected static function prepareDateTimeObjectBasedOnInput(
+		string|int $dt,
+		$tz_in,
+		$tz_out,
+		?string $fmt
+	) {
+		$class = PHP::redef(DateTime::class);
+
+		if (Str::is($dt)) {
+			$dt = !empty($fmt)
+				?$class::createFromFormat($fmt, $dt, $tz_in)
+				:new $class($dt, $tz_in);
+		} else if (is_numeric($dt)) {
+			$dt = new $class(date(DATE_ATOM, intval($dt)), $tz_in);
+		}
+
+		return $dt;
+	}
+
 	/**
 	 * Normalization of date and time
 	 *
@@ -117,7 +159,6 @@ class DT {
 	 * @return DateTime|null
 	 * @throws RedefUnimplemented Redefinable component is not defined
 	 * @throws Exception Empty string as timezone is not allowed
-	 * @noinspection PhpUndefinedMethodInspection
 	 */
 	public static function normalize(
 		DateTime|string|int $dt,
@@ -125,62 +166,22 @@ class DT {
 		string $fmt = null,
 		bool $is_clone_allowed = true,
 	): ?DateTime {
+		[$tz_in, $tz_out] = static::chooseTimeZoneForNormalization($tz);
+
 		if ($dt instanceof DateTime) {
-			return $is_clone_allowed
+			$dt = $is_clone_allowed
 				?clone $dt
 				:$dt;
+		} else {
+			$dt = static::prepareDateTimeObjectBasedOnInput($dt, $tz_in, $tz_out, $fmt);
 		}
 
-		$class = PHP::redef(DateTime::class);
-		$tz_class = PHP::redef(DateTimeZone::class);
+		$dt->tz = $tz_out;
 
-		$tz_in = null;
-		$tz_out = null;
-
-		// Incoming
-		if (is_string($tz)) {
-			if (Str::len($tz) === 0) {
-				throw new Exception('Empty string as timezone is not allowed.');
-			}
-			// Zoned input
-			$tz_in = new $tz_class($tz);
-			$tz_out = new $tz_class($tz);
-
-		} else if ($tz instanceof \DateTimeZone) {
-			// Zoned input
-			$tz_in = $tz;
-			$tz_out = $tz;
-
-		} else if ($tz === false) {
-			// Un-zoned input!
-			$tz_in = new $tz_class('UTC');
-			$tz_out = new $tz_class('UTC');
-
-		} else if (is_null($tz) || $tz === true) {
-			// Zoned input
-			$tz_in = new $tz_class('UTC');
-			$tz_out = static::getDefaultTimeZone();
-
-		}
-
-		/** @var DateTime $res */
-		// Resulting
-		if (Str::is($dt)) {
-			$res = !empty($fmt)
-				?$class::createFromFormat($fmt, $dt, $tz_in)
-				:new $class($dt, $tz_in);
-		} else if (is_numeric($dt)) {
-			$res = new $class(date(DATE_ATOM, intval($dt)), $tz_in);
-		}
-
-		if ($res->tz->getName() !== $tz_out->getName()) {
-			$res->tz = $tz_out;
-		}
-
-		return $res;
+		return $dt;
 	}
 
-	static private function _composeIntervalSpecificationString(
+	protected static function composeIntervalSpecificationString(
 		$obj,
 		Box|array $cases,
 	) {
@@ -195,12 +196,12 @@ class DT {
 	}
 
 	static function dateIntervalSpecificationString(\DateInterval $obj) {
-		$date = static::_composeIntervalSpecificationString($obj, [
+		$date = static::composeIntervalSpecificationString($obj, [
 			'y' => 'Y',
 			'm' => 'M',
 			'd' => 'D',
 		]);
-		$time = static::_composeIntervalSpecificationString($obj, [
+		$time = static::composeIntervalSpecificationString($obj, [
 			'h' => 'H',
 			'i' => 'M',
 			's' => 'S',

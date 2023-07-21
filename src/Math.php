@@ -28,6 +28,11 @@ use spaf\simputils\attributes\markers\Shortcut;
  *      be uses in cryptographical purposes, and should not be used for those purposes.
  *
  * @see https://www.php.net/manual/en/ref.math.php
+ * @SuppressWarnings(PHPMD.TooManyMethods)
+ * @SuppressWarnings(PHPMD.TooManyPublicMethods)
+ * @SuppressWarnings(PHPMD.ExcessivePublicCount)
+ * @SuppressWarnings(PHPMD.ExcessiveClassComplexity) Does not matter for Core Helper Classes
+ *
  */
 class Math {
 

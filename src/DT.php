@@ -175,10 +175,10 @@ class DT {
 					"user_datetime_ext_format",
 					"user_datetime_full_format",
 				]);
-
+				$settings_date_time = PHP::box(PHP::ic()?->l10n?->settings_date_time);
 				foreach ($try_formats as $field) {
 					try {
-						$fmt = PHP::ic()?->l10n?->settings_date_time[$field];
+						$fmt = $settings_date_time->get($field);
 						if (!empty($fmt)) {
 							$res = $class::createFromFormat($fmt, $dt, $tz_in);
 							if ($res !== false) {

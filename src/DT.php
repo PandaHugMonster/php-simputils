@@ -163,7 +163,7 @@ class DT {
 	public static function normalize(
 		DateTime|string|int $dt,
 		null|bool|DateTimeZone|string $tz = null,
-		string $fmt = null,
+		?string $fmt = null,
 		bool $is_clone_allowed = true,
 	): ?DateTime {
 		[$tz_in, $tz_out] = static::chooseTimeZoneForNormalization($tz);

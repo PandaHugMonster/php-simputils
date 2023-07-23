@@ -26,6 +26,7 @@ use function spaf\simputils\basic\ts;
  * @uses \spaf\simputils\PHP
  * @uses \spaf\simputils\special\CodeBlocksCacheIndex
  * @uses \spaf\simputils\attributes\Property
+ * @uses \spaf\simputils\traits\PropertiesTrait::__set
  * @uses \spaf\simputils\traits\SimpleObjectTrait
  * @uses \spaf\simputils\traits\SimpleObjectTrait::_simpUtilsPrepareProperty
  * @uses \spaf\simputils\traits\SimpleObjectTrait::__get

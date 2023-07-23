@@ -112,18 +112,59 @@ class DT {
 		};
 	}
 
+	private static $_try_field_formats = null;
+
+	protected static function getTryFieldFormats(): Box {
+		if (empty(static::$_try_field_formats)) {
+			static::$_try_field_formats = PHP::box([
+				"user_datetime_full_format",
+				"user_datetime_ext_format",
+				"user_datetime_format",
+
+				"user_date_format",
+
+				"user_time_full_format",
+				"user_time_ext_format",
+				"user_time_format",
+			]);
+		}
+
+		return static::$_try_field_formats;
+	}
+
 	protected static function prepareDateTimeObjectBasedOnInput(
 		string|int $dt,
 		$tz_in,
-		$tz_out,
 		?string $fmt
 	) {
 		$class = PHP::redef(DateTime::class);
 
 		if (Str::is($dt)) {
-			$dt = !empty($fmt)
-				?$class::createFromFormat($fmt, $dt, $tz_in)
-				:new $class($dt, $tz_in);
+			if (empty($fmt)) {
+				$settings_date_time = PHP::box(PHP::ic()?->l10n?->settings_date_time);
+				foreach (static::getTryFieldFormats() as $field) {
+					try {
+						$pre_fmt = $settings_date_time->get($field);
+						if (!empty($pre_fmt)) {
+							$pre_dt = $class::createFromFormat($pre_fmt, $dt, $tz_in);
+							// FIX  HERE!
+							if ($pre_dt !== false) {
+								$fmt = $pre_fmt;
+								$dt = $pre_dt;
+								break;
+							}
+						}
+					} catch (Exception) {
+						// NOTE Skipping, because we are simply trying out the cases to parse
+					}
+				}
+			} else {
+				$dt = $class::createFromFormat($fmt, $dt, $tz_in);
+			}
+
+			if (empty($fmt) || $dt === false) {
+				$dt = new $class($dt, $tz_in);
+			}
 		} else if (is_numeric($dt)) {
 			$dt = new $class(date(DATE_ATOM, intval($dt)), $tz_in);
 		}
@@ -173,10 +214,12 @@ class DT {
 				?clone $dt
 				:$dt;
 		} else {
-			$dt = static::prepareDateTimeObjectBasedOnInput($dt, $tz_in, $tz_out, $fmt);
+			$dt = static::prepareDateTimeObjectBasedOnInput($dt, $tz_in, $fmt);
 		}
 
-		$dt->tz = $tz_out;
+		if ($dt) {
+			$dt->tz = $tz_out;
+		}
 
 		return $dt;
 	}

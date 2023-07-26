@@ -11,7 +11,7 @@ use function is_null;
 
 abstract class BasicVersionParser extends SimpleObject implements VersionParserInterface {
 
-	public static array $build_type_priorities = [
+	static array $build_type_priorities = [
 		'DEV' => 0,
 		'A' => 1,   'ALPHA' => 1,
 		'B' => 2,   'BETA' => 2,
@@ -20,7 +20,7 @@ abstract class BasicVersionParser extends SimpleObject implements VersionParserI
 		'P' => 5,   'PL' => 5,
 	];
 
-	public function toString(Version|string $obj): string {
+	function toString(Version|string $obj): string {
 		$obj = static::normalize($obj);
 
 		$res = $obj->major.'.'.$obj->minor.'.'.$obj->patch;
@@ -40,27 +40,27 @@ abstract class BasicVersionParser extends SimpleObject implements VersionParserI
 		return $res;
 	}
 
-	abstract public function parse(Version $version_object, ?string $string_version): array;
+	abstract function parse(Version $version_object, ?string $string_version): array;
 
-	abstract public function greaterThan(Version|string $obj1, Version|string $obj2): bool;
+	abstract function greaterThan(Version|string $obj1, Version|string $obj2): bool;
 
-	abstract public function equalsTo(Version|string $obj1, Version|string $obj2): bool;
+	abstract function equalsTo(Version|string $obj1, Version|string $obj2): bool;
 
-	public function greaterThanEqual(Version|string $obj1, Version|string $obj2): bool {
+	function greaterThanEqual(Version|string $obj1, Version|string $obj2): bool {
 		$obj1 = static::normalize($obj1);
 		$obj2 = static::normalize($obj2);
 
 		return $this->greaterThan($obj1, $obj2) || $this->equalsTo($obj1, $obj2);
 	}
 
-	public function lessThan(Version|string $obj1, Version|string $obj2): bool {
+	function lessThan(Version|string $obj1, Version|string $obj2): bool {
 		$obj1 = static::normalize($obj1);
 		$obj2 = static::normalize($obj2);
 
 		return !$this->greaterThanEqual($obj1, $obj2);
 	}
 
-	public function lessThanEqual(Version|string $obj1, Version|string $obj2): bool {
+	function lessThanEqual(Version|string $obj1, Version|string $obj2): bool {
 		$obj1 = static::normalize($obj1);
 		$obj2 = static::normalize($obj2);
 
@@ -68,7 +68,7 @@ abstract class BasicVersionParser extends SimpleObject implements VersionParserI
 			($this->lessThan($obj1, $obj2) || $this->equalsTo($obj1, $obj2));
 	}
 
-	public static function normalize(
+	static function normalize(
 		Version|string|null $item,
 		?string $app_name = null
 	): ?Version {

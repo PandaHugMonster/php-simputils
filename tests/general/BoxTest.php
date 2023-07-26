@@ -32,7 +32,7 @@ class BoxTest extends TestCase {
 	 *
 	 * @runInSeparateProcess
 	 */
-	public function testBasics() {
+	function testBasics() {
 		$box_class = PHP::redef(Box::class);
 
 		$b1 = PHP::box();

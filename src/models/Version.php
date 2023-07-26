@@ -77,6 +77,8 @@ use function json_encode;
  * @see https://www.php.net/manual/en/function.version-compare.php
  *      The basic logic was inspired by this method
  * @see https://semver.org/ The key functionality is directed to Semantic Versioning
+ *
+ * @SuppressWarnings(PHPMD.TooManyPublicMethods) At this point, cannot be reduced
  * @package spaf\simputils\models
  */
 class Version extends SimpleObject {

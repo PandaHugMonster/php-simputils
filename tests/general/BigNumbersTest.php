@@ -34,14 +34,14 @@ class BigNumbersTest extends TestCase {
 	protected $fake_disabled_bcmath = null;
 	protected $fake_disabled_gmp = null;
 
-	public function setUp(): void {
+	function setUp(): void {
 		$this->fake_disabled_bcmath =
 			Boolean::from(env('TESTS_FAKE_DISABLED_BCMATH', false));
 		$this->fake_disabled_gmp =
 			Boolean::from(env('TESTS_FAKE_DISABLED_GMP', false));
 	}
 
-	public function getGeneralConversion() {
+	function getGeneralConversion() {
 		return [
 			['100000000000000000000', '100000000000000000000'],
 			['100000000000000000100', '100000000000000000100'],
@@ -59,7 +59,7 @@ class BigNumbersTest extends TestCase {
 	 *
 	 * @return void
 	 */
-	public function testBcmathConversion() {
+	function testBcmathConversion() {
 		$this->_extensionWiseTests(
 			BigNumber::SUBSYSTEM_BCMATH,
 			$this->getGeneralConversion(),
@@ -75,7 +75,7 @@ class BigNumbersTest extends TestCase {
 	 *
 	 * @return void
 	 */
-	public function testGmpConversion() {
+	function testGmpConversion() {
 		$this->_extensionWiseTests(
 			BigNumber::SUBSYSTEM_GMP,
 			$this->getGeneralConversion(),

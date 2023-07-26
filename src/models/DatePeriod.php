@@ -59,7 +59,7 @@ class DatePeriod extends FixUpDatePeriod {
 	 * TODO Add "interval" part to the string
 	 * @return string
 	 */
-	public function __toString(): string {
+	function __toString(): string {
 		return "{$this->start} - {$this->end}";
 	}
 

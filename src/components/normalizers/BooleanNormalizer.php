@@ -10,7 +10,7 @@ class BooleanNormalizer extends BasicValidator {
 	/**
 	 * @inheritDoc
 	 */
-	public static function process(mixed $value): mixed {
+	static function process(mixed $value): mixed {
 		return Boolean::from($value);
 	}
 }

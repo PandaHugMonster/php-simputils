@@ -221,7 +221,7 @@ class Box extends ArrayObject {
 	 * @return static|Box|array
 	 */
 	#[Extract(false)]
-	public function flipped(): static|Box|array {
+	function flipped(): static|Box|array {
 		// TODO Improve flipping so it would hash objects when possible for keys
 		return new static(array_flip((array) $this));
 	}
@@ -233,7 +233,7 @@ class Box extends ArrayObject {
 	 *
 	 * @return string|null
 	 */
-	public function getKeyByValue(mixed $value): ?string {
+	function getKeyByValue(mixed $value): ?string {
 		return $this->flipped()[$value] ?? null;
 	}
 
@@ -253,7 +253,7 @@ class Box extends ArrayObject {
 	 *
 	 * @return Box|array
 	 */
-	public function slice(int|array $from = 0, ?int $to = null): Box|array {
+	function slice(int|array $from = 0, ?int $to = null): Box|array {
 		$size = $this->size;
 		$res = new static();
 
@@ -318,7 +318,7 @@ class Box extends ArrayObject {
 	 * @return static
 	 */
 	#[Affecting]
-	public function shift(int $amount = 1, bool $from_start = true): static {
+	function shift(int $amount = 1, bool $from_start = true): static {
 		$temp_stash = new static();
 		$box = $from_start
 			?$this
@@ -348,7 +348,7 @@ class Box extends ArrayObject {
 	 *
 	 * @return Box|array
 	 */
-	public function reversed(): Box|array {
+	function reversed(): Box|array {
 		return new static(array_reverse((array) $this));
 	}
 
@@ -359,7 +359,7 @@ class Box extends ArrayObject {
 	 *
 	 * @return self
 	 */
-	public function load(Box|array ...$args) {
+	function load(Box|array ...$args) {
 		// NOTE Clearing content of our Box
 		$this->exchangeArray([]);
 		return $this->mergeFrom(...$args);
@@ -404,7 +404,7 @@ class Box extends ArrayObject {
 	 *      of "Str::upper".
 	 */
 	#[Affecting]
-	public function each(null|Closure|callable|string $callback = null): self {
+	function each(null|Closure|callable|string $callback = null): self {
 		$res = new static;
 		if (!is_null($callback)) {
 			$callback = static::clearClosure($callback);
@@ -441,7 +441,7 @@ class Box extends ArrayObject {
 	 * TODO Add "unsetByValue"
 	 * @return $this
 	 */
-	public function unsetByKey(int|string ...$keys): self {
+	function unsetByKey(int|string ...$keys): self {
 		foreach ($keys as $key) {
 			if (!empty($this[$key])) {
 				unset($this[$key]);
@@ -460,7 +460,7 @@ class Box extends ArrayObject {
 	 *
 	 * @return $this
 	 */
-	public function extract(int|string ...$keys): static {
+	function extract(int|string ...$keys): static {
 		$res = new static();
 		foreach ($keys as $key) {
 			$res[$key] = $this[$key];
@@ -487,7 +487,7 @@ class Box extends ArrayObject {
 	 *
 	 * @return self Returns self reference
 	 */
-	public function mergeFrom(self|array ...$boxes): self {
+	function mergeFrom(self|array ...$boxes): self {
 		foreach ($boxes as $item) {
 			foreach ($item as $k => $v) {
 				if (is_numeric($k)) {
@@ -518,21 +518,21 @@ class Box extends ArrayObject {
 	 * @return bool
 	 */
 	#[Shortcut('\in_array(key)')]
-	public function containsKey(string $key): bool {
+	function containsKey(string $key): bool {
 		return in_array($key, (array) $this->keys);
 	}
 
 	#[Shortcut('\in_array(value)')]
-	public function containsValue(mixed $value): bool {
+	function containsValue(mixed $value): bool {
 		return in_array($value, (array) $this);
 	}
 
-	public function toSet(): Set {
+	function toSet(): Set {
 		$class = PHP::redef(Set::class);
 		return new $class($this);
 	}
 
-	public function toArray(
+	function toArray(
 		bool $recursively = false,
 		bool $with_class = false,
 		array $exclude_fields = []
@@ -564,7 +564,7 @@ class Box extends ArrayObject {
 	 * @return static
 	 */
 	#[Shortcut('\array_combine()')]
-	public static function combine(array|Box $keys, array|Box $values): static {
+	static function combine(array|Box $keys, array|Box $values): static {
 		return new static(array_combine((array) $keys, (array) $values));
 	}
 
@@ -574,7 +574,7 @@ class Box extends ArrayObject {
 	 * @return \Generator
 	 * @codeCoverageIgnore
 	 */
-	public function randKeys(int $num = 1): Generator {
+	function randKeys(int $num = 1): Generator {
 		$keys = $this->keys;
 
 		$num = $num < 1
@@ -591,7 +591,7 @@ class Box extends ArrayObject {
 	 * @return \Generator
 	 * @codeCoverageIgnore
 	 */
-	public function randValues(int $num = 1): Generator {
+	function randValues(int $num = 1): Generator {
 		$values = $this->values;
 
 		$num = $num < 1
@@ -606,7 +606,7 @@ class Box extends ArrayObject {
 	 * @return false|mixed
 	 * @codeCoverageIgnore
 	 */
-	public function randKey() {
+	function randKey() {
 		$keys = $this->keys;
 		return $keys[Math::rand(0, $keys->size - 1)];
 	}
@@ -615,7 +615,7 @@ class Box extends ArrayObject {
 	 * @return false|mixed
 	 * @codeCoverageIgnore
 	 */
-	public function randValue() {
+	function randValue() {
 		$values = $this->values;
 		return $values[Math::rand(0, $values->size - 1)];
 	}
@@ -634,7 +634,7 @@ class Box extends ArrayObject {
 	 *
 	 * @return mixed Found value by key or $default (which is null if not specified)
 	 */
-	public function get(
+	function get(
 		string|int $key,
 		mixed $default = null,
 		bool $case_sensitive = true
@@ -652,7 +652,7 @@ class Box extends ArrayObject {
 		return $this[$key] ?? $default;
 	}
 
-	public static array|Box|null $default_sorting = [
+	static array|Box|null $default_sorting = [
 		'descending' => false,
 		'by_keys' => false,
 		'by_values' => true,
@@ -690,14 +690,14 @@ class Box extends ArrayObject {
 	 * @return $this
 	 * @codeCoverageIgnore
 	 */
-	public function shuffle(): self {
+	function shuffle(): self {
 		$res = (array) $this;
 		shuffle($res);
 		$this->exchangeArray($res);
 		return $this;
 	}
 
-	public function sum(): int|float {
+	function sum(): int|float {
 		// TODO Consider usage of BigNumber
 		$res = 0;
 		foreach ($this as $value) {
@@ -722,7 +722,7 @@ class Box extends ArrayObject {
 	 *
 	 * @return self
 	 */
-	public function sort(
+	function sort(
 		bool $descending = null,
 		bool $by_values = null,
 		bool $case_sensitive = null,
@@ -830,7 +830,7 @@ class Box extends ArrayObject {
 	 * @see static::$separator
 	 */
 	#[Shortcut('\implode()')]
-	public function implode(?string $sep = null, null|callable|string|bool $stretcher = null): string {
+	function implode(?string $sep = null, null|callable|string|bool $stretcher = null): string {
 		$stretcher = $stretcher ?? $this->_stretcher;
 		if ($stretcher === true) {
 			$stretcher = '=';
@@ -848,7 +848,7 @@ class Box extends ArrayObject {
 	 * @see static::$separator
 	 */
 	#[Shortcut('\implode()')]
-	public function join(?string $sep = null, null|callable|string|bool $stretcher = null): string {
+	function join(?string $sep = null, null|callable|string|bool $stretcher = null): string {
 		return $this->implode($sep, $stretcher);
 	}
 
@@ -1129,7 +1129,7 @@ class Box extends ArrayObject {
 	 * @codeCoverageIgnore
 	 * @return string
 	 */
-	public static function redefComponentName(): string {
+	static function redefComponentName(): string {
 		return InitConfig::REDEF_BOX;
 	}
 
@@ -1141,7 +1141,7 @@ class Box extends ArrayObject {
 	 * @codeCoverageIgnore
 	 * @return $this
 	 */
-	public function ___setup(array $data): static {
+	function ___setup(array $data): static {
 		foreach ($data as $key => $val) {
 			if ($key === PHP::$serialized_class_key_name) {
 				continue;
@@ -1160,7 +1160,7 @@ class Box extends ArrayObject {
 	 * @return array
 	 * @throws \spaf\simputils\exceptions\InfiniteLoopPreventionExceptions ILP Exception
 	 */
-	public function __debugInfo(): array {
+	function __debugInfo(): array {
 		return $this->toArray();
 	}
 

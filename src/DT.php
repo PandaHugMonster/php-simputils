@@ -132,32 +132,47 @@ class DT {
 		return static::$_try_field_formats;
 	}
 
+	protected static function identifyFittingFormatAndDt(
+		$settings_date_time,
+		$tz_in,
+		$dt,
+		$fmt
+	) {
+		/** @var DateTime $class */
+		$class = PHP::redef(DateTime::class);
+		foreach (static::getTryFieldFormats() as $field) {
+			try {
+				$pre_fmt = $settings_date_time->get($field);
+				if (!empty($pre_fmt)) {
+					$pre_dt = $class::createFromFormat($pre_fmt, $dt, $tz_in);
+					if ($pre_dt !== false) {
+						$fmt = $pre_fmt;
+						$dt = $pre_dt;
+						break;
+					}
+				}
+			} catch (Exception) {
+				// NOTE Skipping, because we are simply trying out the cases to parse
+			}
+		}
+
+		return [$dt, $fmt];
+	}
+
 	protected static function prepareDateTimeObjectBasedOnInput(
 		string|int $dt,
 		$tz_in,
 		?string $fmt
 	) {
+		/** @var DateTime $class */
 		$class = PHP::redef(DateTime::class);
 
 		if (Str::is($dt)) {
 			if (empty($fmt)) {
 				$settings_date_time = PHP::box(PHP::ic()?->l10n?->settings_date_time);
-				foreach (static::getTryFieldFormats() as $field) {
-					try {
-						$pre_fmt = $settings_date_time->get($field);
-						if (!empty($pre_fmt)) {
-							$pre_dt = $class::createFromFormat($pre_fmt, $dt, $tz_in);
-							// FIX  HERE!
-							if ($pre_dt !== false) {
-								$fmt = $pre_fmt;
-								$dt = $pre_dt;
-								break;
-							}
-						}
-					} catch (Exception) {
-						// NOTE Skipping, because we are simply trying out the cases to parse
-					}
-				}
+				[$dt, $fmt] = static::identifyFittingFormatAndDt(
+					$settings_date_time, $tz_in, $dt, $fmt,
+				);
 			} else {
 				$dt = $class::createFromFormat($fmt, $dt, $tz_in);
 			}

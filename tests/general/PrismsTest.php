@@ -24,6 +24,9 @@ use spaf\simputils\models\Time;
  * @uses \spaf\simputils\traits\PropertiesTrait::getAllTheLastMethodsAndProperties
  * @uses \spaf\simputils\traits\SimpleObjectTrait::getObjId
  * @uses \spaf\simputils\traits\MetaMagic::createDummy
+ * @uses \spaf\simputils\traits\PropertiesTrait::__set
+ * @uses \spaf\simputils\generic\BasicInitConfig
+ * @uses \spaf\simputils\models\Box
  *
  */
 class PrismsTest extends TestCase {

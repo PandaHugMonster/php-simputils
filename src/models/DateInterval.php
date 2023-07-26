@@ -33,12 +33,12 @@ class DateInterval extends FixUpDateInterval {
 	}
 
 	#[\ReturnTypeWillChange]
-	public static function createFromDateString(string $datetime): static {
+	static function createFromDateString(string $datetime): static {
 		/** @noinspection PhpIncompatibleReturnTypeInspection */
 		return static::expandFrom(parent::createFromDateString($datetime), new static('P1D'));
 	}
 
-	public function __construct(string $duration) {
+	function __construct(string $duration) {
 		$is_inverted = false;
 		if (Str::startsWith($duration, '-')) {
 			$duration = Str::removeStarting($duration, '-');  // @codeCoverageIgnore
@@ -69,7 +69,7 @@ class DateInterval extends FixUpDateInterval {
 		return $this->setFromData($data);
 	}
 
-	public function __toString(): string {
+	function __toString(): string {
 		return $this->format($this->formatForString());
 	}
 }

@@ -38,7 +38,7 @@ class CodeBlocksCacheIndex {
 	private static $index = [];
 	private static $redefinitions = [];
 
-	public static function listDefaultRedefinableComponents(): Box {
+	static function listDefaultRedefinableComponents(): Box {
 		// NOTE Box here cannot be replaced with the dynamic ones.
 		return new Box([
 			InitConfig::REDEF_PD => InitConfig::REDEF_PD,
@@ -74,7 +74,7 @@ class CodeBlocksCacheIndex {
 		]);
 	}
 
-	public static function registerInitBlock(BasicInitConfig $config): ?bool {
+	static function registerInitBlock(BasicInitConfig $config): ?bool {
 		$name = empty($config->name)?'app':$config->name;
 
 		if (static::hasInitBlock($name)) {
@@ -103,12 +103,12 @@ class CodeBlocksCacheIndex {
 		return true;
 	}
 
-	public static function getInitBlock($name): ?BasicInitConfig {
+	static function getInitBlock($name): ?BasicInitConfig {
 		$name = empty($name)?'app':$name;
 		return static::$index[$name] ?? null;
 	}
 
-	public static function hasInitBlock($name): bool {
+	static function hasInitBlock($name): bool {
 		return (bool) static::getInitBlock($name);
 	}
 
@@ -117,7 +117,7 @@ class CodeBlocksCacheIndex {
 	 * @param \Closure|string|null $default Fallback
 	 * @return \Closure|string|null
 	 */
-	public static function getRedefinition(
+	static function getRedefinition(
 		string $key,
 		null|Closure|string $default = null
 	): null|Closure|string {

@@ -53,7 +53,7 @@ class BasicExecEnvHandler extends SimpleObject implements ExecEnvHandlerInterfac
 		3 => self::EE_DEV,
 	];
 
-	public function __construct(
+	function __construct(
 		$ee = self::EE_UNKNOWN,
 		$is_hierarchical = false,
 		$permitted_values = null,

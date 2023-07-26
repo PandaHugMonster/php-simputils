@@ -23,6 +23,8 @@ use function substr;
  * String class. So this class will remain static as `Math` and `PHP`
  *
  * TODO Implement StrObj wrapper for the string, so the operations could be done in chain
+ * @SuppressWarnings(PHPMD.TooManyMethods)
+ * @SuppressWarnings(PHPMD.TooManyPublicMethods)
  */
 class Str {
 

@@ -10,7 +10,7 @@ use function spaf\simputils\basic\bx;
  */
 class BoxAdvancedFeaturesTest extends TestCase {
 
-	private function dataProviderForStretching() {
+	function dataProviderForStretching() {
 		return [
 			[
 				'Key1=Val1, Key2=Val2, Key3=Val3, Key4=Val4',

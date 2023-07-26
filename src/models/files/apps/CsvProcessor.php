@@ -44,7 +44,7 @@ class CsvProcessor extends TextProcessor {
 	 *
 	 * @return CsvSettings
 	 */
-	public static function defaultProcessorSettings(): CsvSettings {
+	static function defaultProcessorSettings(): CsvSettings {
 		return new CsvSettings();
 	}
 
@@ -60,7 +60,7 @@ class CsvProcessor extends TextProcessor {
 		return $line;
 	}
 
-	public function getContent(mixed $fd, ?BasicResource $file = null): mixed {
+	function getContent(mixed $fd, ?BasicResource $file = null): mixed {
 		/** @var CsvSettings $s */
 		$s = static::getSettings($file, $this->_default_settings);
 
@@ -100,7 +100,7 @@ class CsvProcessor extends TextProcessor {
 	 * @param ?BasicResource $file Resource/File object
 	 *
 	 */
-	public function setContent(mixed $fd, mixed $data, ?BasicResource $file = null): void {
+	function setContent(mixed $fd, mixed $data, ?BasicResource $file = null): void {
 		/** @var CsvSettings $s */
 
 		$s = static::getSettings($file, $this->_default_settings);
@@ -147,7 +147,7 @@ class CsvProcessor extends TextProcessor {
 	/**
 	 * Picks up all the keys of the array/matrix for CSV
 	 */
-	public static function prepareHeader(array|Box $data): null|Box {
+	static function prepareHeader(array|Box $data): null|Box {
 //		$class_box = PHP::redef(Box::class);
 
 		$is_box_used = $data instanceof Box && PHP::$use_box_instead_of_array;

@@ -26,6 +26,7 @@ use function spaf\simputils\basic\ts;
  * @uses \spaf\simputils\PHP
  * @uses \spaf\simputils\special\CodeBlocksCacheIndex
  * @uses \spaf\simputils\attributes\Property
+ * @uses \spaf\simputils\traits\PropertiesTrait::__set
  * @uses \spaf\simputils\traits\SimpleObjectTrait
  * @uses \spaf\simputils\traits\SimpleObjectTrait::_simpUtilsPrepareProperty
  * @uses \spaf\simputils\traits\SimpleObjectTrait::__get
@@ -53,7 +54,7 @@ class DateTimeTest extends TestCase {
 	 * @runInSeparateProcess
 	 * @return void
 	 */
-	public function testHelperTransparentParsing(): void {
+	function testHelperTransparentParsing(): void {
 		$dt_class = PHP::redef(DateTime::class);
 
 		$dt = DT::normalize('22.02.1990', 'America/New_York');
@@ -106,7 +107,7 @@ class DateTimeTest extends TestCase {
 //		}
 	}
 
-	public function testNowObjectCreation(): void {
+	function testNowObjectCreation(): void {
 		$dt_class = PHP::redef(DateTime::class);
 		$dt = DT::now();
 		$this->assertInstanceOf($dt_class, $dt, 'Object type check');
@@ -122,7 +123,7 @@ class DateTimeTest extends TestCase {
 		DT::$now_string = null;
 	}
 
-	public function testTransparentStringifyingDateTimeObject() {
+	function testTransparentStringifyingDateTimeObject() {
 		$dt_class = PHP::redef(DateTime::class);
 		$now = DT::now('UTC');
 		$this->assertInstanceOf($dt_class, $now, 'Is a date-time object');

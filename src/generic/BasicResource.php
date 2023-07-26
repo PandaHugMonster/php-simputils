@@ -42,7 +42,7 @@ use function fopen;
  */
 abstract class BasicResource extends SimpleObject {
 
-	public static Box|array $processors = [
+	static Box|array $processors = [
 		// Generic text processor
 		'text/plain' => TextProcessor::class,
 
@@ -114,7 +114,7 @@ abstract class BasicResource extends SimpleObject {
 	 *
 	 * @return BasicResourceApp|TextProcessor
 	 */
-	public static function getCorrespondingProcessor(
+	static function getCorrespondingProcessor(
 		?string $file_name = null,
 		?string $mime = null,
 		?string $enforced_class = null

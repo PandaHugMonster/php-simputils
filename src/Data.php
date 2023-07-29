@@ -28,7 +28,7 @@ class Data {
 	 * @return \spaf\simputils\models\DataUnit
 	 * @throws \spaf\simputils\exceptions\RedefUnimplemented Redefinable component is not defined
 	 */
-	public static function du(
+	static function du(
 		null|int|string|DataUnit $value = null,
 		?string $format = null
 	): DataUnit {

@@ -10,7 +10,7 @@ class DataUnitNormalizer extends BasicValidator {
 	/**
 	 * @inheritDoc
 	 */
-	public static function process(mixed $value): mixed {
+	static function process(mixed $value): mixed {
 		return Data::du($value);
 	}
 }

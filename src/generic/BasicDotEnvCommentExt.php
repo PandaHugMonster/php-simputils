@@ -35,21 +35,21 @@ abstract class BasicDotEnvCommentExt extends SimpleObject {
 	 *
 	 * @return string
 	 */
-	abstract public static function getName(): string;
+	abstract static function getName(): string;
 
 	/**
 	 * Prefix type
 	 *
 	 * @return string
 	 */
-	abstract public function getPrefix(): string;
+	abstract function getPrefix(): string;
 
 	/**
 	 * Params should return generated string of params
 	 *
 	 * @return string|null
 	 */
-	abstract public function params(): ?string;
+	abstract function params(): ?string;
 
 	/**
 	 * Parsing or returning false if not fitting
@@ -58,14 +58,14 @@ abstract class BasicDotEnvCommentExt extends SimpleObject {
 	 *
 	 * @return false|static
 	 */
-	abstract public static function parse(string $value): static|false;
+	abstract static function parse(string $value): static|false;
 
 	/**
 	 * Representation of the object (basically just a string representation in place)
 	 *
 	 * @return string|null
 	 */
-	public function represent(): ?string {
+	function represent(): ?string {
 		$name = str_replace(' ', '', static::getName());
 
 		$params_str = $this->params();
@@ -86,7 +86,7 @@ abstract class BasicDotEnvCommentExt extends SimpleObject {
 	 * @return mixed|null
 	 */
 	#[Property('value')]
-	public function getValue(): ?string {
+	function getValue(): ?string {
 		return $this->getPrefix() === static::PREFIX_ROW
 			?$this->_value
 			:null;
@@ -100,13 +100,13 @@ abstract class BasicDotEnvCommentExt extends SimpleObject {
 	 *
 	 * @return self
 	 */
-	public static function wrap(mixed $value, mixed ...$params): static {
+	static function wrap(mixed $value, mixed ...$params): static {
 		$obj = new static(...$params);
 		$obj->_value = $value;
 		return $obj;
 	}
 
-	public function __toString(): string {
+	function __toString(): string {
 		return $this->represent();
 	}
 }

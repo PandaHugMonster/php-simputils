@@ -31,7 +31,7 @@ abstract class BasicResourceApp extends SimpleObject {
 	 *
 	 * @return mixed
 	 */
-	abstract public function getContent(
+	abstract function getContent(
 		mixed $fd,
 		?BasicResource $file = null
 	): mixed;
@@ -43,7 +43,7 @@ abstract class BasicResourceApp extends SimpleObject {
 	 * @param mixed          $data Data to store
 	 * @param ?BasicResource $file File instance
 	 */
-	abstract public function setContent(
+	abstract function setContent(
 		mixed $fd,
 		mixed $data,
 		?BasicResource $file = null
@@ -58,7 +58,7 @@ abstract class BasicResourceApp extends SimpleObject {
 	 *
 	 * @return mixed
 	 */
-	public static function defaultProcessorSettings(): mixed {
+	static function defaultProcessorSettings(): mixed {
 		return null;
 	}
 
@@ -72,7 +72,7 @@ abstract class BasicResourceApp extends SimpleObject {
 	 *
 	 * @return mixed
 	 */
-	public static function getSettings(
+	static function getSettings(
 		?BasicResource $file = null,
 		mixed $app_default_settings = null
 	): mixed {
@@ -84,7 +84,7 @@ abstract class BasicResourceApp extends SimpleObject {
 		return $file->processor_settings ?? $app_settings;
 	}
 
-	public function __invoke(
+	function __invoke(
 		BasicResource $file,
 		$fd,
 		bool $is_reading = true,

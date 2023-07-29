@@ -42,7 +42,7 @@ class DateTimeZone extends FixUpDateTimeZone {
 		return $this;
 	}
 
-	public function __toString(): string {
+	function __toString(): string {
 		return $this->getName(); // @codeCoverageIgnore
 	}
 
@@ -50,7 +50,7 @@ class DateTimeZone extends FixUpDateTimeZone {
 	 * @codeCoverageIgnore
 	 * @return array
 	 */
-	public function __debugInfo() {
+	function __debugInfo() {
 		$res = [];
 		$res['name'] = $this->getName();
 

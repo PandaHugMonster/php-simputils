@@ -10,7 +10,7 @@ class DateTimeNormalizer extends BasicValidator {
 	/**
 	 * @inheritDoc
 	 */
-	public static function process(mixed $value): mixed {
+	static function process(mixed $value): mixed {
 		return DT::ts($value, true);
 	}
 }

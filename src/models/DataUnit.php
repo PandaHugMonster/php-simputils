@@ -71,18 +71,18 @@ class DataUnit extends SimpleObject {
 	const YOTTABYTE = 'YB';
 
 
-	public static $l10n_translations = null;
-	public static $big_number_extension = null;
+	static $l10n_translations = null;
+	static $big_number_extension = null;
 
 	/**
 	 * @var string $output_separator is a separator in between units symbols and digits
 	 */
-	public static $output_separator = ' ';
+	static $output_separator = ' ';
 
 	/**
 	 * @var bool $long_format is applicable only for `humanReadable()` method (and any user output)
 	 */
-	public static bool $long_format = false;
+	static bool $long_format = false;
 
 	#[DebugHide]
 	protected BigNumber $_value;
@@ -98,7 +98,7 @@ class DataUnit extends SimpleObject {
 		return $this->_value->fractions_supported;
 	}
 
-	public function __construct(string|int $value = 0) {
+	function __construct(string|int $value = 0) {
 		$this->_value = static::toBytes($value);
 		$this->_value->mutable = true;
 	}
@@ -151,7 +151,7 @@ class DataUnit extends SimpleObject {
 	 * @throws \spaf\simputils\exceptions\NonExistingDataUnit Unit does not exist, not recognized
 	 * @throws \spaf\simputils\exceptions\UnspecifiedDataUnit Unit was not specified or missing
 	 */
-	public function format(?string $format = null, bool $with_units = true): string {
+	function format(?string $format = null, bool $with_units = true): string {
 		$format = $format ?? $this->user_format;
 
 		if ($format === DataUnit::USER_FORMAT_HR) {
@@ -175,7 +175,7 @@ class DataUnit extends SimpleObject {
 	 * @throws \spaf\simputils\exceptions\NonExistingDataUnit Unit does not exist, not recognized
 	 * @throws \spaf\simputils\exceptions\UnspecifiedDataUnit Unit was not specified or missing
 	 */
-	public function add(string $b): self {
+	function add(string $b): self {
 		$this->_value->add(static::toBytes($b));
 		return $this;
 	}
@@ -187,7 +187,7 @@ class DataUnit extends SimpleObject {
 	 * @throws \spaf\simputils\exceptions\NonExistingDataUnit Unit does not exist, not recognized
 	 * @throws \spaf\simputils\exceptions\UnspecifiedDataUnit Unit was not specified or missing
 	 */
-	public function sub(string $b): self {
+	function sub(string $b): self {
 		$this->_value->sub(static::toBytes($b));
 		return $this;
 	}
@@ -197,7 +197,7 @@ class DataUnit extends SimpleObject {
 	 *
 	 * @return $this
 	 */
-	public function mul(BigNumber|int|string $b): self {
+	function mul(BigNumber|int|string $b): self {
 		$this->_value->mul($b);
 		return $this;
 	}
@@ -207,7 +207,7 @@ class DataUnit extends SimpleObject {
 	 *
 	 * @return $this
 	 */
-	public function div(BigNumber|int|string $b): self {
+	function div(BigNumber|int|string $b): self {
 		$this->_value->div($b);
 		return $this;
 	}
@@ -341,7 +341,7 @@ class DataUnit extends SimpleObject {
 	 *
 	 * @see static::unitCodeToPowerArray()
 	 */
-	public static function clearUnit(string $unit): string {
+	static function clearUnit(string $unit): string {
 		$unit_codes = static::unitToPowerMap();
 
 		$unit = preg_replace('/[\W]/ui', '', Str::upper($unit));
@@ -361,7 +361,7 @@ class DataUnit extends SimpleObject {
 		return $unit;
 	}
 
-	public static function clearNumber(string|int $value) {
+	static function clearNumber(string|int $value) {
 		preg_replace('/[^0-9\-.]/', '', $value);
 		$is_negative = $value && $value[0] === '-';
 		$value = preg_replace('/[^0-9.]/', '', $value);
@@ -435,7 +435,7 @@ class DataUnit extends SimpleObject {
 	 * @throws \spaf\simputils\exceptions\RedefUnimplemented  Redefinable component is not defined
 	 * @throws \spaf\simputils\exceptions\UnspecifiedDataUnit Unit was not specified or missing
 	 */
-	public static function humanReadable(BigNumber|int|string $value): null|BigNumber|string {
+	static function humanReadable(BigNumber|int|string $value): null|BigNumber|string {
 		$res = '';
 		$dctp = static::unitToPowerMap();
 		foreach ($dctp->keys as $unit_code) {
@@ -531,11 +531,11 @@ class DataUnit extends SimpleObject {
 	 * @inheritdoc
 	 * @return string Numeric value in bytes
 	 */
-	public function toJson(?bool $pretty = null, bool $with_class = false): string {
+	function toJson(?bool $pretty = null, bool $with_class = false): string {
 		return json_encode($this->for_system);
 	}
 
-	public static function fromJson(string $json): static {
+	static function fromJson(string $json): static {
 		$res = json_decode($json, true);
 		if (is_numeric($res)) {
 			$res = "{$res}b";
@@ -562,7 +562,7 @@ class DataUnit extends SimpleObject {
 	 * @return string
 	 * @codeCoverageIgnore
 	 */
-	public static function redefComponentName(): string {
+	static function redefComponentName(): string {
 		return InitConfig::REDEF_DATA_UNIT;
 	}
 }

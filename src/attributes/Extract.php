@@ -33,7 +33,7 @@ class Extract extends BasicOutputControlAttribute  {
 	/**
 	 * @inheritDoc
 	 */
-	function appliedOnProperty(): null|string|bool {
+	function appliedOnProperty(mixed $value = null): null|string|bool {
 		return $this->enabled;
 	}
 

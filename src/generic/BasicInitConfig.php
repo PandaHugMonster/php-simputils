@@ -63,6 +63,8 @@ abstract class BasicInitConfig extends SimpleObject {
 	const REDEF_IPV4_RANGE = 'IPv4Range';
 	const REDEF_IPV4 = 'IPv4';
 	const REDEF_URL = 'UrlObject';
+	const REDEF_SECRET = 'Secret';
+	const REDEF_PASSWORD = 'Password';
 
 	public ?string $name = null;
 	public ?string $default_host = 'localhost';
@@ -226,7 +228,7 @@ abstract class BasicInitConfig extends SimpleObject {
 	 */
 	public null|array|Box $redefinitions = [];
 
-	public function __construct(null|array|Box $args = null) {
+	function __construct(null|array|Box $args = null) {
 //		$this->___setup($args ?? []);
 		PHP::metaMagicSpell($this, 'setup', $args ?? []);
 	}
@@ -244,7 +246,7 @@ abstract class BasicInitConfig extends SimpleObject {
 	 * `$ran_init_blocks`.
 	 *
 	 */
-	public function init() {
+	function init() {
 		// The only place getenv is used. It might be safe enough, though not sure yet.
 		if (empty($this->name) || $this->name === 'app') {
 			$_ENV = CommonMemoryCacheIndex::$initial_get_env_state = !empty($_ENV)
@@ -283,7 +285,7 @@ abstract class BasicInitConfig extends SimpleObject {
 	 * @return $this
 	 * @throws \spaf\simputils\exceptions\InitConfigAlreadyInitialized Already initialized
 	 */
-	public function ___setup(array|Box $data): static {
+	function ___setup(array|Box $data): static {
 		if (!$this->_is_already_setup) {
 			foreach ($data as $key => $item) {
 				if (is_numeric($key)) {
@@ -316,7 +318,7 @@ abstract class BasicInitConfig extends SimpleObject {
 		return $this;
 	}
 
-	public function __toString(): string {
+	function __toString(): string {
 		$box_class = PHP::redef(Box::class);
 		$init_blocks = $this->init_blocks;
 		if (!$init_blocks instanceof $box_class) {

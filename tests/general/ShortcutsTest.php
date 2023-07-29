@@ -232,6 +232,7 @@ class ShortcutsTest extends TestCase {
 	 *
 	 * @uses \spaf\simputils\FS
 	 *
+	 * @uses \spaf\simputils\basic\bx
 	 * @return void
 	 */
 	function testPath() {

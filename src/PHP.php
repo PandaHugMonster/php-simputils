@@ -75,7 +75,13 @@ use const JSON_ERROR_NONE;
  * should not compromise your performance. THOUGH keep in mind, Box is not as efficient as arrays.
  * Especially if you will be implementing your own Box class and overriding some of it's methods.
  *
+ * @SuppressWarnings(PHPMD.TooManyMethods)
+ * @SuppressWarnings(PHPMD.TooManyPublicMethods)
+ * @SuppressWarnings(PHPMD.ExcessivePublicCount)
+ * @SuppressWarnings(PHPMD.ExcessiveClassComplexity) Does not matter for Core Helper Classes
  * @see Box
+ *
+ *
  * @package spaf\simputils
  */
 class PHP {

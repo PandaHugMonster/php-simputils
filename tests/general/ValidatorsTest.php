@@ -16,6 +16,7 @@ use spaf\simputils\models\DateTime;
 
 /**
  *
+ * @uses \spaf\simputils\models\Box
  *
  */
 class ValidatorsTest extends TestCase {
@@ -101,6 +102,7 @@ class ValidatorsTest extends TestCase {
 	 * @uses \spaf\simputils\special\CodeBlocksCacheIndex
 	 * @uses \spaf\simputils\models\DateTime
 	 * @uses \spaf\simputils\traits\PropertiesTrait::__get
+	 * @uses \spaf\simputils\traits\PropertiesTrait::__set
 	 *
 	 * @return void
 	 */

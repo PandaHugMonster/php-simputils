@@ -1,10 +1,12 @@
 # Changelog
 
-## 1.2.1
-
 ## 1.2.0
 
 [//]: # (FIX   Don't forget to implement proper tests for the fixed timezone machanics)
+
+
+
+## 1.1.5
 
 * Implemented extensive PHPDOC with examples to `\spaf\simputils\basic` (in progress)
 * Fixed ticket #116 (Weird bug of "tz" on DateTime)

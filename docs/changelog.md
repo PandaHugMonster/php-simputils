@@ -13,12 +13,38 @@
 	* `\spaf\simputils\traits\BaseHtmlTrait` - Minimal HTML related methods and renderers trait
 	* `\spaf\simputils\Attrs` - PHP Attributes related helper
 	* `\spaf\simputils\Html` - Minimal HTML helper that can be used as a base for custom HTML helper
+    * You can try out a simple renderer:
+      ```php
+      use spaf\simputils\Html;
+      use function spaf\simputils\basic\now;
+      Html::render(now());
+      ```
 * Fixed issue with url "params" when the params with empty value are stripped out.
 * Added models `\spaf\simputils\models\Password` and `\spaf\simputils\models\Secret`.
   Documentation: [Passwords and Secrets explained](passwords-and-secrets.md)
 * Added some documentation and examples into [README.md](../README.md)
 * Improved composer scripts for the framework development and analysis/testing
-* Implemented minimal infrastructure for Renderers
+* Fixed some minimal amount of mess (Cyclomatic Complexity)
+* Added `\spaf\simputils\PHP::currentUrl()` method
+* Added `\spaf\simputils\attributes\DebugHide::$default_placeholder` field for default placeholder instead of `****`
+  * Usage on secrets and passwords will cooperate with those objects in a better way, displaying proper "placeholder"
+* Added `\spaf\simputils\components\normalizers\VersionNormalizer` normalizer
+* Added Canadian locale `CA`
+* Files now can be accessed through `with` functionality
+  * Added `$in_memory_type` parameter for `File` constructor
+  * Added integer support for `File` constructor to provide File Descriptor as integer instead of file path 
+    (limited to runtime)
+* Added a file processor for: `\spaf\simputils\models\files\apps\PHPFileProcessor` (basically prevent from displaying as text)
+* Improved `\spaf\simputils\models\files\apps\CsvProcessor` and `\spaf\simputils\models\files\apps\settings\CsvSettings`
+* Improved `Box::join()`/`Box::impload()` functionality
+  * Added `apply()` method "params": `stretcher, value_wrap, key_wrap`
+    * Added `pathAlike()` method
+    * Added `paramsAlike()` (URL params) method
+    * Added `htmlAttrAlike()` (HTML attributes) method
+    * Added `stretched()` method
+* Some improvements of Url Objects
+* A bit more testing coverage is added
+* Some more little stuff could be added or polished
 
 ## 1.1.4
 

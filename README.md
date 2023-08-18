@@ -5,6 +5,7 @@ This is the official Bank of Ukraine link for donations for Ukraine:
 https://bank.gov.ua/en/news/all/natsionalniy-bank-vidkriv-spetsrahunok-dlya-zboru-koshtiv-na-potrebi-armiyi
 
 -----
+
 -----
 
 # SimpUtils
@@ -15,7 +16,7 @@ Those badges are outdated for now :(
 [![codecov](https://codecov.io/gh/PandaHugMonster/php-simputils/branch/main/graph/badge.svg)](https://codecov.io/gh/PandaHugMonster/php-simputils)
 
 **SimpUtils** is a micro-framework that provides really simple and lightweight tools
-for development and prototyping. Additionally there are tools for comfortable and efficient
+for development and prototyping. Additionally, there are tools for comfortable and efficient
 optimization and debugging.
 
 The framework does not have much of composer dependencies (on purpose), to make sure that
@@ -24,8 +25,7 @@ it does not bloat your `vendor` folder.
 The main purpose of the framework is to improve development experience, and it does not oppose
 any of the popular framework giants like "Yii2/3", "Laravel" or "Zend". The **SimpUtils**
 can be easily used in combination of any framework.
-For that matter I develop integration package of "SimpUtils" to "Yii2" framework:
-https://github.com/PandaHugMonster/yii2-simputils
+
 
 The framework extends PHP language with some useful perks. Provides similar to native classes,
 but improves their capabilities. Normalizes naming and architecture.
@@ -41,6 +41,7 @@ I will be really happy hearing from you.
 
 ----
 
+## License is "MIT"
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -59,7 +60,7 @@ SOFTWARE.
 
 ## Important notes
 
-1. Currently JSON serialization and deserialization does not work properly.
+1. Currently, JSON serialization and deserialization does not work properly.
    Please do not rely on it for now! **IMPORTANT!**
    When fix for this problem comes, and you are using current logic - you might get
    into a broken code logic. Please do not use `\spaf\simputils\PHP::serialize()` and
@@ -96,7 +97,7 @@ so documentation will come after that in the very nearest time. My apologies.
 
 Minimal PHP version: **8.0**
 
-Current framework version: **1.1.6**
+Current framework version: **1.1.5**
 
 ```shell
 composer require spaf/simputils "^1"
@@ -104,7 +105,7 @@ composer require spaf/simputils "^1"
 
 Keep in mind that the library development suppose to follow the semantic versioning,
 so the functionality within the same major version - should be backward-compatible (Except
-cases of bugs and issues).
+cases of bugs and some rare issues).
 
 More about semantic versioning: [Semantic Versioning Explanation](https://semver.org).
 
@@ -116,7 +117,7 @@ From this point, I decided to have stable version with some recent updates that 
 before the final release. Consider it "ALPHA" release.
 
 **Though, avoid using it on production, it would be times better if you would
-just poke me with a ticket so I would release the stable version quicker!**
+just poke me with a ticket, so I would release the stable version quicker!**
 
 Just keep in mind, even though it should be stable, it's still "unreleased" and might be even
 unfinished concepts. Please avoid using it without serious reasons.
@@ -134,7 +135,7 @@ All the features of this branch will be properly packaged and released, don't wo
 
 ### "dev-dev" Unstable version
 
-Additionally I've decided to have unstable version with much more recent updates that
+Additionally, I've decided to have unstable version with much more recent updates that
 I need in a first row with unfinished and broken concepts.
 
 Just keep in mind, it can completely break your code, unfinished concepts or
@@ -285,8 +286,8 @@ http://my.spec.domain.com.ru.at/path1/path2/path_3/path_4?param1=val1&param2=val
 
 And after all that you could get parts separately and play around with them.
 
-For example we get "path" parts, and they are returned as a Box-array, you can
-work with them sequntially, but as soon as you stringify them, they turn back to "path" string
+For example, we get "path" parts, and they are returned as a Box-array, you can
+work with them sequentially, but as soon as you stringify them, they turn back to "path" string
 again:
 
 ```php
@@ -323,7 +324,6 @@ The output would be:
 
 ```text
 My path really is: path1/I_REPLACED_PATH2_PIECE/path_3/path_4/HUGE-PATH-ADDITION
-
 ```
 
 Another moment worth mentioning, that when you modify the "path" box object -
@@ -564,7 +564,7 @@ but this feature should appear in the future releases.
 In the example above there is a simple textual data is used. The processing capabilities
 depend on the Resource App Processor and can be customized in any way you want.
 
-Currently there are a few of them:
+Currently, there are a few of them:
 
 * `\spaf\simputils\models\files\apps\CsvProcessor` - CSV file processing
 * `\spaf\simputils\models\files\apps\DotEnvProcessor` - ".env" file processing
@@ -573,7 +573,7 @@ Currently there are a few of them:
 * `\spaf\simputils\models\files\apps\PHPFileProcessor` - Special processor, **it is not allowed to
   be use directly** for security reasons!
 
-By default if file is not recognized then `TextProcessor` is used.
+By default, if file is not recognized then `TextProcessor` is used.
 
 The processor can be used explicitly when creating file object or can be re-assigned later:
 
@@ -1586,3 +1586,52 @@ basically a tip of the iceberg! There are lots of useful functionality descripti
 added in upcoming weeks.
 
 ----
+
+## Additional composer scripts
+You can test and analyze code with some additional scripts in composer.
+
+List all available scripts:
+```shell
+composer run -l
+```
+
+Output something like:
+```text
+scripts:
+  test             Run the whole PHPUnit test suit                                                                                              
+  coverage         Run the whole PHPUnit test with Coverage suit. Output in HTML at "docs/coverage/html"                                        
+  coverage-clover  Run the whole PHPUnit test with Coverage suit. Output in clover xml at "docs/coverage/"                                      
+  mess             Runs the mess script as defined in composer.json.                                                                            
+  pipeline-mess    Runs phpmd Mess Analysis on some scopes and return non 0 exit status if rules are violated. Reasonable for CI/CD pipelines.
+```
+
+### Automated Testing and Coverage
+#### Testing
+Requires `PHPUnit`, `php-mbstring`, `php-xdebug`, `php-bcmath` (GMP extension will not work. It has loss of precision, 
+so some tests will fail)
+
+For APT-GET compatible OS those could be installed like this:
+```shell
+sudo apt install php-mbstring php-xdebug php-bcmath
+```
+
+Running tests
+```shell
+composer run test
+```
+
+#### Code Coverage
+Requires `PHPUnit`
+
+```shell
+composer run coverage
+```
+
+----
+
+### Mess Analysis
+Requires `phpmd`
+
+```shell
+composer run mess
+```

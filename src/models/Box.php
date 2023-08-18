@@ -35,7 +35,6 @@ use function is_object;
 use function is_string;
 use function preg_replace;
 use function shuffle;
-use function spaf\simputils\basic\bx;
 use function uasort;
 
 /**
@@ -776,7 +775,7 @@ class Box extends ArrayObject {
 	}
 
 	protected static function _buildImplodedStr(Box $box, $sep = null, $stretcher = null) {
-		$res = bx();
+		$res = PHP::box();
 
 		if (is_null($sep)) {
 			$sep = static::$default_separator;

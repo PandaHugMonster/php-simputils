@@ -5,7 +5,7 @@
 # Glossary of SimpUtils terms
 
 Really important to remember, that this glossary defines and explains meaning only 
-inside of the framework. Please do not consider in-framework definitions in a wide
+inside the framework. Please do not consider in-framework definitions in a wide
 general purpose meaning.
 
  * [Prism](#term-prism)
@@ -35,7 +35,7 @@ general purpose meaning.
     </dd>
     <dt id="term-virtual-property">Virtual Property</dt>
     <dd>
-        In-class variables that are defined through #[Property] or #[PropertyBatch].
+        In-class variables that are defined through <code>#[Property]</code> or <code>#[PropertyBatch]</code>.
     </dd>
     <dd>
         In broader sense, any in-class variables that are defined through 

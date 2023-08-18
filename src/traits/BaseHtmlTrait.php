@@ -4,7 +4,7 @@ namespace spaf\simputils\traits;
 
 use spaf\simputils\components\RenderedWrapper;
 use spaf\simputils\models\Box;
-use function spaf\simputils\basic\bx;
+use spaf\simputils\PHP;
 use function str_replace;
 
 /**
@@ -27,7 +27,7 @@ trait BaseHtmlTrait {
 		string $value = null,
 		array|Box $attrs = []
 	): string|RenderedWrapper {
-		$attrs = bx($attrs)->stretched(separator: ' ', value_wrap: function ($value) {
+		$attrs = PHP::box($attrs)->stretched(separator: ' ', value_wrap: function ($value) {
 			$value = str_replace("\\\"", "\"", $value);
 			$value = str_replace("\"", "\\\"", $value);
 

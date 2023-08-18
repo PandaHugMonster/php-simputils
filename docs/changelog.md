@@ -1,11 +1,5 @@
 # Changelog
 
-## 1.2.0
-
-[//]: # (FIX   Don't forget to implement proper tests for the fixed timezone machanics)
-
-
-
 ## 1.1.5
 
 * Implemented extensive PHPDOC with examples to `\spaf\simputils\basic` (in progress)
@@ -22,6 +16,9 @@
 * Fixed issue with url "params" when the params with empty value are stripped out.
 * Added models `\spaf\simputils\models\Password` and `\spaf\simputils\models\Secret`.
   Documentation: [Passwords and Secrets explained](passwords-and-secrets.md)
+* Added some documentation and examples into [README.md](../README.md)
+* Improved composer scripts for the framework development and analysis/testing
+* Implemented minimal infrastructure for Renderers
 
 ## 1.1.4
 
@@ -52,7 +49,7 @@
 * Code Sniffer is removed from the project (got really annoyed, and it does not work correctly)
 * `\spaf\simputils\models\Time` and `\spaf\simputils\models\Date` have been refactored a bit.
   The caching mechanics has been fixed.
-	* Additionally have been added the properties for `\spaf\simputils\models\Date`
+	* Additionally, have been added the properties for `\spaf\simputils\models\Date`
 	  and `\spaf\simputils\models\Time` from the target `DateTime` object
 	* `\spaf\simputils\models\Date` and `\spaf\simputils\models\Time` result of `for_system`
 	  now returns the whole DateTime string value of UTC, not only the date or time component.
@@ -150,7 +147,7 @@
   `\spaf\simputils\models\Box::$default_separator` variable value to string that should be used
   during `\spaf\simputils\models\Box::join()` and `\spaf\simputils\models\Box::implode()` as
   a separator by default (initially default is ", " as it was before).
-  Additionally you can specify `\spaf\simputils\models\Box::$separator` on per object basis
+  Additionally, you can specify `\spaf\simputils\models\Box::$separator` on per object basis
   that will be used in the object in case of "join" or "implode" without the first argument.
   That functionality allows to create "path-ready" Box-arrays, that can by default
   be automatically converted into a "unix" path.

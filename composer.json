@@ -15,7 +15,7 @@
   "authors": [
     {
       "name": "Ivan Ponomarev",
-      "email": "pi@spaf.dev"
+      "email": "i.ponomarev@pandev.tech"
     }
   ],
   "type": "library",
@@ -59,7 +59,7 @@
     "test": "Run the whole PHPUnit test suit",
     "coverage": "Run the whole PHPUnit test with Coverage suit. Output in HTML at \"docs/coverage/html\"",
     "coverage-clover": "Run the whole PHPUnit test with Coverage suit. Output in clover xml at \"docs/coverage/\"",
-    "mess-codesize": "Runs phpmd Mess Analysis on scopes of \"codesize,unusedcode,naming\". Output in HTML at \"docs/quality/mess-analysis-codesize-report.html\"",
+    "mess": "Runs phpmd Mess Analysis on scopes of \"codesize,unusedcode,naming\". Output in HTML at \"docs/quality/mess-analysis-codesize-report.html\"",
 
     "pipeline-mess": "Runs phpmd Mess Analysis on scopes of \"codesize,unusedcode,naming\" and return non 0 exit status if rules are violated. Reasonable for CI/CD pipelines."
   }

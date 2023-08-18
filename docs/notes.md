@@ -81,7 +81,7 @@ use spaf\simputils\PHP;
 
 $ic = PHP::init([
 	'l10n' => 'AT',
-	'America/Toronto'
+	'default_tz' => 'America/Toronto',
 ]);
 
 pr("{$ic->l10n->name} // {$ic->default_tz}");

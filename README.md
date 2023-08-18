@@ -25,8 +25,7 @@ it does not bloat your `vendor` folder.
 The main purpose of the framework is to improve development experience, and it does not oppose
 any of the popular framework giants like "Yii2/3", "Laravel" or "Zend". The **SimpUtils**
 can be easily used in combination of any framework.
-~~For that matter I develop integration package of "SimpUtils" to "Yii2" framework:
-https://github.com/PandaHugMonster/yii2-simputils~~
+
 
 The framework extends PHP language with some useful perks. Provides similar to native classes,
 but improves their capabilities. Normalizes naming and architecture.

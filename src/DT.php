@@ -4,7 +4,10 @@
 namespace spaf\simputils;
 
 
+use Exception;
 use spaf\simputils\attributes\markers\Shortcut;
+use spaf\simputils\exceptions\RedefUnimplemented;
+use spaf\simputils\models\Box;
 use spaf\simputils\models\DateInterval;
 use spaf\simputils\models\DateTime;
 use spaf\simputils\models\DateTimeZone;
@@ -13,6 +16,7 @@ use function date;
 use function date_default_timezone_get;
 use function date_default_timezone_set;
 use function intval;
+use function is_null;
 use function is_numeric;
 use function is_string;
 
@@ -85,6 +89,104 @@ class DT {
 		return new $class($value);
 	}
 
+	protected static function chooseTimeZoneForNormalization(
+		null|bool|DateTimeZone|string $target_tz,
+	) {
+		$class = PHP::redef(DateTimeZone::class);
+
+		$is_valid_str = is_string($target_tz) && Str::len($target_tz) > 0;
+
+		if (is_string($target_tz) && !$is_valid_str) {
+			throw new Exception('Empty string as timezone is not allowed.');
+		}
+
+		return match (true) {
+			$is_valid_str
+				=> [$o = new $class($target_tz), $o],
+			$target_tz instanceof \DateTimeZone
+				=> [$target_tz, $target_tz],
+			$target_tz === false
+				=> [$o = new $class('UTC'), $o],
+			is_null($target_tz) || $target_tz === true
+				=> [new $class('UTC'), static::getDefaultTimeZone()]
+		};
+	}
+
+	private static $_try_field_formats = null;
+
+	protected static function getTryFieldFormats(): Box {
+		if (empty(static::$_try_field_formats)) {
+			static::$_try_field_formats = PHP::box([
+				"user_datetime_full_format",
+				"user_datetime_ext_format",
+				"user_datetime_format",
+
+				"user_date_format",
+
+				"user_time_full_format",
+				"user_time_ext_format",
+				"user_time_format",
+			]);
+		}
+
+		return static::$_try_field_formats;
+	}
+
+	protected static function identifyFittingFormatAndDt(
+		$settings_date_time,
+		$tz_in,
+		$dt,
+		$fmt
+	) {
+		/** @var DateTime $class */
+		$class = PHP::redef(DateTime::class);
+		foreach (static::getTryFieldFormats() as $field) {
+			try {
+				$pre_fmt = $settings_date_time->get($field);
+				if (!empty($pre_fmt)) {
+					$pre_dt = $class::createFromFormat($pre_fmt, $dt, $tz_in);
+					if ($pre_dt !== false) {
+						$fmt = $pre_fmt;
+						$dt = $pre_dt;
+						break;
+					}
+				}
+			} catch (Exception) {
+				// NOTE Skipping, because we are simply trying out the cases to parse
+			}
+		}
+
+		return [$dt, $fmt];
+	}
+
+	protected static function prepareDateTimeObjectBasedOnInput(
+		string|int $dt,
+		$tz_in,
+		?string $fmt
+	) {
+		/** @var DateTime $class */
+		$class = PHP::redef(DateTime::class);
+
+		if (Str::is($dt)) {
+			if (empty($fmt)) {
+				$settings_date_time = PHP::box(PHP::ic()?->l10n?->settings_date_time);
+				[$dt, $fmt] = static::identifyFittingFormatAndDt(
+					$settings_date_time, $tz_in, $dt, $fmt,
+				);
+			} else {
+				$dt = $class::createFromFormat($fmt, $dt, $tz_in);
+			}
+
+			if (empty($fmt) || $dt === false) {
+				$dt = new $class($dt, $tz_in);
+			}
+		} else if (is_numeric($dt)) {
+			$dt = new $class(date(DATE_ATOM, intval($dt)), $tz_in);
+		}
+
+		return $dt;
+	}
+
 	/**
 	 * Normalization of date and time
 	 *
@@ -97,95 +199,72 @@ class DT {
 	 * but you have to make sure you understand all the risks, and strongly recommended to avoid
 	 * using this param, when possible
 	 *
-	 * @param DateTime|string|int           $dt               You datetime data you want
+	 * @param DateTime|string|int $dt You datetime data you want
 	 *                                                        to normalize
-	 * @param bool|DateTimeZone|string|null $tz               Your TimeZone if applicable
-	 * @param string|null                   $fmt              Allows to enforce datetime format,
+	 * @param bool|DateTimeZone|string|null $tz Your TimeZone if applicable
+	 * @param string|null $fmt Allows to enforce datetime format,
 	 *                                                        though it's usually not needed.
 	 *                                                        This parameter plays role only
 	 *                                                        in case of the input datetime in
 	 *                                                        string type.
-	 * @param bool                          $is_clone_allowed If false and DateTime object supplied,
+	 * @param bool $is_clone_allowed If false and DateTime object supplied,
 	 *                                                        the same object is returned, instead
 	 *                                                        of the cloned one (instead of
 	 *                                                        a new object). Default is true.
 	 *
 	 * @return DateTime|null
-	 * @throws \spaf\simputils\exceptions\RedefUnimplemented Redefinable component is not defined
-	 * @noinspection PhpUndefinedMethodInspection
+	 * @throws RedefUnimplemented Redefinable component is not defined
+	 * @throws Exception Empty string as timezone is not allowed
 	 */
 	public static function normalize(
 		DateTime|string|int $dt,
 		null|bool|DateTimeZone|string $tz = null,
-		string $fmt = null,
+		?string $fmt = null,
 		bool $is_clone_allowed = true,
 	): ?DateTime {
+		[$tz_in, $tz_out] = static::chooseTimeZoneForNormalization($tz);
+
 		if ($dt instanceof DateTime) {
-			return $is_clone_allowed
+			$dt = $is_clone_allowed
 				?clone $dt
 				:$dt;
+		} else {
+			$dt = static::prepareDateTimeObjectBasedOnInput($dt, $tz_in, $fmt);
 		}
 
-		$class = PHP::redef(DateTime::class);
-		$tz_class = PHP::redef(DateTimeZone::class);
-
-		$from_utc = false;
-
-		// Incoming
-		if ($tz === true) {
-			// Zoned input
-			$tz = null;
-		} else if (is_string($tz)) {
-			// Zoned input
-			$tz = new $tz_class($tz);
-		} else if (empty($tz)) {
-			// Un-zoned input!
-			$tz = new $tz_class('UTC');
-			$from_utc = true;
-		}
-		/** @var DateTime $res */
-		// Resulting
-		if (Str::is($dt)) {
-//			if (Str::lower($dt) != 'now') {
-//				$dt = date($dt);
-//			}
-			$res = !empty($fmt)
-				?$class::createFromFormat($fmt, $dt, $tz)
-				:new $class($dt, $tz);
-		} else if (is_numeric($dt)) {
-			$res = new $class(date(DATE_ATOM, intval($dt)), $tz);
+		if ($dt) {
+			$dt->tz = $tz_out;
 		}
 
-		if ($from_utc) {
-			$res->setTimezone(static::getDefaultTimeZone());
+		return $dt;
+	}
+
+	protected static function composeIntervalSpecificationString(
+		$obj,
+		Box|array $cases,
+	) {
+		$res = '';
+		foreach ($cases as $field => $spec) {
+			if ($obj->$field) {
+				$res .= "{$obj->$field}{$spec}";
+			}
 		}
 
 		return $res;
 	}
 
 	static function dateIntervalSpecificationString(\DateInterval $obj) {
-		$date = '';
-		$time = '';
+		$date = static::composeIntervalSpecificationString($obj, [
+			'y' => 'Y',
+			'm' => 'M',
+			'd' => 'D',
+		]);
+		$time = static::composeIntervalSpecificationString($obj, [
+			'h' => 'H',
+			'i' => 'M',
+			's' => 'S',
+		]);
 
-		if ($obj->y) {
-			$date .= "{$obj->y}Y";
-		}
-		if ($obj->m) {
-			$date .= "{$obj->m}M";
-		}
-		if ($obj->d) {
-			$date .= "{$obj->d}D";
-		}
-
-		if ($obj->h) {
-			$time .= "{$obj->h}H";
-		}
-		if ($obj->i) {
-			$time .= "{$obj->i}M";
-		}
-		if ($obj->s) {
-			$time .= "{$obj->s}S";
-		}
 		if (!empty($time)) {
 			$time = "T{$time}";
 		}
@@ -211,7 +290,7 @@ class DT {
 	 * @param string|null              $parsing_fmt Parsing string input-format hint
 	 *
 	 * @return string|null
-	 * @throws \spaf\simputils\exceptions\RedefUnimplemented Redefinable component is not defined
+	 * @throws RedefUnimplemented Redefinable component is not defined
 	 */
 	public static function stringify(
 		DateTime|string|int $dt,

@@ -26,6 +26,7 @@ use function spaf\simputils\basic\ts;
  * @uses \spaf\simputils\PHP
  * @uses \spaf\simputils\special\CodeBlocksCacheIndex
  * @uses \spaf\simputils\attributes\Property
+ * @uses \spaf\simputils\traits\PropertiesTrait::__set
  * @uses \spaf\simputils\traits\SimpleObjectTrait
  * @uses \spaf\simputils\traits\SimpleObjectTrait::_simpUtilsPrepareProperty
  * @uses \spaf\simputils\traits\SimpleObjectTrait::__get
@@ -53,7 +54,7 @@ class DateTimeTest extends TestCase {
 	 * @runInSeparateProcess
 	 * @return void
 	 */
-	public function testHelperTransparentParsing(): void {
+	function testHelperTransparentParsing(): void {
 		$dt_class = PHP::redef(DateTime::class);
 
 		$dt = DT::normalize('22.02.1990', 'America/New_York');
@@ -97,19 +98,16 @@ class DateTimeTest extends TestCase {
 			'2022-03-21', '2022-03-22', '2022-03-23', '2022-03-24', '2022-03-25',
 			'2022-03-26', '2022-03-27', '2022-03-28', '2022-03-29', '2022-03-30',
 		];
-
-		$dt_period = DT::walk('2022-02-24', '2022-03-30', '1 day');
-		// IMP  Stop the war! Save Ukraine! Slava Ukraini!
-		// FIX  Broken, because DatePeriod returns native PHP DateTime object instead
-		//      of Framework's
+//		FIX https://github.com/PandaHugMonster/php-simputils/issues/121
+//		$dt_period = DT::walk('2022-02-24', '2022-03-30', '1 day');
+//		// IMP  Stop the war! Save Ukraine! Slava Ukraini!
 //		foreach ($dt_period as $day) {
-//			/** @var DateTime $day */
-//			pd($day, PHP::type($day));
+//			/** @var \DatePeriod $day */
 //			$this->assertContains("{$day->date}", $dt_expected);
 //		}
 	}
 
-	public function testNowObjectCreation(): void {
+	function testNowObjectCreation(): void {
 		$dt_class = PHP::redef(DateTime::class);
 		$dt = DT::now();
 		$this->assertInstanceOf($dt_class, $dt, 'Object type check');
@@ -125,7 +123,7 @@ class DateTimeTest extends TestCase {
 		DT::$now_string = null;
 	}
 
-	public function testTransparentStringifyingDateTimeObject() {
+	function testTransparentStringifyingDateTimeObject() {
 		$dt_class = PHP::redef(DateTime::class);
 		$now = DT::now('UTC');
 		$this->assertInstanceOf($dt_class, $now, 'Is a date-time object');

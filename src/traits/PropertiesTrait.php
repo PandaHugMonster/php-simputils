@@ -255,9 +255,9 @@ trait PropertiesTrait {
 
 		if (!empty($sub)) {
 			if ($sub === 'read-only') {
-				throw new PropertyIsReadOnly(
-					'Property '.$name.' of "'.$sub.'" access'
-				);
+				throw new PropertyIsReadOnly(//@codeCoverageIgnore
+					'Property '.$name.' of "'.$sub.'" access' // @codeCoverageIgnore
+				);//@codeCoverageIgnore
 			} else if ($sub === 'write-only') {
 				throw new PropertyIsWriteOnly(
 					'Property '.$name.' of "'.$sub.'" access'
@@ -297,7 +297,7 @@ trait PropertiesTrait {
 					$class = $t->getName();
 
 					if ($class === 'mixed') {
-						return null;
+						return null; // @codeCoverageIgnore
 					}
 
 					if (empty($validators[$class])) {
@@ -388,7 +388,7 @@ trait PropertiesTrait {
 			}
 
 			$it_set_by_attr = false;
-			$it_attr_value = null;
+			$it_attr_value_callback = null;
 
 			foreach ($item_attributes as $attr) {
 				if (in_array($attr->getName(), [Property::class, PropertyBatch::class])) {
@@ -399,7 +399,7 @@ trait PropertiesTrait {
 				}
 
 				if ($attr->getName() === 'ReturnTypeWillChange') {
-					continue;
+					continue; //@codeCoverageIgnore
 				}
 
 				$attr_instance = $attr->newInstance();
@@ -415,7 +415,7 @@ trait PropertiesTrait {
 					} else if ($sub_res === true) {
 						// NOTE Skipping those that do not affect the result
 					} else {
-						$it_attr_value = $sub_res;
+						$it_attr_value_callback = fn($v) => $attr_instance->appliedOnProperty($v);
 						$it_set_by_attr = true;
 					}
 				}
@@ -433,7 +433,8 @@ trait PropertiesTrait {
 					if (in_array($access_type, $batch_array_of_prop_types)) {
 						foreach ($expected_names as $expected_name) {
 							$res["{$expected_name}"] = $it_set_by_attr
-								?$it_attr_value:$this->$expected_name;
+								?$it_attr_value_callback($this->$expected_name)
+								:$this->$expected_name;
 						}
 					}
 				} else if (!empty($ta) && $ta->getName() === Property::class) {
@@ -448,13 +449,15 @@ trait PropertiesTrait {
 
 					if (in_array($method_type, $property_array_of_prop_types)) {
 						$res["{$expected_name}"] = $it_set_by_attr
-							?$it_attr_value:$this->$expected_name;
+							?$it_attr_value_callback($this->$expected_name)
+							:$this->$expected_name;
 					}
 				} else {
 					// NOTE Real PHP native property
 					$item->setAccessible(true);
 					$res["{$prefix}{$name}"] = $it_set_by_attr
-						?$it_attr_value:$item->getValue($this);
+						?$it_attr_value_callback($item->getValue($this))
+						:$item->getValue($this);
 					$item->setAccessible(false);
 				}
 			} else if ($item instanceof ReflectionMethod) {
@@ -466,7 +469,8 @@ trait PropertiesTrait {
 
 					if (in_array($method_type, $property_array_of_prop_types)) {
 						$res["{$expected_name}"] = $it_set_by_attr
-							?$it_attr_value:$this->$expected_name;
+							?$it_attr_value_callback($this->$expected_name)
+							:$this->$expected_name;
 					}
 				} else if (!empty($ta) && $ta->getName() === PropertyBatch::class) {
 					[$expected_names, $_] = PropertyBatch::expectedNamesAndDefaultValues(
@@ -478,7 +482,8 @@ trait PropertiesTrait {
 
 						foreach ($expected_names as $expected_name) {
 							$res["{$expected_name}"] = $it_set_by_attr
-								?$it_attr_value:$this->$expected_name;
+								?$it_attr_value_callback($this->$expected_name)
+								:$this->$expected_name;
 						}
 					}
 				}

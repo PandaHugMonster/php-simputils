@@ -1,6 +1,7 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
+use spaf\simputils\exceptions\ExecEnvException;
 use spaf\simputils\PHP;
 use function spaf\simputils\basic\ic;
 
@@ -8,10 +9,6 @@ use function spaf\simputils\basic\ic;
  * @runTestsInSeparateProcesses
  */
 class ExecEnvsTest extends TestCase {
-
-	protected function setUp(): void {
-		$ic = PHP::init();
-	}
 
 	public function dataProviderDefaultCases() {
 		return [
@@ -128,7 +125,7 @@ class ExecEnvsTest extends TestCase {
 	}
 
 	/**
-	 * @covers \spaf\simputils\generic\BasicExecEnvHandler
+	 * @covers       \spaf\simputils\generic\BasicExecEnvHandler
 	 *
 	 * @dataProvider dataProviderDefaultCases
 	 *
@@ -138,14 +135,78 @@ class ExecEnvsTest extends TestCase {
 	 * @param $expected_bool
 	 *
 	 * @return void
-	 * @throws \spaf\simputils\exceptions\ExecEnvException
+	 * @throws ExecEnvException
 	 */
 	function testDefaultCases($ee, $check_ee, $is_hierarchical, $expected_bool) {
 		$ic = ic();
 		$ic->ee = $ee;
 		$ic->ee->is_hierarchical = $is_hierarchical;
 
-		$this->assertEquals($expected_bool, $ic->ee->is($check_ee));
+		$this->assertEquals($expected_bool, $ic->ee->is($check_ee), "Of values: $ee, $check_ee, $is_hierarchical, $expected_bool");
+	}
+
+	public function dataProviderStrictAndArrayCases() {
+		return [
+			['dev-local', 'prod', false],
+			['dev-local', 'prod-local', false],
+			['dev-local', 'demo', false],
+			['dev-local', 'demo-local', false],
+			['dev-local', 'dev', false],
+			['dev-local', 'dev-local', true],
+
+			['dev', 'prod', false],
+			['dev', 'prod-local', false],
+			['dev', 'demo', false],
+			['dev', 'demo-local', false],
+			['dev', 'dev', true],
+			['dev', 'dev-local', false],
+
+			['prod', 'prod', true],
+			['prod', 'prod-local', false],
+			['prod', 'demo', false],
+			['prod', 'demo-local', false],
+			['prod', 'dev', false],
+			['prod', 'dev-local', false],
+
+			['prod', ['dev-local', 'prod', 'demo'], true],
+			['prod-local', ['dev-local', 'prod', 'demo'], false],
+			['demo', ['dev-local', 'prod', 'demo'], true],
+			['dev', ['dev-local', 'prod', 'demo'], false],
+			['dev-local', ['dev-local', 'prod', 'demo'], true],
+		];
+	}
+
+	/**
+	 *
+	 * @dataProvider dataProviderStrictAndArrayCases
+	 *
+	 * @param $ee
+	 * @param $check_ee
+	 * @param $expected_bool
+	 *
+	 * @return void
+	 * @throws ExecEnvException
+	 * @covers       \spaf\simputils\generic\BasicExecEnvHandler
+	 *
+	 */
+	function testStrictAndArrayCases($ee, $check_ee, $expected_bool) {
+		$ic = ic();
+		$ic->ee = $ee;
+		$ic->ee->is_hierarchical = false;
+
+		if (PHP::isArrayCompatible($check_ee)) {
+			$check_ee = PHP::box($check_ee);
+		}
+
+		$this->assertEquals(
+			$expected_bool,
+			$ic->ee->is($check_ee, is_strict: true),
+			"Of values: $ee, $check_ee, $expected_bool",
+		);
+	}
+
+	protected function setUp(): void {
+		$ic = PHP::init();
 	}
 
 }

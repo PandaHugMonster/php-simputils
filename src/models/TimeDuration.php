@@ -34,6 +34,7 @@ use function trim;
  * @property-read int $seconds
  * @property-read int $milliseconds
  * @property-read int $microseconds
+ * @property-read string $max_name
  *
  * @property bool $is_always_microseconds
  */
@@ -60,6 +61,7 @@ class TimeDuration extends SimpleObject {
 	static float $month_coefficient = 30.436875;
 	static float $day_coefficient = 24;
 	static float $year_coefficient = 12;
+	static string $output_separator = ' ';
 
 	#[DebugHide]
 	protected ?Box $cached = null;
@@ -67,7 +69,7 @@ class TimeDuration extends SimpleObject {
 	#[DebugHide]
 	protected ?Box $cached_coefs = null;
 
-//	#[DebugHide]
+	#[DebugHide]
 	protected ?Box $orig_coefs = null;
 
 	#[Property]
@@ -168,31 +170,14 @@ class TimeDuration extends SimpleObject {
 		return $this->cached;
 	}
 
-	function humanReadable(): ?string {
+	function humanReadable(): string {
 		$res = '';
+		$sep = static::$output_separator;
 
 		if ($this->_is_negative) {
 			$res .= '- ';
 		}
 
-		//		$gg = PHP::box();
-		//		$orig_coefs = PHP::box();
-		//		$was_met_max = false;
-		//		$use = PHP::box();
-		//		foreach ($t as $i => [$name, $v]) {
-		//			if ($name === $this->max_converted_unit) {
-		//				$was_met_max = true;
-		//			}
-		//			if (!$was_met_max) {
-		//				continue;
-		//			}
-		//			$use[] = $name;
-		////			$gg[$i] = [$name, $v];
-		//			if ($name === $this->min_displayed_unit) {
-		//				break;
-		//			}
-		//		}
-		//
 		$params = PHP::box([
 			PHP::box([static::MILLENNIUMS, 'mil.']),
 			PHP::box([static::CENTURIES, 'c.']),
@@ -214,7 +199,7 @@ class TimeDuration extends SimpleObject {
 				continue;
 			}
 			if (($a = Math::abs($c[$name])) > 0) {
-				$res .= "{$a}{$label} ";
+				$res .= "{$a}{$sep}{$label} ";
 			}
 			if ($name === $this->min_displayed_unit) {
 				break;
@@ -226,24 +211,27 @@ class TimeDuration extends SimpleObject {
 			if (static::MICRO_SECONDS === $this->min_displayed_unit && ($this->is_always_microseconds || ($a % 1000) != 0)) {
 				$unit = 'ms.';
 				if ($a > 0) {
-					$res .= "{$a}{$unit} ";
+					$res .= "{$a}{$sep}{$unit} ";
 				}
 			} else {
 				$unit = 'mls.';
 				$m = floor($a / 1000);
 				if ($m > 0) {
-					$res .= "{$m}{$unit} ";
+					$res .= "{$m}{$sep}{$unit} ";
 				}
 			}
 		}
 
 		$res = trim($res);
-		return $res ?: null;
+		return $res ?: '';
 	}
 
 	function numeric(?string $unit = null) {
 		if (is_null($unit)) {
-			$unit = $this->maxName();
+			$unit = $this->max_name;
+		}
+		if (is_null($unit)) {
+			return 0;
 		}
 		if (!$this->cached_coefs->containsKey($unit)) {
 			throw new Exception("Unsupported unit {$unit}");
@@ -252,7 +240,8 @@ class TimeDuration extends SimpleObject {
 		return $this->value / $coef;
 	}
 
-	function maxName() {
+	#[Property('max_name')]
+	protected function getMaxName(): ?string {
 		$unit = null;
 		$c = $this->_cachedValue();
 		foreach ($c as $name => $value) {

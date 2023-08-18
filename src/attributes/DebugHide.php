@@ -5,6 +5,7 @@ namespace spaf\simputils\attributes;
 use Attribute;
 use spaf\simputils\generic\BasicOutputControlAttribute;
 use spaf\simputils\models\Box;
+use spaf\simputils\models\Secret;
 use spaf\simputils\PHP;
 
 /**
@@ -36,6 +37,8 @@ use spaf\simputils\PHP;
 #[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_CLASS | Attribute::TARGET_PROPERTY)]
 class DebugHide extends BasicOutputControlAttribute {
 
+	static $default_placeholder = '****';
+
 	public function __construct(
 		public bool $hide_all = true,
 		public ?string $show_instead = '****',
@@ -48,13 +51,22 @@ class DebugHide extends BasicOutputControlAttribute {
 		if ($this->hide_all) {
 			return PHP::box();
 		}
-		return PHP::box([$this->show_instead ?? '****']);
+		return PHP::box([$this->show_instead ?? static::$default_placeholder]);
 	}
 
 	/**
 	 * @inheritDoc
 	 */
-	function appliedOnProperty(): null|string|false {
+	function appliedOnProperty(mixed $value = null): null|string|false {
+
+		if ($value instanceof Secret) {
+			$stringified = "{$value}";
+			if ($stringified !== $value->value) {
+				return $stringified;
+			}
+		}
+
+
 		return $this->hide_all
 			?false
 			:$this->show_instead;

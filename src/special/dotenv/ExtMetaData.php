@@ -3,7 +3,7 @@
 namespace spaf\simputils\special\dotenv;
 
 use spaf\simputils\generic\BasicDotEnvCommentExt;
-use function spaf\simputils\basic\bx;
+use spaf\simputils\PHP;
 
 /**
  *
@@ -31,7 +31,7 @@ class ExtMetaData extends BasicDotEnvCommentExt {
 	) {}
 
 	public function params(): ?string {
-		$res = bx();
+		$res = PHP::box();
 
 		if ($this->name) {
 			$res['name'] = $this->name;

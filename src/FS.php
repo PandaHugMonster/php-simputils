@@ -2,17 +2,24 @@
 
 namespace spaf\simputils;
 
+use Closure;
 use finfo;
+use ReflectionMethod;
 use spaf\simputils\attributes\markers\Shortcut;
 use spaf\simputils\exceptions\CannotDeleteDirectory;
 use spaf\simputils\exceptions\DataDirectoryIsNotAllowed;
+use spaf\simputils\generic\BasicInitConfig;
+use spaf\simputils\generic\BasicResource;
 use spaf\simputils\generic\BasicResourceApp;
 use spaf\simputils\models\Box;
 use spaf\simputils\models\Dir;
 use spaf\simputils\models\File;
+use spaf\simputils\models\files\apps\PHPFileProcessor;
 use function file_exists;
 use function is_array;
+use function is_callable;
 use function is_dir;
+use function spaf\simputils\basic\ic;
 use const DIRECTORY_SEPARATOR;
 
 /**
@@ -20,6 +27,10 @@ use const DIRECTORY_SEPARATOR;
  *
  * TODO Add fileExists method
  * TODO Add real-path property and check if realpath is the same as specified.
+ * @SuppressWarnings(PHPMD.TooManyMethods)
+ * @SuppressWarnings(PHPMD.TooManyPublicMethods)
+ * @SuppressWarnings(PHPMD.ExcessivePublicCount)
+ * @SuppressWarnings(PHPMD.ExcessiveClassComplexity) Does not matter for Core Helper Classes
  */
 class FS {
 
@@ -103,16 +114,21 @@ class FS {
 	 * @see FS::locate()
 	 * @see FS::require()
 	 */
-	static function data(array|Box|File $file, ?string $ic = 'app') {
+	static function data(array|Box|File $file, null|string|BasicInitConfig $ic = null) {
+		return static::dataFile($file, $ic)?->content ?? null;
+	}
+
+	static function dataFile(array|Box|File $file, null|string|BasicInitConfig $ic = null): ?File {
 		$file = FS::file($file);
 
 		if (empty($ic)) {
-			$ic = 'app';
+			$ic = ic();
+		} else if (Str::is($ic)) {
+			$ic = ic($ic);
 		}
-		$config = PHP::getInitConfig($ic);
 
 		$is_allowed = false;
-		foreach ($config->allowed_data_dirs as $dir) {
+		foreach ($ic->allowed_data_dirs as $dir) {
 			$dir = FS::locate($dir);
 			if (Str::startsWith($file, $dir)) {
 				$is_allowed = true;
@@ -130,10 +146,14 @@ class FS {
 			if (!$file->exists) {
 				return null;
 			}
-			return static::require($file);
+			$reflection = new ReflectionMethod(BasicResource::class, 'setIsExecutableProcessingEnabled');
+			$reflection->setAccessible(true);
+			$reflection->invoke($file, true);
+			$reflection->setAccessible(false);
+			$file->app = new PHPFileProcessor();
 		}
-		// NOTE Non-php file
-		return $file?->content ?? null;
+
+		return $file;
 	}
 
 	/**
@@ -214,19 +234,25 @@ class FS {
 	public static function lsFiles(
 		?string $file_path,
 		bool $recursively = false,
-		bool|string $sorting = true,
+		bool|string|callable $sorting = true,
 		bool $exclude_original_path = true
 	): ?array {
-		$res = $exclude_original_path?[]:[$file_path];
+		$res = $exclude_original_path
+			?[]
+			:[$file_path];
+
 		if (file_exists($file_path)) {
-			if (!is_dir($file_path))
+			if (!is_dir($file_path)) {
 				return $res;
+			}
 
 			// TODO bug here!
 			$scanned_dir = scandir($file_path);
 			if ($recursively) {
 				foreach ($scanned_dir as $file) {
-					if (in_array($file, ['.', '..'])) continue;
+					if (in_array($file, ['.', '..'])) {
+						continue;
+					}
 
 					$full_sub_file_path = realpath($file_path.'/'.$file);
 					$sub_list = static::lsFiles(
@@ -241,15 +267,20 @@ class FS {
 			}
 		}
 
-		if (!empty($sorting)) {
-			if (Str::is($sorting) || is_callable($sorting)) {
-				$sorting($res);
-			} else {
-				sort($res);
-			}
-		}
+		$res = static::applySorting($res, $sorting);
 
 		return $res;
+	}
+
+	protected static function applySorting(Box|array $files, bool|string|callable $sorting) {
+		if (!empty($sorting)) {
+			if (Str::is($sorting) || is_callable($sorting)) {
+				$sorting($files);
+			} else {
+				sort($files);
+			}
+		}
+		return $files;
 	}
 
 	/**
@@ -344,6 +375,67 @@ class FS {
 		return static::mimeTypeRealMapper($orig_mime, $ext, $file);
 	}
 
+	protected static function extractNameAndExtFromFile($file, $ext = null) {
+		$file_name = null;
+		if (!empty($file)) {
+			[$_, $file_name, $_ext] = static::splitFullFilePath($file);
+			if (empty($ext)) {
+				$ext = $_ext; // @codeCoverageIgnore
+			}
+		}
+		return [$file_name, $ext];
+	}
+
+	/**
+	 * @param $file_name
+	 * @param $ext
+	 *
+	 * DotEnv files are extremely loosely defined
+	 * TODO Implement detailed description/documentation compiled from all other
+	 *      languages implementations. Maybe define a specification of that compilation
+	 *
+	 * @return bool
+	 */
+	protected static function checkDotEnvMime($file_name, $ext): bool {
+		return (empty($file_name) && str_starts_with($ext, 'env'))
+			|| (!empty($file_name) && str_starts_with($file_name, '.env'));
+	}
+
+	protected static function checkPhpMime($file_name, $ext): bool {
+		return PHP::listOfExecPhpFileExtensions()->containsValue($ext);
+	}
+
+	protected static function identifyMimeByExt($file_name, $ext) {
+		$ext_to_mime_mapping = PHP::box([
+			'application/json' => ['json', ],
+			'application/dotenv' => [
+				'env',
+				Closure::fromCallable([static::class, 'checkDotEnvMime']),
+			],
+			'application/javascript' => ['js', ],
+			'text/csv' => ['csv', 'tsv', ],
+			'text/xml' => ['xml', ],
+			'application/x-php' => [
+				Closure::fromCallable([static::class, 'checkPhpMime']),
+			],
+		]);
+		foreach ($ext_to_mime_mapping as $mime => $possibles) {
+			foreach ($possibles as $item) {
+				/** @var callable|string $item */
+				if ($item instanceof Closure) {
+					if ($item($file_name, $ext)) {
+						return $mime;
+					}
+				} else if ("{$item}" === $ext) {
+					return $mime;
+
+				}
+			}
+		}
+
+		return null;
+	}
+
 	/**
 	 * @param string  $orig_mime Original mime type
 	 * @param string  $ext       File extension
@@ -364,37 +456,11 @@ class FS {
 		string $ext,
 		string $file = null
 	): string {
-		$file_name = null;
-		if (!empty($file)) {
-			[$_, $file_name, $_ext] = static::splitFullFilePath($file);
-			if (empty($ext)) {
-				$ext = $_ext; // @codeCoverageIgnore
-			}
-		}
-		if (in_array($orig_mime, ['text/plain', 'application/x-empty'])) {
-			if (in_array($ext, ['json'])) {
-				return 'application/json'; // @codeCoverageIgnore
-			}
-			$check = in_array($ext, ['env']);
-			$check = $check || (
-					(empty($file_name) && str_starts_with($ext, 'env')) ||
-					(!empty($file_name) && str_starts_with($file_name, '.env'))
-				);
+		[$file_name, $ext] = static::extractNameAndExtFromFile($file, $ext);
 
-			if ($check) {
-				// DotEnv files are extremely loosely defined
-				// TODO Implement detailed description/documentation compiled from all other
-				//      languages implementations. Maybe define a specification of that compilation
-				return 'application/dotenv'; // @codeCoverageIgnore
-			}
-			if (in_array($ext, ['js'])) {
-				return 'application/javascript'; // @codeCoverageIgnore
-			}
-			if (in_array($ext, ['csv', 'tsv'])) {
-				return 'text/csv';
-			}
-			if (in_array($ext, ['xml'])) {
-				return 'text/xml'; // @codeCoverageIgnore
+		if (in_array($orig_mime, ['text/plain', 'application/x-empty'])) {
+			if ($final_mime = static::identifyMimeByExt($file_name, $ext)) {
+				return $final_mime;
 			}
 		}
 		return $orig_mime;
@@ -403,9 +469,9 @@ class FS {
 	/**
 	 * Opposite of `splitFullFilePath()`
 	 *
-	 * @param string $dir  Directory
-	 * @param string $name File name without extension and directory
-	 * @param string $ext  Extension
+	 * @param string  $dir  Directory
+	 * @param string  $name File name without extension and directory
+	 * @param ?string $ext  Extension
 	 *
 	 * @see splitFullFilePath()
 	 * @return string
@@ -445,12 +511,12 @@ class FS {
 	/**
 	 * Returns File instance for the provided argument
 	 *
-	 * @param null|string|Box|array|File $file Can be a string - then it's a path to a file, or
-	 *                                         a File instance, then it's just provided back
-	 *                                         transparently
-	 * @param mixed|null                 $app  Read/Write processor
+	 * @param string|resource|int|Box|array|File|null $file Can be a string - then it's a path
+	 *                                                      to a file, or a File instance, then
+	 *                                                      it's just provided back transparently
+	 * @param mixed|null                              $app  Read/Write processor
 	 *
-	 * @return \spaf\simputils\models\File|null
+	 * @return File|null
 	 */
 	public static function file(
 		mixed $file = null,

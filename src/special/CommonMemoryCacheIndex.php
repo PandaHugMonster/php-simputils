@@ -13,6 +13,7 @@ use spaf\simputils\components\normalizers\LowerCaseNormalizer;
 use spaf\simputils\components\normalizers\StringNormalizer;
 use spaf\simputils\components\normalizers\UpperCaseNormalizer;
 use spaf\simputils\components\normalizers\UrlNormalizer;
+use spaf\simputils\components\normalizers\VersionNormalizer;
 use spaf\simputils\models\Box;
 use spaf\simputils\models\PhpInfo;
 
@@ -55,6 +56,7 @@ class CommonMemoryCacheIndex {
 		'IPv4' => IPNormalizer::class,
 		'UrlObject' => UrlNormalizer::class,
 		'Box' => BoxNormalizer::class,
+		'Version' => VersionNormalizer::class,
 
 		'lower' => LowerCaseNormalizer::class,
 		'upper' => UpperCaseNormalizer::class,

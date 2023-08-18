@@ -2,6 +2,7 @@
 
 namespace spaf\simputils\generic;
 
+use spaf\simputils\attributes\DebugHide;
 use spaf\simputils\attributes\Property;
 use spaf\simputils\exceptions\ExecEnvException;
 use spaf\simputils\interfaces\ExecEnvHandlerInterface;
@@ -10,6 +11,7 @@ use spaf\simputils\PHP;
 use function intval;
 use function is_null;
 use function is_numeric;
+use function is_string;
 use function preg_match;
 
 /**
@@ -18,8 +20,10 @@ use function preg_match;
  * If you want to modify it, just extend from it, or implement
  * `\spaf\simputils\interfaces\ExecEnvHandlerInterface` interface
  *
- * @property bool $is_hierarchical
- * @property Box $permitted_values
+ * @property-read ?string $value
+ * @property bool         $is_local
+ * @property bool         $is_hierarchical
+ * @property Box          $permitted_values
  */
 class BasicExecEnvHandler extends SimpleObject implements ExecEnvHandlerInterface {
 
@@ -33,7 +37,10 @@ class BasicExecEnvHandler extends SimpleObject implements ExecEnvHandlerInterfac
 	const EE_DEMO_LOCAL = 'demo-local';
 	const EE_PROD_LOCAL = 'prod-local';
 
+	#[Property]
 	protected ?bool $_is_local = false;
+
+	#[DebugHide]
 	protected ?string $_ee = null;
 
 	#[Property]
@@ -46,10 +53,10 @@ class BasicExecEnvHandler extends SimpleObject implements ExecEnvHandlerInterfac
 		3 => self::EE_DEV,
 	];
 
-	public function __construct(
+	function __construct(
 		$ee = self::EE_UNKNOWN,
 		$is_hierarchical = false,
-		$permitted_values = null
+		$permitted_values = null,
 	) {
 		if (is_null($permitted_values)) {
 			$permitted_values = $this->_permitted_values;
@@ -78,7 +85,7 @@ class BasicExecEnvHandler extends SimpleObject implements ExecEnvHandlerInterfac
 			"#({$permitted})?(-local)?#i",
 			$val,
 			$res,
-			$mask
+			$mask,
 		);
 
 		return PHP::box($res)->batch([1, 2], true);
@@ -104,34 +111,48 @@ class BasicExecEnvHandler extends SimpleObject implements ExecEnvHandlerInterfac
 	 * return true, but "dev" will return false. And in case of "dev" - both "prod"
 	 * and "demo" will be included.
 	 *
-	 * By default hierarchical model is disabled
+	 * By default hierarchical model is disabled.
 	 *
+	 * if `$is_strict` parameter set to true then comparison will be strict,
+	 * and only specified exact values will return true, `$is_hierarchical` and `$is_local`
+	 * are ignored.
+	 *
+	 * @param string|Box|array $val
+	 * @param bool             $is_hierarchical
+	 * @param bool             $is_local
+	 * @param bool             $is_strict
+	 *
+	 * @return bool
+	 * @throws ExecEnvException
 	 */
-	function is(string $val): bool {
-		[$expected_ee, $expected_is_local] = $this->parse($val);
-		$expected_is_local = (bool) $expected_is_local;
+	function is(
+		string|Box|array $val,
+		bool             $is_hierarchical = false,
+		bool             $is_local = false,
+		bool             $is_strict = false,
+	): bool {
 
-		if ($expected_ee === static::EE_UNKNOWN || $this->_ee === static::EE_UNKNOWN) {
-			$p = $this->_permitted_values->clone();
-
-			throw new ExecEnvException('Unknown exec-env cannot be used or checked. ' .
-				"Please set the proper exec-env value: {$p}");
+		if (is_string($val)) {
+			$val = [$val];
 		}
+		$val = PHP::box($val);
 
-		$check = $this->_is_local || $expected_is_local === false;
-
-		if ($this->_ee === $expected_ee) {
-			if ($check) {
-				// NOTE Then does not matter if local or not
-				return true;
-			}
-		} else if ($this->is_hierarchical) {
-			// NOTE Hierarchical
-			$flipped = $this->permitted_values->flipped();
-			if (isset($flipped[$expected_ee]) && isset($flipped[$this->_ee])) {
-				if (is_numeric($flipped[$expected_ee]) && is_numeric($flipped[$this->_ee])) {
-					return intval($flipped[$expected_ee]) <= intval($flipped[$this->_ee])
-						&& $check;
+		foreach ($val as $item) {
+			[$expected_ee, $expected_is_local] = $this->parse($item);
+			if ($is_strict) {
+				if ($this->_strictIs($expected_ee, $expected_is_local)) {
+					return true;
+				}
+			} else {
+				if (
+					$this->_normalIs(
+						$expected_ee,
+						$expected_is_local,
+						$is_local,
+						$is_hierarchical,
+					)
+				) {
+					return true;
 				}
 			}
 		}
@@ -139,12 +160,66 @@ class BasicExecEnvHandler extends SimpleObject implements ExecEnvHandlerInterfac
 		return false;
 	}
 
+	private function _strictIs($expected_ee, $expected_is_local): ?bool {
+		if ($expected_is_local) {
+			$expected_ee = "{$expected_ee}-local";
+		}
+		if ($expected_ee === "$this") {
+			return true;
+		}
+
+		return null;
+	}
+
+	private function _normalIs($expected_ee, $expected_is_local, $is_local, $is_hierarchical): ?bool {
+		$is_local = $expected_is_local || $is_local;
+
+		if ($expected_ee === static::EE_UNKNOWN || $this->_ee === static::EE_UNKNOWN) {
+			$p = $this->_permitted_values->clone();
+
+			throw new ExecEnvException("Unknown exec-env cannot be used or checked. ".
+				"Please set the proper exec-env value: {$p}"
+			);
+		}
+
+		$check = $this->_is_local || $is_local === false;
+
+		$is_hierarchical = $this->is_hierarchical || $is_hierarchical;
+
+		if ($this->_ee === $expected_ee) {
+			if ($check) {
+				// NOTE Then does not matter if local or not
+				return true;
+			}
+		} else if ($is_hierarchical) {
+			// NOTE Hierarchical
+			$flipped = $this->permitted_values->flipped();
+			if (isset($flipped[$expected_ee]) && isset($flipped[$this->_ee])) {
+				if (is_numeric($flipped[$expected_ee]) && is_numeric($flipped[$this->_ee])) {
+					$res = intval($flipped[$expected_ee]) <= intval($flipped[$this->_ee])
+						&& $check;
+					if ($res) {
+						return true;
+					}
+				}
+			}
+		}
+
+		return null;
+	}
+
 	function __toString(): string {
 		$res = $this->_ee;
 		if ($this->_is_local) {
 			$res = "{$res}-local";
 		}
+
 		return "{$res}";
+	}
+
+	#[Property('value')]
+	protected function getValue(): ?string {
+		return $this->_ee;
 	}
 
 }

@@ -5,23 +5,27 @@ namespace spaf\simputils\generic;
 use Closure;
 use spaf\simputils\attributes\DebugHide;
 use spaf\simputils\attributes\Property;
+use spaf\simputils\exceptions\Inconsistent;
 use spaf\simputils\FS;
 use spaf\simputils\models\Box;
 use spaf\simputils\models\DataUnit;
+use spaf\simputils\models\files\apps\access\CsvFileDataAccess;
 use spaf\simputils\models\files\apps\CsvProcessor;
 use spaf\simputils\models\files\apps\DotEnvProcessor;
 use spaf\simputils\models\files\apps\JsonProcessor;
+use spaf\simputils\models\files\apps\PHPFileProcessor;
 use spaf\simputils\models\files\apps\TextProcessor;
+use function fopen;
 
 /**
  * Basic resource abstract model
  * TODO Currently only "local" resources/files are supported. In the future it will be extended
  *
- * @property-read ?string $mime_type
+ * @property ?string $mime_type
  * @property-read int $size Size in bytes
  * @property-read ?string $size_hr Human readable size string
- * @property-read ?string $extension
- * @property-read ?string $name
+ * @property ?string $extension
+ * @property ?string $name
  * @property-read ?string $name_full
  * @property-read ?string $path
  * @property-read bool $is_local
@@ -30,12 +34,15 @@ use spaf\simputils\models\files\apps\TextProcessor;
  *
  * @property-read ?string $md5
  * @property-read ?resource $fd
- * @property-read BasicResourceApp|callable|null $app
+ * @property BasicResourceApp|callable|null $app
+ * @property-read bool $is_executable_processing_enabled
+ *
+ * @property-read ?string $filename
  *
  */
 abstract class BasicResource extends SimpleObject {
 
-	public static Box|array $processors = [
+	static Box|array $processors = [
 		// Generic text processor
 		'text/plain' => TextProcessor::class,
 
@@ -49,6 +56,14 @@ abstract class BasicResource extends SimpleObject {
 		// DotEnv processor
 		'text/dotenv' => DotEnvProcessor::class,
 		'application/dotenv' => DotEnvProcessor::class,
+
+		// PHP Files should be caught and not displayed by the default text/plain processor
+		'application/x-php' => PHPFileProcessor::class,
+		'text/x-php' => PHPFileProcessor::class,
+		'application/x-httpd-php' => PHPFileProcessor::class,
+		'application/x-httpd-php-source' => PHPFileProcessor::class,
+		'application/php' => PHPFileProcessor::class,
+		'text/php' => PHPFileProcessor::class,
 	];
 
 	protected static $processors_index = null;
@@ -62,8 +77,10 @@ abstract class BasicResource extends SimpleObject {
 	#[DebugHide]
 	protected ?string $_path = null;
 	#[DebugHide]
+	#[Property('name', 'set')]
 	protected ?string $_name = null;
 	#[DebugHide]
+	#[Property('extension', 'set')]
 	protected ?string $_ext = null;
 	#[DebugHide]
 	protected ?int $_size = null;
@@ -73,6 +90,10 @@ abstract class BasicResource extends SimpleObject {
 	protected ?string $_md5 = null;
 	#[DebugHide]
 	protected mixed $_fd = null;
+
+	#[DebugHide]
+	#[Property('mime_type', 'set')]
+	protected ?string $_override_mime = null;
 
 	/**
 	 * Returns ResourceApp object for a particular mime-type/file-type
@@ -93,14 +114,15 @@ abstract class BasicResource extends SimpleObject {
 	 *
 	 * @return BasicResourceApp|TextProcessor
 	 */
-	public static function getCorrespondingProcessor(
+	static function getCorrespondingProcessor(
 		?string $file_name = null,
 		?string $mime = null,
 		?string $enforced_class = null
 	): BasicResourceApp|TextProcessor {
 		$mime = $mime ?? (!empty($file_name)?FS::getFileMimeType($file_name):null);
 
-		$class = $enforced_class ?? static::$processors[$mime] ?? TextProcessor::class;
+		$class = $enforced_class ?? static::$processors[$mime]
+			?? static::$processors['text/plain'] ?? TextProcessor::class;
 
 		if (empty(static::$processors_index[$class])) {
 			static::$processors_index[$class] = new $class();
@@ -123,9 +145,16 @@ abstract class BasicResource extends SimpleObject {
 		return $this->urn;
 	}
 
+	#[Property('filename')]
+	protected function getFilename(): string {
+		$name = $this->_name ?: '';
+		$ext = $this->_ext?".{$this->_ext}":'';
+		return "{$name}{$ext}";
+	}
+
 	#[Property('mime_type')]
 	protected function getMimeType(): ?string {
-		return $this->_mime_type;
+		return $this->_override_mime ?: $this->_mime_type;
 	}
 
 	/**
@@ -191,6 +220,20 @@ abstract class BasicResource extends SimpleObject {
 		return $this->_is_local;
 	}
 
+	#[Property(type: 'get')]
+	protected bool $_is_executable_processing_enabled = false;
+
+	/**
+	 * This method is special. Try to do not use it!
+	 *
+	 * @param $val
+	 *
+	 * @return void
+	 */
+	private function setIsExecutableProcessingEnabled($val) {
+		$this->_is_executable_processing_enabled = $val; // @codeCoverageIgnore
+	}
+
 	/**
 	 * @codeCoverageIgnore
 	 * @return string
@@ -205,4 +248,49 @@ abstract class BasicResource extends SimpleObject {
 
 	#[Property('app')]
 	abstract protected function setResourceApp(null|Closure|array|BasicResourceApp $var): void;
+
+	/**
+	 * @var CsvFileDataAccess
+	 */
+	private $_fdao = null;
+
+	function ___withStart($obj, $callback) {
+		if ($this->_fdao) {
+			throw new Inconsistent(
+				'Can not start a new "with" operation without closing previous one.'
+			);
+		}
+		$fd = $this->fd;
+		$is_opened_locally = false;
+		if (empty($fd)) {
+			$is_opened_locally = true;
+			// FIX  need "open()" method with r/w params!!!
+			$fd = fopen($this->name_full, 'r+');
+		}
+
+		// FIX  Integrate this fd into File instance for consistency
+		$this->_fdao = $this->app->fileDataAccessObj($this, $fd, $is_opened_locally);
+
+		return $this->_fdao->___withStart($this->_fdao, $callback);
+	}
+
+	function ___withEnd($obj) {
+		$fdao = $this->_fdao;
+		$fdao->___withEnd($fdao);
+		$this->_fdao = null;
+	}
+
+	function open($type = 'r+', ...$params) {
+		$fd = $this->fd;
+		$is_opened_locally = false;
+
+		if (empty($fd)) {
+			$is_opened_locally = true;
+			$fd = fopen($this->name_full, $type);
+		} else {
+			// TODO Log message: Already opened
+		}
+
+		return $this->app->fileDataAccessObj($this, $fd, $is_opened_locally);
+	}
 }

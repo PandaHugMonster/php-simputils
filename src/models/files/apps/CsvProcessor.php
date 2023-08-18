@@ -7,6 +7,7 @@ use spaf\simputils\exceptions\Inconsistent;
 use spaf\simputils\exceptions\ParsingProblem;
 use spaf\simputils\generic\BasicResource;
 use spaf\simputils\models\Box;
+use spaf\simputils\models\files\apps\access\CsvFileDataAccess;
 use spaf\simputils\models\files\apps\settings\CsvSettings;
 use spaf\simputils\PHP;
 use spaf\simputils\Str;
@@ -31,12 +32,19 @@ use spaf\simputils\Str;
  */
 class CsvProcessor extends TextProcessor {
 
+	function __construct(CsvSettings|array|Box|null $default_settings = null) {
+		if (PHP::isArrayCompatible($default_settings)) {
+			$default_settings = new CsvSettings(...$default_settings);
+		}
+		parent::__construct($default_settings);
+	}
+
 	/**
 	 * Default settings for the processor
 	 *
 	 * @return CsvSettings
 	 */
-	public static function defaultProcessorSettings(): CsvSettings {
+	static function defaultProcessorSettings(): CsvSettings {
 		return new CsvSettings();
 	}
 
@@ -52,9 +60,9 @@ class CsvProcessor extends TextProcessor {
 		return $line;
 	}
 
-	public function getContent(mixed $fd, ?BasicResource $file = null): mixed {
+	function getContent(mixed $fd, ?BasicResource $file = null): mixed {
 		/** @var CsvSettings $s */
-		$s = static::getSettings($file);
+		$s = static::getSettings($file, $this->_default_settings);
 
 //		$box_class = PHP::redef(Box::class);
 
@@ -92,10 +100,10 @@ class CsvProcessor extends TextProcessor {
 	 * @param ?BasicResource $file Resource/File object
 	 *
 	 */
-	public function setContent(mixed $fd, mixed $data, ?BasicResource $file = null): void {
+	function setContent(mixed $fd, mixed $data, ?BasicResource $file = null): void {
 		/** @var CsvSettings $s */
 
-		$s = static::getSettings($file);
+		$s = static::getSettings($file, $this->_default_settings);
 
 		if (!is_array($data) && !$data instanceof Box) {
 			if ($s->allow_raw_string_saving) {
@@ -132,14 +140,14 @@ class CsvProcessor extends TextProcessor {
 				$row = $sub_row;
 			}
 
-			fputcsv($fd, $row, $s->separator, $s->enclosure, $s->escape);
+			fputcsv($fd, (array) $row, $s->separator, $s->enclosure, $s->escape);
 		}
 	}
 
 	/**
 	 * Picks up all the keys of the array/matrix for CSV
 	 */
-	public static function prepareHeader(array|Box $data): null|Box {
+	static function prepareHeader(array|Box $data): null|Box {
 //		$class_box = PHP::redef(Box::class);
 
 		$is_box_used = $data instanceof Box && PHP::$use_box_instead_of_array;
@@ -189,5 +197,9 @@ class CsvProcessor extends TextProcessor {
 				'Please use just one option, do not mix up.'
 			);
 		}
+	}
+
+	function fileDataAccessObj($file, $fd = null, $is_opened_locally = false) {
+		return new CsvFileDataAccess($file, $this, $fd, $is_opened_locally);
 	}
 }

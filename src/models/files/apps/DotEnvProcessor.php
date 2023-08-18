@@ -41,7 +41,7 @@ class DotEnvProcessor extends TextProcessor {
 	 * @return array|null
 	 */
 	public function getContent(mixed $fd, ?BasicResource $file = null): ?array {
-		$s = static::getSettings($file);
+		$s = static::getSettings($file, $this->_default_settings);
 		/** @var DotEnvSettings $s */
 		$content = parent::getContent($fd, $file);
 		$lines = explode("\n", $content);
@@ -109,7 +109,7 @@ class DotEnvProcessor extends TextProcessor {
 	public function setContent(mixed $fd, mixed $data, ?BasicResource $file = null): void {
 		$lines = [];
 		/** @var DotEnvSettings $s */
-		$s = static::getSettings($file);
+		$s = static::getSettings($file, $this->_default_settings);
 
 		foreach ($data as $name => $value) {
 			if (is_numeric($name)) {

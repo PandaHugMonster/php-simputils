@@ -4,6 +4,7 @@ namespace spaf\simputils\components\execenvs;
 
 use spaf\simputils\generic\SimpleObject;
 use spaf\simputils\interfaces\ExecEnvHandlerInterface;
+use spaf\simputils\models\Box;
 use spaf\simputils\Str;
 
 /**
@@ -22,7 +23,7 @@ class DummyExecEnvHandler extends SimpleObject implements ExecEnvHandlerInterfac
 		public bool $include_signature = true,
 	) {}
 
-	public function is(string $val): bool {
+	function is(string|Box|array $val): bool {
 		return $this->what_to_return;
 	}
 

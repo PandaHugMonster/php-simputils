@@ -39,12 +39,15 @@ use spaf\simputils\traits\MetaMagic;
 use Throwable;
 use function class_exists;
 use function class_parents;
+use function defined;
 use function dirname;
+use function intval;
 use function is_array;
 use function is_dir;
 use function is_null;
 use function is_object;
 use function is_resource;
+use function is_string;
 use function json_decode;
 use function json_encode;
 use function json_last_error;
@@ -56,7 +59,6 @@ use function serialize;
 use function str_contains;
 use function unserialize;
 use const JSON_ERROR_NONE;
-
 
 /**
  * Special static PHP helper
@@ -70,7 +72,13 @@ use const JSON_ERROR_NONE;
  * should not compromise your performance. THOUGH keep in mind, Box is not as efficient as arrays.
  * Especially if you will be implementing your own Box class and overriding some of it's methods.
  *
+ * @SuppressWarnings(PHPMD.TooManyMethods)
+ * @SuppressWarnings(PHPMD.TooManyPublicMethods)
+ * @SuppressWarnings(PHPMD.ExcessivePublicCount)
+ * @SuppressWarnings(PHPMD.ExcessiveClassComplexity) Does not matter for Core Helper Classes
  * @see Box
+ *
+ *
  * @package spaf\simputils
  */
 class PHP {
@@ -113,7 +121,7 @@ class PHP {
 	 */
 	public static function simpUtilsVersion(): Version|string {
 		$class = static::redef(Version::class);
-		return new $class('1.1.4', 'SimpUtils');
+		return new $class('1.1.5', 'SimpUtils');
 	}
 
 	/**
@@ -176,7 +184,6 @@ class PHP {
 		$config->code_root = $config->code_root ?? debug_backtrace()[0]['file'];
 		$config->working_dir = $config->working_dir ?? $config->code_root;
 
-//		$config->___setup($args ?? []);
 		static::metaMagicSpell($config, 'setup', $args ?? []);
 
 		if (empty($config->ee)) {
@@ -199,6 +206,43 @@ class PHP {
 		}
 
 		return $config;
+	}
+
+	private static $_cached_current_url = null;
+
+	/**
+	 * @param $refresh
+	 *
+	 * @return ?UrlObject
+	 */
+	static function currentUrl($refresh = false) {
+		if (static::isCLI() && !defined('CURRENT_URL_PRETEND_NOT_CLI')) {
+			return null;
+		}
+		if (!static::$_cached_current_url || $refresh) {
+			$info = static::info();
+			$serv = $info->server_var;
+			$protocol = empty($serv['HTTPS']) || $serv['HTTPS']?'https':'http';
+			$host = $serv['SERVER_NAME'] ?? null;
+			if (empty($host)) {
+				$host = $serv['HTTP_HOST'] ?? null;
+			}
+
+			$server_port = $serv['SERVER_PORT'] ?? null
+				?intval($serv['SERVER_PORT'])
+				:null;
+
+			$uri = $serv['REQUEST_URI'] ?? null;
+
+			static::$_cached_current_url = static::url(
+				host: $host,
+				path: $uri,
+				protocol: $protocol,
+				port: $server_port
+			);
+		}
+
+		return static::$_cached_current_url;
 	}
 
 	public static function metaMagicSpell(string|object $ref, $spell, ...$args) {
@@ -722,6 +766,9 @@ class PHP {
 					argument to box");
 				}
 			} else {
+				if (is_string($array) && empty($array)) {
+					$array = [];
+				}
 				$res = new $class($array);
 			}
 		}
@@ -877,21 +924,28 @@ class PHP {
 	}
 
 	static function url(
-		UrlObject|UrlCompatible|string|Box|array $host = null,
-		Box|array|string $path = null,
-		Box|array $params = null,
-		string $protocol = null, // Important - ignored if first argument is an object
+		null|UrlCompatible|string|Box|array $host = null,
+		null|Box|array|string $path = null,
+		null|Box|array $params = null,
+		?string $protocol = null,
+		?string $processor = null,
+		?string $port = null,
+		?string $user = null,
+		?string $pass = null,
 		mixed ...$data,
 	) {
 		$class = PHP::redef(UrlObject::class);
-		if ($host instanceof $class) {
-			/** @var UrlObject $host */
-			$host->addPath($path);
-			$host->addParams($params);
-			return $host;
-		}
+//		if ($host instanceof $class) {
+//			/** @var UrlObject $host */
+//			$host->addPath($path);
+//			$host->addParams($params);
+//			return $host;
+//		}
 
-		$model = new $class($host, $path, $params, $protocol, ...$data);
+		$model = new $class(
+			$host, $path, $params, $protocol, $processor,
+			$port, $user, $pass, ...$data
+		);
 
 		return $model;
 	}

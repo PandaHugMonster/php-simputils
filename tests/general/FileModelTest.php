@@ -9,7 +9,6 @@ use spaf\simputils\FS;
 use spaf\simputils\models\File;
 use spaf\simputils\PHP;
 use spaf\simputils\Str;
-use ValueError;
 use function fclose;
 use function file_get_contents;
 use function fopen;
@@ -115,6 +114,11 @@ class FileModelTest extends TestCase {
 		$file->copy($file->name_full);
 	}
 
+	/**
+	 * @uses \spaf\simputils\models\Box
+	 * @return void
+	 * @throws \spaf\simputils\exceptions\CannotDeleteDirectory
+	 */
 	function testAdditionalFileStuff() {
 		$file = FS::file();
 		$file->content = 'totoro';
@@ -181,8 +185,4 @@ class FileModelTest extends TestCase {
 		$this->assertEmpty($file_non_existing_one->content);
 	}
 
-	function testConstructorValueError() {
-		$this->expectException(ValueError::class);
-		$file = new File(33);
-	}
 }

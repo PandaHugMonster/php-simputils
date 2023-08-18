@@ -38,7 +38,6 @@
 * Improved `\spaf\simputils\models\files\apps\CsvProcessor` and `\spaf\simputils\models\files\apps\settings\CsvSettings`
 * Improved `Box::join()`/`Box::impload()` functionality
   * Added `apply()` method "params": `stretcher, value_wrap, key_wrap`
-    * Added `pathAlike()` method
     * Added `paramsAlike()` (URL params) method
     * Added `htmlAttrAlike()` (HTML attributes) method
     * Added `stretched()` method

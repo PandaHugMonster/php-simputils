@@ -4,6 +4,7 @@ namespace spaf\simputils\attributes;
 
 use Attribute;
 use spaf\simputils\components\RenderedWrapper;
+use spaf\simputils\generic\Spell;
 use spaf\simputils\Html;
 use spaf\simputils\traits\BaseHtmlTrait;
 use spaf\simputils\traits\StaticRendererTrait;
@@ -17,12 +18,19 @@ use spaf\simputils\traits\StaticRendererTrait;
  * and methods must return either `null` or {@see RenderedWrapper}.
  *
  * @see RenderedWrapper Stringifiable object for
- *      {@see \spaf\simputils\traits\StaticRendererTrait::render()}
+ *      {@see StaticRendererTrait::render()}
  * @see StaticRendererTrait Trait containing `render` method/functionality.
  * @see Html Really minimal HTML static class to create/render tags.
  * @see BaseHtmlTrait Trait containing minimal HTML create/render tag(s)
  */
 #[Attribute(Attribute::TARGET_METHOD)]
-class Renderer {
+class Renderer extends Spell {
 
+	static function getName(): string {
+		return 'renderer';
+	}
+
+	static function invoke(callable $target, ...$spell): mixed {
+		// TODO: Implement invoke() method.
+	}
 }

@@ -27,8 +27,6 @@ abstract class Spell extends BasicAttribute {
 	 *
 	 * @return mixed
 	 */
-	static function invoke(callable $target, ...$spell): mixed {
-		return $target(...$spell);
-	}
+	abstract static function invoke(callable $target, ...$spell): mixed;
 
 }

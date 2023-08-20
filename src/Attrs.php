@@ -2,11 +2,15 @@
 
 namespace spaf\simputils;
 
+use Attribute;
 use Closure;
 use Exception;
+use ReflectionAttribute;
 use ReflectionClass;
+use ReflectionClassConstant;
 use ReflectionMethod;
 use ReflectionObject;
+use Reflector;
 use spaf\simputils\models\Box;
 use TypeError;
 use function class_exists;
@@ -47,7 +51,7 @@ class Attrs {
 			$reflection = new ReflectionClass($instance);
 		} else {
 			throw new TypeError(
-				'$instance is not Object or Class String or Class does not exist'
+				'$instance is not Object or Class String or Class does not exist',
 			);
 		}
 		if (!is_string($attr) || !class_exists($attr)) {
@@ -63,6 +67,67 @@ class Attrs {
 		}
 
 		return $res;
+	}
+
+	static function findSpells(
+		string|object $instance,
+		null|Box|array $attrs = null,
+		$attr_target = Attribute::TARGET_ALL,
+		?callable $callback = null,
+	) {
+
+		$attr_target = Attribute::TARGET_ALL | $attr_target;
+
+		$r = new ReflectionClass($instance);
+		$res = PHP::box();
+
+		$attrs = PHP::box($attrs);
+
+		if (Boolean::isBitFlagOn($attr_target, $t = Attribute::TARGET_CLASS)) {
+			static::_processAttributes($res, $r, $t, $attrs, $callback);
+		}
+
+		if (Boolean::isBitFlagOn($attr_target, $t = Attribute::TARGET_PROPERTY)) {
+			foreach ($r->getProperties() as $ref_item) {
+				static::_processAttributes($res, $ref_item, $t, $attrs, $callback);
+			}
+		}
+
+		if (Boolean::isBitFlagOn($attr_target, $t = Attribute::TARGET_METHOD)) {
+			foreach ($r->getMethods() as $ref_item) {
+				static::_processAttributes($res, $ref_item, $t, $attrs, $callback);
+			}
+		}
+
+		if (Boolean::isBitFlagOn($attr_target, $t = Attribute::TARGET_CLASS_CONSTANT)) {
+			foreach ($r->getConstants() as $key => $val) {
+				$ref_item = new ReflectionClassConstant($instance, $key);
+				static::_processAttributes($res, $ref_item, $t, $attrs, $callback);
+			}
+		}
+
+		return $res;
+	}
+
+	static protected function _processAttributes(
+		&$res,
+		Reflector $ref_item,
+		int $target,
+		Box $attrs,
+		?callable $callback,
+	) {
+		foreach ($ref_item->getAttributes() as $at) {
+			/** @var ReflectionAttribute $at */
+			if (!$attrs->size || $attrs->containsValue($at->getName())) {
+				if (!$callback || $callback($ref_item, $at)) {
+					$res->append([
+						'target' => $target,
+						'reflection' => $ref_item,
+						'attribute' => $at->newInstance(),
+					]);
+				}
+			}
+		}
 	}
 
 }

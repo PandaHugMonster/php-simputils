@@ -20,9 +20,11 @@ use function spaf\simputils\basic\url;
  * @uses \spaf\simputils\Math
  * @uses \spaf\simputils\PHP
  * @uses \spaf\simputils\Str
+ * @uses \spaf\simputils\models\Box
  * @uses \spaf\simputils\attributes\Property
  * @uses \spaf\simputils\special\CodeBlocksCacheIndex
  * @uses \spaf\simputils\traits\PropertiesTrait::__get
+ * @uses \spaf\simputils\traits\PropertiesTrait::__set
  * @uses \spaf\simputils\traits\PropertiesTrait::_simpUtilsPrepareProperty
  * @uses \spaf\simputils\traits\PropertiesTrait::getAllTheLastMethodsAndProperties
  */

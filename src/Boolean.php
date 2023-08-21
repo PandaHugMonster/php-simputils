@@ -4,15 +4,15 @@ namespace spaf\simputils;
 
 class Boolean {
 
-	public static array $array_yes = [
+	static array $array_yes = [
 		'enabled', 'yes', 't', 'true', 'y', '+', '1', 'enable',
 	];
-	public static array $array_no = [
+	static array $array_no = [
 		'disabled', 'no', 'f', 'false', 'n', '-', '0', 'disable',
 	];
 
-	public static string $to_yes = 'true';
-	public static string $to_no = 'false';
+	static string $to_yes = 'true';
+	static string $to_no = 'false';
 
 	/**
 	 * Tries to recognize string or other types of value as bool TRUE or FALSE
@@ -31,7 +31,7 @@ class Boolean {
 	 *
 	 * @return ?bool
 	 */
-	public static function from(mixed $val, bool $strict = false): ?bool {
+	static function from(mixed $val, bool $strict = false): ?bool {
 		$sub_res = false;
 		if (Str::is($val))
 			$val = Str::lower($val);
@@ -50,7 +50,7 @@ class Boolean {
 		return $sub_res;
 	}
 
-	public static function to(mixed $val): mixed {
+	static function to(mixed $val): mixed {
 		return static::from($val)?static::$to_yes:static::$to_no;
 	}
 }

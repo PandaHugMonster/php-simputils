@@ -15,7 +15,7 @@
   "authors": [
     {
       "name": "Ivan Ponomarev",
-      "email": "pi@spaf.dev"
+      "email": "i.ponomarev@pandev.tech"
     }
   ],
   "type": "library",
@@ -25,8 +25,8 @@
     "ext-mbstring": "*"
   },
   "require-dev": {
-    "squizlabs/php_codesniffer": "^3",
-    "phpunit/phpunit": "^9"
+    "phpunit/phpunit": "^9",
+    "phpmd/phpmd": "^2.13"
   },
   "suggest": {
     "ext-gmp": "GMP Extension (BigNumbers calculation functionality, without fractions support but much quicker)",
@@ -39,14 +39,28 @@
     "files": ["src/basic.php"]
   },
   "scripts": {
-    "tests": [
+    "test": [
       "phpunit tests"
     ],
-    "tests-clover": [
-      "XDEBUG_MODE=coverage phpunit tests --coverage-clover clover.xml"
+    "coverage": [
+      "XDEBUG_MODE=coverage phpunit tests --coverage-html docs/reports/coverage/html"
     ],
-    "tests-html": [
-      "XDEBUG_MODE=coverage phpunit tests --coverage-html html-coverage/"
+    "coverage-clover": [
+      "XDEBUG_MODE=coverage phpunit tests --coverage-clover docs/reports/coverage/clover.xml"
+    ],
+    "mess": [
+      "phpmd --ignore-violations-on-exit src/ html codesize,unusedcode,naming > docs/reports/quality/mess-analysis-codesize-report.html"
+    ],
+    "pipeline-mess": [
+      "phpmd src/ text codesize,unusedcode,naming"
     ]
+  },
+  "scripts-descriptions": {
+    "test": "Run the whole PHPUnit test suit",
+    "coverage": "Run the whole PHPUnit test with Coverage suit. Output in HTML at \"docs/coverage/html\"",
+    "coverage-clover": "Run the whole PHPUnit test with Coverage suit. Output in clover xml at \"docs/coverage/\"",
+    "mess": "Runs phpmd Mess Analysis on scopes of \"codesize,unusedcode,naming\". Output in HTML at \"docs/quality/mess-analysis-codesize-report.html\"",
+
+    "pipeline-mess": "Runs phpmd Mess Analysis on scopes of \"codesize,unusedcode,naming\" and return non 0 exit status if rules are violated. Reasonable for CI/CD pipelines."
   }
 }

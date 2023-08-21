@@ -5,6 +5,7 @@ namespace spaf\simputils\attributes;
 use Attribute;
 use spaf\simputils\generic\BasicOutputControlAttribute;
 use spaf\simputils\models\Box;
+use spaf\simputils\models\Secret;
 use spaf\simputils\PHP;
 
 /**
@@ -56,7 +57,16 @@ class DebugHide extends BasicOutputControlAttribute {
 	/**
 	 * @inheritDoc
 	 */
-	function appliedOnProperty(): null|string|false {
+	function appliedOnProperty(mixed $value = null): null|string|false {
+
+		if ($value instanceof Secret) {
+			$stringified = "{$value}";
+			if ($stringified !== $value->value) {
+				return $stringified;
+			}
+		}
+
+
 		return $this->hide_all
 			?false
 			:$this->show_instead;

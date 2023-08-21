@@ -47,6 +47,7 @@ use function is_dir;
 use function is_null;
 use function is_object;
 use function is_resource;
+use function is_string;
 use function json_decode;
 use function json_encode;
 use function json_last_error;
@@ -58,7 +59,6 @@ use function serialize;
 use function str_contains;
 use function unserialize;
 use const JSON_ERROR_NONE;
-
 
 /**
  * Special static PHP helper
@@ -72,7 +72,13 @@ use const JSON_ERROR_NONE;
  * should not compromise your performance. THOUGH keep in mind, Box is not as efficient as arrays.
  * Especially if you will be implementing your own Box class and overriding some of it's methods.
  *
+ * @SuppressWarnings(PHPMD.TooManyMethods)
+ * @SuppressWarnings(PHPMD.TooManyPublicMethods)
+ * @SuppressWarnings(PHPMD.ExcessivePublicCount)
+ * @SuppressWarnings(PHPMD.ExcessiveClassComplexity) Does not matter for Core Helper Classes
  * @see Box
+ *
+ *
  * @package spaf\simputils
  */
 class PHP {
@@ -115,7 +121,7 @@ class PHP {
 	 */
 	public static function simpUtilsVersion(): Version|string {
 		$class = static::redef(Version::class);
-		return new $class('1.1.4', 'SimpUtils');
+		return new $class('1.1.5', 'SimpUtils');
 	}
 
 	/**
@@ -755,6 +761,9 @@ class PHP {
 					argument to box");
 				}
 			} else {
+				if (is_string($array) && empty($array)) {
+					$array = [];
+				}
 				$res = new $class($array);
 			}
 		}

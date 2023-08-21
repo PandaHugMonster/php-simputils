@@ -675,13 +675,13 @@ function dur(int|float|DateInterval $value = 0): TimeDuration {
 /**
  * Creating File object
  *
- * @param string|Box|array|File|null $file
+ * @param string|resource|int|Box|array|File|null $file
  * @param $app
  *
  * @return File|null
  */
 #[Shortcut('FS::file()')]
-function fl(null|string|Box|array|File $file = null, $app = null): ?File {
+function fl(mixed $file = null, $app = null): ?File {
 	return FS::file($file, $app);
 }
 

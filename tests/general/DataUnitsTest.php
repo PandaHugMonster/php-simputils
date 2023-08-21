@@ -1,6 +1,5 @@
 <?php
 
-
 use PHPUnit\Framework\TestCase;
 use spaf\simputils\Boolean;
 use spaf\simputils\Data;
@@ -43,14 +42,14 @@ class DataUnitsTest extends TestCase {
 	protected $fake_disabled_bcmath = null;
 	protected $fake_disabled_gmp = null;
 
-	public function setUp(): void {
+	function setUp(): void {
 		$this->fake_disabled_bcmath =
 			Boolean::from(env('TESTS_FAKE_DISABLED_BCMATH', false));
 		$this->fake_disabled_gmp =
 			Boolean::from(env('TESTS_FAKE_DISABLED_GMP', false));
 	}
 
-	public function getNormalTestData() {
+	function getNormalTestData() {
 		return [
 			['0 B', null],
 			['0 B', ''],
@@ -69,7 +68,7 @@ class DataUnitsTest extends TestCase {
 		];
 	}
 
-	public function getRandomTestData($fract) {
+	function getRandomTestData($fract) {
 		return [
 			[$fract?'2.92 MB':'2 MB', '3000kb'],
 			[$fract?'9.76 TB':'9 TB', '9999GB'],
@@ -100,7 +99,7 @@ class DataUnitsTest extends TestCase {
 	 *
 	 * @return void
 	 */
-	public function testBcmathConversion() {
+	function testBcmathConversion() {
 		$this->_extensionWiseTests(
 			BigNumber::SUBSYSTEM_BCMATH,
 			$this->getNormalTestData(),
@@ -123,7 +122,7 @@ class DataUnitsTest extends TestCase {
 	 *
 	 * @return void
 	 */
-	public function testGmpConversion() {
+	function testGmpConversion() {
 		$this->_extensionWiseTests(
 			BigNumber::SUBSYSTEM_GMP,
 			$this->getNormalTestData(),

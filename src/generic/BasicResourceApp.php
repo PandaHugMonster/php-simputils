@@ -4,15 +4,24 @@ namespace spaf\simputils\generic;
 
 
 use spaf\simputils\attributes\Property;
+use spaf\simputils\exceptions\NotImplemented;
 
 /**
  *
  * @property-read bool $is_fd_supported
+ * @property-read bool $default_settings
  */
 abstract class BasicResourceApp extends SimpleObject {
 
 	#[Property]
 	protected bool $_is_fd_supported = true;
+
+	#[Property(type: 'get')]
+	protected $_default_settings = null;
+
+	function __construct($default_settings = null) {
+		$this->_default_settings = $default_settings;
+	}
 
 	/**
 	 * Getting content at once
@@ -22,7 +31,7 @@ abstract class BasicResourceApp extends SimpleObject {
 	 *
 	 * @return mixed
 	 */
-	abstract public function getContent(
+	abstract function getContent(
 		mixed $fd,
 		?BasicResource $file = null
 	): mixed;
@@ -34,7 +43,7 @@ abstract class BasicResourceApp extends SimpleObject {
 	 * @param mixed          $data Data to store
 	 * @param ?BasicResource $file File instance
 	 */
-	abstract public function setContent(
+	abstract function setContent(
 		mixed $fd,
 		mixed $data,
 		?BasicResource $file = null
@@ -49,7 +58,7 @@ abstract class BasicResourceApp extends SimpleObject {
 	 *
 	 * @return mixed
 	 */
-	public static function defaultProcessorSettings(): mixed {
+	static function defaultProcessorSettings(): mixed {
 		return null;
 	}
 
@@ -59,18 +68,23 @@ abstract class BasicResourceApp extends SimpleObject {
 	 * @codeCoverageIgnore
 	 *
 	 * @param ?BasicResource $file Target file
+	 * @param mixed          $app_default_settings
 	 *
 	 * @return mixed
 	 */
-	public static function getSettings(?BasicResource $file = null): mixed {
+	static function getSettings(
+		?BasicResource $file = null,
+		mixed $app_default_settings = null
+	): mixed {
+		$app_settings = $app_default_settings ?? static::defaultProcessorSettings();
 		if (empty($file)) {
-			return static::defaultProcessorSettings();
+			return $app_settings;
 		}
 
-		return $file->processor_settings ?? static::defaultProcessorSettings();
+		return $file->processor_settings ?? $app_settings;
 	}
 
-	public function __invoke(
+	function __invoke(
 		BasicResource $file,
 		$fd,
 		bool $is_reading = true,
@@ -82,4 +96,9 @@ abstract class BasicResourceApp extends SimpleObject {
 
 		$this->setContent($fd, $data, $file);
 	}
+
+	function fileDataAccessObj($file, $fd = null, $is_opened_locally = false) {
+		throw new NotImplemented();
+	}
+
 }

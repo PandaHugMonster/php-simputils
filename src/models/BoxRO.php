@@ -19,13 +19,13 @@ class BoxRO extends Box {
 	use RedefinableComponentTrait;
 
 	function popFromEnd(): mixed {
-		throw new ReadOnlyProblem('Popping from the end is not ' .
-			'possible due to read-only state');
+		throw new ReadOnlyProblem('Popping from the end is not ' . // @codeCoverageIgnore
+			'possible due to read-only state'); // @codeCoverageIgnore
 	}
 
 	function popFromStart(): mixed {
-		throw new ReadOnlyProblem('Popping from the start is not ' .
-			'possible due to read-only state');
+		throw new ReadOnlyProblem('Popping from the start is not ' . // @codeCoverageIgnore
+			'possible due to read-only state'); // @codeCoverageIgnore
 	}
 
 	static function redefComponentName(): string {

@@ -18,10 +18,10 @@ use spaf\simputils\exceptions\ReadOnlyProblem;
  *  class MyArrayObj implements ArrayAccess {
  *      use ArrayAccessReadOnlyTrait;
  *
- *      public function offsetExists(mixed $offset): bool {
+ *      function offsetExists(mixed $offset): bool {
  *          // your checking existence here
  *      }
- *      public function offsetGet(mixed $offset): mixed {
+ *      function offsetGet(mixed $offset): mixed {
  *          // your returning content of the item here
  *      }
  *
@@ -48,7 +48,7 @@ trait ArrayReadOnlyAccessTrait {
 	 *
 	 * @return void
 	 */
-	public function _simpUtilsSetReadOnly(bool $val = true) {
+	function _simpUtilsSetReadOnly(bool $val = true) {
 		$this->_simp_utils_read_only = $val;
 	}
 
@@ -59,7 +59,7 @@ trait ArrayReadOnlyAccessTrait {
 	 * TODO Has to be refactored/or reorganized at some point
 	 * @return bool
 	 */
-	public function _simpUtilsIsReadOnly(): bool {
+	function _simpUtilsIsReadOnly(): bool {
 		return $this->_simp_utils_read_only;
 	}
 
@@ -71,7 +71,7 @@ trait ArrayReadOnlyAccessTrait {
 	 *
 	 * @return void
 	 */
-	final public function offsetSet(mixed $offset, mixed $value): void {
+	final function offsetSet(mixed $offset, mixed $value): void {
 		if ($this->_simpUtilsIsReadOnly()) {
 			$this->cannotUseIt();
 		} else {
@@ -84,7 +84,7 @@ trait ArrayReadOnlyAccessTrait {
 	 *
 	 * @return void
 	 */
-	public function offsetUnset(mixed $offset): void {
+	function offsetUnset(mixed $offset): void {
 		if ($this->_simpUtilsIsReadOnly()) {
 			$this->cannotUseIt();
 		} else {

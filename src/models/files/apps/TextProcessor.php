@@ -4,6 +4,7 @@ namespace spaf\simputils\models\files\apps;
 
 use spaf\simputils\generic\BasicResource;
 use spaf\simputils\generic\BasicResourceApp;
+use spaf\simputils\models\files\apps\access\TextFileDataAccess;
 
 /**
  * Text Processor for file
@@ -27,5 +28,9 @@ class TextProcessor extends BasicResourceApp {
 	 */
 	public function setContent(mixed $fd, mixed $data, ?BasicResource $file = null): void {
 		fwrite($fd, $data);
+	}
+
+	function fileDataAccessObj($file, $fd = null, $is_opened_locally = false) {
+		return new TextFileDataAccess($file, $this, $fd, $is_opened_locally);
 	}
 }

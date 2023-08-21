@@ -462,7 +462,6 @@ class UrlObject extends SimpleObject {
 		}
 
 		if ($path) {
-//			pd($path);
 			$pre_data = $pre_params = $pre = null;
 			if (PHP::isArrayCompatible($path)) {
 				$pre = PHP::box($path)->pathAlike();
@@ -488,6 +487,7 @@ class UrlObject extends SimpleObject {
 					$pre_params = PHP::box()->paramsAlike();
 				}
 				$new_pre = PHP::box()->pathAlike();
+
 				foreach ($pre as $k => $p_item) {
 					if (!preg_match('#^[+-]?[\d]*$#', $k)) {
 						$pre_params[$k] = $p_item;

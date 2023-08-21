@@ -24,11 +24,11 @@ abstract class BasicPrism extends SimpleObject {
 	#[Property(type: 'get')]
 	protected $_object;
 
-	public function init($target_object) {
+	function init($target_object) {
 		$this->_object = $target_object;
 	}
 
-	public static function wrap(object $target_object) {
+	static function wrap(object $target_object) {
 		$self = static::createDummy();
 		$self->init($target_object);
 		return $self;

@@ -921,7 +921,7 @@ class PHP {
 	static function url(
 		null|UrlCompatible|string|Box|array $host = null,
 		null|Box|array|string $path = null,
-		null|Box|array $params = null,
+		null|Box|array|string $params = null,
 		?string $protocol = null,
 		?string $processor = null,
 		?string $port = null,

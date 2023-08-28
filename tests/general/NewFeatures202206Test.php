@@ -229,7 +229,7 @@ class NewFeatures202206Test extends TestCase {
 	/**
 	 * @covers \spaf\simputils\models\UrlObject
 	 * @covers \spaf\simputils\basic\url
-	 * @covers \spaf\simputils\models\urls\processors\HttpProtocolProcessor
+	 * @covers \spaf\simputils\models\urls\processors\HttpSchemeProcessor
 	 *
 	 * @uses \spaf\simputils\Boolean::from
 	 * @uses \spaf\simputils\basic\bx
@@ -440,7 +440,7 @@ class NewFeatures202206Test extends TestCase {
 	 * @uses \spaf\simputils\models\Box
 	 * @uses \spaf\simputils\models\IPv4
 	 * @uses \spaf\simputils\models\UrlObject
-	 * @uses \spaf\simputils\models\urls\processors\HttpProtocolProcessor
+	 * @uses \spaf\simputils\models\urls\processors\HttpSchemeProcessor
 	 * @uses \spaf\simputils\traits\PropertiesTrait::__set
 	 * @uses \spaf\simputils\traits\PropertiesTrait::_simpUtilsGetValidator
 	 *

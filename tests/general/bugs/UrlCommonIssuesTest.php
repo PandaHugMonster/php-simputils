@@ -16,7 +16,7 @@ use function spaf\simputils\basic\url;
  * @uses   \spaf\simputils\components\normalizers\BooleanNormalizer
  * @uses   \spaf\simputils\components\normalizers\StringNormalizer
  * @uses   \spaf\simputils\models\Box
- * @uses   \spaf\simputils\models\urls\processors\HttpProtocolProcessor
+ * @uses   \spaf\simputils\models\urls\processors\HttpSchemeProcessor
  * @uses   \spaf\simputils\special\CodeBlocksCacheIndex
  * @uses   \spaf\simputils\traits\PropertiesTrait
  */

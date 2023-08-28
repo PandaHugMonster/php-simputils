@@ -13,7 +13,7 @@ use Attribute;
  *      and {@see \spaf\simputils\attributes\PropertyBatch}
  */
 #[Attribute]
-abstract class BasicAttribute {
+abstract class BasicAttribute extends SimpleObject {
 
 
 }

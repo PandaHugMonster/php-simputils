@@ -36,7 +36,10 @@
     "psr-4": {
       "spaf\\simputils\\": "src/"
     },
-    "files": ["src/basic.php"]
+    "files": [
+      "src/basic.php",
+      "src/bin/temp_file.php"
+    ]
   },
   "scripts": {
     "test": [
@@ -53,6 +56,9 @@
     ],
     "pipeline-mess": [
       "phpmd src/ text codesize,unusedcode,naming"
+    ],
+    "siut-da-deprecated": [
+      "\\spaf\\simputils\\bin\\BinCodeAnalysis::dynamicDeprecationAnalysis"
     ]
   },
   "scripts-descriptions": {

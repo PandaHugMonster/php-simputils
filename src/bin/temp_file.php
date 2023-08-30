@@ -63,7 +63,7 @@ class NewOldCl2 {
 #[Deprecated(
 	'Just a test Deprecation 2',
 	since: '1.2.0',
-	removed: '4.1.0',
+	removed: '4.0.0',
 )]
 class NewOldCl3 {
 

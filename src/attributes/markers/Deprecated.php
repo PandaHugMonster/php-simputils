@@ -5,7 +5,8 @@ namespace spaf\simputils\attributes\markers;
 use Attribute;
 use spaf\simputils\attributes\Property;
 use spaf\simputils\components\normalizers\VersionNormalizer;
-use spaf\simputils\generic\BasicAttribute;
+use spaf\simputils\generic\BasicMarker;
+use spaf\simputils\models\Box;
 use spaf\simputils\models\Version;
 
 /**
@@ -20,7 +21,7 @@ use spaf\simputils\models\Version;
  * @property Version|string|null $removed
  */
 #[Attribute]
-class Deprecated extends BasicAttribute {
+class Deprecated extends BasicMarker {
 
 	#[Property]
 	protected ?string $_reason = null;
@@ -43,10 +44,13 @@ class Deprecated extends BasicAttribute {
 		?string $replacement = null,
 		Version|string|null $since = null,
 		Version|string|null $removed = null,
+		Box|array|null $tags = null,
+		?string $author = null
 	) {
 		$this->reason = $reason;
 		$this->replacement = $replacement;
 		$this->since = $since;
 		$this->removed = $removed;
+		parent::__construct($tags, $author);
 	}
 }

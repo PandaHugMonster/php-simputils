@@ -19,4 +19,12 @@ abstract class BasicMarker extends BasicAttribute {
 	#[Property]
 	protected ?string $_author = null;
 
+	public function __construct(
+		Box|array|null $tags = null,
+		?string $author = null
+	) {
+		$this->tags = $tags;
+		$this->author = $author;
+	}
+
 }

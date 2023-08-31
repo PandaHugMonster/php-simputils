@@ -33,8 +33,7 @@ class BasicInspectionMarker extends BasicMarker {
 	) {
 		$this->comment = $comment;
 		$this->severity = $severity;
-		$this->tags = $tags;
-		$this->author = $author;
+		parent::__construct($tags, $author);
 	}
 
 }

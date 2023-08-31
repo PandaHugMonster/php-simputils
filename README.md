@@ -158,16 +158,17 @@ All the features of this branch will be properly packaged and released, don't wo
 
 Just a few tini-tiny examples of very condensed functionality :)
 
-1. [Renderers](docs/features/renderers.md)
-2. [Working with URLs](#Working-with-URLs)
-3. [Data files and executable files processing](#Data-files-and-executable-files-processing)
-4. [Properties](#Properties)
-5. [Date Times](#Date-Times)
-6. [Advanced PHP Info Object](#Advanced-PHP-Info-Object)
-7. [IPv4 model](#IPv4-model)
-8. [Path-alike Box-array](#Path-alike-Box-array)
-9. [Stretchable feature of Box-array](#Stretchable-feature-of-Box-array) (`paramsAlike()`)
-10. ["with" love](#with-love)
+1. [Markers](docs/markers.md)
+2. [Renderers](docs/features/renderers.md)
+3. [Working with URLs](#Working-with-URLs)
+4. [Data files and executable files processing](#Data-files-and-executable-files-processing)
+5. [Properties](#Properties)
+6. [Date Times](#Date-Times)
+7. [Advanced PHP Info Object](#Advanced-PHP-Info-Object)
+8. [IPv4 model](#IPv4-model)
+9. [Path-alike Box-array](#Path-alike-Box-array)
+10. [Stretchable feature of Box-array](#Stretchable-feature-of-Box-array) (`paramsAlike()`)
+11. ["with" love](#with-love)
 
 ### Working with URLs
 

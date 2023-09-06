@@ -10,6 +10,9 @@ They do not affect the runtime of the users of the library by default.
 The idea is to keep them as non-invasive as possible, because they are needed for 
 code analysis and not code execution!
 
+Keep in mind that __all the Markers are PHP Attributes__ but **not all the PHP Attributes
+are Markers**!
+
 ## Passive and Active Markers
 
 <dl>
@@ -34,6 +37,10 @@ Markers should be used responsibly, despite the fact that it will not affect the
 Point of markers is to target particular code-places temporarily (in some very rare 
 cases permanently).
 
+When "marking" something, it's highly advised to add at least a couple of `tags` to that
+marker (and keep in mind "tags" consistency across your code base).
+This should help filtering out Markers for analytical tools.
+
 ### ~~`Affecting`~~ (deprecated)
 
 A deprecated marker, the purpose of which suppose to highlight,
@@ -48,7 +55,7 @@ The `ObjState` marker suppose to play similar role.
 
 The new marker that suppose to replace a previous version ~~`Affecting`~~.
 
-It allows to mark the method with a type the object-state "influenced" with:
+It allows to mark a method (and only methods!) with a type the object-state "influenced" with:
  * `unaffecting` - the method does not affect the object state
  * `partially-affecting` - for example not affecting the state of the whole object, but 
    do some operations with internal cache, etc.
@@ -62,3 +69,49 @@ It allows to mark the method with a type the object-state "influenced" with:
 
 **Important 2:** Do not mark with it each method, mark only those, which meaning 
 is counterintuitive or unclear from the signature/documentation
+
+
+### `Deprecated`
+
+Marking entity as "Deprecated" (End-Of-Life).
+
+Suggested to always specify `reason` and `replacement` arguments.
+Additionally suggested to specify argument `since` (version), and
+`removed` (version).
+
+Comment annotation `@deprecated` is for IDE convenience, it is not required, 
+but suggested if your IDE does not support SimpUtils integration.
+
+Example:
+
+```php
+use spaf\simputils\attributes\markers\Deprecated;
+use spaf\simputils\generic\SimpleObject;
+
+/**
+ * @deprecated 
+ */
+#[Deprecated(
+    reason: 'I do not like this class anymore',
+    replacement: 'irreplaceable',
+    since: '0.0.1',
+    removed: '1.0.0'
+)]
+class MyOwnClass extends SimpleObject {
+
+}
+```
+
+**Important:** Keep in mind that `removed` version must always be "major" version,
+and the rest of it ("minor" and "patch") must be `0`.
+
+### `Issue`
+
+### `Optimize`
+
+### `Refactor`
+
+### `Duplicated`
+
+### `Shortcut`
+

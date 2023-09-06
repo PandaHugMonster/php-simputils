@@ -29,11 +29,11 @@ class BasicInspectionMarker extends BasicMarker {
 		?string $comment,
 		?string $severity = self::SEVERITY_UNDEFINED,
 		Box|array|null $tags = null,
-		?string $author = null
+		?string $reference = null
 	) {
 		$this->comment = $comment;
 		$this->severity = $severity;
-		parent::__construct($tags, $author);
+		parent::__construct($tags, $reference);
 	}
 
 }

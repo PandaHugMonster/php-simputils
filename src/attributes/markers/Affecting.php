@@ -41,6 +41,7 @@ use spaf\simputils\generic\BasicAttribute;
  * It's basically just a marker
  *
  *
+ * @see ObjState
  * @codeCoverageIgnore
  */
 #[Deprecated(

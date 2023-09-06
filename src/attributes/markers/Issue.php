@@ -31,10 +31,10 @@ class Issue extends BasicInspectionMarker {
 		?string $comment,
 		?string $severity = self::SEVERITY_UNDEFINED,
 		Box|array|null $tags = null,
-		?string $author = null
+		?string $reference = null
 	) {
 		$this->type = $type;
-		parent::__construct($comment, $severity, $tags, $author);
+		parent::__construct($comment, $severity, $tags, $reference);
 	}
 
 }

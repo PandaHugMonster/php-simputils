@@ -28,11 +28,11 @@ class ObjState extends BasicMarker {
 		?string $type = null,
 		?string $description = null,
 		Box|array|null $tags = null,
-		?string $author = null,
+		?string $reference = null,
 	) {
 		$this->type = $type;
 		$this->description = $description;
-		parent::__construct($tags, $author);
+		parent::__construct($tags, $reference);
 	}
 
 }

@@ -45,12 +45,12 @@ class Deprecated extends BasicMarker {
 		Version|string|null $since = null,
 		Version|string|null $removed = null,
 		Box|array|null $tags = null,
-		?string $author = null
+		?string $reference = null,
 	) {
 		$this->reason = $reason;
 		$this->replacement = $replacement;
 		$this->since = $since;
 		$this->removed = $removed;
-		parent::__construct($tags, $author);
+		parent::__construct($tags, $reference);
 	}
 }

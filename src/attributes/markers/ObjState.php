@@ -11,7 +11,7 @@ use spaf\simputils\models\Box;
  * @property ?string $type
  * @property ?string $description
  */
-#[Attribute]
+#[Attribute(Attribute::TARGET_METHOD)]
 class ObjState extends BasicMarker {
 
 	const TYPE_AFFECTING = 'affecting';

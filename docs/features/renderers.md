@@ -2,7 +2,7 @@
 
 Feature was added in version `1.1.5`.
 
-Renderers are PHP Attributes `\spaf\simputils\attributes\Renderer` that applied to 
+Renderers is a PHP Attribute `\spaf\simputils\attributes\Renderer` that applied to 
 static methods (usually of static helper classes).
 And for functionality to work you should use a trait `\spaf\simputils\traits\StaticRendererTrait`
 for your class.
@@ -129,3 +129,11 @@ And group similar functionality within a bigger/chunkier rendering method.
 If you are a library developer that wants to provide own traits with rendering methods,
 it's a good idea to keep in line how many such methods are added, or maybe even better 
 to implement a single rendering method per trait. 
+
+## Unfinished functionality
+
+This functionality more or less stable, but it's a bare minimum or POC.
+
+It lacks some significant functionality (renderers order control over inheritance, etc.).
+
+Just keep in mind that it's unfinished for now.

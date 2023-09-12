@@ -161,7 +161,7 @@ Just a few tini-tiny examples of very condensed functionality :)
 1. [Markers](docs/markers.md)
 2. [Renderers](docs/features/renderers.md)
 3. [Working with URLs](#Working-with-URLs)
-4. [Data files and executable files processing](#Data-files-and-executable-files-processing)
+4. [Files, Data Files and executables processing](#Files-Data-Files-and-executables-processing)
 5. [Properties](#Properties)
 6. [Date Times](#Date-Times)
 7. [Advanced PHP Info Object](#Advanced-PHP-Info-Object)
@@ -801,6 +801,74 @@ Process finished with exit code 255
 ```
 
 **This behaviour is very intended due to security reasons!** Do not try to override this behaviour.
+
+-----
+
+#### Streamlined reading of file
+
+**Note:** This functionality is not fully finished, and Streamlined writing is not yet there.
+You still can use directly `fd` (file descriptor) to write if you need.
+
+```php
+
+use function spaf\simputils\basic\fl;
+use function spaf\simputils\basic\with;
+
+// Temp/anonymous file
+$f = fl();
+
+// Writing content to a file (non-streamlined)
+$f->content =
+	"my content 1\n" .
+	"my content 2\n" .
+	"my content 3\n" .
+	"my content 4\n" .
+	"my content 5\n";
+
+// Reading line by line file 2 times (streamlined reading)
+with($f, function ($fa) {
+	/** @var TextFileDataAccess $fa */
+	// Reading group in case of text file means "line", for other
+	// processing apps it could mean something else.
+	while ($line = $fa->readGroup()) {
+		$line = trim($line);
+		echo "|{$line}|\n\n";
+	}
+
+    // Rewinding the cursor to start of the file
+	$fa->rewind();
+
+    // Reading again
+	while ($line = $fa->readGroup()) {
+		$line = trim($line);
+		echo "|{$line}|\n\n";
+	}
+});
+
+```
+
+Output:
+```text
+|my content 1|
+
+|my content 2|
+
+|my content 3|
+
+|my content 4|
+
+|my content 5|
+
+|my content 1|
+
+|my content 2|
+
+|my content 3|
+
+|my content 4|
+
+|my content 5|
+```
 
 #### Special notes
 

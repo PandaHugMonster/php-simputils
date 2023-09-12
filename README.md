@@ -169,6 +169,7 @@ Just a few tini-tiny examples of very condensed functionality :)
 9. [Path-alike Box-array](#Path-alike-Box-array)
 10. [Stretchable feature of Box-array](#Stretchable-feature-of-Box-array) (`paramsAlike()`)
 11. ["with" love](#with-love)
+12. [Passwords and Secrets explained](docs/passwords-and-secrets.md)
 
 ### Working with URLs
 
@@ -806,6 +807,9 @@ Process finished with exit code 255
 
 #### Streamlined reading of file
 
+Under streamlined reading considered reading byte-by-byte data from a file/stream without
+loading your whole file/stream into memory. For files over a couple MB it's a must!
+
 **Note:** This functionality is not fully finished, and Streamlined writing is not yet there.
 You still can use directly `fd` (file descriptor) to write if you need.
 
@@ -874,7 +878,7 @@ Output:
 
 1. For every `PHP::init()` process the ".env" file is searched and processed, so it's easy
    to specify/modify env variables. The values are accessible through `env()` function.
-   In case if you want to disable it:
+   In case you want to disable it:
    ```php
      PHP::init([
        'disable_init_for' => [
@@ -967,6 +971,9 @@ the PHP engine, that seems to be really ignored by the PHP engine developers.
 ----
 
 Cool way to hide some fields from the debug output with special attribute `DebugHide`:
+
+Keep in mind that for passwords and tokens/secrets 
+there exists additional functionality: [Passwords and Secrets explained](docs/passwords-and-secrets.md)
 
 ```php
 

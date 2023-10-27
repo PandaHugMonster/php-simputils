@@ -1,10 +1,23 @@
-[<< Back to README.md](../README.md)
-
-----
-
 # Important Notes
 
 This section is recommended to be reviewed in case of misunderstandings.
+
+1. Currently, JSON serialization and deserialization does not work properly.
+   Please do not rely on it for now! **IMPORTANT!**
+   When fix for this problem comes, and you are using current logic - you might get
+   into a broken code logic. Please do not use `\spaf\simputils\PHP::serialize()` and
+   `\spaf\simputils\PHP::deserialize()` code with JSON mechanics, you can switch the
+   mechanics to native PHP like this (workaround):
+   ```php
+     PHP::$serialization_mechanism = PHP::SERIALIZATION_TYPE_PHP;
+     PHP::init();
+   ```
+   That will use native PHP mechanics for serialization, which should work properly
+   starting from this release (1.1.3)
+2. Starting from the release 1.1.6 fixed the bug with timezones indirect params (this
+   partially changes the logic, but initial logic before that release was broken).
+
+----
 
 1. [Nuances of l10n and default_tz](#Nuances-of-l10n-and-default_tz)
 

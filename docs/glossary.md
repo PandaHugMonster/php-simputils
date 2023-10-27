@@ -1,7 +1,3 @@
-[<< Back to README.md](../README.md)
-
-----
-
 # Glossary of SimpUtils terms
 
 Really important to remember, that this glossary defines and explains meaning only 

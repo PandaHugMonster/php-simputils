@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.6
+
+* 
+
 ## 1.1.5
 
 * Implemented extensive PHPDOC with examples to `\spaf\simputils\basic` (in progress)

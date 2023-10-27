@@ -13,7 +13,7 @@ code analysis and not code execution!
 Keep in mind that __all the Markers are PHP Attributes__ but **not all the PHP Attributes
 are Markers**!
 
-## Passive and Active Markers
+## Types of Markers (type of marker)
 
 <dl>
     <dt id="marker-passive">Passive Marker</dt>
@@ -26,6 +26,20 @@ are Markers**!
     <dd>
         When aggregated <font color="#ff4500">might cause</font> CLI exit codes other than <code>0</code>.
 		Relevant for CI/CD and code quality reports.
+    </dd>
+</dl>
+
+## Hybrid Markers (nature of marker)
+
+Hybrid markers are not markers PHP Attributes, but real **code-affecting** PHP Attributes,
+like `ComaptibilityReference` that affect code execution/runtime, but are subjects for
+analysis as markers for CI/CD pipelines, etc.
+
+<dl>
+    <dt id="marker-active">Hybrid Marker</dt>
+    <dd>
+        It is a non-marker PHP Attribute that affects runtime, but could be analysed by the side
+        tools as "A Marker".
     </dd>
 </dl>
 

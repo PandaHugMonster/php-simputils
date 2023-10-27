@@ -140,7 +140,7 @@ P.S. Found a tiny bug in using one file object for different file types, please 
 changing file type. https://github.com/PandaHugMonster/php-simputils/issues/124
 
 Please do not use `PHPFileProcessor`. It's a really special processor, which is used in some rare
-cases across the framework. But it should never be explicitly used. Do not override it
+cases across the framework. But it should never be explicitly used. Do not override it!
 
 
 -----
@@ -196,13 +196,19 @@ pr($file->content);
 
 ```
 
+Output:
+```text
+== Default / Special / Dummy / Text ==
+-- NEW STRING --
+```
+
 **Important**: `PHP::redef(File::class)` is an easy way to refer to the `File` class,
 it is safer than using just a `File` class directly, because in your system you might redefine some
 models/classes - and then in this case you might break compatibility.
 The `PHP::redef(File::class)` is used to avoid such a problem.
 
 **Additionally**: The `text/plain` mime-type is the default one for unspecified cases. So
-if you redefine it, any unspecified/unrecognized files will be using it!
+if you redefine it, any unspecified/unrecognized files will be using this processor/app!
 
 You can redefine the complete set of supported mime-types. And even create your own.
 
@@ -211,7 +217,7 @@ You can redefine the complete set of supported mime-types. And even create your 
 Data Files are scoped set of files with configs or some stored info in files for your application.
 
 It's a common thing to want to save a small config into JSON or "PHP-Array" files, and
-then read them and use.
+then to read them and to use them.
 
 Or store some test-fixture or dictionary data for DB migrations.
 
@@ -233,7 +239,7 @@ require_once 'vendor/autoload.php';
 PHP::init([
 	'allowed_data_dirs' => [
 	    // This is the specification of the data folders.
-	    // It's always considered from the "working_dir"
+	    // Path is always considered from the "working_dir"
 		'data',
 	]
 ]);
@@ -246,7 +252,7 @@ pr($data_php);
 ```
 
 Keep in mind that the data is retrieved through the Files infrastructure.
-This is why you could alternatively could use directly through "File" objects.
+This is why you alternatively could use directly through "File" objects.
 
 ```php
 use spaf\simputils\FS;
@@ -271,7 +277,7 @@ pr($data_php->content);
 
 The output would be exactly the same.
 
-It's recommended to use `FS::data()` over `FS::dataFile()`.
+It's preferred to use `FS::data()` over `FS::dataFile()` when applicable.
 
 ## DotEnv
 
@@ -295,7 +301,48 @@ DENV_VAR_4="My variable 4"
 
 Keep in mind that `DENV_VAR_3` is commented out (just to highlight that commenting in `.env` works)
 
-And the script code:
+The simplest usage is:
+
+```php
+use spaf\simputils\PHP;
+use function spaf\simputils\basic\env;
+use function spaf\simputils\basic\pr;
+
+require_once 'vendor/autoload.php';
+
+PHP::init();
+
+$first_env = env('DENV_VAR_1');
+
+$my_env = env('DENV_VAR_2');
+
+// empty, because not specified
+$non_existing_env = env('DENV_VAR_3');
+
+// If the value is not specified, then default (second argument) is used
+$defaulted_non_existing_env = env('DENV_VAR_3', '(DENV_VAR_3) ANOTHER value');
+
+$last_env = env('DENV_VAR_4', 'This value is not shown, because the original value exists');
+
+pr(
+	$first_env,
+	$my_env,
+	$non_existing_env,
+	$defaulted_non_existing_env,
+	$last_env,
+);
+```
+
+And output:
+```text
+My variable 1
+Redefined by EnvVars
+
+(DENV_VAR_3) ANOTHER value
+My variable 4
+```
+
+There is another way to access env-vars, but the mostly for inspection or very niche use cases.
 ```php
 use spaf\simputils\PHP;
 use function spaf\simputils\basic\pr;
@@ -320,7 +367,7 @@ spaf\simputils\models\Box Object
 ```
 
 As you can see, the `.env` is loaded, but the values specified in the shell-environment
-overriding those if specified.
+overriding those.
 
 ## Executables Processing
 
@@ -376,7 +423,7 @@ Process finished with exit code 255
 
 ```
 
-**This behaviour is very intended due to security reasons!** Do not try to override this behaviour.
+**This behaviour is very much intended due to security reasons!** Do not try to override this behaviour.
 
 -----
 
@@ -462,5 +509,5 @@ Output:
      ]);
    ```
 2. **ALL THE ENV VARS MUST BE REFERRED IN UPPER CASE!!!** So if you have the .env vars like this:
-   "test_1" - then in `env('TEST_1')` always use the UPPER CASE! It's mandatory due
+   "test_1" - then in the code always use `env('TEST_1')` the UPPER CASE! It's mandatory due
    to best practices.

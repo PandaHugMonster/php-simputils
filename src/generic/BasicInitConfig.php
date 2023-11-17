@@ -26,13 +26,13 @@ use function is_string;
 
 /**
  *
- * @property-read Box|array $successful_init_blocks
- * @property ?L10n $l10n
- * @property ?DateTimeZone $default_tz
+ * @property-read Box|array                                   $successful_init_blocks
+ * @property ?L10n                                            $l10n
+ * @property ?DateTimeZone                                    $default_tz
  *
- * @property string $big_number_extension
- * @property bool $data_unit_long
- * @property null|ExecEnvHandlerInterface|\spaf\simputils\generic\BasicExecEnvHandler $ee Exec-Environment
+ * @property string                                           $big_number_extension
+ * @property bool                                             $data_unit_long
+ * @property null|ExecEnvHandlerInterface|BasicExecEnvHandler $ee Exec-Environment
  */
 abstract class BasicInitConfig extends SimpleObject {
 
@@ -40,6 +40,8 @@ abstract class BasicInitConfig extends SimpleObject {
 	const REDEF_PR = 'pr';
 	const REDEF_BOX = 'Box';
 	const REDEF_BRO = 'BoxRO';
+	const REDEF_H10L_CONF = 'H10lConf';
+	const REDEF_ENV_VARS = 'EnvVars';
 	const REDEF_DATE_TIME = 'DateTime';
 	const REDEF_DATE_TIME_ZONE = 'DateTimeZone';
 	const REDEF_DATE_INTERVAL = 'DateInterval';

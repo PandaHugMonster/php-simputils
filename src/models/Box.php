@@ -462,7 +462,9 @@ class Box extends ArrayObject {
 	function extract(int|string ...$keys): static {
 		$res = new static();
 		foreach ($keys as $key) {
-			$res[$key] = $this[$key];
+			if ($this->containsKey($key)) {
+				$res[$key] = $this[$key];
+			}
 		}
 
 		return $res;

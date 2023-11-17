@@ -70,13 +70,10 @@ trait ArrayReadOnlyAccessTrait {
 	 * @param mixed $value  A value
 	 *
 	 * @return void
+	 * @throws ReadOnlyProblem
 	 */
 	final function offsetSet(mixed $offset, mixed $value): void {
-		if ($this->_simpUtilsIsReadOnly()) {
-			$this->cannotUseIt();
-		} else {
-			parent::offsetSet($offset, $value);
-		}
+		$this->set($offset, $value, false);
 	}
 
 	/**
@@ -85,17 +82,55 @@ trait ArrayReadOnlyAccessTrait {
 	 * @return void
 	 */
 	function offsetUnset(mixed $offset): void {
-		if ($this->_simpUtilsIsReadOnly()) {
+		$this->unset($offset, false);
+	}
+
+	/**
+	 * Internal Setting Method
+	 *
+	 * It allows you to set key value pairs internally inside of your object,
+	 * but do not let to do that from outside of your object
+	 *
+	 * @param mixed $key
+	 * @param mixed $value
+	 * @param bool  $is_internal
+	 *
+	 * @return void
+	 * @throws ReadOnlyProblem
+	 */
+	protected function set(mixed $key, mixed $value, bool $is_internal = false): void {
+		if (!$is_internal && $this->_simpUtilsIsReadOnly()) {
 			$this->cannotUseIt();
 		} else {
-			parent::offsetUnset($offset);
+			parent::offsetSet($key, $value);
+		}
+	}
+
+	/**
+	 * Internal Un-setting Method
+	 *
+	 * It allows you to unset key value pairs internally inside of your object,
+	 * but do not let to do that from outside of your object
+	 *
+	 * @param mixed $key
+	 * @param bool  $is_internal
+	 *
+	 * @return void
+	 * @throws ReadOnlyProblem
+	 */
+	protected function unset(mixed $key, bool $is_internal = false): void {
+		if (!$is_internal && $this->_simpUtilsIsReadOnly()) {
+			$this->cannotUseIt();
+		} else {
+			parent::offsetUnset($key);
 		}
 	}
 
 	/**
 	 * @return void
+	 * @throws ReadOnlyProblem
 	 */
-	private function cannotUseIt(): void {
-		throw new ReadOnlyProblem('Modification (setting) of this object/array is not allowed');
+	protected function cannotUseIt(): void {
+		throw new ReadOnlyProblem('Modification (setting/unsetting) of this object/array is not allowed');
 	}
 }

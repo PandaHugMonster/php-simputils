@@ -12,6 +12,7 @@ general purpose meaning.
  * [Property](#term-property)
  * [Virtual Property](#term-virtual-property)
  * [Real Property](#term-real-property)
+ * [H10L/H10l](#term-h10l)
 
 
 <dl>
@@ -44,6 +45,11 @@ general purpose meaning.
     <dt id="term-real-property">Real Property</dt>
     <dd>
         In-class variables that are directly defined in a class (Non-virtual ones)
+    </dd>
+    <dt id="term-h10l">H10L/H10l</dt>
+    <dd>
+        H10l (H10L) in the framework stands for "<strong>Hierarchical</strong>". Keep in mind that the
+        last letter in the abbreviation is "L"
     </dd>
 </dl>
 

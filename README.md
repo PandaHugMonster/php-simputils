@@ -72,8 +72,9 @@ SOFTWARE.
    ```
    That will use native PHP mechanics for serialization, which should work properly
    starting from this release (1.1.3)
-2. Starting from the release 1.1.6 fixed the bug with timezones indirect params (this
-   partially changes the logic, but initial logic before that release was broken).
+
+[//]: # (2. Starting from the release 1.2.0 fixed the bug with timezones indirect params &#40;this)
+[//]: # (   partially changes the logic, but initial logic before that release was broken&#41;.)
 
 ----
 

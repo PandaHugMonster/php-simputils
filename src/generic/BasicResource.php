@@ -27,7 +27,10 @@ use function fopen;
  * @property ?string $extension
  * @property ?string $name
  * @property-read ?string $name_full
- * @property-read ?string $path
+ * @property-read ?string $path Specified path when object created
+ * @property-read ?string $path_absolute Returns absolute path, it would match the $path
+ *                                       if initial $path was specified as absolute
+ *                                       during object creation
  * @property-read bool $is_local
  * @property-read string $urn
  * @property-read string $uri
@@ -209,6 +212,13 @@ abstract class BasicResource extends SimpleObject {
 	#[Property('path')]
 	protected function getPath(): ?string {
 		return $this->_path;
+	}
+
+	#[Property('path_absolute')]
+	protected function getPathAbsolute(): ?string {
+		// FIX  Unfinished!
+		$path = $this->_path;
+		return "";
 	}
 
 	/**

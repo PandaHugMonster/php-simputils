@@ -22,6 +22,7 @@ use spaf\simputils\models\Dir;
 use spaf\simputils\models\File;
 use spaf\simputils\models\InitConfig;
 use spaf\simputils\models\IPv4;
+use spaf\simputils\models\Path;
 use spaf\simputils\models\StackFifo;
 use spaf\simputils\models\StackLifo;
 use spaf\simputils\models\TimeDuration;
@@ -733,8 +734,8 @@ function prstr(...$args): ?string {
 	return PHP::prstr(...$args);
 }
 
-#[Shortcut('PHP::path()')]
-function path(?string ...$args): ?string {
+#[Shortcut('FS::path()')]
+function path(null|string|Box ...$args): null|string|Path {
 	return FS::path(...$args);
 }
 

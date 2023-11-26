@@ -15,6 +15,7 @@ use spaf\simputils\models\Box;
 use spaf\simputils\models\Dir;
 use spaf\simputils\models\File;
 use spaf\simputils\models\files\apps\PHPFileProcessor;
+use spaf\simputils\models\Path;
 use function file_exists;
 use function is_array;
 use function is_callable;
@@ -99,13 +100,13 @@ class FS {
 	 *  pd($data);
 	 * ```
 	 *
-	 * @param array|Box|File $file File ref
-	 * @param ?string        $ic   Init Config name (default - is referenced to the app,
-	 *                             other non-empty names can be used by
-	 *                             the libraries/plugins)
+	 * @param array|Box|File              $file File ref
+	 * @param null|string|BasicInitConfig $ic   Init Config name (default - is referenced to the app,
+	 *                                          other non-empty names can be used by
+	 *                                          the libraries/plugins)
 	 *
 	 * @return mixed
-	 * @throws \spaf\simputils\exceptions\DataDirectoryIsNotAllowed If directory was not
+	 * @throws DataDirectoryIsNotAllowed If directory was not
 	 *                                                              beforehand allowed
 	 *                                                              in init-config
 	 * @see FS::include()
@@ -484,7 +485,20 @@ class FS {
 		if (!empty($ext)) {
 			$ext = ".{$ext}";
 		}
-		return "{$dir}/{$name}{$ext}";
+		return static::join($dir, "{$name}{$ext}");
+	}
+
+	/**
+	 * Join array/box with `DIRECTORY_SEPARATOR`
+	 *
+	 * Similar to python `os.path.join()` function
+	 *
+	 * @param string ...$path_parts
+	 *
+	 * @return string
+	 */
+	static function join(string ...$path_parts): string {
+		return PHP::box($path_parts)->join(DIRECTORY_SEPARATOR);
 	}
 
 	/**
@@ -544,19 +558,12 @@ class FS {
 	}
 
 	/**
-	 * @param string|null ...$parts Parts that should be joined depending on the platform
+	 * @param null|string|Box ...$parts
 	 *
-	 * TODO Implement root part somehow
-	 * TODO Windows is not tested, and might cause errors for now
-	 * @return string|null
+	 * @return null|string|Path
 	 */
-	public static function path(?string ...$parts): ?string {
-		// FIX  Refactor mechanics to use new one
-		$sep = DIRECTORY_SEPARATOR;
-		if ($parts) {
-			$res = PHP::box($parts)->join($sep);
-		}
-		return $res ?? null;
+	static function path(null|string|Box ...$parts): null|string|Path {
+		return new Path(...$parts);
 	}
 
 	/**

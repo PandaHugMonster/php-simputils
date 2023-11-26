@@ -36,6 +36,7 @@ use function is_string;
 use function preg_replace;
 use function shuffle;
 use function uasort;
+use const DIRECTORY_SEPARATOR;
 
 /**
  * The Array-alike Box
@@ -887,7 +888,7 @@ class Box extends ArrayObject {
 	 * @return $this
 	 */
 	function apply(...$properties) {
-		$permitted_properties = new static([
+		$permitted_properties = new self([
 			// NOTE For now only those are permitted params
 			'separator', 'joined_to_str',
 			'stretcher', 'value_wrap', 'key_wrap'
@@ -913,11 +914,14 @@ class Box extends ArrayObject {
 	/**
 	 * Apply settings for stringification to unix-path
 	 *
-	 * @param string $separator
+	 * @param null|string $separator
 	 *
 	 * @return $this
 	 */
-	function pathAlike(string $separator = '/'): self {
+	function pathAlike(?string $separator = null): self {
+		if (empty($separator)) {
+			$separator = DIRECTORY_SEPARATOR;
+		}
 		$this->apply(separator: $separator, joined_to_str: true);
 		return $this;
 	}

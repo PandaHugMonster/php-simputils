@@ -1,5 +1,19 @@
 # Changelog
 
+## Latest
+[//]: # (NOTE   Don't forget to update this file)
+
+* Added `FS::join()` method that works similarly to python `os.path.join()` function
+  * Improved `FS::glueFullFilePath()` method to use `FS::join()`, this should improve
+    functionality on other platforms than UNIX/Linux
+  * 
+
+
+## 1.1.6
+
+* Fixed issue with `DatePeriod` on PHP release 8.2
+* Added procedure for running tests against minor and major releases of PHP
+
 ## 1.1.5
 
 * Implemented extensive PHPDOC with examples to `\spaf\simputils\basic` (in progress)

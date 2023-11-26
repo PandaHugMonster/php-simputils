@@ -184,4 +184,8 @@ class Property extends BasicAttribute {
 
 		return $method_type;
 	}
+
+	function getFinalType() {
+
+	}
 }

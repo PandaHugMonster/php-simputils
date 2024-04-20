@@ -3,11 +3,12 @@
 namespace spaf\simputils\models;
 
 use spaf\simputils\attributes\DebugHide;
+use spaf\simputils\attributes\markers\Shortcut;
 use spaf\simputils\attributes\Property;
 use spaf\simputils\exceptions\NotImplementedYet;
 use spaf\simputils\generic\SimpleObject;
 use spaf\simputils\interfaces\UrlCompatible;
-use spaf\simputils\models\urls\processors\HttpProtocolProcessor;
+use spaf\simputils\models\urls\processors\HttpSchemeProcessor;
 use spaf\simputils\PHP;
 use spaf\simputils\Str;
 use spaf\simputils\traits\ForOutputsTrait;
@@ -15,12 +16,19 @@ use spaf\simputils\traits\RedefinableComponentTrait;
 use function explode;
 use function is_array;
 use function is_null;
+use function is_numeric;
 use function is_string;
 use function preg_match;
 use function preg_replace;
 use function spaf\simputils\basic\ic;
+use function spaf\simputils\basic\pd;
 
 /**
+ *
+ * **Important**: `cs` prefixed methods here are "chaining setting methods" to be used
+ * instead of properties of the same name. For changing multiple aspects of your URL properties
+ * might be not the most comfortable solution.
+ *
  * @property-read UrlCompatible|string|Box|array|null $orig Contains original value of the "host".
  *                                                          really useful in case of parsing of
  *                                                          an url.
@@ -41,18 +49,263 @@ class UrlObject extends SimpleObject {
 	use ForOutputsTrait;
 	use RedefinableComponentTrait;
 
-	static string $default_processor = HttpProtocolProcessor::class;
+
+	/**
+	 * CS operation "prepend", will cause to add elements to the left of the group
+	 */
+	const CS_OP_PREPEND = 'prepend';
+
+	/**
+	 * CS operation "append", will cause to add elements to the right of the group
+	 */
+	const CS_OP_APPEND = 'append';
+
+	/**
+	 * CS operation "replace", will cause to replace all the elements of the group
+	 */
+	const CS_OP_REPLACE = 'replace';
+
+	static string $default_processor = HttpSchemeProcessor::class;
 
 	static array $processors = [
-		'http' => HttpProtocolProcessor::class,
-		'https' => HttpProtocolProcessor::class,
+		'http' => HttpSchemeProcessor::class,
+		'https' => HttpSchemeProcessor::class,
 	];
+
+	/**
+	 * Chained Setting of Protocol
+	 *
+	 * CS - in this context stands for `Chained Setting`
+	 *
+	 * This naming is done for compatibility reasons, due to possibility of `set` prefixed
+	 * methods might collide with other frameworks "getter/setter" functionality, and cause
+	 * unexpected behaviour.
+	 *
+	 * This method can be used the same way as the property,
+	 * but allows chaining due to native functions/methods nature.
+	 *
+	 * @param ?string $protocol
+	 *
+	 * @return $this
+	 */
+	#[Shortcut('$this->protocol')]
+	function csProto(?string $protocol): self {
+		$this->protocol = $protocol;
+		return $this;
+	}
+
+	/**
+	 * Chained Setting of Host
+	 *
+	 * CS - in this context stands for `Chained Setting`
+	 *
+	 * This naming is done for compatibility reasons, due to possibility of `set` prefixed
+	 * methods might collide with other frameworks "getter/setter" functionality, and cause
+	 * unexpected behaviour.
+	 *
+	 * This method can be used the same way as the property,
+	 * but allows chaining due to native functions/methods nature.
+	 *
+	 * @param ?string $host
+	 *
+	 * @return $this
+	 */
+	#[Shortcut('$this->host')]
+	function csHost(?string $host): self {
+		$this->host = $host;
+		return $this;
+	}
+
+	/**
+	 * Chained Setting of Port
+	 *
+	 * CS - in this context stands for `Chained Setting`
+	 *
+	 * This naming is done for compatibility reasons, due to possibility of `set` prefixed
+	 * methods might collide with other frameworks "getter/setter" functionality, and cause
+	 * unexpected behaviour.
+	 *
+	 * This method can be used the same way as the property,
+	 * but allows chaining due to native functions/methods nature.
+	 *
+	 * @param ?int $port
+	 *
+	 * @return $this
+	 */
+	#[Shortcut('$this->port')]
+	function csPort(?int $port): self {
+		$this->port = $port;
+		return $this;
+	}
+
+	/**
+	 * Chained Setting of User
+	 *
+	 * CS - in this context stands for `Chained Setting`
+	 *
+	 * This naming is done for compatibility reasons, due to possibility of `set` prefixed
+	 * methods might collide with other frameworks "getter/setter" functionality, and cause
+	 * unexpected behaviour.
+	 *
+	 * This method can be used the same way as the property,
+	 * but allows chaining due to native functions/methods nature.
+	 *
+	 * @param ?string $user
+	 *
+	 * @return $this
+	 */
+	#[Shortcut('$this->user')]
+	function csUser(?string $user): self {
+		$this->user = $user;
+		return $this;
+	}
+
+	/**
+	 * Chained Setting of Password
+	 *
+	 * CS - in this context stands for `Chained Setting`
+	 *
+	 * This naming is done for compatibility reasons, due to possibility of `set` prefixed
+	 * methods might collide with other frameworks "getter/setter" functionality, and cause
+	 * unexpected behaviour.
+	 *
+	 * This method can be used the same way as the property,
+	 * but allows chaining due to native functions/methods nature.
+	 *
+	 * @param ?string $password
+	 *
+	 * @return $this
+	 */
+	#[Shortcut('$this->password')]
+	function csPass(?string $password): self {
+		$this->password = $password;
+		return $this;
+	}
+
+	/**
+	 * Chained Setting of Sharpy
+	 *
+	 * CS - in this context stands for `Chained Setting`
+	 *
+	 * This naming is done for compatibility reasons, due to possibility of `set` prefixed
+	 * methods might collide with other frameworks "getter/setter" functionality, and cause
+	 * unexpected behaviour.
+	 *
+	 * This method can be used the same way as the property,
+	 * but allows chaining due to native functions/methods nature.
+	 *
+	 * @param ?string $sharpy
+	 *
+	 * @return $this
+	 */
+	#[Shortcut('$this->sharpy')]
+	function csSharpy(?string $sharpy): self {
+		$this->sharpy = $sharpy;
+		return $this;
+	}
+
+	/**
+	 * Chained Setting of Path
+	 *
+	 * CS - in this context stands for `Chained Setting`
+	 *
+	 * This naming is done for compatibility reasons, due to possibility of `set` prefixed
+	 * methods might collide with other frameworks "getter/setter" functionality, and cause
+	 * unexpected behaviour.
+	 *
+	 * This method can be used the same way as the property,
+	 * but allows chaining due to native functions/methods nature.
+	 *
+	 * @param null|Box|array|string $path
+	 * @param string $operation
+	 *
+	 * @return $this
+	 */
+	#[Shortcut('$this->path')]
+	function csPath(null|Box|array|string $path, string $operation = self::CS_OP_REPLACE): self {
+		$path_new = static::preProcessPathData($path);
+		$path_old = $this->path ?: PHP::box()->pathAlike();
+
+		$res = match ($operation) {
+			static::CS_OP_REPLACE => $path_new,
+			static::CS_OP_PREPEND => static::addPathElements($path_new, $path_old),
+			static::CS_OP_APPEND => static::addPathElements($path_old, $path_new),
+		};
+
+		$this->path = $res;
+		return $this;
+	}
+
+	private static function addPathElements($to, $from) {
+		foreach ($from as $k => $val) {
+			if (is_numeric($k)) {
+				$to[] = $val;
+			} else {
+				$to[$k] = $val;
+			}
+		}
+		return $to;
+	}
+
+	/**
+	 * Chained Setting of Path
+	 *
+	 * CS - in this context stands for `Chained Setting`
+	 *
+	 * This naming is done for compatibility reasons, due to possibility of `set` prefixed
+	 * methods might collide with other frameworks "getter/setter" functionality, and cause
+	 * unexpected behaviour.
+	 *
+	 * This method can be used the same way as the property,
+	 * but allows chaining due to native functions/methods nature.
+	 *
+	 * @param Box|array|null $params
+	 * @param string $operation
+	 *
+	 * @return $this
+	 */
+	#[Shortcut('$this->params')]
+	function csParams(null|Box|array $params, string $operation = self::CS_OP_REPLACE): self {
+		$this->params = $this->preProcessParamsData($params);
+		return $this;
+	}
+
+	/**
+	 * @param UrlCompatible|string|Box|array|null $host
+	 * @param Box|array|string|null $path
+	 * @param Box|array|null $params
+	 * @param string|null $protocol
+	 * @param string|null $processor
+	 * @param string|null $port
+	 * @param string|null $user
+	 * @param string|null $pass
+	 * @param mixed ...$data
+	 *
+	 * @return $this
+	 */
+	function update(
+		null|UrlCompatible|string|Box|array $host = null,
+		null|Box|array|string $path = null,
+		null|Box|array $params = null,
+		?string $protocol = null,
+		?string $processor = null,
+		?string $port = null,
+		?string $user = null,
+		?string $pass = null,
+		mixed ...$data,
+	): static {
+		// MARK Proceed here!
+
+		return $this;
+	}
 
 	#[Property]
 	protected ?string $_processor = null;
 
+//	FIX After implementing multiple properties (and arrayed names)
 	#[Property]
-	protected ?string $_protocol = null;
+	#[Property('protocol')]
+	protected ?string $_scheme = null;
 
 	#[Property]
 	protected ?string $_user = null;
@@ -73,17 +326,43 @@ class UrlObject extends SimpleObject {
 	#[Property]
 	protected ?Box $_params = null;
 
-	#[Property('path')]
-	protected function setPath($val) {
+	static function preProcessPathData($val) {
+		$res = null;
 		if ($val instanceof Box) {
 			$val->pathAlike();
-			$this->_path = $val;
+			$res = $val;
 		} else if (is_array($val)) {
-			$this->_path = PHP::box($val)->pathAlike();
+			$res = PHP::box($val)->pathAlike();
 		} else if (is_string($val)) {
 			$val = Str::removeStarting($val, '/');
-			$this->_path = PHP::box(explode('/', $val))->pathAlike();
+			$res = PHP::box(explode('/', $val))->pathAlike();
 		}
+		return $res;
+	}
+
+	protected function preProcessParamsData($val) {
+		$res = null;
+		if ($val instanceof Box) {
+			$val->paramsAlike();
+			$res = $val;
+		} else if (is_array($val)) {
+			$res = PHP::box($val)->paramsAlike();
+		} else if (is_string($val)) {
+			// FIX  Proceed here with params data parsing
+//			pd('FIX', $val);
+			$proc = $this->_processor;
+			/** @var HttpSchemeProcessor $proc */
+			$r = $proc::parse($val, part: HttpSchemeProcessor::PART_PARAMS);
+			pd('FIX RES', $r);
+//			$val = Str::removeStarting($val, '/');
+//			$res = PHP::box(explode('/', $val))->pathAlike();
+		}
+		return $res;
+	}
+
+	#[Property('path')]
+	protected function setPathProperty($val) {
+		$this->_path = static::preProcessPathData($val);
 	}
 
 	#[Property]
@@ -100,7 +379,7 @@ class UrlObject extends SimpleObject {
 	}
 
 	#[Property('sharpy')]
-	protected function setSharpy($val) {
+	protected function setSharpyProperty($val) {
 		$this->data['sharpy'] = $val;
 	}
 
@@ -157,7 +436,7 @@ class UrlObject extends SimpleObject {
 	function __construct(
 		null|UrlCompatible|string|Box|array $host = null,
 		null|Box|array|string $path = null,
-		null|Box|array $params = null,
+		null|Box|array|string $params = null,
 		?string $protocol = null,
 		?string $processor = null,
 		?string $port = null,
@@ -176,7 +455,7 @@ class UrlObject extends SimpleObject {
 
 		$parsed = $this->parseHost($host);
 
-		$this->_protocol = $protocol ?: $parsed->get('protocol');
+		$this->_scheme = $protocol ?: $parsed->get('protocol');
 		unset($parsed['protocol']);
 
 		$this->_user = $user ?: $parsed->get('user');
@@ -210,7 +489,7 @@ class UrlObject extends SimpleObject {
 			if (PHP::isArrayCompatible($path)) {
 				$pre = PHP::box($path)->pathAlike();
 			} else if (is_string($path)) {
-				/** @var \spaf\simputils\models\Box $_def_pre */
+				/** @var Box $_def_pre */
 				$_def_pre = $this->_processor::parse($path, part: 'path');
 				$ll = $_def_pre->get('path');
 				if ($ll) {
@@ -264,11 +543,16 @@ class UrlObject extends SimpleObject {
 		unset($parsed['path']);
 
 		if ($params) {
+
+			if (Str::is($params)) {
+				$params = $this->preProcessParamsData($params);
+			}
+
 			$pre_data = $pre = null;
 			if (PHP::isArrayCompatible($params)) {
 				$pre = PHP::box($params)->paramsAlike();
 			} else if (is_string($path)) {
-				/** @var \spaf\simputils\models\Box $_def_pre */
+				/** @var Box $_def_pre */
 				$_def_pre = $this->_processor::parse($params, part: 'params');
 				$pre = PHP::box($_def_pre->get('params'))->paramsAlike();
 				unset($_def_pre['path']);
@@ -335,257 +619,6 @@ class UrlObject extends SimpleObject {
 	protected function getRelative(): string {
 		return $this->_processor::generateRelative($this);
 	}
-
-//
-//	static ?string $default_host = null;
-//	static ?string $default_protocol = 'https';
-//
-//	static Box|array $processors = [
-//		'http' => HttpProtocolProcessor::class,
-//		'https' => HttpProtocolProcessor::class,
-//	];
-//
-//	#[Property(type: 'get')]
-//	protected UrlCompatible|string|Box|array|null $_orig = null;
-//
-//	#[Property(type: 'get')]
-//	protected UrlCompatible|string|null $_host = null;
-//
-//	#[Property]
-//	protected Box|array|string|null $_path = null;
-//
-//	#[Property]
-//	protected Box|array|null $_params = null;
-//
-//	#[Property]
-//	protected Box|array|null $_data = null;
-//
-//	#[Property('port')]
-//	protected function getPort(): ?int {
-//		return $this->_processor->getPort($this);
-//	}
-//
-//	#[Property('port')]
-//	protected function setPort(?int $val) {
-//		$this->_processor->setPort($this, $val);
-//	}
-//
-//	#[Extract(false)]
-//	#[DebugHide]
-//	protected ?BasicProtocolProcessor $_processor = null;
-//
-//	#[Property('protocol')]
-//	protected function getProtocol(): string {
-//		return $this->processor->protocol;
-//	}
-//
-//	#[Property('processor')]
-//	protected function getProcessor(): BasicProtocolProcessor {
-//		return $this->_processor;
-//	}
-//
-//	#[Property('processor')]
-//	protected function setProcessor(BasicProtocolProcessor $val) {
-//		$this->_processor = $val; // @codeCoverageIgnore
-//	}
-//
-//	/**
-//	 *
-//	 * Some info:
-//	 *      * Host can be "condensed" string containing all arguments - should be parsed
-//	 *      * Host can be everything without protocol - should be parsed
-//	 *      * Host can be just portion of URL - should be parsed
-//	 *      * Path can be path portion (array, string) + params if assoc indexes
-//	 *      * Params can contain only "get" encoded arguments
-//	 *      * Protocol just a string
-//	 *      * Processor should not be explicitly specified
-//	 *      * Data provided to the processors to incorporate/use in URLs
-//	 *
-//	 * All the above should be incremental, and no info should be lost. So if the params
-//	 * can be in all 3 ($host, $path and $params) all of them have to be aggregated!
-//	 *
-//	 *
-//	 * @param UrlCompatible|string|Box|array|null $host      Host
-//	 * @param Box|array|string|null               $path      Path
-//	 * @param Box|array|null                      $params    Params
-//	 * @param string|null                         $protocol  Protocol
-//	 * @param string|null                         $processor Processor object
-//	 * @param mixed                               ...$data   Additional data
-//	 */
-//	function __construct(
-//		UrlCompatible|string|Box|array $host = null,
-//		Box|array|string $path = null,
-//		Box|array $params = null,
-//		string $protocol = null,
-//		string $processor = null,
-//		mixed ...$data,
-//	) {
-//		$this->_host = null;
-//		$this->_path = PHP::box();
-//		$this->_params = PHP::box();
-//		$this->_data = PHP::box();
-//		$this->_orig = $host;
-//
-//		$this->parseHost($host, $protocol, $processor);
-//		$this->addPath($path);
-//		$this->addParams($params);
-//		$this->addData($data);
-//		$this->_path->pathAlike();
-//	}
-//
-//	protected function parseHost(
-//		UrlCompatible|string|Box|array $host = null,
-//		?string $protocol = null,
-//		?string $processor = null
-//	) {
-//		if (!empty($host)) {
-//			if (is_string($host)) {
-//				$m = [];
-//				$orig_host = $host;
-//				preg_match('#^([a-zA-Z]?[a-zA-Z0-9_-]*):(.*)$#S', $host, $m);
-//				if ($m) {
-//					$protocol = $protocol ?? $m[1] ?? null;
-//					$host = $m[2] ?? null;
-//				}
-//
-//				// Str::startsWith($host, '//') || (!Str::startsWith($host, 'http://') && !Str::startsWith($host, 'https://'))
-//				$tt = bx(static::$processors);
-//				if (!$tt->containsKey($protocol) || bx(['http', 'https'])->containsValue($protocol)) {
-//					// NOTE We need to check whether it's a valid http url without protocol part,
-//					//      or it's something else.
-//					$processor_class = static::$processors['http'] ?? null;
-//					if (empty($processor_class)) {
-//						throw new Exception('HTTP Protocol does not have a proper Processor Class specified for it!');
-//					}
-//					/** @var HttpProtocolProcessor $http_processor */
-//					$protocol = empty($protocol) && $processor_class::isValid($host, $protocol)?'http':$protocol;
-//
-//					[$protocol, $user, $pass, $host, $port] = $processor_class::preParsing($orig_host, $protocol);
-//					$this->data['user'] = $user;
-//					$this->data['pass'] = $pass;
-//					$this->data['port'] = $port;
-//				}
-//
-////				pd($protocol);
-//				// FIX  Parse here!
-//
-//			} else if (is_array($host) || $host instanceof Box) {
-//				$host = PHP::box($host);
-//
-//				$this->_path->mergeFrom($host->only_numeric);
-//				$this->_params->mergeFrom($host->only_assoc);
-//				$host = null;
-//			}
-//		}
-//
-//		$protocol = $protocol?:static::$default_protocol;
-//		if (is_null($protocol)) {
-//			$protocol = 'https';
-//		}
-//		$this->_processor = $processor ?: static::chooseProcessor($protocol);
-//
-//		if (!empty($host)) {
-//			[
-//				$this->_host,
-//				$this->_path,
-//				$this->_params,
-//				$this->_data
-//			] = $this->_processor->parse($host, true, $this->data);
-//		}
-//	}
-//
-//	function addPath(Box|array|string|null $path) {
-//		if (!empty($path)) {
-//			$proc = $this->processor;
-//
-//			if (is_string($path)) {
-//				[$_, $_path, $_params, $_data] = $proc->parse($path, false);
-//				if (!empty($_path)) {
-//					$this->_path->mergeFrom($_path);
-//				}
-//				if (!empty($_params)) {
-//					$this->_params->mergeFrom($_params);
-//				}
-//				if (!empty($_data)) {
-//					$this->_data->mergeFrom($_data);
-//				}
-//			} else {
-//				// NOTE Path can contain params as well. Difference is in indexes
-//				$path = PHP::box($path);
-//
-//				$this->_path->mergeFrom($path->only_numeric);
-//				$this->_params->mergeFrom($path->only_assoc);
-//			}
-//		}
-//
-//		// TODO Re-implement properly without creating a new object every single time
-//		$r = PHP::box()->pathAlike();
-//		foreach ($this->_path as $item) {
-//			$sub = preg_replace('#\s+#S', '', $item);
-//			if (!empty($sub)) {
-//				$r[] = $sub;
-//			}
-//		}
-//		$this->_path = $r;
-//	}
-//
-//	function addParams(Box|array|null $params) {
-//		if (!empty($params)) {
-//			$this->_params->mergeFrom($params);
-//		}
-//
-//		$r = PHP::box();
-//		foreach ($this->_params as $k => $v) {
-//			$sub = preg_replace('#\s+#S', '', $k);
-//			if (!empty($sub)) {
-//				$r[$sub] = $v;
-//			}
-//		}
-//		$this->_params = $r;
-//	}
-//
-//	function addData(Box|array|null $data) {
-//		if (!empty($data)) {
-//			$this->_data->mergeFrom($data);
-//		}
-//	}
-//
-//	protected static function chooseProcessor(string $protocol): BasicProtocolProcessor {
-//		$protocols = PHP::box(static::$processors);
-//		if (!$protocols->containsKey($protocol)) {
-//			throw new ProtocolProcessorIsUndefined(
-//				"No processor defined for this protocol: {$protocol}"
-//			);
-//		}
-//
-//		$class = $protocols[$protocol];
-//		return new $class($protocol);
-//	}
-//
-//	#[Property('for_system')]
-//	protected function getForSystem(): string {
-//		$host = $this->_host ?? static::$default_host ?? 'localhost';
-//		return $this->_processor->generateForSystem(
-//			$host, $this->_path, $this->_params, $this->_data
-//		);
-//	}
-//
-//	#[Property('for_user')]
-//	protected function getForUser(): string {
-//		$host = $this->_host ?? static::$default_host ?? 'localhost';
-//		return $this->_processor->generateForUser(
-//			$host, $this->_path, $this->_params, $this->_data
-//		);
-//	}
-//
-//	#[Property('relative')]
-//	protected function getRelative(): string {
-//		$host = $this->_host ?? static::$default_host ?? 'localhost';
-//		return $this->_processor->generateRelative(
-//			$host, $this->_path, $this->_params, $this->_data
-//		);
-//	}
-
 
 	function setFromData($data): static {
 		$this->__construct($data['for_system']);

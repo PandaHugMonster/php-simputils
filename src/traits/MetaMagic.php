@@ -3,8 +3,10 @@
 namespace spaf\simputils\traits;
 
 use JsonException;
+use ReflectionException;
 use spaf\simputils\exceptions\InfiniteLoopPreventionExceptions;
 use spaf\simputils\exceptions\MetaMagicStrictInheritanceProblem;
+use spaf\simputils\exceptions\PropertyDoesNotExist;
 use spaf\simputils\FS;
 use spaf\simputils\generic\BasicPrism;
 use spaf\simputils\generic\SimpleObject;
@@ -181,7 +183,7 @@ trait MetaMagic {
 	 * @param string $json Json string
 	 *
 	 * @return static
-	 * @throws \ReflectionException Reflection issues
+	 * @throws ReflectionException Reflection issues
 	 */
 	public static function fromJson(string $json): static {
 		$data = json_decode($json, true);
@@ -404,8 +406,8 @@ trait MetaMagic {
 	 *                                          By default is true
 	 *
 	 * @return object Always returns a new object of type provided as a first argument
-	 * @throws \ReflectionException Reflection issue
-	 * @throws \spaf\simputils\exceptions\MetaMagicStrictInheritanceProblem Strict Inheritance
+	 * @throws ReflectionException Reflection issue
+	 * @throws MetaMagicStrictInheritanceProblem Strict Inheritance
 	 *                                                                      Problem
 	 */
 	public static function expandFrom(
@@ -433,7 +435,7 @@ trait MetaMagic {
 	 * @param array $data Array data for the class
 	 *
 	 * @return static
-	 * @throws \ReflectionException Reflection issues
+	 * @throws ReflectionException Reflection issues
 	 */
 	public static function fromArray(array $data): static {
 		$class = static::class;
@@ -451,7 +453,7 @@ trait MetaMagic {
 	 *
 	 * @return static
 	 *
-	 * @throws \ReflectionException Reflection Exception
+	 * @throws ReflectionException Reflection Exception
 	 */
 	public static function createDummy(): static {
 		/** @noinspection PhpIncompatibleReturnTypeInspection */
@@ -478,15 +480,25 @@ trait MetaMagic {
 	 * @param array|Box $data Setup data
 	 *
 	 * @return $this
+	 * @throws ReflectionException
 	 */
 	protected function ___setup(array|Box $data): static {
 		foreach ($data as $key => $val) {
-			if (is_array($val) && !empty($val[PHP::$serialized_class_key_name])) {
-				$obj = PHP::createDummy($val[PHP::$serialized_class_key_name]);
-				unset($val[PHP::$serialized_class_key_name]);
-				$val = PHP::metaMagicSpell($obj, 'setup', $val);
+			// MARK Temporary hack to resolve unknown "properties" during setup,
+			//      https://github.com/PandaHugMonster/php-simputils/issues/170
+
+			// MARK This hack must be revised and the issue considered during redesign
+			//      of the engine
+			try {
+				if (is_array($val) && !empty($val[PHP::$serialized_class_key_name])) {
+					$obj = PHP::createDummy($val[PHP::$serialized_class_key_name]);
+					unset($val[PHP::$serialized_class_key_name]);
+					$val = PHP::metaMagicSpell($obj, 'setup', $val);
+				}
+				$this->$key = $val;
+			} catch (PropertyDoesNotExist) {
+				// MARK Skipping setting up an unknown "property"
 			}
-			$this->$key = $val;
 		}
 		return $this;
 	}

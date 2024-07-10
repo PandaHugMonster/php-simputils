@@ -74,6 +74,8 @@ I will be really happy hearing from you.
 
 ### Installation
 
+Minimal PHP version: **8.0**
+
 ```shell
 composer require spaf/simputils "^1"
 ```

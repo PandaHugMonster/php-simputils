@@ -12,7 +12,6 @@ use spaf\simputils\models\Box;
  * contact information that can explain, help or give some additional info about
  * the marked entity.
  */
-#[Attribute]
 abstract class BasicMarker extends BasicAttribute {
 
 	#[Property]

@@ -18,7 +18,7 @@ class Issue extends BasicInspectionMarker {
 	const TYPE_PERFORMANCE = 'performance';
 	const TYPE_ARCHITECTURE = 'architecture';
 	const TYPE_BUG = 'bug';
-	const TYPE_MESSY = 'Messy';
+	const TYPE_MESSY = 'messy';
 	const TYPE_LACKS_DOCUMENTATION = 'lacks-documentation';
 	const TYPE_COUNTER_INTUITIVE = 'counter-intuitive';
 	const TYPE_WEIRD_BEHAVIOUR = 'weird-behaviour';

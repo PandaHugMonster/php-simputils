@@ -10,8 +10,7 @@ use spaf\simputils\models\Box;
  * @property ?string $severity
  * @property ?string $comment
  */
-#[Attribute(Attribute::IS_REPEATABLE)]
-class BasicInspectionMarker extends BasicMarker {
+abstract class BasicInspectionMarker extends BasicMarker {
 
 	const SEVERITY_UNDEFINED = 'undefined';
 	const SEVERITY_LOW = 'low';

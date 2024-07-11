@@ -1,8 +1,21 @@
 # Changelog
 
+## 1.1.7
+
+* `BigNumber`
+  * Fixed a small issue with losing minus with `GMP` extension
+  * Fixed a small issue with not applying `BigNumber::$default_extension` to unspecified extension
+    during new object creation.
+  * Implemented helper method and a shortcut for creation of `BigNumber`
+    * `\spaf\simputils\basic\bn()` Shortcut (preferable)
+    * `\spaf\simputils\Math::bn()` Helper
+* Documentation has been fully rewritten
+
 ## 1.1.6
 
-* 
+* Fixed bug 
+  [PHP 8.1 to 8.2 update causes error with DateTimeRange](https://github.com/PandaHugMonster/php-simputils/issues/170)
+  * Additionally process of testing now includes running tests against main PHP releases
 
 ## 1.1.5
 

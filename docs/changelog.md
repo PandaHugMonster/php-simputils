@@ -9,6 +9,14 @@
   * Implemented helper method and a shortcut for creation of `BigNumber`
     * `\spaf\simputils\basic\bn()` Shortcut (preferable)
     * `\spaf\simputils\Math::bn()` Helper
+* Added default "simputils/default-ic" `InitConfig` if the `PHP::init()` was not called.
+  Please always call `PHP::init()`
+* Introduced `\spaf\simputils\generic\BasicInitConfig::$strict_mode` 
+  instance property which now by default is `true`.
+  The strict mode means that bugs, fixes of which will break backward compatibility with previous versions.
+  anyone, who does not care about those fixes, can just set this property of `InitConfig`/`PHP::init()` to `false`.
+* Fixed missing exception in case of DateTime failed parsing.
+  `\spaf\simputils\exceptions\DateTimeParsingException`. Previously it was returning wrong date-time object.
 * Documentation has been fully rewritten
 
 ## 1.1.6

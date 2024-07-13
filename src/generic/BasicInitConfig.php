@@ -32,7 +32,7 @@ use function is_string;
  *
  * @property string $big_number_extension
  * @property bool $data_unit_long
- * @property null|ExecEnvHandlerInterface|\spaf\simputils\generic\BasicExecEnvHandler $ee Exec-Environment
+ * @property null|ExecEnvHandlerInterface|BasicExecEnvHandler $ee Exec-Environment
  */
 abstract class BasicInitConfig extends SimpleObject {
 
@@ -70,6 +70,7 @@ abstract class BasicInitConfig extends SimpleObject {
 	public ?string $default_host = 'localhost';
 	public ?string $code_root = null;
 	public ?string $working_dir = null;
+	public bool $strict_mode = true;
 	public array|Box $disable_init_for = [];
 
 	public null|array|Box $allowed_data_dirs = [];

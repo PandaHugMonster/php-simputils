@@ -6,6 +6,7 @@ namespace spaf\simputils;
 
 use Exception;
 use spaf\simputils\attributes\markers\Shortcut;
+use spaf\simputils\exceptions\DateTimeParsingException;
 use spaf\simputils\exceptions\RedefUnimplemented;
 use spaf\simputils\models\Box;
 use spaf\simputils\models\DateInterval;
@@ -175,6 +176,11 @@ class DT {
 				);
 			} else {
 				$dt = $class::createFromFormat($fmt, $dt, $tz_in);
+				if (PHP::ic()->strict_mode && !$dt) {
+					throw new DateTimeParsingException(
+						"DateTime parsing failed. Format: \"{$fmt}\"; DT: \"{$dt}\""
+					);
+				}
 			}
 
 			if (empty($fmt) || $dt === false) {

@@ -1,6 +1,7 @@
 # Working with Date/Time
 
 * PHP time zones: https://www.php.net/manual/en/timezones.europe.php
+* PHP formatting parameters: https://www.php.net/manual/en/datetime.format.php#refsect1-datetime.format-parameters
 
 ## Date/Time
 
@@ -288,6 +289,8 @@ UTC: 		2024-07-13 13:15:30.012345
 Timezoned: 	2024-07-13 15:15:30 (Europe/Berlin)
 ```
 
+PHP formatting parameters: https://www.php.net/manual/en/datetime.format.php#refsect1-datetime.format-parameters
+
 #### String representations of `DateTime` objects
 
 There are 2 major ways to represent `DateTime` objects as strings
@@ -319,7 +322,7 @@ Output:
 For user: 	2024-07-12 15:00:00
 ```
 
-It's basically a shortcut for `for_user` property.
+It's basically a shortcut for `for_user` property (especially convenient for embedding into HTML).
 
 > [!IMPORTANT]
 > Code, storage, db-wise always explicit `for_system` must be used!

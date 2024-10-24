@@ -5,6 +5,9 @@
 
 ## Date/Time
 
+The framework's `\spaf\simputils\models\DateTime` class is inherited from 
+PHP `\DateTime` so it's highly compatible with it.
+
 ### Simple use
 
 Framework provides `\spaf\simputils\models\DateTime` class which could be used directly.
@@ -330,6 +333,123 @@ It's basically a shortcut for `for_user` property (especially convenient for emb
 
 ## Date/Time atoms
 
+> [!IMPORTANT]
+> Keep in mind that any modifications on prisms will modify the underlying original `DateTime` object.
+> 
+> More about prisms here: [Glossary - Prisms](./glossary.md#prisms)
 
-## Time zones
+### Date prism
 
+It simply represents "Date" portion of a date-time object.
+
+```php
+#!/bin/env php8.0
+<?php
+
+use spaf\simputils\Boolean;
+use spaf\simputils\models\InitConfig;
+use spaf\simputils\PHP;
+use function spaf\simputils\basic\pr;
+use function spaf\simputils\basic\ts;
+
+/** @var InitConfig $ic */
+$ic = PHP::init();
+
+$dt = ts("2024-07-12 13:00:00");
+
+pr("Date: \t\t{$dt->date}");
+pr("Is weekday:\t".Boolean::to($dt->date->is_weekday));
+```
+
+Output:
+```text
+Date: 		2024-07-12
+Is weekday:	true
+```
+
+### Time prism
+
+It simply represents "Time" portion of date-time object.
+
+```php
+
+use spaf\simputils\Boolean;
+use spaf\simputils\Math;
+use spaf\simputils\models\InitConfig;
+use spaf\simputils\PHP;
+use function spaf\simputils\basic\pr;
+use function spaf\simputils\basic\ts;
+
+/** @var InitConfig $ic */
+$ic = PHP::init();
+
+$dt = ts("2024-07-12 13:16:22");
+
+pr("Time: \t\t\t\t\t{$dt->time}");
+pr("Is hour even ({$dt->hour}):\t\t".Boolean::to(Math::even($dt->time->hour)));
+pr("Is minute even ({$dt->minute}):\t".Boolean::to(Math::even($dt->time->minute)));
+pr("Is second odd ({$dt->second}):\t\t".Boolean::to(Math::odd($dt->time->second)));
+```
+
+Output:
+```text
+Time: 					15:16:22
+Is hour even (15):		false
+Is minute even (16):	true
+Is second odd (22):		false
+```
+
+
+
+### Time duration
+
+Duration can be created through `dur()` shortcut:
+
+```php
+
+use spaf\simputils\models\InitConfig;
+use spaf\simputils\PHP;
+use function spaf\simputils\basic\dur;
+use function spaf\simputils\basic\pr;
+
+/** @var InitConfig $ic */
+$ic = PHP::init();
+
+// In seconds or DateInterval object
+$d1 = dur(3750.666333);
+$d2 = dur(3600 * 72 + 480);
+pr("Representation 1: {$d1}");
+pr("Representation 2: {$d2}");
+```
+
+Output:
+```text
+Representation 1: 1 h. 2 min. 30 sec. 666333 ms.
+Representation 2: 3 d. 8 min.
+```
+
+### Time difference
+
+```php
+use spaf\simputils\models\InitConfig;
+use spaf\simputils\PHP;
+use function spaf\simputils\basic\pr;
+use function spaf\simputils\basic\ts;
+
+/** @var InitConfig $ic */
+$ic = PHP::init();
+
+$dt1 = ts("2025-07-18");
+$dt2 = ts("2024-09-01");
+
+pr("Time interval MIN->MAX: {$dt2->diff($dt1)}");
+pr("Time interval MAX->MIN: {$dt1->diff($dt2)}");
+```
+
+Output:
+```text
+Time interval MIN->MAX: + 10 months 17 days
+Time interval MAX->MIN: - 10 months 17 days
+```
+
+### Iteration over time

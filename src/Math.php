@@ -38,6 +38,14 @@ use spaf\simputils\models\BigNumber;
  */
 class Math {
 
+	static function even(int|float $value): bool {
+		return $value % 2 === 0;
+	}
+
+	static function odd(int|float $value): bool {
+		return !static::even($value);
+	}
+
 	/**
 	 * BigNumber wrapper
 	 *

@@ -256,7 +256,16 @@ class PHP {
 	}
 
 	public static function getInitConfig(?string $name = null): ?BasicInitConfig {
-		return CodeBlocksCacheIndex::getInitBlock($name);
+		$config = CodeBlocksCacheIndex::getInitBlock($name);
+		if (is_null($config)) {
+			$name = "simputils/default-ic";
+			$config = CodeBlocksCacheIndex::getInitBlock($name);
+			if (is_null($config)) {
+				$config = new InitConfig(["name" => $name]);
+				CodeBlocksCacheIndex::registerInitBlock($config);
+			}
+		}
+		return $config;
 	}
 
 	/**

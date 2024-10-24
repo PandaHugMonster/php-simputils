@@ -1,5 +1,30 @@
 # Changelog
 
+## 1.1.7
+
+* `BigNumber`
+  * Fixed a small issue with losing minus with `GMP` extension
+  * Fixed a small issue with not applying `BigNumber::$default_extension` to unspecified extension
+    during new object creation.
+  * Implemented helper method and a shortcut for creation of `BigNumber`
+    * `\spaf\simputils\basic\bn()` Shortcut (preferable)
+    * `\spaf\simputils\Math::bn()` Helper
+* Added default "simputils/default-ic" `InitConfig` if the `PHP::init()` was not called.
+  Please always call `PHP::init()`
+* Introduced `\spaf\simputils\generic\BasicInitConfig::$strict_mode` 
+  instance property which now by default is `true`.
+  The strict mode means that bugs, fixes of which will break backward compatibility with previous versions.
+  anyone, who does not care about those fixes, can just set this property of `InitConfig`/`PHP::init()` to `false`.
+* Fixed missing exception in case of DateTime failed parsing.
+  `\spaf\simputils\exceptions\DateTimeParsingException`. Previously it was returning wrong date-time object.
+* Documentation has been fully rewritten
+
+## 1.1.6
+
+* Fixed bug 
+  [PHP 8.1 to 8.2 update causes error with DateTimeRange](https://github.com/PandaHugMonster/php-simputils/issues/170)
+  * Additionally process of testing now includes running tests against main PHP releases
+
 ## 1.1.5
 
 * Implemented extensive PHPDOC with examples to `\spaf\simputils\basic` (in progress)

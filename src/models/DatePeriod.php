@@ -69,7 +69,7 @@ class DatePeriod extends FixUpDatePeriod {
 	 * This is the only way to get the framework DateInterval object, because it was not possible
 	 * to replace the native php "interval" functionality.
 	 *
-	 * So prefrably use this one instead of native "interval" property.
+	 * So preferably use this one instead of native "interval" property.
 	 *
 	 * @return DateInterval
 	 * @throws \spaf\simputils\exceptions\RedefUnimplemented Redefinition is not implemented

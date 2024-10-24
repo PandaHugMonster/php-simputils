@@ -4,6 +4,8 @@ namespace spaf\simputils;
 
 use Generator;
 use spaf\simputils\attributes\markers\Shortcut;
+use spaf\simputils\exceptions\NoExtensionFound;
+use spaf\simputils\models\BigNumber;
 
 /**
  * Math and common calculations functionality
@@ -35,6 +37,31 @@ use spaf\simputils\attributes\markers\Shortcut;
  *
  */
 class Math {
+
+	static function even(int|float $value): bool {
+		return $value % 2 === 0;
+	}
+
+	static function odd(int|float $value): bool {
+		return !static::even($value);
+	}
+
+	/**
+	 * BigNumber wrapper
+	 *
+	 * @param int|float|BigNumber|null $value
+	 * @param bool $mutable
+	 * @param string|null $extension
+	 * @return BigNumber
+	 * @throws NoExtensionFound
+	 */
+	static function bn(
+		null | int | float | BigNumber $value = null,
+		bool $mutable = false,
+		?string $extension = null
+	): BigNumber {
+		return new BigNumber($value, $mutable, $extension);
+	}
 
 	/**
 	 * Absolute value

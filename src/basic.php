@@ -14,6 +14,8 @@ use spaf\simputils\generic\BasicInitConfig;
 use spaf\simputils\generic\BasicIP;
 use spaf\simputils\generic\SimpleObject;
 use spaf\simputils\interfaces\UrlCompatible;
+use spaf\simputils\Math;
+use spaf\simputils\models\BigNumber;
 use spaf\simputils\models\Box;
 use spaf\simputils\models\DataUnit;
 use spaf\simputils\models\DateInterval;
@@ -848,3 +850,13 @@ function ip(string|BasicIP $ip): IPv4 {
 function with($obj, callable $callback): void {
 	PHP::with($obj, $callback);
 }
+
+#[Shortcut('Math::bn()')]
+function bn(
+	null | int | float | BigNumber $value = null,
+	bool $mutable = false,
+	?string $extension = null
+): BigNumber {
+	return Math::bn($value, $mutable, $extension);
+}
+

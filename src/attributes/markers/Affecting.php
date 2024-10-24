@@ -39,8 +39,16 @@ use spaf\simputils\generic\BasicAttribute;
  * ```
  *
  * It's basically just a marker
+ *
+ *
+ * @see ObjState
  * @codeCoverageIgnore
  */
+#[Deprecated(
+	'Sub-Optimal design and purpose. Similar functionality is available as ' .
+	'`ObjState(ObjState::TYPE_AFFECTING)`',
+	'\spaf\simputils\attributes\markers\ObjState(ObjState::TYPE_AFFECTING)'
+)]
 #[Attribute(Attribute::TARGET_METHOD)]
 class Affecting extends BasicAttribute {
 

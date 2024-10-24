@@ -2,6 +2,7 @@
 
 namespace spaf\simputils\models;
 
+use GMP;
 use spaf\simputils\attributes\markers\Shortcut;
 use spaf\simputils\attributes\Property;
 use spaf\simputils\exceptions\NoExtensionFound;
@@ -14,6 +15,7 @@ use function bccomp;
 use function gmp_add;
 use function gmp_cmp;
 use function intval;
+use function is_null;
 use function preg_replace;
 
 /**
@@ -75,6 +77,7 @@ use function preg_replace;
  * @property bool $mutable
  * @property bool $fractions_supported Whether fractions (float) supported by this extension
  * @property string $extension What extension is being used in this object
+ * @property numeric $value
  */
 class BigNumber extends SimpleObject {
 	use RedefinableComponentTrait;
@@ -108,27 +111,30 @@ class BigNumber extends SimpleObject {
 	/**
 	 * Create BigNumber object
 	 *
-	 * @param int|static|float|string $val       String or integer value representing number
+	 * @param int|BigNumber|float|string|null $val String or integer value representing number
 	 *                                           or big-number
-	 * @param bool                    $mutable   If set to true, then all the operations
+	 * @param bool $mutable If set to true, then all the operations
 	 *                                           will be changing value of this object
-	 * @param ?string                 $extension Enforcing usage of particular extension
+	 * @param ?string $extension Enforcing usage of particular extension
 	 *                                           for this number
 	 *
-	 * @throws \spaf\simputils\exceptions\NoExtensionFound No math extension found
+	 * @throws NoExtensionFound No math extension found
 	 */
 	function __construct(
-		int|self|float|string $val = 0,
+		int|self|float|string|null $val = 0,
 		bool $mutable = false,
 		?string $extension = null
 	) {
+		if (is_null($val)) {
+			$val = 0;
+		}
 		$this->_is_mutable = $mutable;
 		$this->_ext = static::checkExtensionAvailability($extension);
 		if ($this->_ext === false) {
 			throw new NoExtensionFound('No math extension available'); // @codeCoverageIgnore
 		}
 		if ($this->_ext === static::SUBSYSTEM_GMP) {
-			$val = preg_replace('/[^0-9]/', '', $val);
+			$val = preg_replace('/[^0-9-]/', '', $val);
 		}
 		$this->_value = $val;
 	}
@@ -159,6 +165,9 @@ class BigNumber extends SimpleObject {
 		$php_info = PHP::info();
 		$gmp_available = false;
 		$bcmath_available = false;
+		if (empty($extension)) {
+			$extension = static::$default_extension;
+		}
 
 		if ($php_info->hasExtension(static::SUBSYSTEM_GMP)) {
 			if (empty($extension) || $extension === static::SUBSYSTEM_GMP) {
@@ -193,7 +202,7 @@ class BigNumber extends SimpleObject {
 	 *                                 for this operation
 	 *
 	 * @return static
-	 * @throws \spaf\simputils\exceptions\NoExtensionFound No math extension found
+	 * @throws NoExtensionFound No math extension found
 	 * @see \gmp_add()
 	 * @see \bcadd()
 	 */
@@ -229,7 +238,7 @@ class BigNumber extends SimpleObject {
 	 *
 	 * @return static
 	 *
-	 * @throws \spaf\simputils\exceptions\NoExtensionFound No math extension found
+	 * @throws NoExtensionFound No math extension found
 	 * @see \gmp_sub()
 	 * @see \bcsub()
 	 */
@@ -265,7 +274,7 @@ class BigNumber extends SimpleObject {
 	 *
 	 * @return static
 	 *
-	 * @throws \spaf\simputils\exceptions\NoExtensionFound No math extension found
+	 * @throws NoExtensionFound No math extension found
 	 * @see \gmp_div_q()
 	 * @see \bcdiv()
 	 */
@@ -315,7 +324,7 @@ class BigNumber extends SimpleObject {
 	 *
 	 * @return static
 	 *
-	 * @throws \spaf\simputils\exceptions\NoExtensionFound No math extension found
+	 * @throws NoExtensionFound No math extension found
 	 * @see \gmp_mul()
 	 * @see \bcmul()
 	 */
@@ -349,7 +358,7 @@ class BigNumber extends SimpleObject {
 	 *
 	 * @return static
 	 *
-	 * @throws \spaf\simputils\exceptions\NoExtensionFound No math extension found
+	 * @throws NoExtensionFound No math extension found
 	 * @see \gmp_mod()
 	 * @see \bcmod()
 	 */
@@ -414,7 +423,7 @@ class BigNumber extends SimpleObject {
 	 *
 	 * @return static
 	 *
-	 * @throws \spaf\simputils\exceptions\NoExtensionFound No math extension found
+	 * @throws NoExtensionFound No math extension found
 	 * @see \gmp_pow()
 	 * @see \bcpow()
 	 */
@@ -449,7 +458,7 @@ class BigNumber extends SimpleObject {
 	 *
 	 * @return static
 	 *
-	 * @throws \spaf\simputils\exceptions\NoExtensionFound No math extension found
+	 * @throws NoExtensionFound No math extension found
 	 * @see \gmp_powm()
 	 * @see \bcpowmod()
 	 */
@@ -486,7 +495,7 @@ class BigNumber extends SimpleObject {
 	 *
 	 * @return static
 	 *
-	 * @throws \spaf\simputils\exceptions\NoExtensionFound No math extension found
+	 * @throws NoExtensionFound No math extension found
 	 * @see \gmp_sqrt()
 	 * @see \bcsqrt()
 	 */
@@ -525,6 +534,11 @@ class BigNumber extends SimpleObject {
 
 	protected function ___deserialize(array|Box $data): static {
 		return $this->setFromData($data);
+	}
+
+	#[Property("value")]
+	protected function getValue(): string {
+		return $this->_value;
 	}
 
 	function __toString(): string {

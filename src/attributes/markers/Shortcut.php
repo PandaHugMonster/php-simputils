@@ -14,7 +14,7 @@ use spaf\simputils\generic\BasicAttribute;
  * It's basically just a marker
  * @codeCoverageIgnore
  */
-#[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_FUNCTION)]
+#[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_FUNCTION | Attribute::IS_REPEATABLE)]
 class Shortcut extends BasicAttribute {
 
 	/**

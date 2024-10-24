@@ -1,8 +1,6 @@
-[<< Back to README.md](../README.md)
-
-----
-
 # Structure
+
+[//]: # (FIX    Update and improve this page)
 
 ## Legend
 * Grey squares - Static classes

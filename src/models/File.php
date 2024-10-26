@@ -536,7 +536,7 @@ class File extends BasicResource {
 	#[DebugHide(false)]
 	#[Property('backup_content')]
 	protected function getBackupContent(): ?string {
-		if (file_exists($this->_backup_file)) {
+		if (!empty($this->_backup_file) && file_exists($this->_backup_file)) {
 			return (new static($this->_backup_file))->content;
 		}
 

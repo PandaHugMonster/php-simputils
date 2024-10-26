@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.7
+* Fixed bug of ticket #174 "Small bug related to deprecation of null for file_exists() method"
+
+## 1.1.6
+* Fixed bug of ticket #170 "PHP 8.1 to 8.2 update causes error with DateTimeRange"
+
 ## 1.1.5
 
 * Implemented extensive PHPDOC with examples to `\spaf\simputils\basic` (in progress)

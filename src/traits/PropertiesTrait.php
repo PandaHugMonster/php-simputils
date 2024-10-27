@@ -2,7 +2,6 @@
 
 namespace spaf\simputils\traits;
 
-use ArrayObject;
 use Closure;
 use Error;
 use ReflectionClass;
@@ -23,9 +22,11 @@ use spaf\simputils\models\Box;
 use spaf\simputils\PHP;
 use spaf\simputils\special\CommonMemoryCacheIndex;
 use spaf\simputils\special\PropertiesCacheIndex;
-use function get_parent_class;
+use function class_parents;
 use function in_array;
 use function is_null;
+use function next;
+use function reset;
 
 /**
  *
@@ -116,10 +117,13 @@ trait PropertiesTrait {
 		if (!$res) {
 			try {
 				/** @noinspection PhpUndefinedMethodInspection */
-//				if (get_parent_class() && method_exists(parent::class, '__isset')) {
-				if (get_parent_class()) {
-					if (get_parent_class() !== ArrayObject::class) { // @codeCoverageIgnore
-						$res = parent::__isset($name);
+				$parents = class_parents(static::class);
+				if ($parents) {
+					reset($parents);
+					$parent = next($parents);
+
+					if ($parent && method_exists($parent, '__isset')) {
+						$res = $parent::__isset($name);
 					}
 				}
 			} catch (Error $e) { // @codeCoverageIgnore

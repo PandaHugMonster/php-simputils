@@ -53,4 +53,19 @@ class Boolean {
 	static function to(mixed $val): mixed {
 		return static::from($val)?static::$to_yes:static::$to_no;
 	}
+
+	/**
+	 * Checks whether a bit-flag is on
+	 *
+	 * Basically a shortcut for bit operation "AND" mask
+	 *
+	 * @param int $value
+	 * @param int $flags
+	 *
+	 * @return bool
+	 */
+	static function isBitFlagOn(int $value, int $flags): bool {
+		$res = $value & $flags;
+		return $res;
+	}
 }

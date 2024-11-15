@@ -65,9 +65,9 @@ trait PropertiesTrait {
 	 * @param string $name Name of the property
 	 *
 	 * @return mixed
-	 * @throws \spaf\simputils\exceptions\PropertyDoesNotExist Property does not exist
-	 * @throws \spaf\simputils\exceptions\PropertyIsReadOnly   Property is read-only
-	 * @throws \spaf\simputils\exceptions\PropertyIsWriteOnly  Property is write-only
+	 * @throws PropertyDoesNotExist Property does not exist
+	 * @throws PropertyIsReadOnly   Property is read-only
+	 * @throws PropertyIsWriteOnly  Property is write-only
 	 */
 	public function __get($name) {
 		$ref = static::class.'#'.$name.'#'.Property::TYPE_GET;
@@ -189,9 +189,9 @@ trait PropertiesTrait {
 	 *                                      relevant only for {@see __isset()})
 	 *
 	 * @return bool
-	 * @throws \spaf\simputils\exceptions\PropertyDoesNotExist Property does not exist
-	 * @throws \spaf\simputils\exceptions\PropertyIsReadOnly   Property is read-only
-	 * @throws \spaf\simputils\exceptions\PropertyIsWriteOnly  Property is write-only
+	 * @throws PropertyDoesNotExist Property does not exist
+	 * @throws PropertyIsReadOnly   Property is read-only
+	 * @throws PropertyIsWriteOnly  Property is write-only
 	 */
 	private function _simpUtilsPrepareProperty(
 		string $name,

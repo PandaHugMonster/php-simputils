@@ -3,6 +3,7 @@
 namespace spaf\simputils\traits;
 
 use ReflectionMethod;
+use spaf\simputils\attributes\markers\Shortcut;
 use spaf\simputils\attributes\Renderer;
 use spaf\simputils\Attrs;
 use spaf\simputils\components\RenderedWrapper;
@@ -44,8 +45,7 @@ trait StaticRendererTrait {
 
 			try {
 				$res = $method_reflection->invoke($instance, ...$params);
-			}
-			catch (TypeError) {
+			} catch (TypeError) {
 				$res = null;
 			}
 
@@ -67,6 +67,21 @@ trait StaticRendererTrait {
 		}
 
 		return $res;
+	}
+
+	/**
+	 * Shortcut for render method
+	 *
+	 * @param mixed ...$params
+	 *
+	 * @return string
+	 * @throws \Exception
+	 * @see Renderer
+	 * @see RenderedWrapper
+	 */
+	#[Shortcut('static::render()')]
+	static function r(mixed ...$params): string {
+		return static::render(...$params);
 	}
 
 	#[Renderer]

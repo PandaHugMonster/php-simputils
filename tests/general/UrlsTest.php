@@ -9,7 +9,7 @@ use function spaf\simputils\basic\url;
 
 /**
  * @covers \spaf\simputils\models\UrlObject
- * @covers \spaf\simputils\models\urls\processors\HttpProtocolProcessor
+ * @covers \spaf\simputils\models\urls\processors\HttpSchemeProcessor
  * @covers \spaf\simputils\basic\url
  * @covers \spaf\simputils\generic\BasicProtocolProcessor
  *
@@ -218,6 +218,35 @@ class UrlsTest extends TestCase {
 					'password' => 'gg',
 					'params' => [],
 					// 'data' => ['sharpy' => 'ggogg'],
+				]
+			],
+			[
+				'http://dd:gg@localhost/p1/p2/p3?empty_param=',
+				[
+					'protocol' => 'http',
+					'host' => 'localhost',
+					'port' => 80,
+					'path' => ['p1', 'p2', 'p3'],
+					'user' => 'dd',
+					'password' => 'gg',
+					'params' => [
+						'empty_param' => null,
+					],
+				]
+			],
+			[
+				'http://dd:gg@localhost/p1/p2/p3?empty_param=&another-non-empty-param=test',
+				[
+					'protocol' => 'http',
+					'host' => 'localhost',
+					'port' => 80,
+					'path' => ['p1', 'p2', 'p3'],
+					'user' => 'dd',
+					'password' => 'gg',
+					'params' => [
+						'empty_param' => null,
+						'another-non-empty-param' => 'test',
+					],
 				]
 			],
 			[
@@ -520,4 +549,117 @@ class UrlsTest extends TestCase {
 //		pd($url);
 	}
 
+	function dataProviderAdvancedExtension() {
+		return [
+			[
+				url('/path1/path2'),
+				'https://localhost/path1/path2'
+			],
+			[
+				url('my-domain'),
+				'https://my-domain/'
+			],
+			[
+				url('http://my-domain'),
+				'http://my-domain/'
+			],
+			[
+				url('http://my-domain/path1/path2'),
+				'http://my-domain/path1/path2'
+			],
+			[
+				url('http://my-domain/path1/path2/'),
+				'http://my-domain/path1/path2'
+			],
+			[
+				url('http://my-domain/path1/path2?arg1=1'),
+				'http://my-domain/path1/path2?arg1=1'
+			],
+			[
+				url('http://my-domain/path1/path2?arg0=&arg1=1&arg2=2'),
+				'http://my-domain/path1/path2?arg0=&arg1=1&arg2=2'
+			],
+			[
+				url($host = 'http://my-domain/path1/path2?arg0=&arg1=1&arg2=2#sch'),
+				'http://my-domain/path1/path2?arg0=&arg1=1&arg2=2#sch'
+			],
+			[   // NOTE Normally in UNIX systems first slash should make path absolute.
+				//      So the new path value must replace the old one, and not add up
+				url($host, '/path-1/path0'),
+				'http://my-domain/path-1/path0?arg0=&arg1=1&arg2=2#sch'
+			],
+			[
+				url($host, 'path3/path4'),
+				'http://my-domain/path1/path2/path3/path4?arg0=&arg1=1&arg2=2#sch'
+			],
+			[   // NOTE Normally in UNIX systems first slash should make path absolute.
+				//      So the new path value must replace the old one, and not add up
+				url($host, ['/path-2/path-1', 'path0']),
+				'http://my-domain/path-2/path-1/path0?arg0=&arg1=1&arg2=2#sch'
+			],
+			[
+				url($host, ['path3/path4', 'path5']),
+				'http://my-domain/path1/path2/path3/path4?arg0=&arg1=1&arg2=2#sch'
+			],
+			[
+				url($host, ['path3', 'path4', 'arg0' => 0, 'arg1' => 10, 'arg3' => 30]),
+				'http://my-domain/path1/path2/path3/path4?arg0=0&arg1=10&arg2=2&arg3=30#sch'
+			],
+			[
+				url($host, ['arg0' => 0, 'arg1' => 10, 'arg3' => 30]),
+				'http://my-domain/path1/path2?arg0=0&arg1=10&arg2=2&arg3=30#sch'
+			],
+			[
+				url($host, ['path3', 'path4', 'arg0' => 'new', '#' => 'new']),
+				'http://my-domain/path1/path2/path3/path4?arg0=new&arg1=1&arg2=2#new'
+			],
+			[
+				url($host, ['#' => 'new']),
+				'http://my-domain/path1/path2?arg0=&arg1=1&arg2=2#new'
+			],
+
+			[
+				url(
+					$host,
+					$path = ['path3', 'path4', 'arg0' => 0, 'arg1' => 10, 'arg3' => 30, '#' => 'sharpy'],
+					[
+						'arg0' => 'new-0',
+						'arg4' => 'new-4',
+					]
+				),
+				'http://my-domain/path1/path2/path3/path4?arg0=new-0&arg1=10&arg2=2&arg3=30&arg4=new-4#sharpy'
+			],
+			[
+				url(
+					$host,
+					$path,
+					[
+						'arg0' => 'new-0',
+						'arg4' => 'new-4',
+						'#' => 'replaced-sharpy'
+					]
+				),
+				'http://my-domain/path1/path2/path3/path4?arg0=new-0&arg1=10&arg2=2&arg3=30&arg4=new-4#replaced-sharpy'
+			],
+			[
+				url(
+					$host,
+					$path,
+					'arg0=new-0&arg4=new-4#replaced-sharpy'
+				),
+				'http://my-domain/path1/path2/path3/path4?arg0=new-0&arg1=10&arg2=2&arg3=30&arg4=new-4#replaced-sharpy'
+			],
+		];
+	}
+
+	/**
+	 * @param $url
+	 * @param $expected
+	 *
+	 * @dataProvider dataProviderAdvancedExtension
+	 * @return void
+	 */
+	function testStatusQuo202308($url, $expected) {
+		$this->assertEquals($expected, "{$url}");
+	}
 }

@@ -7,6 +7,10 @@ use spaf\simputils\generic\BasicDotEnvCommentExt;
 use spaf\simputils\generic\BasicResource;
 use spaf\simputils\models\files\apps\settings\DotEnvSettings;
 use spaf\simputils\special\dotenv\ExtTypeHint;
+use spaf\simputils\Str;
+use function spaf\simputils\basic\pr;
+use function str_replace;
+use function trim;
 
 /**
  * DotEnv data processor
@@ -47,10 +51,16 @@ class DotEnvProcessor extends TextProcessor {
 		$lines = explode("\n", $content);
 		$res = [];
 		foreach ($lines as $line) {
+			if (Str::contains($line, "\r")) {
+				pr("Line contains \"\\r\" symbol, trimmed.");
+			}
+
+			$line = trim($line);
+
 			if (empty($line)) {
 				continue;
 			}
-			$line = trim($line);
+
 			if ($line[0] === '#') {
 				// TODO Comment-extension processing must happen here!
 
